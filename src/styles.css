@@ -15,16 +15,17 @@
      overflow-hidden 
      rounded-md 
      hover:scale-105 
+     hover:animate-pulse 
      hover:border-2 
-     hover:border-solid 
-     hover:border-white
+     hover:border-solid
+     hover:border-white 
      focus:scale-105 
      focus:border-2 
-     focus:border-solid 
-     focus:border-white
+     focus:border-solid
+     focus:border-white 
      active:scale-105 
      active:border-2 
-     active:border-solid 
+     active:border-solid
      active:border-white;
   }
   .link-image {
