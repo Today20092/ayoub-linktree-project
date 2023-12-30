@@ -1,6 +1,16 @@
 ---
 import Link from "../components/Link.astro";
 import "../styles.css";
+import { Image, Picture } from "astro:assets";
+import Ayoub from "../image/Ayoub.jpg";
+import kofi from "../image/Ko-Fi.png";
+import yt from "../image/youtube.png";
+import cashapp from "../image/CashApp.png";
+import venmo from "../image/Venmo.png";
+import paypal from "../image/Paypal.png";
+import contact from "../image/Contactcard.png";
+import matrix from "../image/Matrix.png";
+import { Icon } from "astro-icon/components";
 ---
 
 <!doctype html>
@@ -15,16 +25,28 @@ import "../styles.css";
       crossorigin="anonymous"></script>
   </head>
   <body
-    class="mx-auto my-8 max-w-[90%] justify-center bg-stone-400 pb-8 text-center text-lg lg:max-w-screen-md"
+    class="mx-auto my-8 max-w-[90%] justify-center bg-gradient-to-t from-emerald-800 to-green-700 pb-8 text-center text-lg lg:max-w-screen-md"
   >
-    <img src="https://place-hold.it/100" alt="" class="m-auto" />
-    <h1 class="my-4">Ayoub Abedrabbo</h1>
-    <p class="my-4">
+    <div class="mx-auto size-40 overflow-hidden rounded-full drop-shadow-md">
+      <Picture
+        src={Ayoub}
+        alt="Portrait of Ayoub Abedrabbo"
+        decoding="async"
+        loading="lazy"
+        format="['avif','webp']"
+        class="h-44 object-cover object-center drop-shadow-md"
+      />
+    </div>
+
+    <h1 class="my-4 font-bold text-white">Ayoub Abedrabbo</h1>
+    <p class="my-4 text-white">
       I am a photographer & creator of videos about education, and photography
       tips.
     </p>
     <!-- icons -->
-    <div class="my-4 flex flex-wrap items-center justify-center">
+    <div
+      class="my-4 flex flex-wrap items-center justify-center text-2xl text-white"
+    >
       <a class="mx-2" href="https://instagram.com/ayoubabedrabbo"
         ><i class="fa-brands fa-instagram"></i></a
       >
@@ -52,66 +74,113 @@ import "../styles.css";
     </div>
     <!-- link buttons -->
 
-    <h2 class="my-4">My Channels</h2>
+    <h2 class="my-4 text-lg text-white drop-shadow-lg">My Channels</h2>
     <Link
       imagesrc="https://place-hold.it/50"
       linktxt="Youtube Channel"
-      bgcolor="bg-blue-400"
-      alt="alt text"
+      bgcolor=" bg-red-700 "
       link="https://www.youtube.com/@ayoubthegreat"
-    />
+      linkcolor="text-white"
+    >
+      <Image
+        src={yt}
+        alt="Youtube logo"
+        class="link-image h-auto object-cover object-center"
+      />
+    </Link>
     <Link
       imagesrc="https://place-hold.it/50"
       linktxt="My Photography Channel"
-      bgcolor="bg-blue-400"
-      alt="alt text"
+      bgcolor="bg-red-800"
       link="https://www.youtube.com/@ayoubphotos"
-    />
+      linkcolor="text-white"
+    >
+      <Image
+        src={yt}
+        alt="Youtube logo"
+        class="link-image h-auto object-cover object-center"
+      />
+    </Link>
     <!-- Next section of link buttions -->
-    <h2 class="my-4">Support Me</h2>
+    <h2 class="my-4 text-lg text-white drop-shadow-lg">Support Me</h2>
     <Link
       imagesrc="https://place-hold.it/50"
       linktxt="Ko-Fi"
-      bgcolor="bg-blue-400"
-      alt="alt text"
+      bgcolor="bg-green-800"
       link="https://ko-fi.com/ayoubab1"
-    />
+      linkcolor="text-white"
+      border="hover:border-amber-500 focus:border-amber-500 active:border-amber-500"
+    >
+      <Image
+        src={kofi}
+        alt="Ko-Fi logo"
+        class="link-image h-auto object-cover object-center"
+      />
+    </Link>
     <Link
       imagesrc="https://place-hold.it/50"
       linktxt="CashApp"
-      bgcolor="bg-blue-400"
-      alt="alt text"
+      bgcolor="bg-green-700"
       link="https://cash.app/ayoubab1"
-    />
+      linkcolor="text-white"
+    >
+      <Image
+        src={cashapp}
+        alt="Cashapp logo"
+        class="link-image h-auto object-cover object-center"
+      />
+    </Link>
     <Link
       imagesrc="https://place-hold.it/50"
       linktxt="Venmo"
-      bgcolor="bg-blue-400"
-      alt="alt text"
+      bgcolor="bg-green-600"
       link="https://venmo.com/u/Ayoub-Abedrabbo"
-    />
+      linkcolor="text-white"
+    >
+      <Image
+        src={venmo}
+        alt="Venmo logo"
+        class="link-image h-auto object-cover object-center"
+      />
+    </Link>
     <Link
       imagesrc="https://place-hold.it/50"
       linktxt="Paypal"
-      bgcolor="bg-blue-400"
-      alt="alt text"
+      bgcolor="bg-green-500"
       link="http://paypal.me/AyoubAbedrabbo"
-    />
+      linkcolor="text-white"
+    >
+      <Image
+        src={paypal}
+        alt="Paypal logo"
+        class="link-image h-auto object-cover object-center"
+      />
+    </Link>
     <!-- Next Section Of link -->
-    <h2 class="my-4">Contact me</h2>
+    <h2 class="my-4 text-lg text-white drop-shadow-lg">Contact me</h2>
     <Link
       imagesrc="https://place-hold.it/50"
       linktxt="Download my contact card"
-      bgcolor="bg-blue-400"
-      alt="alt text"
+      bgcolor="bg-sky-600"
       link="https://www.tampashutter.net/vcard/ayoubabedrabbo.vcf"
-    />
+    >
+      <Image
+        src={contact}
+        alt="Contact Card logo"
+        class="link-image h-auto object-cover object-center"
+      />
+    </Link>
     <Link
       imagesrc="https://place-hold.it/50"
       linktxt="Message me on Matrix"
-      bgcolor="bg-blue-400"
-      alt="alt text"
+      bgcolor="bg-sky-700"
       link="https://matrix.to/#/@ayoubab:matrix.org"
-    />
+    >
+      <Image
+        src={matrix}
+        alt="Matrix logo"
+        class="link-image h-auto object-cover object-center"
+      />
+    </Link>
   </body>
 </html>

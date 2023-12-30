@@ -1,12 +1,13 @@
 ---
-// import { Icon } from "astro-icon";
+import { Icon } from "astro-icon/components";
 
-const { link, imagesrc, alttext, bgcolor, linktxt } = Astro.props;
+const { link, imagesrc, alttext, bgcolor, linktxt, icon, linkcolor, border } =
+  Astro.props;
 ---
 
 <div class={`item-center justify-center`}></div>
-<a class={`link ${bgcolor}`} href={link}>
-  <!-- <Icon name="logos:youtube-icon" /> -->
-  <img class="link-image" src={imagesrc} alt={alttext} />
+<a class={`link ${linkcolor} drop-shadow-lg ${bgcolor} ${border}`} href={link}>
+  <slot />
+  <!-- <img class="link-image" src={imagesrc} alt={alttext} /> -->
   <span class="link-text">{linktxt}</span>
 </a>
