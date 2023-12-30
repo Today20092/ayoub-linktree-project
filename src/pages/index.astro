@@ -1,5 +1,6 @@
 ---
-import '../styles.css';
+import Link from "../components/Link.astro";
+import "../styles.css";
 ---
 
 <!doctype html>
@@ -11,11 +12,10 @@ import '../styles.css';
     <title>Ayoub Abedrabbo</title>
     <script
       src="https://kit.fontawesome.com/e8d1b35a19.js"
-      crossorigin="anonymous"
-    ></script>
+      crossorigin="anonymous"></script>
   </head>
   <body
-    class="mx-auto my-8 max-w-[90%] justify-center bg-yellow-900 pb-8 text-center text-lg lg:max-w-screen-md"
+    class="mx-auto my-8 max-w-[90%] justify-center bg-stone-400 pb-8 text-center text-lg lg:max-w-screen-md"
   >
     <img src="https://place-hold.it/100" alt="" class="m-auto" />
     <h1 class="my-4">Ayoub Abedrabbo</h1>
@@ -26,97 +26,92 @@ import '../styles.css';
     <!-- icons -->
     <div class="my-4 flex flex-wrap items-center justify-center">
       <a class="mx-2" href="https://instagram.com/ayoubabedrabbo"
-        ><i class="fa-brands fa-instagram"></i
-      ></a>
+        ><i class="fa-brands fa-instagram"></i></a
+      >
       <a class="mx-2" href="https://discord.com/invite/ayoubab1"
-        ><i class="fa-brands fa-discord"></i
-      ></a>
+        ><i class="fa-brands fa-discord"></i></a
+      >
       <a class="mx-2" href="https://www.linkedin.com/in/ayoubabedrabbo/"
-        ><i class="fa-brands fa-linkedin"></i
-      ></a>
+        ><i class="fa-brands fa-linkedin"></i></a
+      >
       <a class="mx-2" href="https://mastodon.social/@ayoubabedrabbo"
-        ><i class="fa-brands fa-mastodon"></i
-      ></a>
+        ><i class="fa-brands fa-mastodon"></i></a
+      >
       <a class="mx-2" href="https://metroviewposters.etsy.com/"
-        ><i class="fa-brands fa-etsy"></i
-      ></a>
+        ><i class="fa-brands fa-etsy"></i></a
+      >
       <a class="mx-2" href="https://github.com/Today20092"
-        ><i class="fa-brands fa-github"></i
-      ></a>
+        ><i class="fa-brands fa-github"></i></a
+      >
       <a class="mx-2" href="https://t.me/AyoubAb1"
-        ><i class="fa-brands fa-telegram"></i
-      ></a>
+        ><i class="fa-brands fa-telegram"></i></a
+      >
       <a class="mx-2" href="https://www.youtube.com/@ayoubthegreat"
-        ><i class="fa-brands fa-youtube"></i
-      ></a>
+        ><i class="fa-brands fa-youtube"></i></a
+      >
     </div>
     <!-- link buttons -->
 
     <h2 class="my-4">My Channels</h2>
-    <div>
-      <div class="item-center justify-center">
-        <a
-          class="link bg-blue-400"
-          href="https://www.youtube.com/@ayoubthegreat"
-        >
-          <img
-            class="link-image"
-            src="https://place-hold.it/50"
-            alt=""
-          />
-          <span class="link-text">Youtube Channel</span>
-        </a>
-      </div>
-      <div>
-        <a href="https://www.youtube.com/@ayoubphotos">
-          <img src="https://place-hold.it/50" alt="" />
-          <span>My Photography Channel</span>
-        </a>
-      </div>
-    </div>
+    <Link
+      imagesrc="https://place-hold.it/50"
+      linktxt="Youtube Channel"
+      bgcolor="bg-blue-400"
+      alt="alt text"
+      link="https://www.youtube.com/@ayoubthegreat"
+    />
+    <Link
+      imagesrc="https://place-hold.it/50"
+      linktxt="My Photography Channel"
+      bgcolor="bg-blue-400"
+      alt="alt text"
+      link="https://www.youtube.com/@ayoubphotos"
+    />
     <!-- Next section of link buttions -->
     <h2 class="my-4">Support Me</h2>
-    <div>
-      <div>
-        <a href="https://ko-fi.com/ayoubab1">
-          <img src="https://place-hold.it/50" alt="" />
-          <span>Ko-Fi</span>
-        </a>
-      </div>
-      <div>
-        <a href="https://cash.app/ayoubab1">
-          <img src="https://place-hold.it/50" alt="" />
-          <span>CashApp</span>
-        </a>
-      </div>
-      <div>
-        <a href="https://venmo.com/u/Ayoub-Abedrabbo">
-          <img src="https://place-hold.it/50" alt="" />
-          <span>Venmo</span>
-        </a>
-      </div>
-      <div>
-        <a href="http://paypal.me/AyoubAbedrabbo">
-          <img src="https://place-hold.it/50" alt="" />
-          <span>Paypal</span>
-        </a>
-      </div>
-    </div>
+    <Link
+      imagesrc="https://place-hold.it/50"
+      linktxt="Ko-Fi"
+      bgcolor="bg-blue-400"
+      alt="alt text"
+      link="https://ko-fi.com/ayoubab1"
+    />
+    <Link
+      imagesrc="https://place-hold.it/50"
+      linktxt="CashApp"
+      bgcolor="bg-blue-400"
+      alt="alt text"
+      link="https://cash.app/ayoubab1"
+    />
+    <Link
+      imagesrc="https://place-hold.it/50"
+      linktxt="Venmo"
+      bgcolor="bg-blue-400"
+      alt="alt text"
+      link="https://venmo.com/u/Ayoub-Abedrabbo"
+    />
+    <Link
+      imagesrc="https://place-hold.it/50"
+      linktxt="Paypal"
+      bgcolor="bg-blue-400"
+      alt="alt text"
+      link="http://paypal.me/AyoubAbedrabbo"
+    />
     <!-- Next Section Of link -->
     <h2 class="my-4">Contact me</h2>
-    <div>
-      <div>
-        <a href="https://www.tampashutter.net/vcard/ayoubabedrabbo.vcf">
-          <img src="https://place-hold.it/50" alt="" />
-          <span>Download my contact card</span>
-        </a>
-      </div>
-      <div>
-        <a href="https://matrix.to/#/@ayoubab:matrix.org">
-          <img src="https://place-hold.it/50" alt="" />
-          <span>Message me on Matrix</span>
-        </a>
-      </div>
-    </div>
+    <Link
+      imagesrc="https://place-hold.it/50"
+      linktxt="Download my contact card"
+      bgcolor="bg-blue-400"
+      alt="alt text"
+      link="https://www.tampashutter.net/vcard/ayoubabedrabbo.vcf"
+    />
+    <Link
+      imagesrc="https://place-hold.it/50"
+      linktxt="Message me on Matrix"
+      bgcolor="bg-blue-400"
+      alt="alt text"
+      link="https://matrix.to/#/@ayoubab:matrix.org"
+    />
   </body>
 </html>

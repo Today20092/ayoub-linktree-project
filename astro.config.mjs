@@ -9,4 +9,12 @@ export default defineConfig({
       applyBaseStyles: false,
     }),
   ],
+  styles: {
+    postcss: {
+      plugins: [
+        // ... other PostCSS plugins
+        // require("prettier-plugin-tailwindcss"),
+      ],
+    },
+  },
 });
