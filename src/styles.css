@@ -6,27 +6,24 @@
 /* My custom component for classes */
 @layer components {
   .link {
-    @apply relative
+    @apply relative 
      my-4 
      flex 
      min-h-16 
      items-center 
      justify-center 
-     overflow-hidden 
+     overflow-hidden
      rounded-md 
-     hover:scale-105 
+     transition 
+     duration-200 
+     hover:scale-105
      hover:animate-pulse 
      hover:border-2 
-     hover:border-solid
-     hover:border-white 
-     focus:scale-105 
-     focus:border-2 
-     focus:border-solid
-     focus:border-white 
-     active:scale-105 
-     active:border-2 
-     active:border-solid
-     active:border-white;
+     hover:border-solid 
+     hover:border-white
+     focus:scale-105
+     focus:border-2 focus:border-solid focus:border-white active:scale-105 active:border-2
+     active:border-solid active:border-white;
   }
   .link-image {
     @apply absolute left-3 flex size-11 rounded-md object-cover;
