@@ -17,7 +17,6 @@
      transition 
      duration-200 
      hover:scale-105
-     hover:animate-pulse 
      hover:border-2 
      hover:border-solid 
      hover:border-white
