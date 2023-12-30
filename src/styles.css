@@ -4,3 +4,14 @@
 @tailwind utilities;
 
 /* My custom component for classes */
+@layer components {
+  .link {
+    @apply relative my-4 flex min-h-16 items-center justify-center overflow-hidden rounded-md;
+  }
+  .link-image {
+    @apply absolute left-4 flex size-11 rounded-md object-cover;
+  }
+  .link-text {
+    @apply w-[55%] break-words text-center;
+  }
+}
