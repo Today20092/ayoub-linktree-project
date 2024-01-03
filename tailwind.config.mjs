@@ -4,7 +4,7 @@ export default {
   theme: {
     extend: {
       animation: {
-        blob: "blob 6s ease-in-out infinite",
+        blob: "blob 10s ease-out infinite",
       },
       keyframes: {
         blob: {
@@ -12,7 +12,7 @@ export default {
             transform: "scale(1)",
           },
           "25%": {
-            transform: "scale(1.5)",
+            transform: "scale(1.35)",
           },
           "50%": {
             transform: "scale(1)",
