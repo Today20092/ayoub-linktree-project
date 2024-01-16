@@ -4,8 +4,7 @@ import icon from "astro-icon";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://Today20092.github.io",
-  base: "/ayoub-linktree-project",
+  site: "https://ayoubabed.xyz",
   integrations: [
     tailwind({
       applyBaseStyles: false,
