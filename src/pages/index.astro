@@ -11,6 +11,7 @@ import paypal from "../image/Paypal.png";
 import contact from "../image/Contactcard.png";
 import matrix from "../image/Matrix.png";
 import tampashutter from "../image/Tampashutter.png";
+import odysee from "../image/Odysee.png";
 import { Icon } from "astro-icon/components";
 ---
 
@@ -21,6 +22,10 @@ import { Icon } from "astro-icon/components";
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ayoub Abedrabbo</title>
+    <meta
+      name="description"
+      content="Ayoub Abedrabbo is an event photographer that is local to Tampa, Florida. He takes photos and videos for all budgets. Vist all his social media pages from here."
+    />
     <script
       src="https://kit.fontawesome.com/e8d1b35a19.js"
       crossorigin="anonymous"></script>
@@ -41,7 +46,8 @@ import { Icon } from "astro-icon/components";
 
     <h1 class="my-4 text-xl font-bold text-white">Ayoub Abedrabbo</h1>
     <p class="my-4 text-white">
-      I am a photographer & I create videos about photography. Contact me to book me!
+      I am a photographer & I create videos about photography. Contact me to
+      book me!
     </p>
     <!-- icons -->
     <div
@@ -97,11 +103,12 @@ import { Icon } from "astro-icon/components";
     </div>
     <!-- link buttons -->
 
-    <h2 class="my-4 text-lg tracking-wide text-white drop-shadow-lg">
-      My Channels
+    <!-- youtube buttons -->
+    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">
+      Watch on Youtube
     </h2>
     <Link
-      linktxt="Youtube Channel"
+      linktxt="My Youtube Channel"
       bgcolor=" bg-red-700 "
       link="https://www.youtube.com/@ayoubthegreat"
       linkcolor="text-white"
@@ -124,12 +131,29 @@ import { Icon } from "astro-icon/components";
         class="link-image h-auto object-cover object-center"
       />
     </Link>
+
+    <!-- Odysee Page -->
+    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">
+      Watch on Odysee
+    </h2>
+    <Link
+      linktxt="Odysee Channel"
+      bgcolor="bg-orange-700"
+      link="https://odysee.com/@AyoubTheGreat:1"
+      linkcolor="text-white"
+    >
+      <Image
+        src={odysee}
+        alt="Odysee Logo"
+        class="link-image h-auto object-cover object-center"
+      />
+    </Link>
     <!-- My website section -->
-    <h2 class="my-4 text-lg tracking-wide text-white drop-shadow-lg">
+    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">
       My Website
     </h2>
     <Link
-      linktxt="My Photography Channel"
+      linktxt="My Photography Website"
       bgcolor="bg-zinc-700"
       link="https://tampashutter.net"
       linkcolor="text-white"
@@ -141,8 +165,8 @@ import { Icon } from "astro-icon/components";
       />
     </Link>
     <!-- Next section of link buttions -->
-    <h2 class="my-4 text-lg tracking-wide text-white drop-shadow-lg">
-      Support Me
+    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">
+      Donate to me on:
     </h2>
     <Link
       imagesrc="https://place-hold.it/50"
@@ -198,7 +222,7 @@ import { Icon } from "astro-icon/components";
       />
     </Link>
     <!-- Next Section Of link -->
-    <h2 class="my-4 text-lg tracking-wide text-white drop-shadow-lg">
+    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">
       Contact me
     </h2>
     <Link
