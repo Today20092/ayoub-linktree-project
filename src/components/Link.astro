@@ -1,15 +1,25 @@
 ---
 import { Icon } from "astro-icon/components";
 
-const { link, imagesrc, alttext, bgcolor, linktxt, icon, linkcolor, border } =
-  Astro.props;
+const {
+  link,
+  imagesrc,
+  alttext,
+  bgcolor,
+  linktxt,
+  icon,
+  linkcolor,
+  border,
+  id,
+} = Astro.props;
 ---
 
 <div class={`item-center justify-center`}></div>
 <a
-  class={`link ${linkcolor} drop-shadow-lg ${bgcolor} ${border}`}
+  class={`link ${linkcolor} drop-shadow-lg ${bgcolor} ${border} target:link-id`}
   href={link}
   target="_blank"
+  id={id}
 >
   <slot />
   <!-- <img class="link-image" src={imagesrc} alt={alttext} /> -->

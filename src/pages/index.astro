@@ -58,47 +58,55 @@ import { ViewTransitions } from "astro:transitions";
       class="my-4 flex flex-wrap items-center justify-center text-2xl text-white"
     >
       <a
+        id="instagram"
         target="_blank"
         class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150"
         href="https://instagram.com/ayoubabedrabbo"
         ><i class="fa-brands fa-instagram"></i></a
       >
       <a
+        id="discord"
         target="_blank"
         class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150"
         href="https://discordapp.com/users/279467079990640641"
         ><i class="fa-brands fa-discord"></i></a
       >
       <a
+        id="linkedin"
         target="_blank"
         class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150"
         href="https://www.linkedin.com/in/ayoubabedrabbo/"
         ><i class="fa-brands fa-linkedin"></i></a
       >
       <a
+        id="mastodon"
         target="_blank"
         class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150"
         href="https://mastodon.social/@ayoubabedrabbo"
         ><i class="fa-brands fa-mastodon"></i></a
       >
       <a
+        id="etsy"
         target="_blank"
         class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150"
         href="https://metroviewposters.etsy.com/"
         ><i class="fa-brands fa-etsy"></i></a
       >
       <a
+        id="github"
         target="_blank"
         class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150"
         href="https://github.com/Today20092"
         ><i class="fa-brands fa-github"></i></a
       >
       <a
+        id="telegram"
         target="_blank"
         class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150"
         href="https://t.me/AyoubAb1"><i class="fa-brands fa-telegram"></i></a
       >
       <a
+        id="youtube"
         target="_blank"
         class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150"
         href="https://www.youtube.com/@ayoubthegreat"
@@ -117,6 +125,7 @@ import { ViewTransitions } from "astro:transitions";
       bgcolor="bg-sky-600"
       link="https://www.tampashutter.net/vcard/ayoubabedrabbo.vcf"
       linkcolor="text-white"
+      id="contact-card"
     >
       <Image
         src={contact}
@@ -130,6 +139,7 @@ import { ViewTransitions } from "astro:transitions";
       bgcolor="bg-sky-700"
       link="https://matrix.to/#/@ayoubab:matrix.org"
       linkcolor="text-white"
+      id="matrix"
     >
       <Image
         src={matrix}
@@ -147,6 +157,7 @@ import { ViewTransitions } from "astro:transitions";
       bgcolor=" bg-red-700 "
       link="https://www.youtube.com/@ayoubthegreat"
       linkcolor="text-white"
+      id="youtube-personal"
     >
       <Image
         src={yt}
@@ -159,6 +170,7 @@ import { ViewTransitions } from "astro:transitions";
       bgcolor="bg-red-800"
       link="https://www.youtube.com/@ayoubphotos"
       linkcolor="text-white"
+      id="youtube-photography"
     >
       <Image
         src={yt}
@@ -176,6 +188,7 @@ import { ViewTransitions } from "astro:transitions";
       bgcolor="bg-orange-700"
       link="https://odysee.com/@AyoubTheGreat:1"
       linkcolor="text-white"
+      id="odysee"
     >
       <Image
         src={odysee}
@@ -192,6 +205,7 @@ import { ViewTransitions } from "astro:transitions";
       bgcolor="bg-zinc-700"
       link="https://tampashutter.net"
       linkcolor="text-white"
+      id="tampashutter"
     >
       <Image
         src={tampashutter}
@@ -210,6 +224,7 @@ import { ViewTransitions } from "astro:transitions";
       link="https://ko-fi.com/ayoubab1"
       linkcolor="text-white"
       border="hover:border-amber-300 focus:border-amber-300 active:border-amber-300"
+      id="ko-fi"
     >
       <Image
         src={kofi}
@@ -223,6 +238,8 @@ import { ViewTransitions } from "astro:transitions";
       bgcolor="bg-green-700"
       link="https://cash.app/ayoubab1"
       linkcolor="text-white"
+      id="cash-app"
+      border="target:link-id"
     >
       <Image
         src={cashapp}
@@ -236,6 +253,7 @@ import { ViewTransitions } from "astro:transitions";
       bgcolor="bg-green-600"
       link="https://venmo.com/u/Ayoub-Abedrabbo"
       linkcolor="text-white"
+      id="venmo"
     >
       <Image
         src={venmo}
@@ -249,6 +267,7 @@ import { ViewTransitions } from "astro:transitions";
       bgcolor="bg-green-500"
       link="http://paypal.me/AyoubAbedrabbo"
       linkcolor="text-white"
+      id="paypal"
     >
       <Image
         src={paypal}
