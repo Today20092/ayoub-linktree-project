@@ -16,6 +16,7 @@ import { Icon } from "astro-icon/components"
 import { Picture } from "astro:assets"
 import { ViewTransitions } from "astro:transitions"
 import actionlens from "../image/ActionLens.png"
+import patreon from "../image/Patreon.png"
 ---
 
 <!doctype html>
@@ -67,6 +68,12 @@ import actionlens from "../image/ActionLens.png"
       <Image src={matrix} alt="Matrix logo" class="link-image h-auto object-cover object-center" />
     </Link>
 
+    <!--  Patreon  -->
+    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Patreon</h2>
+    <Link linktxt="Join the community on Patreon for education & guides." bgcolor="bg-neutral-50" link="https://patreon.com/AyoubAbedrabbo" linkcolor="text-black" id="patreon">
+      <Image src={patreon} alt="Patreon logo" class="link-image h-auto object-cover object-center" />
+    </Link>
+
     <!-- youtube buttons -->
     <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Watch on Youtube</h2>
     <Link linktxt="My Youtube Channel" bgcolor=" bg-red-700 " link="https://www.youtube.com/@ayoubthegreat" linkcolor="text-white" id="youtube-personal">
@@ -77,10 +84,10 @@ import actionlens from "../image/ActionLens.png"
     </Link>
 
     <!-- Odysee Page -->
-    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Watch on Odysee</h2>
+    <!-- <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Watch on Odysee</h2>
     <Link linktxt="Odysee Channel" bgcolor="bg-orange-700" link="https://odysee.com/@AyoubTheGreat:1" linkcolor="text-white" id="odysee">
       <Image src={odysee} alt="Odysee Logo" class="link-image h-auto object-cover object-center" />
-    </Link>
+    </Link> -->
     <!-- My website section
     <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">
       My Website
