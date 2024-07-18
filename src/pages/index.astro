@@ -17,7 +17,7 @@ import { Picture } from "astro:assets"
 import { ViewTransitions } from "astro:transitions"
 import actionlens from "../image/ActionLens.png"
 import patreon from "../image/Patreon.png"
-import sms from "../image/SMSicon.svg"
+import sms from "../image/SMS.svg"
 ---
 
 <!doctype html>
@@ -62,19 +62,19 @@ import sms from "../image/SMSicon.svg"
 
     <!-- Contact me section -->
     <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Contact me</h2>
-    <Link linktxt="Download my contact card" bgcolor="bg-sky-600" link="https://www.tampashutter.net/vcard/ayoubabedrabbo.vcf" linkcolor="text-white" id="contact">
+    <Link linktxt="Download my contact card" bgcolor="bg-sky-500" link="https://www.tampashutter.net/vcard/ayoubabedrabbo.vcf" linkcolor="text-white" id="contact">
       <Image src={contact} alt="Contact Card logo" class="link-image h-auto object-cover object-center" />
     </Link>
-    <Link linktxt="Message me on Matrix" bgcolor="bg-sky-700" link="https://matrix.to/#/@ayoubab:matrix.org" linkcolor="text-white" id="matrix">
+    <Link linktxt="Message me on Matrix" bgcolor="bg-sky-600" link="https://matrix.to/#/@ayoubab:matrix.org" linkcolor="text-white" id="matrix">
       <Image src={matrix} alt="Matrix logo" class="link-image h-auto object-cover object-center" />
     </Link>
-    <Link linktxt="Send me a text" bgcolor="bg-sky-800" link="sms:+18134240606?body=Hello Ayoub from Action Lens Media, It was nice to meet you." linkcolor="text-white" id="matrix">
+    <Link linktxt="Send me a text" bgcolor="bg-sky-700" link="sms:+18134240606?body=Hello Ayoub from Action Lens Media, It was nice to meet you." linkcolor="text-white" id="sms">
       <Image src={sms} alt="" class="link-image h-auto object-cover object-center" />
     </Link>
 
     <!--  Patreon  -->
     <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Patreon</h2>
-    <Link linktxt="Join the community on Patreon for education & guides." bgcolor="bg-neutral-50" link="https://patreon.com/AyoubAbedrabbo" linkcolor="text-black" id="patreon">
+    <Link linktxt="Join for free on Patreon" bgcolor="bg-neutral-50" link="https://patreon.com/AyoubAbedrabbo" linkcolor="text-black" id="patreon">
       <Image src={patreon} alt="Patreon logo" class="link-image h-auto object-cover object-center" />
     </Link>
 
@@ -120,7 +120,7 @@ import sms from "../image/SMSicon.svg"
     <Link linktxt="Action Lens Media Facebook Page" bgcolor="bg-cyan-600" link="https://www.facebook.com/people/Action-Lens-Media/61558442317195/" linkcolor="text-white" id="actionlensfacebook">
       <Image src={actionlens} alt="Action Lens Media Logo" class="link-image h-auto object-cover object-center" />
     </Link>
-    <Link linktxt="Action Lens Media Ko Fi" bgcolor="bg-cyan-700" link="https://ko-fi.com/actionlensmedia" linkcolor="text-white" id="actionlenskofi">
+    <Link linktxt="Action Lens Media Ko-Fi" bgcolor="bg-cyan-700" link="https://ko-fi.com/actionlensmedia" linkcolor="text-white" id="actionlenskofi">
       <Image src={kofi} alt="Ko-Fi Logo" class="link-image h-auto object-cover object-center" />
     </Link>
     <!-- Donate to me  -->
