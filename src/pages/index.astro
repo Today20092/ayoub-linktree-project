@@ -18,6 +18,7 @@ import { ViewTransitions } from "astro:transitions"
 import actionlens from "../image/ActionLens.png"
 import patreon from "../image/Patreon.png"
 import sms from "../image/SMS.svg"
+import signal from "../image/signal.svg"
 ---
 
 <!doctype html>
@@ -68,7 +69,10 @@ import sms from "../image/SMS.svg"
     <Link linktxt="Message me on Matrix" bgcolor="bg-sky-600" link="https://matrix.to/#/@ayoubab:matrix.org" linkcolor="text-white" id="matrix">
       <Image src={matrix} alt="Matrix logo" class="link-image h-auto object-cover object-center" />
     </Link>
-    <Link linktxt="Send me a text" bgcolor="bg-sky-700" link="sms:+18134240606?body=Hello Ayoub from Action Lens Media, It was nice to meet you." linkcolor="text-white" id="sms">
+    <Link linktxt="Message me on Signal" bgcolor="bg-sky-700" link="https://signal.me/#eu/69JqyX9IFc7IdHHGVi0WbrS68tgkCS6duJSWkivyLk1av_6Vo2xEoLIvhn0duI7B" linkcolor="text-white" id="matrix">
+      <Image src={signal} alt="Signal logo" class="link-image h-auto fill-white object-cover object-center" />
+    </Link>
+    <Link linktxt="Send me a text" bgcolor="bg-sky-800" link="sms:+18134240606?body=Hello Ayoub from Action Lens Media, It was nice to meet you." linkcolor="text-white" id="sms">
       <Image src={sms} alt="" class="link-image h-auto object-cover object-center" />
     </Link>
 
