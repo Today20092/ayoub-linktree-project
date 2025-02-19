@@ -13,7 +13,6 @@ import matrix from "../image/Matrix.png"
 import tampashutter from "../image/Tampashutter.png"
 import odysee from "../image/Odysee.png"
 import { Icon } from "astro-icon/components"
-import { Picture } from "astro:assets"
 import { ViewTransitions } from "astro:transitions"
 import actionlens from "../image/ActionLens.png"
 import patreon from "../image/Patreon.png"
@@ -40,11 +39,12 @@ import signal from "../image/signal.svg"
   </head>
   <body class="mx-auto my-8 h-full max-w-[90%] justify-center bg-gradient-to-t from-emerald-800 to-green-700 pb-8 text-center text-lg subpixel-antialiased lg:max-w-screen-md">
     <div class="mx-auto size-40 overflow-hidden rounded-full drop-shadow-md">
-      <Picture src={Ayoub} alt="Portrait of Ayoub Abedrabbo" decoding="async" loading="lazy" format="['avif','webp']" class="h-44 object-cover object-center drop-shadow-md" />
+      <Image src={Ayoub} alt="Portrait of Ayoub Abedrabbo" class="h-44 object-cover object-center drop-shadow-lg" decoding="async" loading="eager" />
+      <!-- <Picture src={Ayoub} alt="Portrait of Ayoub Abedrabbo" decoding="async" loading="lazy" format="['avif','webp']" class="h-44 object-cover object-center drop-shadow-md" /> -->
     </div>
 
-    <h1 class="my-4 text-xl font-bold text-white">Ayoub Abedrabbo</h1>
-    <p class="mx-auto my-4 text-center text-white">I am a photographer & I create videos about photography. Contact me to book me!</p>
+    <h1 class="my-4 text-2xl font-bold text-white drop-shadow-lg">Ayoub Abedrabbo</h1>
+    <p class="mx-auto my-4 text-center text-white">I am a photographer/videographer. I also make videos about many topics like Islam, manifestation, and books that im reading.</p>
     <!-- icons -->
     <div class="my-4 flex flex-wrap items-center justify-center text-2xl text-white">
       <a id="instagram" target="_blank" class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150" href="https://instagram.com/ayoubabedrabbo"><i class="fa-brands fa-instagram"></i></a>
@@ -55,7 +55,7 @@ import signal from "../image/signal.svg"
         ><i class="fa-brands fa-linkedin"></i></a
       >
       <a id="mastodon" target="_blank" class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150" href="https://mastodon.social/@ayoubabedrabbo"><i class="fa-brands fa-mastodon"></i></a>
-      <a id="etsy" target="_blank" class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150" href="https://metroviewposters.etsy.com/"><i class="fa-brands fa-etsy"></i></a>
+      <!-- <a id="etsy" target="_blank" class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150" href="https://metroviewposters.etsy.com/"><i class="fa-brands fa-etsy"></i></a> -->
       <a id="github" target="_blank" class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150" href="https://github.com/Today20092"><i class="fa-brands fa-github"></i></a>
       <a id="telegram" target="_blank" class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150" href="https://t.me/AyoubAb1"><i class="fa-brands fa-telegram"></i></a>
       <a id="youtube" target="_blank" class="mx-2 transition hover:scale-150 focus:scale-150 active:scale-150" href="https://www.youtube.com/@ayoubthegreat"><i class="fa-brands fa-youtube"></i></a>
@@ -64,34 +64,33 @@ import signal from "../image/signal.svg"
     <!-- link buttons -->
 
     <!-- Contact me section -->
-    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Contact me</h2>
+    <h2 class="mb-4 mt-8 text-lg font-bold tracking-wide text-white drop-shadow-lg">Contact me</h2>
     <Link linktxt="Download my contact card" bgcolor="bg-sky-500" link="https://www.tampashutter.net/vcard/ayoubabedrabbo.vcf" linkcolor="text-white" id="contact">
       <Image src={contact} alt="Contact Card logo" class="link-image h-auto object-cover object-center" />
     </Link>
-    <Link linktxt="Message me on Matrix" bgcolor="bg-sky-600" link="https://matrix.to/#/@ayoubab:matrix.org" linkcolor="text-white" id="matrix">
-      <Image src={matrix} alt="Matrix logo" class="link-image h-auto object-cover object-center" />
-    </Link>
-    <Link linktxt="Message me on Signal" bgcolor="bg-sky-700" link="https://signal.me/#eu/69JqyX9IFc7IdHHGVi0WbrS68tgkCS6duJSWkivyLk1av_6Vo2xEoLIvhn0duI7B" linkcolor="text-white" id="matrix">
+    <!-- <Link linktxt="Message me on Matrix" bgcolor="bg-sky-600" link="https://matrix.to/#/@ayoubab:matrix.org" linkcolor="text-white" id="matrix">
+      <Image src={matrix} alt="Matrix logo" class="link-image h-auto object-cover object-center" /> -->
+    <Link linktxt="Message me on Signal" bgcolor="bg-sky-600" link="https://signal.me/#eu/69JqyX9IFc7IdHHGVi0WbrS68tgkCS6duJSWkivyLk1av_6Vo2xEoLIvhn0duI7B" linkcolor="text-white" id="matrix">
       <Image src={signal} alt="Signal logo" class="link-image h-auto fill-white object-cover object-center" />
     </Link>
-    <Link linktxt="Send me a text" bgcolor="bg-sky-800" link="sms:+18134240606?body=Hello Ayoub from Action Lens Media, It was nice to meet you." linkcolor="text-white" id="sms">
+    <Link linktxt="Send me a text" bgcolor="bg-sky-700" link="sms:+18134240606?body=Hello Ayoub from Action Lens Media, It was nice to meet you." linkcolor="text-white" id="sms">
       <Image src={sms} alt="" class="link-image h-auto object-cover object-center" />
     </Link>
 
     <!--  Patreon  -->
-    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Patreon</h2>
+    <h2 class="mb-4 mt-8 text-lg font-bold tracking-wide text-white drop-shadow-lg">Patreon</h2>
     <Link linktxt="Join my community on Patreon" bgcolor="bg-neutral-50" link="https://patreon.com/AyoubAbedrabbo" linkcolor="text-black" id="patreon">
       <Image src={patreon} alt="Patreon logo" class="link-image h-auto object-cover object-center" />
     </Link>
 
     <!-- youtube buttons -->
-    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Watch on Youtube</h2>
-    <Link linktxt="My Youtube Channel" bgcolor=" bg-red-700 " link="https://www.youtube.com/@ayoubthegreat" linkcolor="text-white" id="youtube-personal">
+    <h2 class="mb-4 mt-8 text-lg font-bold tracking-wide text-white drop-shadow-lg">Watch on Youtube</h2>
+    <Link linktxt="Subscribe to my Youtube Channel" bgcolor=" bg-red-700 " link="https://www.youtube.com/@ayoubthegreat" linkcolor="text-white" id="youtube-personal">
       <Image src={yt} alt="Youtube logo" class="link-image h-auto object-cover object-center" />
     </Link>
     <!-- <Link linktxt="My Photography Channel" bgcolor="bg-red-800" link="https://www.youtube.com/@ayoubphotos" linkcolor="text-white" id="youtube-photography"> -->
     <!-- <Image src={yt} alt="Youtube logo" class="link-image h-auto object-cover object-center" /> -->
-    <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Donate to me on:</h2>
+    <h2 class="mb-4 mt-8 text-lg font-bold tracking-wide text-white drop-shadow-lg">Send me money on:</h2>
     <!-- <Link linktxt="Ko-Fi" bgcolor="bg-amber-500" link="https://ko-fi.com/ayoubab1" linkcolor="text-white" border="hover:border-amber-300 focus:border-amber-300 active:border-amber-300" id="ko-fi">
       <Image src={kofi} alt="Ko-Fi logo" class="link-image h-auto object-cover object-center" />
     </Link> -->
@@ -104,7 +103,8 @@ import signal from "../image/signal.svg"
     <Link linktxt="Paypal" bgcolor="bg-green-500" link="http://paypal.me/AyoubAbedrabbo" linkcolor="text-white" id="paypal">
       <Image src={paypal} alt="Paypal logo" class="link-image h-auto object-cover object-center" />
     </Link>
-  </body><!-- Odysee Page --><!-- <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Watch on Odysee</h2>
+
+    <!-- Odysee Page --><!-- <h2 class="mb-4 mt-8 text-lg tracking-wide text-white drop-shadow-lg">Watch on Odysee</h2>
     <Link linktxt="Odysee Channel" bgcolor="bg-orange-700" link="https://odysee.com/@AyoubTheGreat:1" linkcolor="text-white" id="odysee">
       <Image src={odysee} alt="Odysee Logo" class="link-image h-auto object-cover object-center" />
     </Link> --><!-- My website section
@@ -133,4 +133,5 @@ import signal from "../image/signal.svg"
     <Link linktxt="Action Lens Media Ko-Fi" bgcolor="bg-cyan-700" link="https://ko-fi.com/actionlensmedia" linkcolor="text-white" id="actionlenskofi">
       <Image src={kofi} alt="Ko-Fi Logo" class="link-image h-auto object-cover object-center" />
     </Link> --><!-- Donate to me  -->
+  </body>
 </html>
