@@ -24,6 +24,16 @@ import abm from "../image/ABM.webp"
 <!doctype html>
 <html lang="en" class="box-border">
   <head>
+    <!-- From AI -->
+    <!-- Add OpenGraph and Twitter meta tags -->
+    <meta property="og:title" content="Ayoub Abedrabbo – Photographer & Videographer" />
+    <meta property="og:description" content="Tampa-based event photographer & videographer. Book or support me here." />
+    <meta property="og:image" content={Ayoub.src} />
+    <meta property="og:url" content="https://www.ayoubabed.xyz/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Preload font -->
+    <link rel="preload" href="https://rsms.me/inter/inter.css" as="style" />
+    <!-- End FROM AI -->
     <ViewTransitions />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta charset="UTF-8" />
@@ -38,6 +48,7 @@ import abm from "../image/ABM.webp"
     <link rel="preconnect" href="https://rsms.me/" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
   </head>
+
   <body class="mx-auto my-8 h-full max-w-[90%] justify-center bg-gradient-to-t from-emerald-800 to-green-700 pb-8 text-center text-lg subpixel-antialiased lg:max-w-screen-md">
     <div class="mx-auto size-40 overflow-hidden rounded-full drop-shadow-md">
       <Image src={Ayoub} alt="Portrait of Ayoub Abedrabbo" class="h-44 object-cover object-center drop-shadow-lg" decoding="async" loading="eager" />
@@ -144,5 +155,12 @@ import abm from "../image/ABM.webp"
     <Link linktxt="Action Lens Media Ko-Fi" bgcolor="bg-cyan-700" link="https://ko-fi.com/actionlensmedia" linkcolor="text-white" id="actionlenskofi">
       <Image src={kofi} alt="Ko-Fi Logo" class="link-image h-auto object-cover object-center" />
     </Link> --><!-- Donate to me  -->
+    <footer class="mt-auto w-full max-w-screen-md px-4 py-6 text-center text-sm text-white/70">
+      <p class="mb-2">&copy; 2024 Ayoub Abedrabbo. All rights reserved.</p>
+      <p>
+        Built with <a href="https://astro.build" target="_blank" rel="noopener" class="underline hover:text-white">Astro</a>
+        &amp; <a href="https://tailwindcss.com" target="_blank" rel="noopener" class="underline hover:text-white">Tailwind CSS</a>.
+      </p>
+    </footer>
   </body>
 </html>
