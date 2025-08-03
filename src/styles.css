@@ -1,9 +1,9 @@
+@import url(https://rsms.me/inter/inter.css);
+
 /* The integration's default injected base.css file */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url(https://rsms.me/inter/inter.css);
 
 @layer base {
   html {

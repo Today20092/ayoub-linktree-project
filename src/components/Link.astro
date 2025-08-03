@@ -1,12 +1,37 @@
 ---
-import { Icon } from "astro-icon/components"
+type LinkProps = {
+  link: string
+  linktxt: string
+  id?: string
+  class?: string // extra classes from parent
+  linkcolor?: string // e.g., "text-white"
+  bgcolor?: string // e.g., "bg-red-700"
+  border?: string // optional border utilities
+  ariaLabel?: string
+  truncate?: boolean // single-line with ellipsis
+}
 
-const { link, imagesrc, alttext, bgcolor, linktxt, icon, linkcolor, border, id } = Astro.props
+const { link, linktxt, id, class: extra, linkcolor = "text-white", bgcolor = "bg-zinc-700", border = "", ariaLabel, truncate = false } = Astro.props as LinkProps
 ---
 
-<div class={`item-center justify-center`}></div>
-<a class={`link ${linkcolor} drop-shadow-lg ${bgcolor} ${border} target:link-id`} href={link} target="_blank" id={id}>
-  <slot />
-  <!-- <img class="link-image" src={imagesrc} alt={alttext} /> -->
-  <span class="link-text whitespace-normal break-words">{linktxt}</span>
+<a
+  href={link}
+  id={id}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={ariaLabel ?? linktxt}
+  class={`w-full max-w-[560px] mx-auto block rounded-md ${bgcolor} ${linkcolor}
+          drop-shadow-lg ${border} ${extra}
+          transition duration-150 ease-out
+          hover:brightness-110 hover:-translate-y-0.5
+          focus-visible:outline-none focus-visible:ring-2
+          focus-visible:ring-white/70 active:translate-y-0`}
+  role="button"
+>
+  <span class="flex items-center gap-3 px-4 py-3">
+    <slot name="icon" />
+    <span class={truncate ? "whitespace-nowrap overflow-hidden text-ellipsis" : "whitespace-normal break-words leading-tight text-center w-full"}>
+      {linktxt}
+    </span>
+  </span>
 </a>
