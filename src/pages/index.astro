@@ -1,7 +1,10 @@
 ---
-import Link from '../components/Link.astro'
 import '../styles.css'
-import { Image, Picture } from 'astro:assets'
+import { Image } from 'astro:assets'
+
+import Link from '../components/Link.astro'
+import Section from '../components/Section.astro'
+
 import Ayoub from '../image/Ayoub.jpg'
 import kofi from '../image/Ko-Fi.png'
 import yt from '../image/youtube.png'
@@ -12,13 +15,15 @@ import contact from '../image/Contactcard.png'
 import matrix from '../image/Matrix.png'
 import tampashutter from '../image/Tampashutter.png'
 import odysee from '../image/Odysee.png'
-import { ViewTransitions } from 'astro:transitions'
 import actionlens from '../image/ActionLens.png'
 import patreon from '../image/Patreon.png'
 import sms from '../image/SMS.svg'
 import signal from '../image/signal.svg'
 import abm from '../image/ABM.webp'
+import islamicTampaTVLogo from "../image/IslamicTampaTV Logo.png"
+
 const siteUrl = 'https://www.ayoubabed.xyz/'
+const ayoubImageUrl = Ayoub.src
 ---
 
 <!doctype html>
@@ -33,7 +38,7 @@ const siteUrl = 'https://www.ayoubabed.xyz/'
     <title>Ayoub Abedrabbo</title>
     <meta
       name="description"
-      content="Ayoub Abedrabbo is an event photographer in Tampa, Florida. Photos and videos for all budgets. Find all links, contact, and support options here."
+      content="Ayoub Abedrabbo is an event photographer and videographer in Tampa, Florida. Photos and videos for all budgets. Find all links, contact, and support options here."
     />
 
     <!-- Icons/branding -->
@@ -48,26 +53,24 @@ const siteUrl = 'https://www.ayoubabed.xyz/'
       property="og:description"
       content="Tampa-based event photographer & videographer. Book or support me here."
     />
-    <meta property="og:image" content={Ayoub.src} />
+    <meta property="og:image" content={ayoubImageUrl} />
     <meta property="og:type" content="profile" />
     <meta property="og:url" content={siteUrl} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href={siteUrl} />
     <meta name="robots" content="index,follow" />
 
-    <!-- Inter font (optional). Consider self-hosting for max performance -->
+    <!-- Inter font -->
     <link rel="preconnect" href="https://rsms.me/" />
     <link rel="preload" href="https://rsms.me/inter/inter.css" as="style" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
 
-    <!-- Font Awesome kit (consider replacing with local SVGs later) -->
+    <!-- Font Awesome kit -->
     <script
       src="https://kit.fontawesome.com/e8d1b35a19.js"
       crossorigin="anonymous"
       defer
     ></script>
-
-    <ViewTransitions />
   </head>
 
   <body
@@ -92,12 +95,13 @@ const siteUrl = 'https://www.ayoubabed.xyz/'
       Ayoub Abedrabbo
     </h1>
     <p class="mx-auto my-4 max-w-prose text-center text-white">
-      I am a digital media specialist. I make videos to help others learn about videography/photography as well as support the Islamic community with local journalism. 
+      Digital Media Specailist.<br>I create educational
+      content about media production/videography and support the Islamic community through local journalism.
     </p>
 
     <!-- Social icons -->
     <div
-      class="my-4 flex flex-wrap items-center justify-center text-2xl text-white"
+      class="my-4 flex flex-wrap items-center justify-center text-3xl text-white"
     >
       <a
         id="instagram"
@@ -181,234 +185,236 @@ const siteUrl = 'https://www.ayoubabed.xyz/'
       </a>
     </div>
 
-    <!-- Contact section -->
-    <h2
-      class="mb-4 mt-8 text-lg font-bold tracking-wide text-white drop-shadow-lg"
-    >
-      Contact me
-    </h2>
-    <Link
-      linktxt="Download my contact card"
-      bgcolor="bg-sky-500"
-      link="https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf"
-      linkcolor="text-white"
-      id="contact"
-      class="mx-auto w-full max-w-[560px]"
-    >
-      <Image
-        slot="icon"
-        src={contact}
-        alt="Contact Card logo"
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+    <!-- Sections using components -->
 
-    <Link
-      linktxt="Message me on Matrix"
-      bgcolor="bg-sky-600"
-      link="https://matrix.to/#/@ayoubab:matrix.org"
-      linkcolor="text-white"
-      id="matrix"
-      class="mx-auto mt-3 w-full max-w-[560px]"
-    >
-      <Image
-        slot="icon"
-        src={matrix}
-        alt="Matrix logo"
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+    <Section title="Contact me">
+      <Link
+        linktxt="Download my contact card"
+        bgcolor="bg-sky-500"
+        link="https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf"
+        linkcolor="text-white"
+        id="contact"
+        extraClasses="mt-0"
+      >
+        <Image
+          slot="icon"
+          src={contact}
+          alt="Contact Card logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
 
-    <Link
-      linktxt="Message me on Signal"
-      bgcolor="bg-sky-700"
-      link="https://signal.me/#eu/69JqyX9IFc7IdHHGVi0WbrS68tgkCS6duJSWkivyLk1av_6Vo2xEoLIvhn0duI7B"
-      linkcolor="text-white"
-      id="signal"
-      class="mx-auto mt-3 w-full max-w-[560px]"
-    >
-      <Image
-        slot="icon"
-        src={signal}
-        alt="Signal logo"
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+      <Link
+        linktxt="Message me on Matrix"
+        bgcolor="bg-sky-600"
+        link="https://matrix.to/#/@ayoubab:matrix.org"
+        linkcolor="text-white"
+        id="matrix"
+        extraClasses="mt-3"
+      >
+        <Image
+          slot="icon"
+          src={matrix}
+          alt="Matrix logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
 
-    <Link
-      linktxt="Send me a text"
-      bgcolor="bg-sky-800"
-      link="sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
-      linkcolor="text-white"
-      id="sms"
-      class="mx-auto mt-3 w-full max-w-[560px]"
-    >
-      <Image
-        slot="icon"
-        src={sms}
-        alt=""
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+      <Link
+        linktxt="Message me on Signal"
+        bgcolor="bg-sky-700"
+        link="https://signal.me/#eu/69JqyX9IFc7IdHHGVi0WbrS68tgkCS6duJSWkivyLk1av_6Vo2xEoLIvhn0duI7B"
+        linkcolor="text-white"
+        id="signal"
+        extraClasses="mt-3"
+      >
+        <Image
+          slot="icon"
+          src={signal}
+          alt="Signal logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
 
-    <!-- Patreon -->
-    <h2
-      class="mb-4 mt-8 text-lg font-bold tracking-wide text-white drop-shadow-lg"
-    >
-      Patreon
-    </h2>
-    <Link
-      linktxt="Join my community on Patreon"
-      bgcolor="bg-neutral-50"
-      link="https://patreon.com/AyoubAbedrabbo"
-      linkcolor="text-black"
-      id="patreon"
-      class="mx-auto w-full max-w-[560px]"
-    >
-      <Image
-        slot="icon"
-        src={patreon}
-        alt="Patreon logo"
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+      <Link
+        linktxt="Send me a text"
+        bgcolor="bg-sky-800"
+        link="sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
+        linkcolor="text-white"
+        id="sms"
+        extraClasses="mt-3"
+      >
+        <Image
+          slot="icon"
+          src={sms}
+          alt=""
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
+    </Section>
 
-    <!-- YouTube -->
-    <h2
-      class="mb-4 mt-8 text-lg font-bold tracking-wide text-white drop-shadow-lg"
-    >
-      Watch on Youtube
-    </h2>
-    <Link
-      linktxt="Subscribe to my Youtube Channel"
-      bgcolor="bg-red-700"
-      link="https://www.youtube.com/@ayoubthegreat"
-      linkcolor="text-white"
-      id="youtube-personal"
-      class="mx-auto w-full max-w-[560px]"
-    >
-      <Image
-        slot="icon"
-        src={yt}
-        alt="YouTube logo"
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+    <Section title="Patreon">
+      <Link
+        linktxt="Join my community on Patreon"
+        bgcolor="bg-neutral-50"
+        link="https://patreon.com/AyoubAbedrabbo"
+        linkcolor="text-black"
+        id="patreon"
+        extraClasses="mt-0"
+      >
+        <Image
+          slot="icon"
+          src={patreon}
+          alt="Patreon logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
+    </Section>
 
-    <Link
-      linktxt="Visit AlphaBravoMedia Youtube Channel"
-      bgcolor="bg-red-800"
-      link="https://youtube.com/@alphabravomedia"
-      linkcolor="text-white"
-      id="youtube-alphabravomedia"
-      class="mx-auto mt-3 w-full max-w-[560px]"
-    >
-      <Image
-        slot="icon"
-        src={yt}
-        alt="YouTube logo"
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+    <Section title="Watch on YouTube">
+      <Link
+        linktxt="Subscribe to my YouTube Channel"
+        bgcolor="bg-red-700"
+        link="https://www.youtube.com/@ayoubthegreat"
+        linkcolor="text-white"
+        id="youtube-personal"
+        extraClasses="mt-0"
+      >
+        <Image
+          slot="icon"
+          src={yt}
+          alt="YouTube logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
 
-    <!-- Company -->
-    <h2
-      class="mb-4 mt-8 text-lg font-bold tracking-wide text-white drop-shadow-lg"
-    >
-      My video &amp; photo company
-    </h2>
-    <Link
-      linktxt="AlphaBravoMedia Homepage"
-      bgcolor="bg-orange-700"
-      link="https://linktr.ee/AlphaBravoMedia"
-      linkcolor="text-white"
-      id="alphabravomedia"
-      class="mx-auto w-full max-w-[560px]"
-    >
-      <Image
-        slot="icon"
-        src={abm}
-        alt="AlphaBravoMedia logo"
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+      <Link
+        linktxt="Visit AlphaBravoMedia YouTube Channel"
+        bgcolor="bg-red-800"
+        link="https://youtube.com/@alphabravomedia"
+        linkcolor="text-white"
+        id="youtube-alphabravomedia"
+        extraClasses="mt-3"
+      >
+        <Image
+          slot="icon"
+          src={yt}
+          alt="YouTube logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
 
-    <!-- Payments -->
-    <h2
-      class="mb-4 mt-8 text-lg font-bold tracking-wide text-white drop-shadow-lg"
-    >
-      Send me money on:
-    </h2>
+      <Link
+        linktxt="Visit Islamic Tampa TV YouTube Channel"
+        bgcolor="bg-red-900"
+        link="https://youtube.com/@alphabravomedia"
+        linkcolor="text-white"
+        id="youtube-alphabravomedia"
+        extraClasses="mt-3"
+      >
+        <Image
+          slot="icon"
+          src={islamicTampaTVLogo}
+          alt="YouTube logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
+    </Section>
 
-    <Link
-      linktxt="CashApp"
-      bgcolor="bg-green-700"
-      link="https://cash.app/ayoubab1"
-      linkcolor="text-white"
-      id="cash-app"
-      class="mx-auto w-full max-w-[560px]"
+    <Section
+      title="My video &amp; photo company"
+      description="Event photography, videography, and media services for Tampa and beyond."
     >
-      <Image
-        slot="icon"
-        src={cashapp}
-        alt="Cash App logo"
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+      <Link
+        linktxt="AlphaBravoMedia Homepage"
+        bgcolor="bg-orange-700"
+        link="https://linktr.ee/AlphaBravoMedia"
+        linkcolor="text-white"
+        id="alphabravomedia"
+        extraClasses="mt-0"
+      >
+        <Image
+          slot="icon"
+          src={abm}
+          alt="AlphaBravoMedia logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
+    </Section>
 
-    <Link
-      linktxt="Venmo"
-      bgcolor="bg-green-600"
-      link="https://venmo.com/u/Ayoub-Abedrabbo"
-      linkcolor="text-white"
-      id="venmo"
-      class="mx-auto mt-3 w-full max-w-[560px]"
-    >
-      <Image
-        slot="icon"
-        src={venmo}
-        alt="Venmo logo"
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+    <Section title="Send me money on:">
+      <Link
+        linktxt="CashApp"
+        bgcolor="bg-green-700"
+        link="https://cash.app/ayoubab1"
+        linkcolor="text-white"
+        id="cash-app"
+        extraClasses="mt-0"
+      >
+        <Image
+          slot="icon"
+          src={cashapp}
+          alt="Cash App logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
 
-    <Link
-      linktxt="Paypal"
-      bgcolor="bg-green-500"
-      link="https://paypal.me/AyoubAbedrabbo"
-      linkcolor="text-white"
-      id="paypal"
-      class="mx-auto mt-3 w-full max-w-[560px]"
-    >
-      <Image
-        slot="icon"
-        src={paypal}
-        alt="PayPal logo"
-        class="link-image h-5 w-5 object-contain"
-        loading="lazy"
-        decoding="async"
-      />
-    </Link>
+      <Link
+        linktxt="Venmo"
+        bgcolor="bg-green-600"
+        link="https://venmo.com/u/Ayoub-Abedrabbo"
+        linkcolor="text-white"
+        id="venmo"
+        extraClasses="mt-3"
+      >
+        <Image
+          slot="icon"
+          src={venmo}
+          alt="Venmo logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
+
+      <Link
+        linktxt="Paypal"
+        bgcolor="bg-green-500"
+        link="https://paypal.me/AyoubAbedrabbo"
+        linkcolor="text-white"
+        id="paypal"
+        extraClasses="mt-3"
+      >
+        <Image
+          slot="icon"
+          src={paypal}
+          alt="PayPal logo"
+          class="link-image h-5 w-5 object-contain"
+          loading="lazy"
+          decoding="async"
+        />
+      </Link>
+    </Section>
 
     <!-- Footer -->
     <footer
@@ -437,27 +443,27 @@ const siteUrl = 'https://www.ayoubabed.xyz/'
       </p>
     </footer>
 
-    <!-- Person JSON-LD (optional but helpful for SEO) -->
+    <!-- Person JSON-LD -->
     <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Ayoub Abedrabbo",
-        "url": "https://www.ayoubabed.xyz/",
-        "image": "{Ayoub.src}",
-        "sameAs": [
-          "https://instagram.com/ayoubabedrabbo",
-          "https://www.youtube.com/@ayoubthegreat",
-          "https://www.linkedin.com/in/ayoubabedrabbo/",
-          "https://mastodon.social/@ayoubabedrabbo"
+      {JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: 'Ayoub Abedrabbo',
+        url: siteUrl,
+        image: ayoubImageUrl,
+        sameAs: [
+          'https://instagram.com/ayoubabedrabbo',
+          'https://www.youtube.com/@ayoubthegreat',
+          'https://www.linkedin.com/in/ayoubabedrabbo/',
+          'https://mastodon.social/@ayoubabedrabbo',
         ],
-        "jobTitle": "Photographer & Videographer",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Tampa",
-          "addressRegion": "FL"
-        }
-      }
+        jobTitle: 'Photographer & Videographer',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Tampa',
+          addressRegion: 'FL',
+        },
+      })}
     </script>
   </body>
 </html>

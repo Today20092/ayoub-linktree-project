@@ -3,15 +3,25 @@ type LinkProps = {
   link: string
   linktxt: string
   id?: string
-  class?: string // extra classes from parent
-  linkcolor?: string // e.g., "text-white"
-  bgcolor?: string // e.g., "bg-red-700"
-  border?: string // optional border utilities
+  extraClasses?: string
+  linkcolor?: string
+  bgcolor?: string
+  border?: string
   ariaLabel?: string
-  truncate?: boolean // single-line with ellipsis
+  truncate?: boolean
 }
 
-const { link, linktxt, id, class: extra, linkcolor = "text-white", bgcolor = "bg-zinc-700", border = "", ariaLabel, truncate = false } = Astro.props as LinkProps
+const {
+  link,
+  linktxt,
+  id,
+  extraClasses = '',
+  linkcolor = 'text-white',
+  bgcolor = 'bg-zinc-700',
+  border = '',
+  ariaLabel,
+  truncate = false,
+} = Astro.props as LinkProps
 ---
 
 <a
@@ -21,16 +31,27 @@ const { link, linktxt, id, class: extra, linkcolor = "text-white", bgcolor = "bg
   rel="noopener noreferrer"
   aria-label={ariaLabel ?? linktxt}
   class={`w-full max-w-[560px] mx-auto block rounded-md ${bgcolor} ${linkcolor}
-          drop-shadow-lg ${border} ${extra}
+          drop-shadow-lg ${border} ${extraClasses}
           transition duration-150 ease-out
           hover:brightness-110 hover:-translate-y-0.5
           focus-visible:outline-none focus-visible:ring-2
           focus-visible:ring-white/70 active:translate-y-0`}
-  role="button"
 >
-  <span class="flex items-center gap-3 px-4 py-3">
-    <slot name="icon" />
-    <span class={truncate ? "whitespace-nowrap overflow-hidden text-ellipsis" : "whitespace-normal break-words leading-tight text-center w-full"}>
+  <!-- New layout -->
+  <span class="flex items-center px-4 py-3">
+    <!-- Icon area: fixed width, left-aligned -->
+    <span class="flex w-6 flex-none items-center justify-start">
+      <slot name="icon" />
+    </span>
+
+    <!-- Text: takes full width, centered -->
+    <span
+      class={`flex-1 text-center leading-tight ${
+        truncate
+          ? 'whitespace-nowrap overflow-hidden text-ellipsis'
+          : 'whitespace-normal break-words'
+      }`}
+    >
       {linktxt}
     </span>
   </span>

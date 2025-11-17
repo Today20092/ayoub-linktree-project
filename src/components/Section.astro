@@ -1,0 +1,26 @@
+---
+type SectionProps = {
+  title: string
+  description?: string
+}
+
+const { title, description } = Astro.props as SectionProps
+---
+
+<section class="mt-8">
+  <h2
+    class="mb-4 text-lg font-bold tracking-wide text-white drop-shadow-lg"
+  >
+    {title}
+  </h2>
+
+  {description && (
+    <p class="mx-auto mb-3 max-w-prose text-sm text-white/80">
+      {description}
+    </p>
+  )}
+
+  <div class="flex flex-col items-center">
+    <slot />
+  </div>
+</section>
