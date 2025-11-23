@@ -166,7 +166,7 @@ const socialLinks = [
       ))}
     </div>
 
-    <Section title="Contact me">
+<Section title="Contact me">
       <Link
         linktxt="Download my contact card"
         bgcolor="bg-sky-500"
@@ -175,13 +175,11 @@ const socialLinks = [
         id="contact"
         extraClasses="mt-0"
       >
-        <Image
+        <Icon
           slot="icon"
-          src={contact}
-          alt="Contact Card logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
+          name="fa-solid:id-card"
+          class="h-6 w-6"
+          aria-hidden="true"
         />
       </Link>
 
@@ -193,15 +191,29 @@ const socialLinks = [
         id="matrix"
         extraClasses="mt-3"
       >
-        <Image
+        <Icon
           slot="icon"
-          src={matrix}
-          alt="Matrix logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
+          name="simple-icons:matrix"
+          class="h-6 w-6"
+          aria-hidden="true"
         />
       </Link>
+
+      <!-- <Link
+        linktxt="Message me on Signal"
+        bgcolor="bg-sky-700"
+        link="https://signal.me/#eu/69JqyX9IFc7IdHHGVi0WbrS68tgkCS6duJSWkivyLk1av_6Vo2xEoLIvhn0duI7B"
+        linkcolor="text-white"
+        id="signal"
+        extraClasses="mt-3"
+      >
+        <Icon
+          slot="icon"
+          name="simple-icons:signal"
+          class="h-6 w-6"
+          aria-hidden="true"
+        />
+      </Link> -->
 
       <Link
         linktxt="Send me a text"
@@ -211,13 +223,11 @@ const socialLinks = [
         id="sms"
         extraClasses="mt-3"
       >
-        <Image
+        <Icon
           slot="icon"
-          src={sms}
-          alt=""
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
+          name="fa-solid:comment-dots"
+          class="h-6 w-6"
+          aria-hidden="true"
         />
       </Link>
 
@@ -232,14 +242,12 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="fa-solid:envelope"
-          class="h-5 w-5"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
-
     </Section>
 
-    
     <Section title="Watch on YouTube">
       <Link
         linktxt="Subscribe to my YouTube Channel"
@@ -249,49 +257,43 @@ const socialLinks = [
         id="youtube-personal"
         extraClasses="mt-0"
       >
-        <Image
+        <Icon
           slot="icon"
-          src={yt}
-          alt="YouTube logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
+          name="fa-brands:youtube"
+          class="h-6 w-6"
+          aria-hidden="true"
         />
       </Link>
 
       <Link
-        linktxt="Visit AlphaBravoMedia YouTube Channel"
+        linktxt="Visit AlphaBravoMedia YouTube"
         bgcolor="bg-red-800"
         link="https://youtube.com/@alphabravomedia"
         linkcolor="text-white"
         id="youtube-alphabravomedia"
         extraClasses="mt-3"
       >
-        <Image
+        <Icon
           slot="icon"
-          src={yt}
-          alt="YouTube logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
+          name="fa-brands:youtube"
+          class="h-6 w-6"
+          aria-hidden="true"
         />
       </Link>
 
       <Link
-        linktxt="Visit Islamic Tampa TV YouTube Channel"
+        linktxt="Visit Islamic Tampa TV YouTube"
         bgcolor="bg-red-900"
         link="https://www.youtube.com/@islamicTampaTV"
         linkcolor="text-white"
-        id="youtube-alphabravomedia"
+        id="youtube-islamic"
         extraClasses="mt-3"
       >
-        <Image
+        <Icon
           slot="icon"
-          src={islamicTampaTVLogo}
-          alt="YouTube logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
+          name="fa-brands:youtube"
+          class="h-6 w-6"
+          aria-hidden="true"
         />
       </Link>
     </Section>
@@ -308,13 +310,11 @@ const socialLinks = [
         id="alphabravomedia"
         extraClasses="mt-0"
       >
-        <Image
+        <Icon
           slot="icon"
-          src={abm}
-          alt="AlphaBravoMedia logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
+          name="fa-solid:camera"
+          class="h-6 w-6"
+          aria-hidden="true"
         />
       </Link>
     </Section>
@@ -328,13 +328,11 @@ const socialLinks = [
         id="cash-app"
         extraClasses="mt-0"
       >
-        <Image
+        <Icon
           slot="icon"
-          src={cashapp}
-          alt="Cash App logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
+          name="simple-icons:cashapp"
+          class="h-6 w-6"
+          aria-hidden="true"
         />
       </Link>
 
@@ -346,13 +344,11 @@ const socialLinks = [
         id="venmo"
         extraClasses="mt-3"
       >
-        <Image
+        <Icon
           slot="icon"
-          src={venmo}
-          alt="Venmo logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
+          name="simple-icons:venmo"
+          class="h-6 w-6"
+          aria-hidden="true"
         />
       </Link>
 
@@ -364,17 +360,14 @@ const socialLinks = [
         id="paypal"
         extraClasses="mt-3"
       >
-        <Image
+        <Icon
           slot="icon"
-          src={paypal}
-          alt="PayPal logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
+          name="fa-brands:paypal"
+          class="h-6 w-6"
+          aria-hidden="true"
         />
       </Link>
     </Section>
-
     <footer
       class="mt-auto w-full max-w-screen-md px-4 pb-2 pt-4 text-center text-sm text-white/70"
     >
