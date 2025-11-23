@@ -2,9 +2,13 @@
 import '../styles.css'
 import { Image } from 'astro:assets'
 
+// Import the Icon component
+import { Icon } from 'astro-icon/components'
+
 import Link from '../components/Link.astro'
 import Section from '../components/Section.astro'
 
+// Images
 import Ayoub from '../image/Ayoub.jpg'
 import kofi from '../image/Ko-Fi.png'
 import yt from '../image/youtube.png'
@@ -22,8 +26,64 @@ import signal from '../image/signal.svg'
 import abm from '../image/ABM.webp'
 import islamicTampaTVLogo from "../image/IslamicTampaTV Logo.png"
 
+// Site Data
 const siteUrl = 'https://www.ayoubabed.xyz/'
 const ayoubImageUrl = Ayoub.src
+const currentYear = new Date().getFullYear()
+
+// Social Media Data Map
+// FIX 1: Corrected names to remove the extra "fa-" prefix
+const socialLinks = [
+  {
+    id: 'instagram',
+    url: 'https://instagram.com/ayoubabedrabbo',
+    icon: 'fa-brands:instagram', 
+    label: 'Instagram: @ayoubabedrabbo'
+  },
+  {
+    id: 'discord',
+    url: 'https://discordapp.com/users/279467079990640641',
+    icon: 'fa-brands:discord',
+    label: 'Discord profile'
+  },
+  {
+    id: 'linkedin',
+    url: 'https://www.linkedin.com/in/ayoubabedrabbo/',
+    icon: 'fa-brands:linkedin',
+    label: 'LinkedIn'
+  },
+  {
+    id: 'mastodon',
+    url: 'https://mastodon.social/@ayoubabedrabbo',
+    icon: 'fa-brands:mastodon',
+    label: 'Mastodon',
+    rel: 'me noopener noreferrer'
+  },
+  {
+    id: 'github',
+    url: 'https://github.com/Today20092',
+    icon: 'fa-brands:github',
+    label: 'GitHub'
+  },
+  {
+    id: 'telegram',
+    url: 'https://t.me/AyoubAb1',
+    icon: 'fa-brands:telegram',
+    label: 'Telegram'
+  },
+  {
+    id: 'youtube',
+    url: 'https://www.youtube.com/@ayoubthegreat',
+    icon: 'fa-brands:youtube',
+    label: 'YouTube channel'
+  },
+  {
+    id: 'tiktok',
+    url: 'https://www.tiktok.com/@ayoubabedrabbo',
+    icon: 'fa-brands:tiktok',
+    label: 'TikTok'
+  }
+]
 ---
 
 <!doctype html>
@@ -41,10 +101,8 @@ const ayoubImageUrl = Ayoub.src
       content="Ayoub Abedrabbo is an event photographer and videographer in Tampa, Florida. Photos and videos for all budgets. Find all links, contact, and support options here."
     />
 
-    <!-- Icons/branding -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- OG / Twitter -->
     <meta
       property="og:title"
       content="Ayoub Abedrabbo – Photographer & Videographer"
@@ -60,17 +118,9 @@ const ayoubImageUrl = Ayoub.src
     <link rel="canonical" href={siteUrl} />
     <meta name="robots" content="index,follow" />
 
-    <!-- Inter font -->
     <link rel="preconnect" href="https://rsms.me/" />
     <link rel="preload" href="https://rsms.me/inter/inter.css" as="style" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
-
-    <!-- Font Awesome kit -->
-    <script
-      src="https://kit.fontawesome.com/e8d1b35a19.js"
-      crossorigin="anonymous"
-      defer
-    ></script>
   </head>
 
   <body
@@ -78,7 +128,6 @@ const ayoubImageUrl = Ayoub.src
            bg-gradient-to-t from-emerald-800 to-green-700 pb-2
            text-center text-lg subpixel-antialiased lg:max-w-screen-md"
   >
-    <!-- Header / Avatar -->
     <div
       class="animate-float mx-auto size-40 overflow-hidden rounded-full drop-shadow-md"
     >
@@ -96,96 +145,26 @@ const ayoubImageUrl = Ayoub.src
     </h1>
     <p class="mx-auto my-4 max-w-prose text-center text-white">
       Digital Media Specialist.<br>I create educational
-      content about media production/videography and support the Islamic community through local journalism.
+      content about media production/videography and support the Islamic community through 
+      local journalism.
     </p>
 
-    <!-- Social icons -->
     <div
       class="my-4 flex flex-wrap items-center justify-center text-3xl text-white"
     >
-      <a
-        id="instagram"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Instagram: @ayoubabedrabbo"
-        class="mx-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
-        href="https://instagram.com/ayoubabedrabbo"
-      >
-        <i class="fa-brands fa-instagram" aria-hidden="true"></i>
-      </a>
-      <a
-        id="discord"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Discord profile"
-        class="mx-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
-        href="https://discordapp.com/users/279467079990640641"
-      >
-        <i class="fa-brands fa-discord" aria-hidden="true"></i>
-      </a>
-      <a
-        id="linkedin"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="LinkedIn"
-        class="mx-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
-        href="https://www.linkedin.com/in/ayoubabedrabbo/"
-      >
-        <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
-      </a>
-      <a
-        id="mastodon"
-        target="_blank"
-        rel="me noopener noreferrer"
-        aria-label="Mastodon"
-        class="mx-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
-        href="https://mastodon.social/@ayoubabedrabbo"
-      >
-        <i class="fa-brands fa-mastodon" aria-hidden="true"></i>
-      </a>
-      <a
-        id="github"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="GitHub"
-        class="mx-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
-        href="https://github.com/Today20092"
-      >
-        <i class="fa-brands fa-github" aria-hidden="true"></i>
-      </a>
-      <a
-        id="telegram"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Telegram"
-        class="mx-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
-        href="https://t.me/AyoubAb1"
-      >
-        <i class="fa-brands fa-telegram" aria-hidden="true"></i>
-      </a>
-      <a
-        id="youtube"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="YouTube channel"
-        class="mx-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
-        href="https://www.youtube.com/@ayoubthegreat"
-      >
-        <i class="fa-brands fa-youtube" aria-hidden="true"></i>
-      </a>
-      <a
-        id="tiktok"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="TikTok"
-        class="mx-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
-        href="https://www.tiktok.com/@ayoubabedrabbo"
-      >
-        <i class="fa-brands fa-tiktok" aria-hidden="true"></i>
-      </a>
+      {socialLinks.map((social) => (
+        <a
+          id={social.id}
+          target="_blank"
+          rel={social.rel || "noopener noreferrer"}
+          aria-label={social.label}
+          class="mx-2 p-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
+          href={social.url}
+        >
+          <Icon name={social.icon} class="h-8 w-8" aria-hidden="true" />
+        </a>
+      ))}
     </div>
-
-    <!-- Sections using components -->
 
     <Section title="Contact me">
       <Link
@@ -225,26 +204,8 @@ const ayoubImageUrl = Ayoub.src
       </Link>
 
       <Link
-        linktxt="Message me on Signal"
-        bgcolor="bg-sky-700"
-        link="https://signal.me/#eu/69JqyX9IFc7IdHHGVi0WbrS68tgkCS6duJSWkivyLk1av_6Vo2xEoLIvhn0duI7B"
-        linkcolor="text-white"
-        id="signal"
-        extraClasses="mt-3"
-      >
-        <Image
-          slot="icon"
-          src={signal}
-          alt="Signal logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
-        />
-      </Link>
-
-      <Link
         linktxt="Send me a text"
-        bgcolor="bg-sky-800"
+        bgcolor="bg-sky-700"
         link="sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
         linkcolor="text-white"
         id="sms"
@@ -260,26 +221,6 @@ const ayoubImageUrl = Ayoub.src
         />
       </Link>
     </Section>
-
-    <!-- <Section title="Patreon">
-      <Link
-        linktxt="Join my community on Patreon"
-        bgcolor="bg-neutral-50"
-        link="https://patreon.com/AyoubAbedrabbo"
-        linkcolor="text-black"
-        id="patreon"
-        extraClasses="mt-0"
-      >
-        <Image
-          slot="icon"
-          src={patreon}
-          alt="Patreon logo"
-          class="link-image h-5 w-5 object-contain"
-          loading="lazy"
-          decoding="async"
-        />
-      </Link>
-    </Section> -->
 
     <Section title="Watch on YouTube">
       <Link
@@ -338,7 +279,7 @@ const ayoubImageUrl = Ayoub.src
     </Section>
 
     <Section
-      title="My video &amp; photo company"
+      title="My video & photo company"
       description="Event photography, videography, and media services for Tampa and beyond."
     >
       <Link
@@ -416,11 +357,10 @@ const ayoubImageUrl = Ayoub.src
       </Link>
     </Section>
 
-    <!-- Footer -->
     <footer
       class="mt-auto w-full max-w-screen-md px-4 pb-2 pt-4 text-center text-sm text-white/70"
     >
-      <p class="mb-0">&copy; 2025 Ayoub Abedrabbo. All rights reserved.</p>
+      <p class="mb-0">&copy; {currentYear} Ayoub Abedrabbo. All rights reserved.</p>
       <p>
         Built with
         <a
@@ -443,7 +383,6 @@ const ayoubImageUrl = Ayoub.src
       </p>
     </footer>
 
-    <!-- Person JSON-LD -->
     <script type="application/ld+json">
       {JSON.stringify({
         '@context': 'https://schema.org',
