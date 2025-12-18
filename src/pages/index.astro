@@ -32,7 +32,6 @@ const ayoubImageUrl = Ayoub.src
 const currentYear = new Date().getFullYear()
 
 // Social Media Data Map
-// FIX 1: Corrected names to remove the extra "fa-" prefix
 const socialLinks = [
   {
     id: 'instagram',
@@ -101,10 +100,10 @@ const socialLinks = [
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Ayoub Abedrabbo</title>
+    <title>Ayoub Abedrabbo | Media Specialist</title>
     <meta
       name="description"
-      content="Ayoub Abedrabbo is an event photographer and videographer in Tampa, Florida. Photos and videos for all budgets. Find all links, contact, and support options here."
+      content="Ayoub Abedrabbo is an event photographer and videographer in Tampa, Florida. Digital media specialist focusing on education and local journalism."
     />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -130,33 +129,34 @@ const socialLinks = [
   </head>
 
   <body
-    class="mx-auto my-8 min-h-screen max-w-[90%] justify-center
-           bg-gradient-to-t from-emerald-800 to-green-700 pb-2
+    class="mx-auto min-h-screen max-w-full justify-center
+           bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-950 pb-12 pt-12
            text-center text-lg subpixel-antialiased lg:max-w-screen-md"
   >
     <div
-      class="animate-float mx-auto size-40 overflow-hidden rounded-full drop-shadow-md"
+      class="animate-float mx-auto size-40 overflow-hidden rounded-full ring-4 ring-white/10 drop-shadow-2xl"
     >
       <Image
         src={Ayoub}
         alt="Portrait of Ayoub Abedrabbo"
-        class="h-44 w-full object-cover object-center drop-shadow-lg"
+        class="h-44 w-full object-cover object-center"
         decoding="async"
         loading="eager"
+        fetchpriority="high"
       />
     </div>
 
-    <h1 class="my-4 text-2xl font-bold text-white drop-shadow-lg">
+    <h1 class="mt-6 text-3xl font-extrabold tracking-tight text-white drop-shadow-md">
       Ayoub Abedrabbo
     </h1>
-    <p class="mx-auto my-4 max-w-prose text-center text-white">
-      Digital Media Specialist.<br>I create educational
-      content about media production/videography and support the Islamic community through 
-      local journalism.
+    <p class="mx-auto mt-2 mb-6 max-w-prose px-6 text-center text-emerald-50/80">
+      <span class="font-semibold text-white">Digital Media Specialist.</span><br>
+      Creating educational media production content and <br class="hidden md:block"> supporting the Islamic community through local journalism.
     </p>
 
+    <!-- Social Grid -->
     <div
-      class="my-4 flex flex-wrap items-center justify-center text-3xl text-white"
+      class="mb-8 flex flex-wrap items-center justify-center gap-2 px-4 text-3xl text-white/90"
     >
       {socialLinks.map((social) => (
         <a
@@ -164,100 +164,37 @@ const socialLinks = [
           target="_blank"
           rel={social.rel || "noopener noreferrer"}
           aria-label={social.label}
-          class="mx-2 p-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
+          class="p-2 rounded-full transition-all duration-300 hover:scale-125 hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-400"
           href={social.url}
         >
-          <Icon name={social.icon} class="h-8 w-8" aria-hidden="true" />
+          <Icon name={social.icon} class="h-7 w-7" aria-hidden="true" />
         </a>
       ))}
     </div>
 
-<Section title="Contact me">
+    <!-- Featured Newsletter Section -->
+    <Section title="Read My Writing">
       <Link
-        linktxt="Download my contact card"
-        bgcolor="bg-sky-500"
-        link="https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf"
+        linktxt="Subscribe to my Substack"
+        bgcolor="bg-[#FF6719]" 
+        link="https://www.substack.com/@ayoubabedrabbo1"
         linkcolor="text-white"
-        id="contact"
-        extraClasses="mt-0"
+        id="substack-featured"
+        extraClasses="mt-0 font-bold shadow-lg shadow-orange-950/20"
       >
         <Icon
           slot="icon"
-          name="fa-solid:id-card"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
-
-      <Link
-        linktxt="Message me on Matrix"
-        bgcolor="bg-sky-600"
-        link="https://matrix.to/#/@ayoubab:matrix.org"
-        linkcolor="text-white"
-        id="matrix"
-        extraClasses="mt-3"
-      >
-        <Icon
-          slot="icon"
-          name="simple-icons:matrix"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
-
-      <!-- <Link
-        linktxt="Message me on Signal"
-        bgcolor="bg-sky-700"
-        link="https://signal.me/#eu/69JqyX9IFc7IdHHGVi0WbrS68tgkCS6duJSWkivyLk1av_6Vo2xEoLIvhn0duI7B"
-        linkcolor="text-white"
-        id="signal"
-        extraClasses="mt-3"
-      >
-        <Icon
-          slot="icon"
-          name="simple-icons:signal"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link> -->
-
-      <Link
-        linktxt="Send me a text"
-        bgcolor="bg-sky-700"
-        link="sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
-        linkcolor="text-white"
-        id="sms"
-        extraClasses="mt-3"
-      >
-        <Icon
-          slot="icon"
-          name="fa-solid:comment-dots"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
-
-      <Link
-        linktxt="Send me an email"
-        bgcolor="bg-sky-800"
-        link="mailto:Ayoub@AyoubAbed.xyz"
-        linkcolor="text-white"
-        id="email"
-        extraClasses="mt-3"
-      >
-        <Icon
-          slot="icon"
-          name="fa-solid:envelope"
+          name="simple-icons:substack"
           class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
     </Section>
 
-    <Section title="Watch on YouTube">
+    <Section title="Watch & Learn">
       <Link
-        linktxt="Subscribe to my YouTube Channel"
-        bgcolor="bg-red-700"
+        linktxt="My Personal Youtube Channel (Fun & Education)"
+        bgcolor="bg-red-600"
         link="https://www.youtube.com/@ayoubthegreat"
         linkcolor="text-white"
         id="youtube-personal"
@@ -272,8 +209,8 @@ const socialLinks = [
       </Link>
 
       <Link
-        linktxt="Visit AlphaBravoMedia YouTube"
-        bgcolor="bg-red-800"
+        linktxt="AlphaBravoMedia (Production)"
+        bgcolor="bg-red-700"
         link="https://youtube.com/@alphabravomedia"
         linkcolor="text-white"
         id="youtube-alphabravomedia"
@@ -288,8 +225,8 @@ const socialLinks = [
       </Link>
 
       <Link
-        linktxt="Visit Islamic Tampa TV YouTube"
-        bgcolor="bg-red-900"
+        linktxt="Islamic Tampa TV (Journalism)"
+        bgcolor="bg-red-800"
         link="https://www.youtube.com/@islamicTampaTV"
         linkcolor="text-white"
         id="youtube-islamic"
@@ -305,12 +242,12 @@ const socialLinks = [
     </Section>
 
     <Section
-      title="My video & photo company"
-      description="Event photography, videography, and media services for Tampa and beyond."
+      title="Hire Me"
+      description="Professional photography & videography in Tampa."
     >
       <Link
-        linktxt="AlphaBravoMedia Homepage"
-        bgcolor="bg-orange-700"
+        linktxt="AlphaBravoMedia Services"
+        bgcolor="bg-orange-600"
         link="https://linktr.ee/AlphaBravoMedia"
         linkcolor="text-white"
         id="alphabravomedia"
@@ -325,10 +262,76 @@ const socialLinks = [
       </Link>
     </Section>
 
-    <Section title="Send me money on:">
+    <Section title="Contact & Networking">
+      <Link
+        linktxt="Download Contact Card"
+        bgcolor="bg-sky-600"
+        link="https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf"
+        linkcolor="text-white"
+        id="contact"
+        extraClasses="mt-0"
+      >
+        <Icon
+          slot="icon"
+          name="fa-solid:id-card"
+          class="h-6 w-6"
+          aria-hidden="true"
+        />
+      </Link>
+
+      <Link
+        linktxt="Message me on Matrix"
+        bgcolor="bg-sky-700"
+        link="https://matrix.to/#/@ayoubab:matrix.org"
+        linkcolor="text-white"
+        id="matrix"
+        extraClasses="mt-3"
+      >
+        <Icon
+          slot="icon"
+          name="simple-icons:matrix"
+          class="h-6 w-6"
+          aria-hidden="true"
+        />
+      </Link>
+
+      <Link
+        linktxt="Send a Text"
+        bgcolor="bg-sky-800"
+        link="sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
+        linkcolor="text-white"
+        id="sms"
+        extraClasses="mt-3"
+      >
+        <Icon
+          slot="icon"
+          name="fa-solid:comment-dots"
+          class="h-6 w-6"
+          aria-hidden="true"
+        />
+      </Link>
+
+      <Link
+        linktxt="Email Me"
+        bgcolor="bg-sky-900"
+        link="mailto:Ayoub@AyoubAbed.xyz"
+        linkcolor="text-white"
+        id="email"
+        extraClasses="mt-3"
+      >
+        <Icon
+          slot="icon"
+          name="fa-solid:envelope"
+          class="h-6 w-6"
+          aria-hidden="true"
+        />
+      </Link>
+    </Section>
+
+    <Section title="Support My Work">
       <Link
         linktxt="CashApp"
-        bgcolor="bg-green-700"
+        bgcolor="bg-emerald-700"
         link="https://cash.app/ayoubab1"
         linkcolor="text-white"
         id="cash-app"
@@ -344,7 +347,7 @@ const socialLinks = [
 
       <Link
         linktxt="Venmo"
-        bgcolor="bg-green-600"
+        bgcolor="bg-emerald-600"
         link="https://venmo.com/u/Ayoub-Abedrabbo"
         linkcolor="text-white"
         id="venmo"
@@ -360,7 +363,7 @@ const socialLinks = [
 
       <Link
         linktxt="Paypal"
-        bgcolor="bg-green-500"
+        bgcolor="bg-emerald-500"
         link="https://paypal.me/AyoubAbedrabbo"
         linkcolor="text-white"
         id="paypal"
@@ -374,17 +377,18 @@ const socialLinks = [
         />
       </Link>
     </Section>
+
     <footer
-      class="mt-auto w-full max-w-screen-md px-4 pb-2 pt-4 text-center text-sm text-white/70"
+      class="mt-12 w-full max-w-screen-md px-4 pb-8 pt-4 text-center text-sm text-white/50"
     >
-      <p class="mb-0">&copy; {currentYear} Ayoub Abedrabbo. All rights reserved.</p>
+      <p class="mb-2 font-medium">&copy; {currentYear} Ayoub Abedrabbo. All rights reserved.</p>
       <p>
         Built with
         <a
           href="https://astro.build"
           target="_blank"
           rel="noopener"
-          class="underline hover:text-white"
+          class="underline decoration-emerald-500/30 hover:text-white hover:decoration-emerald-500"
         >
           Astro
         </a>
@@ -393,7 +397,7 @@ const socialLinks = [
           href="https://tailwindcss.com"
           target="_blank"
           rel="noopener"
-          class="underline hover:text-white"
+          class="underline decoration-emerald-500/30 hover:text-white hover:decoration-emerald-500"
         >
           Tailwind CSS
         </a>.
