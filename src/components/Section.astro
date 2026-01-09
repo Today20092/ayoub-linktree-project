@@ -2,12 +2,13 @@
 type SectionProps = {
   title: string
   description?: string
+  class?: string
 }
 
-const { title, description } = Astro.props as SectionProps
+const { title, description, class: className } = Astro.props as SectionProps
 ---
 
-<section class="mt-8">
+<section class={`mt-8 ${className || ''}`}>
   <h2
     class="mb-4 text-lg font-bold tracking-wide text-white drop-shadow-lg"
   >

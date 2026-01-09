@@ -10,21 +10,7 @@ import Section from '../components/Section.astro'
 
 // Images
 import Ayoub from '../image/Ayoub.jpg'
-import kofi from '../image/Ko-Fi.png'
-import yt from '../image/youtube.png'
-import cashapp from '../image/CashApp.png'
-import venmo from '../image/Venmo.png'
-import paypal from '../image/Paypal.png'
-import contact from '../image/Contactcard.png'
-import matrix from '../image/Matrix.png'
-import tampashutter from '../image/Tampashutter.png'
-import odysee from '../image/Odysee.png'
-import actionlens from '../image/ActionLens.png'
-import patreon from '../image/Patreon.png'
-import sms from '../image/SMS.svg'
-import signal from '../image/signal.svg'
 import abm from '../image/ABM.webp'
-import islamicTampaTVLogo from "../image/IslamicTampaTV Logo.png"
 
 // Site Data
 const siteUrl = 'https://www.ayoubabed.xyz/'
@@ -135,7 +121,7 @@ const socialLinks = [
            text-center text-lg subpixel-antialiased lg:max-w-screen-md"
   >
     <div
-      class="animate-float mx-auto size-40 overflow-hidden rounded-full drop-shadow-md"
+      class="animate-float animate-fade-in-up mx-auto size-40 overflow-hidden rounded-full drop-shadow-md"
     >
       <Image
         src={Ayoub}
@@ -146,17 +132,17 @@ const socialLinks = [
       />
     </div>
 
-    <h1 class="my-4 text-2xl font-bold text-white drop-shadow-lg">
+    <h1 class="animate-fade-in-up delay-100 my-4 text-2xl font-bold text-white drop-shadow-lg">
       Ayoub Abedrabbo
     </h1>
-    <p class="mx-auto my-4 max-w-prose text-center text-white">
+    <p class="animate-fade-in-up delay-200 mx-auto my-4 max-w-prose text-center text-white">
       Digital Media Specialist.<br>I create educational
-      content about media production/videography and support the Islamic community through 
+      content about media production/videography and support the Islamic community through
       local journalism.
     </p>
 
     <div
-      class="my-4 flex flex-wrap items-center justify-center text-3xl text-white"
+      class="animate-fade-in-up delay-300 my-4 flex flex-wrap items-center justify-center text-3xl text-white"
     >
       {socialLinks.map((social) => (
         <a
@@ -164,6 +150,7 @@ const socialLinks = [
           target="_blank"
           rel={social.rel || "noopener noreferrer"}
           aria-label={social.label}
+          title={social.label}
           class="mx-2 p-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
           href={social.url}
         >
@@ -172,7 +159,7 @@ const socialLinks = [
       ))}
     </div>
 
-<Section title="Contact me">
+<Section title="Contact me" class="animate-fade-in-up delay-400">
       <Link
         linktxt="Download my contact card"
         bgcolor="bg-sky-500"
@@ -184,7 +171,7 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="fa-solid:id-card"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
@@ -200,7 +187,7 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="simple-icons:matrix"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
@@ -216,7 +203,7 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="simple-icons:signal"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link> -->
@@ -232,7 +219,7 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="fa-solid:comment-dots"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
@@ -248,13 +235,13 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="fa-solid:envelope"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
     </Section>
 
-    <Section title="Watch on YouTube">
+    <Section title="Watch on YouTube" class="animate-fade-in-up delay-400">
       <Link
         linktxt="Subscribe to my YouTube Channel"
         bgcolor="bg-red-700"
@@ -266,7 +253,7 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="fa-brands:youtube"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
@@ -282,7 +269,7 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="fa-brands:youtube"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
@@ -298,7 +285,7 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="fa-brands:youtube"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
@@ -307,6 +294,7 @@ const socialLinks = [
     <Section
       title="My video & photo company"
       description="Event photography, videography, and media services for Tampa and beyond."
+      class="animate-fade-in-up delay-400"
     >
       <Link
         linktxt="AlphaBravoMedia Homepage"
@@ -319,16 +307,16 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="fa-solid:camera"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
     </Section>
 
-    <Section title="Send me money on:">
+    <Section title="Support My Work" class="animate-fade-in-up delay-400">
       <Link
         linktxt="CashApp"
-        bgcolor="bg-green-700"
+        bgcolor="bg-purple-700"
         link="https://cash.app/ayoubab1"
         linkcolor="text-white"
         id="cash-app"
@@ -337,14 +325,14 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="simple-icons:cashapp"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
 
       <Link
         linktxt="Venmo"
-        bgcolor="bg-green-600"
+        bgcolor="bg-purple-600"
         link="https://venmo.com/u/Ayoub-Abedrabbo"
         linkcolor="text-white"
         id="venmo"
@@ -353,14 +341,14 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="simple-icons:venmo"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
 
       <Link
         linktxt="Paypal"
-        bgcolor="bg-green-500"
+        bgcolor="bg-purple-500"
         link="https://paypal.me/AyoubAbedrabbo"
         linkcolor="text-white"
         id="paypal"
@@ -369,7 +357,7 @@ const socialLinks = [
         <Icon
           slot="icon"
           name="fa-brands:paypal"
-          class="h-6 w-6"
+          class="h-8 w-8"
           aria-hidden="true"
         />
       </Link>
@@ -408,7 +396,7 @@ const socialLinks = [
         url: siteUrl,
         image: ayoubImageUrl,
         sameAs: [
-          'https://instagram.com/ayoubabedrabbo',
+          'https://instagram.com/alphabravomedia',
           'https://www.youtube.com/@ayoubthegreat',
           'https://www.linkedin.com/in/ayoubabedrabbo/',
           'https://mastodon.social/@ayoubabedrabbo',
