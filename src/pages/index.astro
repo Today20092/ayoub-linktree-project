@@ -120,6 +120,7 @@ const socialLinks = [
            bg-gradient-to-t from-emerald-800 to-green-700 pb-2
            text-center text-lg subpixel-antialiased lg:max-w-screen-md"
   >
+    <main>
     <div
       class="animate-float animate-fade-in-up mx-auto size-40 overflow-hidden rounded-full drop-shadow-md"
     >
@@ -141,23 +142,25 @@ const socialLinks = [
       local journalism.
     </p>
 
-    <div
-      class="animate-fade-in-up delay-300 my-4 flex flex-wrap items-center justify-center text-3xl text-white"
-    >
-      {socialLinks.map((social) => (
-        <a
-          id={social.id}
-          target="_blank"
-          rel={social.rel || "noopener noreferrer"}
-          aria-label={social.label}
-          title={social.label}
-          class="mx-2 p-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
-          href={social.url}
-        >
-          <Icon name={social.icon} class="h-8 w-8" aria-hidden="true" />
-        </a>
-      ))}
-    </div>
+    <nav aria-label="Social media links">
+      <div
+        class="animate-fade-in-up delay-300 my-4 flex flex-wrap items-center justify-center text-3xl text-white"
+      >
+        {socialLinks.map((social) => (
+          <a
+            id={social.id}
+            target="_blank"
+            rel={social.rel || "noopener noreferrer"}
+            aria-label={social.label}
+            title={social.label}
+            class="mx-2 p-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
+            href={social.url}
+          >
+            <Icon name={social.icon} class="h-8 w-8" aria-hidden="true" />
+          </a>
+        ))}
+      </div>
+    </nav>
 
 <Section title="Contact me" class="animate-fade-in-up delay-400">
       <Link
@@ -362,6 +365,8 @@ const socialLinks = [
         />
       </Link>
     </Section>
+    </main>
+
     <footer
       class="mt-auto w-full max-w-screen-md px-4 pb-2 pt-4 text-center text-sm text-white/90"
     >
