@@ -9,7 +9,7 @@ import Link from '../components/Link.astro'
 import Section from '../components/Section.astro'
 
 // Images
-import Ayoub from '../image/Ayoub.jpg'
+import Ayoub from '../image/AyoubBayaan.jpg'
 import abm from '../image/ABM.webp'
 
 // Site Data
@@ -23,7 +23,7 @@ const socialLinks = [
   {
     id: 'instagram',
     url: 'https://instagram.com/alphabravomedia',
-    icon: 'fa-brands:instagram', 
+    icon: 'fa-brands:instagram',
     label: 'Instagram: @AlphaBravoMedia'
   },
   {
@@ -116,27 +116,27 @@ const socialLinks = [
   </head>
 
   <body
-    class="mx-auto my-8 min-h-screen max-w-[90%] justify-center
-           bg-gradient-to-t from-emerald-800 to-green-700 pb-2
+    class="mx-auto my-0 min-h-screen max-w-[90%] justify-center
+           bg-surface pb-6 pt-10
            text-center text-lg subpixel-antialiased lg:max-w-screen-md"
   >
     <main>
     <div
-      class="animate-float animate-fade-in-up mx-auto size-40 overflow-hidden rounded-full drop-shadow-md"
+      class="animate-float animate-fade-in-up mx-auto size-40 overflow-hidden rounded-full ring-4 ring-primary-container elevation-3"
     >
       <Image
         src={Ayoub}
         alt="Portrait of Ayoub Abedrabbo"
-        class="h-44 w-full object-cover object-center drop-shadow-lg"
+        class="h-44 w-full object-cover object-center"
         decoding="async"
         loading="eager"
       />
     </div>
 
-    <h1 class="animate-fade-in-up delay-100 my-4 text-2xl font-bold text-white drop-shadow-lg">
+    <h1 class="animate-fade-in-up delay-100 my-5 text-2xl font-bold text-on-surface">
       Ayoub Abedrabbo
     </h1>
-    <p class="animate-fade-in-up delay-200 mx-auto my-4 max-w-prose text-center text-white">
+    <p class="animate-fade-in-up delay-200 mx-auto my-5 max-w-prose text-center text-on-surface-variant">
       Digital Media Specialist.<br>I create educational
       content about media production/videography and support the Islamic community through
       local journalism.
@@ -144,7 +144,7 @@ const socialLinks = [
 
     <nav aria-label="Social media links">
       <div
-        class="animate-fade-in-up delay-300 my-4 flex flex-wrap items-center justify-center text-3xl text-white"
+        class="animate-fade-in-up delay-300 my-6 flex flex-wrap items-center justify-center gap-1 text-3xl text-on-surface"
       >
         {socialLinks.map((social) => (
           <a
@@ -153,92 +153,74 @@ const socialLinks = [
             rel={social.rel || "noopener noreferrer"}
             aria-label={social.label}
             title={social.label}
-            class="mx-2 p-2 rounded transition hover:scale-150 focus-visible:ring-2 focus-visible:ring-white/70"
+            class="p-2.5 rounded-xl transition-all duration-200
+                   hover:scale-110 hover:bg-surface-container-high
+                   focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:outline-none"
             href={social.url}
           >
-            <Icon name={social.icon} class="h-8 w-8" aria-hidden="true" />
+            <Icon name={social.icon} class="h-7 w-7" aria-hidden="true" />
           </a>
         ))}
       </div>
     </nav>
 
-<Section title="Contact me" class="animate-fade-in-up delay-400">
+    <Section title="Contact me" class="animate-fade-in-up delay-400">
       <Link
         linktxt="Download my contact card"
-        bgcolor="bg-sky-500"
+        bgcolor="bg-contact-container"
         link="https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf"
-        linkcolor="text-white"
+        linkcolor="text-contact"
         id="contact"
-        extraClasses="mt-0"
       >
         <Icon
           slot="icon"
           name="fa-solid:id-card"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
 
       <Link
         linktxt="Message me on Matrix"
-        bgcolor="bg-sky-600"
+        bgcolor="bg-contact-container"
         link="https://matrix.to/#/@ayoubab:matrix.org"
-        linkcolor="text-white"
+        linkcolor="text-contact"
         id="matrix"
-        extraClasses="mt-3"
       >
         <Icon
           slot="icon"
           name="simple-icons:matrix"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
 
-      <!-- <Link
-        linktxt="Message me on Signal"
-        bgcolor="bg-sky-700"
-        link="https://signal.me/#eu/69JqyX9IFc7IdHHGVi0WbrS68tgkCS6duJSWkivyLk1av_6Vo2xEoLIvhn0duI7B"
-        linkcolor="text-white"
-        id="signal"
-        extraClasses="mt-3"
-      >
-        <Icon
-          slot="icon"
-          name="simple-icons:signal"
-          class="h-8 w-8"
-          aria-hidden="true"
-        />
-      </Link> -->
-
       <Link
         linktxt="Send me a text"
-        bgcolor="bg-sky-700"
+        bgcolor="bg-contact-container"
         link="sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
-        linkcolor="text-white"
+        linkcolor="text-contact"
         id="sms"
-        extraClasses="mt-3"
       >
         <Icon
           slot="icon"
           name="fa-solid:comment-dots"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
 
       <Link
         linktxt="Send me an email"
-        bgcolor="bg-sky-800"
+        bgcolor="bg-contact-container"
         link="mailto:Ayoub@AyoubAbed.xyz"
-        linkcolor="text-white"
+        linkcolor="text-contact"
         id="email"
-        extraClasses="mt-3"
       >
         <Icon
           slot="icon"
           name="fa-solid:envelope"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
@@ -247,48 +229,45 @@ const socialLinks = [
     <Section title="Watch on YouTube" class="animate-fade-in-up delay-400">
       <Link
         linktxt="Subscribe to my YouTube Channel"
-        bgcolor="bg-red-700"
+        bgcolor="bg-youtube-container"
         link="https://www.youtube.com/@ayoubthegreat"
-        linkcolor="text-white"
+        linkcolor="text-youtube"
         id="youtube-personal"
-        extraClasses="mt-0"
       >
         <Icon
           slot="icon"
           name="fa-brands:youtube"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
 
       <Link
         linktxt="Visit AlphaBravoMedia YouTube"
-        bgcolor="bg-red-800"
+        bgcolor="bg-youtube-container"
         link="https://youtube.com/@alphabravomedia"
-        linkcolor="text-white"
+        linkcolor="text-youtube"
         id="youtube-alphabravomedia"
-        extraClasses="mt-3"
       >
         <Icon
           slot="icon"
           name="fa-brands:youtube"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
 
       <Link
         linktxt="Visit Islamic Tampa TV YouTube"
-        bgcolor="bg-red-900"
+        bgcolor="bg-youtube-container"
         link="https://www.youtube.com/@islamicTampaTV"
-        linkcolor="text-white"
+        linkcolor="text-youtube"
         id="youtube-islamic"
-        extraClasses="mt-3"
       >
         <Icon
           slot="icon"
           name="fa-brands:youtube"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
@@ -301,16 +280,15 @@ const socialLinks = [
     >
       <Link
         linktxt="AlphaBravoMedia Homepage"
-        bgcolor="bg-orange-700"
+        bgcolor="bg-company-container"
         link="https://linktr.ee/AlphaBravoMedia"
-        linkcolor="text-white"
+        linkcolor="text-company"
         id="alphabravomedia"
-        extraClasses="mt-0"
       >
         <Icon
           slot="icon"
           name="fa-solid:camera"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
@@ -319,48 +297,45 @@ const socialLinks = [
     <Section title="Support My Work" class="animate-fade-in-up delay-400">
       <Link
         linktxt="CashApp"
-        bgcolor="bg-purple-700"
+        bgcolor="bg-support-container"
         link="https://cash.app/ayoubab1"
-        linkcolor="text-white"
+        linkcolor="text-support"
         id="cash-app"
-        extraClasses="mt-0"
       >
         <Icon
           slot="icon"
           name="simple-icons:cashapp"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
 
       <Link
         linktxt="Venmo"
-        bgcolor="bg-purple-600"
+        bgcolor="bg-support-container"
         link="https://venmo.com/u/Ayoub-Abedrabbo"
-        linkcolor="text-white"
+        linkcolor="text-support"
         id="venmo"
-        extraClasses="mt-3"
       >
         <Icon
           slot="icon"
           name="simple-icons:venmo"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
 
       <Link
         linktxt="Paypal"
-        bgcolor="bg-purple-500"
+        bgcolor="bg-support-container"
         link="https://paypal.me/AyoubAbedrabbo"
-        linkcolor="text-white"
+        linkcolor="text-support"
         id="paypal"
-        extraClasses="mt-3"
       >
         <Icon
           slot="icon"
           name="fa-brands:paypal"
-          class="h-8 w-8"
+          class="h-6 w-6"
           aria-hidden="true"
         />
       </Link>
@@ -368,16 +343,16 @@ const socialLinks = [
     </main>
 
     <footer
-      class="mt-auto w-full max-w-screen-md px-4 pb-2 pt-4 text-center text-sm text-white/90"
+      class="mt-12 w-full max-w-screen-md px-4 pb-4 pt-6 text-center text-sm text-on-surface-variant"
     >
-      <p class="mb-0">&copy; {currentYear} Ayoub Abedrabbo. All rights reserved.</p>
+      <p class="mb-1">&copy; {currentYear} Ayoub Abedrabbo. All rights reserved.</p>
       <p>
         Built with
         <a
           href="https://astro.build"
           target="_blank"
           rel="noopener"
-          class="underline hover:text-white"
+          class="underline text-primary hover:text-on-primary-container transition-colors"
         >
           Astro
         </a>
@@ -386,7 +361,7 @@ const socialLinks = [
           href="https://tailwindcss.com"
           target="_blank"
           rel="noopener"
-          class="underline hover:text-white"
+          class="underline text-primary hover:text-on-primary-container transition-colors"
         >
           Tailwind CSS
         </a>.

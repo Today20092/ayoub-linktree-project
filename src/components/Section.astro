@@ -8,20 +8,20 @@ type SectionProps = {
 const { title, description, class: className } = Astro.props as SectionProps
 ---
 
-<section class={`mt-8 ${className || ''}`}>
+<section class:list={['mt-10', className]}>
   <h2
-    class="mb-4 text-lg font-bold tracking-wide text-white drop-shadow-lg"
+    class="mb-5 text-lg font-semibold tracking-wide text-on-surface"
   >
     {title}
   </h2>
 
   {description && (
-    <p class="mx-auto mb-3 max-w-prose text-sm text-white/90">
+    <p class="mx-auto mb-4 max-w-prose text-sm text-on-surface-variant">
       {description}
     </p>
   )}
 
-  <div class="flex flex-col items-center">
+  <div class="flex flex-col items-center gap-3">
     <slot />
   </div>
 </section>

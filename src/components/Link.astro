@@ -16,8 +16,8 @@ const {
   linktxt,
   id,
   extraClasses = '',
-  linkcolor = 'text-white',
-  bgcolor = 'bg-zinc-700',
+  linkcolor = 'text-on-surface',
+  bgcolor = 'bg-surface-container-high',
   border = '',
   ariaLabel,
   truncate = false,
@@ -30,29 +30,40 @@ const {
   target="_blank"
   rel="noopener noreferrer"
   aria-label={ariaLabel ?? linktxt}
-  class={`w-full max-w-[560px] mx-auto block rounded-md ${bgcolor} ${linkcolor}
-          drop-shadow-lg ${border} ${extraClasses}
-          transition duration-150 ease-out
-          hover:brightness-110 hover:-translate-y-0.5
-          focus-visible:outline-none focus-visible:ring-2
-          focus-visible:ring-white/70 active:translate-y-0`}
+  class:list={[
+    'w-full max-w-[560px] mx-auto block',
+    'rounded-xl',
+    bgcolor,
+    linkcolor,
+    'elevation-2',
+    border,
+    extraClasses,
+    'transition-all duration-200 ease-out',
+    'hover:brightness-110 hover:-translate-y-0.5 hover:elevation-3',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+    'active:translate-y-0 active:scale-[0.99]',
+  ]}
 >
-  <!-- New layout -->
-  <span class="flex items-center px-4 py-3">
-    <!-- Icon area: fixed width, left-aligned -->
-    <span class="flex w-6 flex-none items-center justify-start">
+  <!-- LiftKit-inspired layout with generous padding -->
+  <span class="flex items-center px-5 py-4">
+    <!-- Icon area: fixed width, left-aligned with proper optical alignment -->
+    <span class="flex w-7 shrink-0 items-center justify-center">
       <slot name="icon" />
     </span>
 
-    <!-- Text: takes full width, centered -->
+    <!-- Text: takes full width, centered with good spacing from icon -->
     <span
-      class={`flex-1 text-center leading-tight ${
+      class:list={[
+        'flex-1 text-center font-medium leading-snug pl-2',
         truncate
           ? 'whitespace-nowrap overflow-hidden text-ellipsis'
-          : 'whitespace-normal break-words'
-      }`}
+          : 'whitespace-normal break-words',
+      ]}
     >
       {linktxt}
     </span>
+
+    <!-- Spacer for optical balance -->
+    <span class="w-7 shrink-0"></span>
   </span>
 </a>
