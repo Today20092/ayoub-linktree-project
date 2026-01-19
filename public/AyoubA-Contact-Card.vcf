@@ -6,14 +6,16 @@ FN:Ayoub Abedrabbo
 ORG:AlphaBravoMedia
 TITLE:CEO
 BDAY:1994-04-20
+CATEGORIES:Photographer,Videographer,Media
 ADR;TYPE=WORK,POSTAL:;;;Tampa;Florida;33647;USA
 TEL;TYPE=CELL,VOICE,pref:+18134240606
 EMAIL;TYPE=INTERNET,WORK:Ayoub@AyoubAbed.xyz
-URL;TYPE=WORK:https://ayoubabed.xyz
-URL;TYPE=Linktree:https://linktr.ee/AyoubAbedrabbo
+URL;TYPE=Portfolio:https://ayoubabed.xyz
+URL;TYPE=Links:https://linktr.ee/AyoubAbedrabbo
 X-SOCIALPROFILE;TYPE=instagram:https://instagram.com/alphabravomedia
 X-SOCIALPROFILE;TYPE=tiktok:https://www.tiktok.com/@ayoubabedrabbo
 X-SOCIALPROFILE;TYPE=linkedin:https://www.linkedin.com/in/ayoubabedrabbo/
 PHOTO;VALUE=URI:https://ayoubabed.xyz/AyoubContactCardImage.jpg
 NOTE:It was nice to meet you! I am a photographer & videographer. Contact me on my AlphaBravoMedia Linktree for event photography & booking.
+REV:20260119T210000Z
 END:VCARD
