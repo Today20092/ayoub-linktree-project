@@ -5,13 +5,15 @@ N:Abedrabbo;Ayoub;;;
 FN:Ayoub Abedrabbo
 ORG:AlphaBravoMedia
 TITLE:CEO
-BDAY:1990-04-20
+BDAY:1994-04-20
 ADR;TYPE=WORK,POSTAL:;;;Tampa;Florida;33647;USA
 TEL;TYPE=CELL,VOICE,pref:+18134240606
 EMAIL;TYPE=INTERNET,WORK:Ayoub@AyoubAbed.xyz
 URL;TYPE=WORK:https://ayoubabed.xyz
-X-SOCIALPROFILE;TYPE=linktree:https://linktr.ee/AyoubAbedrabbo
-X-SOCIALPROFILE;TYPE=linktree:https://linktr.ee/AlphaBravoMedia
+URL;TYPE=Linktree:https://linktr.ee/AyoubAbedrabbo
+X-SOCIALPROFILE;TYPE=instagram:https://instagram.com/alphabravomedia
+X-SOCIALPROFILE;TYPE=tiktok:https://www.tiktok.com/@ayoubabedrabbo
+X-SOCIALPROFILE;TYPE=linkedin:https://www.linkedin.com/in/ayoubabedrabbo/
 PHOTO;VALUE=URI:https://ayoubabed.xyz/AyoubContactCardImage.jpg
 NOTE:It was nice to meet you! I am a photographer & videographer. Contact me on my AlphaBravoMedia Linktree for event photography & booking.
 END:VCARD
