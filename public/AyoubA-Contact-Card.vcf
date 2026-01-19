@@ -1,20 +1,17 @@
 BEGIN:VCARD
-VERSION:4.0
-KIND:individual
+VERSION:3.0
+PRODID:-//T3 Chat//Ayoub Abedrabbo//EN
 N:Abedrabbo;Ayoub;;;
 FN:Ayoub Abedrabbo
-SORT-STRING:Abedrabbo
 ORG:AlphaBravoMedia
 TITLE:CEO
-BDAY:--0420
-TZ:America/New_York
-ADR;TYPE=work;LABEL="Tampa, Florida 33647":;;;Tampa;Florida;33647;USA
-TEL;VALUE=uri;TYPE="voice,cell";PREF=1:tel:+1-813-424-0606
-EMAIL;TYPE=work:Ayoub@AyoubAbed.xyz
-URL;TYPE=work:https://ayoubabed.xyz
-URL;TYPE=social:https://linktr.ee/AyoubAbedrabbo
-URL;TYPE=social:https://linktr.ee/AlphaBravoMedia
-PHOTO:https://ayoubabed.xyz/AyoubContactCardImage.jpg
+BDAY:1990-04-20
+ADR;TYPE=WORK,POSTAL:;;;Tampa;Florida;33647;USA
+TEL;TYPE=CELL,VOICE,pref:+18134240606
+EMAIL;TYPE=INTERNET,WORK:Ayoub@AyoubAbed.xyz
+URL;TYPE=WORK:https://ayoubabed.xyz
+X-SOCIALPROFILE;TYPE=linktree:https://linktr.ee/AyoubAbedrabbo
+X-SOCIALPROFILE;TYPE=linktree:https://linktr.ee/AlphaBravoMedia
+PHOTO;VALUE=URI:https://ayoubabed.xyz/AyoubContactCardImage.jpg
 NOTE:It was nice to meet you! I am a photographer & videographer. Contact me on my AlphaBravoMedia Linktree for event photography & booking.
-REV:20260119T160000Z
 END:VCARD
