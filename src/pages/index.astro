@@ -115,7 +115,7 @@ const socialLinks = [
     <meta property="og:url" content={siteUrl} />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href={siteUrl} />
-    <meta name="robots" content="index,follow" />
+    <meta name="robots" content="noindex,nofollow" />
 
     <link rel="preconnect" href="https://rsms.me/" />
     <link rel="preload" href="https://rsms.me/inter/inter.css" as="style" />
@@ -171,67 +171,39 @@ const socialLinks = [
       </div>
     </nav>
 
-    <Section title="Contact me" class="animate-fade-in-up delay-400">
+    <div class="animate-fade-in-up delay-400 mb-8 flex flex-col gap-4">
       <Link
-        linktxt="Download my contact card"
-        bgcolor="bg-contact-container"
+        linktxt="1. Download my contact card"
+        bgcolor="bg-primary text-on-primary"
         link="https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf"
-        linkcolor="text-contact"
+        linkcolor="text-on-primary"
         id="contact"
+        extraClasses="py-3 text-xl font-bold border-2 border-primary shadow-lg"
       >
         <Icon
           slot="icon"
           name="fa-solid:id-card"
-          class="h-6 w-6"
+          class="h-7 w-7"
           aria-hidden="true"
         />
       </Link>
 
       <Link
-        linktxt="Message me on Matrix"
-        bgcolor="bg-contact-container"
-        link="https://matrix.to/#/@ayoubab:matrix.org"
-        linkcolor="text-contact"
-        id="matrix"
-      >
-        <Icon
-          slot="icon"
-          name="simple-icons:matrix"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
-
-      <Link
-        linktxt="Send me a text"
-        bgcolor="bg-contact-container"
+        linktxt="2. Send me a text"
+        bgcolor="bg-secondary text-on-secondary"
         link="sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
-        linkcolor="text-contact"
+        linkcolor="text-on-secondary"
         id="sms"
+        extraClasses="py-3 text-xl font-bold border-2 border-secondary shadow-md"
       >
         <Icon
           slot="icon"
           name="fa-solid:comment-dots"
-          class="h-6 w-6"
+          class="h-7 w-7"
           aria-hidden="true"
         />
       </Link>
-
-      <Link
-        linktxt="Send me an email"
-        bgcolor="bg-contact-container"
-        link="mailto:Ayoub@AyoubAbed.xyz"
-        linkcolor="text-contact"
-        id="email"
-      >
-        <Icon
-          slot="icon"
-          name="fa-solid:envelope"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
-    </Section>
+    </div>
 
     <Section title="Watch on YouTube" class="animate-fade-in-up delay-400">
       <Link
@@ -375,42 +347,6 @@ const socialLinks = [
       </p>
     </footer>
 
-    <script type="application/ld+json">
-      {JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Person',
-        name: 'Ayoub Abedrabbo',
-        url: siteUrl,
-        image: ayoubImageUrl,
-        sameAs: [
-          'https://instagram.com/alphabravomedia',
-          'https://www.youtube.com/@ayoubthegreat',
-          'https://youtube.com/@alphabravomedia',
-          'https://www.youtube.com/@islamicTampaTV',
-          'https://www.linkedin.com/in/ayoubabedrabbo/',
-          'https://mastodon.social/@ayoubabedrabbo',
-          'https://github.com/Today20092',
-          'https://discordapp.com/users/279467079990640641',
-          'https://t.me/AyoubAb1',
-          'https://www.tiktok.com/@ayoubabedrabbo',
-          'https://www.substack.com/@ayoubabedrabbo1',
-          'https://matrix.to/#/@ayoubab:matrix.org',
-        ],
-        telephone: '+1-813-424-0606',
-        email: 'Ayoub@AyoubAbed.xyz',
-        contactPoint: {
-          '@type': 'ContactPoint',
-          telephone: '+1-813-424-0606',
-          contactType: 'customer service',
-          availableLanguage: ['English', 'Arabic']
-        },
-        jobTitle: 'Photographer & Videographer',
-        address: {
-          '@type': 'PostalAddress',
-          addressLocality: 'Tampa',
-          addressRegion: 'FL',
-        },
-      })}
-    </script>
+    </footer>
   </body>
 </html>
