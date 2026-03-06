@@ -38,10 +38,10 @@ const {
     'elevation-2',
     border,
     extraClasses,
-    'transition-all duration-200 ease-out',
-    'hover:brightness-110 hover:-translate-y-0.5 hover:elevation-3',
+    'transition-all duration-300 ease-out',
+    'hover:brightness-110 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl hover:elevation-4 cursor-pointer',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
-    'active:translate-y-0 active:scale-[0.99]',
+    'active:translate-y-0 active:scale-[0.98]',
   ]}
 >
   <!-- LiftKit-inspired layout with generous padding -->
@@ -57,7 +57,7 @@ const {
         'flex-1 text-center font-medium leading-snug pl-2',
         truncate
           ? 'whitespace-nowrap overflow-hidden text-ellipsis'
-          : 'whitespace-normal break-words',
+          : 'whitespace-normal wrap-break-word',
       ]}
     >
       {linktxt}
