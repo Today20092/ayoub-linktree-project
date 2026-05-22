@@ -6,7 +6,10 @@ import { Image } from 'astro:assets'
 import { Icon } from 'astro-icon/components'
 
 import Link from '../components/Link.astro'
+import LatestChannelVideo from '../components/LatestChannelVideo.astro'
 import Section from '../components/Section.astro'
+import latestYoutubeVideos from '../data/latest-youtube-videos.json'
+import youtubeChannels from '../data/youtube-channels.json'
 
 // Images
 import Ayoub from '../image/AyoubBayaan.jpg'
@@ -16,6 +19,9 @@ import abm from '../image/ABM.webp'
 const siteUrl = 'https://www.ayoubabed.xyz/'
 const ayoubImageUrl = Ayoub.src
 const currentYear = new Date().getFullYear()
+const latestVideoChannels = youtubeChannels.filter((channel) =>
+  Boolean(latestYoutubeVideos[channel.id])
+)
 
 // Social Media Data Map
 // FIX 1: Corrected names to remove the extra "fa-" prefix
@@ -205,56 +211,9 @@ const socialLinks = [
       </Link>
     </div>
 
-    <Section title="Watch on YouTube" class="animate-fade-in-up delay-400">
-      <Link
-        linktxt="Subscribe to my YouTube Channel"
-        bgcolor="bg-youtube-container"
-        link="https://www.youtube.com/channel/UCQ5YfTwU5n_khZx-WJEkZKQ"
-        linkcolor="text-youtube"
-        id="youtube-personal"
-      >
-        <Icon
-          slot="icon"
-          name="heroicons:play-circle"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
-
-      <Link
-        linktxt="Visit AlphaBravoMedia YouTube"
-        bgcolor="bg-youtube-container"
-        link="https://youtube.com/@alphabravomedia"
-        linkcolor="text-youtube"
-        id="youtube-alphabravomedia"
-      >
-        <Icon
-          slot="icon"
-          name="heroicons:play-circle"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
-
-      <Link
-        linktxt="Visit Islamic Tampa TV YouTube"
-        bgcolor="bg-youtube-container"
-        link="https://www.youtube.com/@islamicTampaTV"
-        linkcolor="text-youtube"
-        id="youtube-islamic"
-      >
-        <Icon
-          slot="icon"
-          name="heroicons:play-circle"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
-    </Section>
-
     <Section
       title="My video & photo company"
-      description="Event photography, videography, and media services for Tampa and beyond."
+      description="Monthly content retainers, video production, photography, editing, and repurposing for Tampa businesses that need consistent, credible media."
       class="animate-fade-in-up delay-400"
     >
       <Link
@@ -273,6 +232,64 @@ const socialLinks = [
       </Link>
     </Section>
 
+    <Section title="Watch on YouTube" class="animate-fade-in-up delay-400">
+      {latestVideoChannels.map((channel) => (
+        <LatestChannelVideo
+          channelName={channel.name}
+          video={latestYoutubeVideos[channel.id]}
+        />
+      ))}
+
+      {/*
+        Temporarily hidden while latest channel video cards are featured.
+
+        <Link
+          linktxt="Subscribe to my YouTube Channel"
+          bgcolor="bg-youtube-container"
+          link="https://www.youtube.com/channel/UCQ5YfTwU5n_khZx-WJEkZKQ"
+          linkcolor="text-youtube"
+          id="youtube-personal"
+        >
+          <Icon
+            slot="icon"
+            name="heroicons:play-circle"
+            class="h-6 w-6"
+            aria-hidden="true"
+          />
+        </Link>
+
+        <Link
+          linktxt="Visit AlphaBravoMedia YouTube"
+          bgcolor="bg-youtube-container"
+          link="https://youtube.com/@alphabravomedia"
+          linkcolor="text-youtube"
+          id="youtube-alphabravomedia"
+        >
+          <Icon
+            slot="icon"
+            name="heroicons:play-circle"
+            class="h-6 w-6"
+            aria-hidden="true"
+          />
+        </Link>
+
+        <Link
+          linktxt="Visit Islamic Tampa TV YouTube"
+          bgcolor="bg-youtube-container"
+          link="https://www.youtube.com/@islamicTampaTV"
+          linkcolor="text-youtube"
+          id="youtube-islamic"
+        >
+          <Icon
+            slot="icon"
+            name="heroicons:play-circle"
+            class="h-6 w-6"
+            aria-hidden="true"
+          />
+        </Link>
+      */}
+    </Section>
+
     <Section title="Support My Work" class="animate-fade-in-up delay-400">
       <Link
         linktxt="CashApp"
@@ -283,7 +300,7 @@ const socialLinks = [
       >
         <Icon
           slot="icon"
-          name="heroicons:banknotes"
+          name="simple-icons:cashapp"
           class="h-6 w-6"
           aria-hidden="true"
         />
@@ -298,7 +315,7 @@ const socialLinks = [
       >
         <Icon
           slot="icon"
-          name="heroicons:wallet"
+          name="simple-icons:venmo"
           class="h-6 w-6"
           aria-hidden="true"
         />
@@ -313,7 +330,7 @@ const socialLinks = [
       >
         <Icon
           slot="icon"
-          name="heroicons:credit-card"
+          name="simple-icons:paypal"
           class="h-6 w-6"
           aria-hidden="true"
         />

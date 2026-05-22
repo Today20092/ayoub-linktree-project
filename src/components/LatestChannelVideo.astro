@@ -1,0 +1,81 @@
+---
+type Video = {
+  title: string
+  url: string
+  thumbnail: string
+  published: string
+}
+
+type LatestChannelVideoProps = {
+  channelName: string
+  video: Video
+}
+
+const { channelName, video } = Astro.props as LatestChannelVideoProps
+
+const publishedDate = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+}).format(new Date(video.published))
+---
+
+<a
+  href={video.url}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={`Watch latest ${channelName} video on YouTube: ${video.title}`}
+  class="group mx-auto block w-full max-w-[560px] overflow-hidden rounded-xl bg-surface-container-high text-left text-on-surface elevation-2 ring-1 ring-outline-variant/60 transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:bg-surface-container-highest hover:elevation-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:translate-y-0 active:scale-[0.98]"
+>
+  <span class="relative block aspect-video w-full overflow-hidden bg-surface-container-low">
+    <img
+      src={video.thumbnail}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+    />
+    <span
+      class="absolute inset-0 flex items-center justify-center bg-scrim/25 transition-colors group-hover:bg-scrim/10"
+      aria-hidden="true"
+    >
+      <span class="rounded-full bg-youtube p-3 text-youtube-container shadow-lg ring-4 ring-surface/70">
+        <svg class="h-7 w-7 translate-x-0.5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z"></path>
+        </svg>
+      </span>
+    </span>
+  </span>
+
+  <span class="block px-5 py-4">
+    <span class="mb-3 flex items-center justify-between gap-3">
+      <span class="flex min-w-0 items-center gap-2">
+        <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-youtube text-youtube-container">
+          <svg class="h-4 w-4 translate-x-px" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8 5v14l11-7z"></path>
+          </svg>
+        </span>
+        <span class="min-w-0">
+          <span class="block text-[0.7rem] font-semibold uppercase tracking-wide text-on-surface-variant">
+            Channel
+          </span>
+          <span class="block truncate text-sm font-bold leading-tight text-on-surface">
+            {channelName}
+          </span>
+        </span>
+      </span>
+
+      <span class="shrink-0 rounded-full bg-youtube-container px-2.5 py-1 text-[0.7rem] font-bold uppercase tracking-wide text-youtube">
+        Latest
+      </span>
+    </span>
+
+    <span class="mb-2 block text-lg font-bold leading-snug text-on-surface sm:text-xl">
+      {video.title}
+    </span>
+
+    <span class="block text-sm font-medium text-on-surface-variant">
+      Published {publishedDate}
+    </span>
+  </span>
+</a>

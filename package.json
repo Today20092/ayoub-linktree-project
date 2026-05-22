@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "update:youtube": "node scripts/update-latest-youtube-video.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
