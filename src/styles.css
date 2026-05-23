@@ -2,72 +2,99 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-sage-50: oklch(0.951 0.074 132.54);
-  --color-sage-100: oklch(0.901 0.141 131.65);
-  --color-sage-200: oklch(0.824 0.13 131.42);
-  --color-sage-300: oklch(0.74 0.116 131.55);
-  --color-sage-400: oklch(0.661 0.104 131.71);
-  --color-sage-500: oklch(0.569 0.089 131.37);
-  --color-sage-600: oklch(0.485 0.077 131.57);
-  --color-sage-700: oklch(0.401 0.063 131.87);
-  --color-sage-800: oklch(0.315 0.051 131.75);
-  --color-sage-900: oklch(0.221 0.034 131.42);
-  --color-sage-950: oklch(0.175 0.028 131.06);
+  /* Ink */
+  --color-ink-50: oklch(0.985 0.004 255);
+  --color-ink-100: oklch(0.954 0.006 255);
+  --color-ink-200: oklch(0.906 0.008 255);
+  --color-ink-300: oklch(0.816 0.01 255);
+  --color-ink-400: oklch(0.68 0.012 255);
+  --color-ink-500: oklch(0.53 0.014 255);
+  --color-ink-600: oklch(0.415 0.014 255);
+  --color-ink-700: oklch(0.315 0.012 255);
+  --color-ink-800: oklch(0.23 0.01 255);
+  --color-ink-900: oklch(0.155 0.008 255);
+  --color-ink-950: oklch(0.105 0.006 255);
 
-  --color-primary: var(--color-sage-300);
-  --color-on-primary: var(--color-sage-950);
-  --color-primary-container: var(--color-sage-800);
-  --color-on-primary-container: var(--color-sage-50);
+  /* Sand */
+  --color-sand-50: oklch(0.987 0.008 82);
+  --color-sand-100: oklch(0.966 0.012 82);
+  --color-sand-200: oklch(0.928 0.016 82);
+  --color-sand-300: oklch(0.864 0.022 82);
+  --color-sand-400: oklch(0.786 0.026 82);
+  --color-sand-500: oklch(0.694 0.03 82);
+  --color-sand-600: oklch(0.594 0.03 82);
+  --color-sand-700: oklch(0.476 0.026 82);
+  --color-sand-800: oklch(0.352 0.02 82);
+  --color-sand-900: oklch(0.238 0.015 82);
+  --color-sand-950: oklch(0.162 0.012 82);
 
-  --color-secondary: oklch(0.77 0.08 178);
-  --color-on-secondary: oklch(0.19 0.04 184);
-  --color-secondary-container: oklch(0.32 0.06 184);
-  --color-on-secondary-container: oklch(0.92 0.04 178);
+  /* Sage */
+  --color-sage-50: oklch(0.982 0.014 145);
+  --color-sage-100: oklch(0.953 0.023 145);
+  --color-sage-200: oklch(0.902 0.035 145);
+  --color-sage-300: oklch(0.825 0.05 145);
+  --color-sage-400: oklch(0.725 0.066 145);
+  --color-sage-500: oklch(0.615 0.078 145);
+  --color-sage-600: oklch(0.51 0.082 145);
+  --color-sage-700: oklch(0.405 0.072 145);
+  --color-sage-800: oklch(0.312 0.056 145);
+  --color-sage-900: oklch(0.222 0.04 145);
+  --color-sage-950: oklch(0.162 0.03 145);
 
-  --color-tertiary: oklch(0.78 0.08 325);
-  --color-on-tertiary: oklch(0.22 0.04 325);
-  --color-tertiary-container: oklch(0.34 0.07 325);
-  --color-on-tertiary-container: oklch(0.94 0.04 325);
+  --color-primary: var(--color-sage-700);
+  --color-on-primary: var(--color-sand-50);
+  --color-primary-container: var(--color-sage-100);
+  --color-on-primary-container: var(--color-ink-950);
 
-  --color-error: rgb(255 180 171);
-  --color-on-error: rgb(105 0 5);
-  --color-error-container: rgb(147 0 10);
-  --color-on-error-container: rgb(255 218 214);
+  --color-secondary: var(--color-ink-900);
+  --color-on-secondary: var(--color-sand-50);
+  --color-secondary-container: var(--color-ink-100);
+  --color-on-secondary-container: var(--color-ink-900);
+
+  --color-tertiary: var(--color-sand-800);
+  --color-on-tertiary: var(--color-ink-950);
+  --color-tertiary-container: var(--color-sand-100);
+  --color-on-tertiary-container: var(--color-ink-900);
+
+  --color-error: oklch(0.68 0.15 28);
+  --color-on-error: oklch(0.18 0.03 28);
+  --color-error-container: oklch(0.27 0.08 28);
+  --color-on-error-container: oklch(0.97 0.02 28);
 
   /* Surface colors - the core background system */
-  --color-surface: oklch(0.17 0.025 132);
-  --color-on-surface: oklch(0.96 0.024 128);
-  --color-surface-dim: oklch(0.14 0.022 132);
-  --color-surface-bright: oklch(0.34 0.038 132);
-  --color-surface-container-lowest: oklch(0.12 0.02 132);
-  --color-surface-container-low: oklch(0.21 0.028 132);
-  --color-surface-container: oklch(0.24 0.032 132);
-  --color-surface-container-high: oklch(0.29 0.036 132);
-  --color-surface-container-highest: oklch(0.35 0.04 132);
+  --color-surface: var(--color-sand-50);
+  --color-on-surface: var(--color-ink-950);
+  --color-surface-dim: var(--color-sand-100);
+  --color-surface-bright: oklch(1 0 0);
+  --color-surface-container-lowest: var(--color-sand-50);
+  --color-surface-container-low: var(--color-sand-100);
+  --color-surface-container: oklch(0.978 0.009 82);
+  --color-surface-container-high: oklch(0.96 0.011 82);
+  --color-surface-container-highest: oklch(0.985 0.006 82);
 
-  --color-surface-variant: oklch(0.36 0.036 132);
-  --color-on-surface-variant: oklch(0.82 0.045 128);
+  --color-surface-variant: var(--color-sand-200);
+  --color-on-surface-variant: var(--color-ink-800);
 
-  --color-outline: oklch(0.62 0.052 128);
-  --color-outline-variant: oklch(0.4 0.04 132);
+  --color-outline: var(--color-ink-400);
+  --color-outline-variant: var(--color-sand-300);
 
-  --color-inverse-surface: var(--color-sage-50);
-  --color-inverse-on-surface: var(--color-sage-950);
-  --color-inverse-primary: var(--color-sage-600);
+  --color-inverse-surface: var(--color-ink-900);
+  --color-inverse-on-surface: var(--color-sand-50);
+  --color-inverse-primary: var(--color-sage-300);
 
   /* Extended palette for sections */
-  --color-contact: var(--color-sage-100);
-  --color-contact-container: var(--color-sage-800);
-  --color-youtube: oklch(0.82 0.12 28);
-  --color-youtube-container: oklch(0.32 0.09 28);
-  --color-company: var(--color-sage-200);
-  --color-company-container: var(--color-sage-900);
-  --color-support: oklch(0.82 0.1 325);
-  --color-support-container: oklch(0.32 0.08 325);
+  --color-contact: var(--color-sage-700);
+  --color-contact-container: var(--color-sage-100);
+  --color-youtube: oklch(0.5 0.13 28);
+  --color-youtube-container: var(--color-sand-100);
+  --color-company: var(--color-ink-800);
+  --color-company-container: var(--color-sand-100);
+  --color-support: var(--color-sage-700);
+  --color-support-container: var(--color-sage-100);
 
   /* Shadow and scrim */
-  --color-shadow: rgb(0 0 0);
-  --color-scrim: rgb(0 0 0);
+  --color-shadow: var(--color-ink-950);
+  --color-scrim: var(--color-ink-950);
 
   /* LiftKit-inspired spacing scale */
   --spacing-button-x: 1.25rem;
@@ -86,15 +113,68 @@
 
 @layer base {
   html {
+    background-color: var(--color-surface);
     font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
     font-feature-settings:
       'liga' 1,
       'calt' 1;
+    color-scheme: light dark;
   }
 
   body {
     background-color: var(--color-surface);
     color: var(--color-on-surface);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-primary: var(--color-sage-300);
+      --color-on-primary: var(--color-ink-950);
+      --color-primary-container: var(--color-sage-800);
+      --color-on-primary-container: var(--color-sage-50);
+
+      --color-secondary: var(--color-sand-200);
+      --color-on-secondary: var(--color-ink-950);
+      --color-secondary-container: var(--color-ink-800);
+      --color-on-secondary-container: var(--color-sand-50);
+
+      --color-tertiary: var(--color-sand-300);
+      --color-on-tertiary: var(--color-ink-950);
+      --color-tertiary-container: var(--color-sand-800);
+      --color-on-tertiary-container: var(--color-sand-50);
+
+      --color-surface: var(--color-ink-950);
+      --color-on-surface: var(--color-sand-50);
+      --color-surface-dim: var(--color-ink-950);
+      --color-surface-bright: var(--color-ink-700);
+      --color-surface-container-lowest: oklch(0.085 0.006 255);
+      --color-surface-container-low: var(--color-ink-900);
+      --color-surface-container: var(--color-ink-800);
+      --color-surface-container-high: oklch(0.255 0.011 255);
+      --color-surface-container-highest: oklch(0.31 0.012 255);
+
+      --color-surface-variant: var(--color-ink-800);
+      --color-on-surface-variant: var(--color-sand-200);
+
+      --color-outline: var(--color-ink-400);
+      --color-outline-variant: var(--color-ink-700);
+
+      --color-inverse-surface: var(--color-sand-50);
+      --color-inverse-on-surface: var(--color-ink-950);
+      --color-inverse-primary: var(--color-sage-700);
+
+      --color-contact: var(--color-sage-100);
+      --color-contact-container: var(--color-sage-900);
+      --color-youtube: oklch(0.78 0.12 28);
+      --color-youtube-container: oklch(0.235 0.075 28);
+      --color-company: var(--color-sand-100);
+      --color-company-container: var(--color-surface-container);
+      --color-support: var(--color-sage-100);
+      --color-support-container: oklch(0.205 0.035 145);
+
+      --color-shadow: oklch(0 0 0);
+      --color-scrim: oklch(0 0 0);
+    }
   }
 }
 
@@ -149,31 +229,61 @@
   /* Material elevation shadows */
   .elevation-1 {
     box-shadow:
-      0 1px 3px 1px rgba(0, 0, 0, 0.15),
-      0 1px 2px rgba(0, 0, 0, 0.3);
+      0 1px 2px oklch(0.23 0.01 255 / 0.05),
+      0 1px 1px oklch(0.23 0.01 255 / 0.03);
   }
 
   .elevation-2 {
     box-shadow:
-      0 2px 6px 2px rgba(0, 0, 0, 0.15),
-      0 1px 2px rgba(0, 0, 0, 0.3);
+      0 4px 12px oklch(0.23 0.01 255 / 0.08),
+      0 2px 4px oklch(0.23 0.01 255 / 0.05);
   }
 
   .elevation-3 {
     box-shadow:
-      0 4px 8px 3px rgba(0, 0, 0, 0.15),
-      0 1px 3px rgba(0, 0, 0, 0.3);
+      0 10px 28px oklch(0.23 0.01 255 / 0.1),
+      0 4px 10px oklch(0.23 0.01 255 / 0.05);
+  }
+
+  .elevation-4 {
+    box-shadow:
+      0 16px 40px oklch(0.23 0.01 255 / 0.12),
+      0 6px 16px oklch(0.23 0.01 255 / 0.06);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .elevation-1 {
+      box-shadow: 0 1px 2px oklch(0 0 0 / 0.2);
+    }
+
+    .elevation-2 {
+      box-shadow:
+        0 6px 18px oklch(0 0 0 / 0.28),
+        0 1px 0 oklch(1 0 0 / 0.04) inset;
+    }
+
+    .elevation-3 {
+      box-shadow:
+        0 14px 34px oklch(0 0 0 / 0.34),
+        0 1px 0 oklch(1 0 0 / 0.06) inset;
+    }
+
+    .elevation-4 {
+      box-shadow:
+        0 18px 48px oklch(0 0 0 / 0.42),
+        0 1px 0 oklch(1 0 0 / 0.07) inset;
+    }
   }
 
   @keyframes buttonPulse {
     0%,
     100% {
       transform: scale(1);
-      box-shadow: 0 0 0 0 oklch(0.74 0.116 131.55 / 0.45);
+      box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-primary) 36%, transparent);
     }
     50% {
       transform: scale(1.02);
-      box-shadow: 0 0 0 12px oklch(0.74 0.116 131.55 / 0);
+      box-shadow: 0 0 0 12px color-mix(in oklch, var(--color-primary) 0%, transparent);
     }
   }
 
