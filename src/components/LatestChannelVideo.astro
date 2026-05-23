@@ -1,4 +1,6 @@
 ---
+import { Icon } from 'astro-icon/components'
+
 type Video = {
   title: string
   url: string
@@ -39,10 +41,8 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
       class="absolute inset-0 flex items-center justify-center bg-scrim/25 transition-colors group-hover:bg-scrim/10"
       aria-hidden="true"
     >
-      <span class="rounded-full bg-youtube p-3 text-youtube-container shadow-lg ring-4 ring-surface/70">
-        <svg class="h-7 w-7 translate-x-0.5" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M8 5v14l11-7z"></path>
-        </svg>
+      <span class="grid h-14 w-14 place-items-center rounded-full bg-youtube text-youtube-container shadow-lg ring-4 ring-surface/70">
+        <Icon name="heroicons:play-solid" class="h-6 w-6 translate-x-[1px]" aria-hidden="true" />
       </span>
     </span>
   </span>
@@ -51,9 +51,7 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
     <span class="mb-3 flex items-center justify-between gap-3">
       <span class="flex min-w-0 items-center gap-2">
         <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-youtube text-youtube-container">
-          <svg class="h-4 w-4 translate-x-px" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M8 5v14l11-7z"></path>
-          </svg>
+          <Icon name="heroicons:video-camera-solid" class="h-4 w-4" aria-hidden="true" />
         </span>
         <span class="min-w-0">
           <span class="block text-[0.7rem] font-semibold uppercase tracking-wide text-on-surface-variant">
