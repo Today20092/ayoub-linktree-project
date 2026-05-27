@@ -245,6 +245,7 @@ const socialLinks = [
       {latestVideoChannels.map((channel) => (
         <LatestChannelVideo
           channelName={channel.name}
+          channelDescription={channel.description}
           video={latestYoutubeVideos[channel.id]}
         />
       ))}

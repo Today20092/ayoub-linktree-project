@@ -2,16 +2,19 @@
   {
     "id": "alphabravomedia",
     "name": "AlphaBravoMedia",
-    "channelId": "UCVAZXZ90b8aw3i1MQngo_WQ"
+    "channelId": "UCVAZXZ90b8aw3i1MQngo_WQ",
+    "description": "Videography, editing, DaVinci Resolve, Lumix cameras, exposure, and practical media production tutorials."
   },
   {
     "id": "personal",
     "name": "Ayoub Abedrabbo",
-    "channelId": "UCQ5YfTwU5n_khZx-WJEkZKQ"
+    "channelId": "UCQ5YfTwU5n_khZx-WJEkZKQ",
+    "description": "Personal educational videos, live Quran readings, reflections, books, and useful things I am learning."
   },
   {
     "id": "islamic-tampa-tv",
     "name": "Islamic Tampa TV",
-    "channelId": "UCw7ZJOSz1GuYbRGKBu2tFfw"
+    "channelId": "UCw7ZJOSz1GuYbRGKBu2tFfw",
+    "description": "Local Tampa Islamic community coverage, including events, gatherings, announcements, and community news."
   }
 ]

@@ -10,10 +10,11 @@ type Video = {
 
 type LatestChannelVideoProps = {
   channelName: string
+  channelDescription: string
   video: Video
 }
 
-const { channelName, video } = Astro.props as LatestChannelVideoProps
+const { channelName, channelDescription, video } = Astro.props as LatestChannelVideoProps
 
 const publishedDate = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -70,6 +71,10 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
 
     <span class="mb-2 block text-lg font-bold leading-snug text-on-surface sm:text-xl">
       {video.title}
+    </span>
+
+    <span class="mb-3 block text-sm leading-relaxed text-on-surface-variant">
+      {channelDescription}
     </span>
 
     <span class="block text-sm font-medium text-on-surface-variant">
