@@ -5,6 +5,7 @@ import { Image } from 'astro:assets'
 // Import the Icon component
 import { Icon } from 'astro-icon/components'
 
+import AlphaBravoPreviewCard from '../components/AlphaBravoPreviewCard.astro'
 import Link from '../components/Link.astro'
 import LatestChannelVideo from '../components/LatestChannelVideo.astro'
 import Section from '../components/Section.astro'
@@ -13,15 +14,45 @@ import youtubeChannels from '../data/youtube-channels.json'
 
 // Images
 import Ayoub from '../image/AyoubBayaan.jpg'
-import abm from '../image/ABM.webp'
+import AlphaBravoMediaLogo from '../image/ABM.webp'
+import IslamicTampaTvLogo from '../image/IslamicTampaTV Logo.png'
 
 // Site Data
 const siteUrl = 'https://www.ayoubabed.xyz/'
 const ayoubImageUrl = Ayoub.src
 const currentYear = new Date().getFullYear()
 const latestVideoChannels = youtubeChannels.filter((channel) =>
-  Boolean(latestYoutubeVideos[channel.id])
+  Boolean(latestYoutubeVideos[channel.id]),
 )
+const channelBranding = {
+  alphabravomedia: {
+    logoSrc: AlphaBravoMediaLogo.src,
+    accentColor: '#8f3f37',
+    cardBackground: '#fffafa',
+    cardTint: '#f7ece8',
+    logoBackgroundColor: '#15110d',
+    logoFit: 'contain',
+    logoPaddingClass: 'p-2',
+  },
+  personal: {
+    logoSrc: Ayoub.src,
+    accentColor: '#765247',
+    cardBackground: '#fbf6ee',
+    cardTint: '#eee5db',
+    logoBackgroundColor: '#d8ccc6',
+    logoFit: 'cover',
+    logoPaddingClass: '',
+  },
+  'islamic-tampa-tv': {
+    logoSrc: IslamicTampaTvLogo.src,
+    accentColor: '#776a32',
+    cardBackground: '#fbf8ef',
+    cardTint: '#efe8d2',
+    logoBackgroundColor: '#10120c',
+    logoFit: 'cover',
+    logoPaddingClass: '',
+  },
+}
 
 // Social Media Data Map
 // FIX 1: Corrected names to remove the extra "fa-" prefix
@@ -31,21 +62,21 @@ const socialLinks = [
     url: 'https://instagram.com/alphabravomedia',
     icon: 'simple-icons:instagram',
     label: 'Instagram: @AlphaBravoMedia',
-    color: '#FF0069'
+    color: '#FF0069',
   },
   {
     id: 'discord',
     url: 'https://discordapp.com/users/279467079990640641',
     icon: 'simple-icons:discord',
     label: 'Discord profile',
-    color: '#5865F2'
+    color: '#5865F2',
   },
   {
     id: 'linkedin',
     url: 'https://www.linkedin.com/in/ayoubabedrabbo/',
     icon: 'simple-icons:linkedin',
     label: 'LinkedIn',
-    color: '#0A66C2'
+    color: '#0A66C2',
   },
   /*
   {
@@ -62,14 +93,14 @@ const socialLinks = [
     icon: 'simple-icons:github',
     label: 'GitHub',
     color: '#181717',
-    darkColor: '#ffffff'
+    darkColor: '#ffffff',
   },
   {
     id: 'telegram',
     url: 'https://t.me/AyoubAb1',
     icon: 'simple-icons:telegram',
     label: 'Telegram',
-    color: '#26A5E4'
+    color: '#26A5E4',
   },
   /*
   {
@@ -84,7 +115,7 @@ const socialLinks = [
     url: 'https://www.tiktok.com/@ayoubabedrabbo',
     icon: 'logos:tiktok-icon',
     label: 'TikTok',
-    color: '#000000'
+    color: '#000000',
   },
   /*
   {
@@ -151,137 +182,154 @@ const socialLinks = [
   </head>
 
   <body
-    class="mx-auto my-0 min-h-screen max-w-[90%] justify-center
-           bg-surface pb-6 pt-10
-           text-center text-lg subpixel-antialiased lg:max-w-3xl"
+    class="bg-surface mx-auto my-0 min-h-screen max-w-[90%] justify-center pt-10 pb-6 text-center text-lg subpixel-antialiased lg:max-w-3xl"
   >
     <main>
-    <div
-      class="animate-float animate-fade-in-up mx-auto size-40 overflow-hidden rounded-full ring-4 ring-primary-container elevation-3"
-    >
-      <Image
-        src={Ayoub}
-        alt="Portrait of Ayoub Abedrabbo"
-        class="h-44 w-full object-cover object-center"
-        decoding="async"
-        loading="eager"
-      />
-    </div>
-
-    <h1 class="animate-fade-in-up delay-100 my-5 text-2xl font-bold text-on-surface">
-      Ayoub Abedrabbo
-    </h1>
-    <p class="animate-fade-in-up delay-200 mx-auto my-5 max-w-prose text-center text-on-surface-variant">
-      Digital Media Specialist.<br>I create educational
-      content about media production/videography and support the Islamic community through
-      local journalism.
-    </p>
-
-    <nav aria-label="Social media links">
       <div
-        class="animate-fade-in-up delay-300 my-6 flex flex-wrap items-center justify-center gap-1 text-3xl text-on-surface"
+        class="animate-float animate-fade-in-up ring-primary-container elevation-3 mx-auto size-40 overflow-hidden rounded-full ring-4"
       >
-        {socialLinks.map((social) => (
-          <a
-            id={social.id}
-            target="_blank"
-            rel={social.rel || "noopener noreferrer"}
-            aria-label={social.label}
-            title={social.label}
-            class:list={[
-              'flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-200',
-              'hover:scale-110 hover:bg-surface-container-high',
-              'focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:outline-none',
-              '[color:var(--social-color)] dark:[color:var(--social-color-dark)]',
-            ]}
-            style={`--social-color: ${social.color}; --social-color-dark: ${social.darkColor ?? social.color};`}
-            href={social.url}
-          >
-            {social.id === 'tiktok' ? (
-              <svg
-                class="h-9 w-8"
-                viewBox="0 0 256 290"
-                role="img"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path fill="#ff004f" d="M189.72 104.421c18.678 13.345 41.56 21.197 66.273 21.197v-47.53a67 67 0 0 1-13.918-1.456v37.413c-24.711 0-47.59-7.851-66.272-21.195v96.996c0 48.523-39.356 87.855-87.9 87.855c-18.113 0-34.949-5.473-48.934-14.86c15.962 16.313 38.222 26.432 62.848 26.432c48.548 0 87.905-39.332 87.905-87.857v-96.995zm17.17-47.952c-9.546-10.423-15.814-23.893-17.17-38.785v-6.113h-13.189c3.32 18.927 14.644 35.097 30.358 44.898M69.673 225.607a40 40 0 0 1-8.203-24.33c0-22.192 18.001-40.186 40.21-40.186a40.3 40.3 0 0 1 12.197 1.883v-48.593c-4.61-.631-9.262-.9-13.912-.801v37.822a40.3 40.3 0 0 0-12.203-1.882c-22.208 0-40.208 17.992-40.208 40.187c0 15.694 8.997 29.281 22.119 35.9" />
-                <path d="M175.803 92.849c18.683 13.344 41.56 21.195 66.272 21.195V76.631c-13.794-2.937-26.005-10.141-35.186-20.162c-15.715-9.802-27.038-25.972-30.358-44.898h-34.643v189.843c-.079 22.132-18.049 40.052-40.21 40.052c-13.058 0-24.66-6.221-32.007-15.86c-13.12-6.618-22.118-20.206-22.118-35.898c0-22.193 18-40.187 40.208-40.187c4.255 0 8.356.662 12.203 1.882v-37.822c-47.692.985-86.047 39.933-86.047 87.834c0 23.912 9.551 45.589 25.053 61.428c13.985 9.385 30.82 14.86 48.934 14.86c48.545 0 87.9-39.335 87.9-87.857z" />
-                <path fill="#00f2ea" d="M242.075 76.63V66.516a66.3 66.3 0 0 1-35.186-10.047a66.47 66.47 0 0 0 35.186 20.163M176.53 11.57a68 68 0 0 1-.728-5.457V0h-47.834v189.845c-.076 22.13-18.046 40.05-40.208 40.05a40.06 40.06 0 0 1-18.09-4.287c7.347 9.637 18.949 15.857 32.007 15.857c22.16 0 40.132-17.918 40.21-40.05V11.571zM99.966 113.58v-10.769a89 89 0 0 0-12.061-.818C39.355 101.993 0 141.327 0 189.845c0 30.419 15.467 57.227 38.971 72.996c-15.502-15.838-25.053-37.516-25.053-61.427c0-47.9 38.354-86.848 86.048-87.833" />
-              </svg>
-            ) : (
-              <Icon name={social.icon} class="h-8 w-8" aria-hidden="true" />
-            )}
-          </a>
-        ))}
+        <Image
+          src={Ayoub}
+          alt="Portrait of Ayoub Abedrabbo"
+          class="h-44 w-full object-cover object-center"
+          decoding="async"
+          loading="eager"
+        />
       </div>
-    </nav>
 
-    <div class="animate-fade-in-up delay-400 mb-8 flex flex-col gap-4">
-      <Link
-        linktxt="1. Download my contact card"
-        bgcolor="bg-primary text-on-primary"
-        link="https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf"
-        linkcolor="text-on-primary"
-        id="contact"
-        extraClasses="py-3 text-xl font-bold border-2 border-primary shadow-lg animate-button-pulse"
+      <h1
+        class="animate-fade-in-up text-on-surface my-5 text-2xl font-bold delay-100"
       >
-        <Icon
-          slot="icon"
-          name="heroicons:identification"
-          class="h-7 w-7"
-          aria-hidden="true"
-        />
-      </Link>
-
-      <Link
-        linktxt="2. Send me a text"
-        bgcolor="bg-secondary text-on-secondary"
-        link="sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
-        linkcolor="text-on-secondary"
-        id="sms"
-        extraClasses="py-3 text-xl font-bold border-2 border-secondary shadow-md"
+        Ayoub Abedrabbo
+      </h1>
+      <p
+        class="animate-fade-in-up text-on-surface-variant mx-auto my-5 max-w-prose text-center delay-200"
       >
-        <Icon
-          slot="icon"
-          name="heroicons:chat-bubble-left-ellipsis"
-          class="h-7 w-7"
-          aria-hidden="true"
-        />
-      </Link>
-    </div>
+        Digital Media Specialist.<br />I create educational content about media
+        production/videography and support the Islamic community through local
+        journalism.
+      </p>
 
-    <Section
-      title="My video & photo company"
-      description="Monthly content retainers, video production, photography, editing, and repurposing for Tampa businesses that need consistent, credible media."
-      class="animate-fade-in-up delay-400"
-    >
-      <Link
-        linktxt="AlphaBravoMedia Homepage"
-        bgcolor="bg-company-container"
-        link="https://alphabravomedia.co"
-        linkcolor="text-company"
-        id="alphabravomedia"
+      <nav aria-label="Social media links">
+        <div
+          class="animate-fade-in-up text-on-surface my-6 flex flex-wrap items-center justify-center gap-1 text-3xl delay-300"
+        >
+          {
+            socialLinks.map((social) => (
+              <a
+                id={social.id}
+                target="_blank"
+                rel={social.rel || 'noopener noreferrer'}
+                aria-label={social.label}
+                title={social.label}
+                class:list={[
+                  'flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-200',
+                  'hover:bg-surface-container-high hover:scale-110',
+                  'focus-visible:ring-primary/70 focus-visible:ring-2 focus-visible:outline-none',
+                  '[color:var(--social-color)] dark:[color:var(--social-color-dark)]',
+                ]}
+                style={`--social-color: ${social.color}; --social-color-dark: ${
+                  social.darkColor ?? social.color
+                };`}
+                href={social.url}
+              >
+                {social.id === 'tiktok' ? (
+                  <svg
+                    class="h-9 w-8"
+                    viewBox="0 0 256 290"
+                    role="img"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fill="#ff004f"
+                      d="M189.72 104.421c18.678 13.345 41.56 21.197 66.273 21.197v-47.53a67 67 0 0 1-13.918-1.456v37.413c-24.711 0-47.59-7.851-66.272-21.195v96.996c0 48.523-39.356 87.855-87.9 87.855c-18.113 0-34.949-5.473-48.934-14.86c15.962 16.313 38.222 26.432 62.848 26.432c48.548 0 87.905-39.332 87.905-87.857v-96.995zm17.17-47.952c-9.546-10.423-15.814-23.893-17.17-38.785v-6.113h-13.189c3.32 18.927 14.644 35.097 30.358 44.898M69.673 225.607a40 40 0 0 1-8.203-24.33c0-22.192 18.001-40.186 40.21-40.186a40.3 40.3 0 0 1 12.197 1.883v-48.593c-4.61-.631-9.262-.9-13.912-.801v37.822a40.3 40.3 0 0 0-12.203-1.882c-22.208 0-40.208 17.992-40.208 40.187c0 15.694 8.997 29.281 22.119 35.9"
+                    />
+                    <path d="M175.803 92.849c18.683 13.344 41.56 21.195 66.272 21.195V76.631c-13.794-2.937-26.005-10.141-35.186-20.162c-15.715-9.802-27.038-25.972-30.358-44.898h-34.643v189.843c-.079 22.132-18.049 40.052-40.21 40.052c-13.058 0-24.66-6.221-32.007-15.86c-13.12-6.618-22.118-20.206-22.118-35.898c0-22.193 18-40.187 40.208-40.187c4.255 0 8.356.662 12.203 1.882v-37.822c-47.692.985-86.047 39.933-86.047 87.834c0 23.912 9.551 45.589 25.053 61.428c13.985 9.385 30.82 14.86 48.934 14.86c48.545 0 87.9-39.335 87.9-87.857z" />
+                    <path
+                      fill="#00f2ea"
+                      d="M242.075 76.63V66.516a66.3 66.3 0 0 1-35.186-10.047a66.47 66.47 0 0 0 35.186 20.163M176.53 11.57a68 68 0 0 1-.728-5.457V0h-47.834v189.845c-.076 22.13-18.046 40.05-40.208 40.05a40.06 40.06 0 0 1-18.09-4.287c7.347 9.637 18.949 15.857 32.007 15.857c22.16 0 40.132-17.918 40.21-40.05V11.571zM99.966 113.58v-10.769a89 89 0 0 0-12.061-.818C39.355 101.993 0 141.327 0 189.845c0 30.419 15.467 57.227 38.971 72.996c-15.502-15.838-25.053-37.516-25.053-61.427c0-47.9 38.354-86.848 86.048-87.833"
+                    />
+                  </svg>
+                ) : (
+                  <Icon name={social.icon} class="h-8 w-8" aria-hidden="true" />
+                )}
+              </a>
+            ))
+          }
+        </div>
+      </nav>
+
+      <div class="animate-fade-in-up mb-8 flex flex-col gap-4 delay-400">
+        <Link
+          linktxt="1. Download my contact card"
+          bgcolor="brand-action-link"
+          link="https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf"
+          linkcolor=""
+          id="contact"
+          border="border border-solid"
+          style="--brand-color: var(--color-primary); --brand-text-color: var(--color-on-primary);"
+          extraClasses="py-3 text-xl font-bold animate-button-pulse"
+        >
+          <Icon
+            slot="icon"
+            name="heroicons:identification"
+            class="h-7 w-7"
+            aria-hidden="true"
+          />
+        </Link>
+
+        <Link
+          linktxt="2. Send me a text"
+          bgcolor="brand-action-link"
+          link="sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
+          linkcolor=""
+          id="sms"
+          border="border border-solid"
+          style="--brand-color: var(--color-secondary); --brand-text-color: var(--color-on-secondary);"
+          extraClasses="py-3 text-xl font-bold"
+        >
+          <Icon
+            slot="icon"
+            name="heroicons:chat-bubble-left-ellipsis"
+            class="h-7 w-7"
+            aria-hidden="true"
+          />
+        </Link>
+      </div>
+
+      <Section
+        title="My video & photo company"
+        description="Monthly content retainers, video production, photography, editing, and repurposing for Tampa businesses that need consistent, credible media. You can find my pricing, work, portfolio, and who we have worked with on this page."
+        class="animate-fade-in-up delay-400"
       >
-        <Icon
-          slot="icon"
-          name="heroicons:camera"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
-    </Section>
+        <AlphaBravoPreviewCard />
+      </Section>
 
-    <Section title="Watch on YouTube" class="animate-fade-in-up delay-400">
-      {latestVideoChannels.map((channel) => (
-        <LatestChannelVideo
-          channelName={channel.name}
-          channelDescription={channel.description}
-          video={latestYoutubeVideos[channel.id]}
-        />
-      ))}
+      <Section title="Watch on YouTube" class="animate-fade-in-up delay-400">
+        {
+          latestVideoChannels.map((channel) => (
+            <LatestChannelVideo
+              channelName={channel.name}
+              channelDescription={channel.description}
+              channelLogoSrc={channelBranding[channel.id].logoSrc}
+              channelAccentColor={channelBranding[channel.id].accentColor}
+              channelCardBackground={channelBranding[channel.id].cardBackground}
+              channelCardTint={channelBranding[channel.id].cardTint}
+              channelLogoBackgroundColor={
+                channelBranding[channel.id].logoBackgroundColor
+              }
+              channelLogoFit={channelBranding[channel.id].logoFit}
+              channelLogoPaddingClass={
+                channelBranding[channel.id].logoPaddingClass
+              }
+              video={latestYoutubeVideos[channel.id]}
+            />
+          ))
+        }
 
-      {/*
+        {
+          /*
         Temporarily hidden while latest channel video cards are featured.
 
         <Link
@@ -328,68 +376,77 @@ const socialLinks = [
             aria-hidden="true"
           />
         </Link>
-      */}
-    </Section>
+      */
+        }
+      </Section>
 
-    <Section title="Support My Work" class="animate-fade-in-up delay-400">
-      <Link
-        linktxt="CashApp"
-        bgcolor="bg-support-container"
-        link="https://cash.app/ayoubab1"
-        linkcolor="text-support"
-        id="cash-app"
-      >
-        <Icon
-          slot="icon"
-          name="simple-icons:cashapp"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
+      <Section title="Support My Work" class="animate-fade-in-up delay-400">
+        <Link
+          linktxt="CashApp"
+          bgcolor="brand-support-link"
+          link="https://cash.app/ayoubab1"
+          linkcolor=""
+          id="cash-app"
+          border="border border-solid"
+          style="--brand-color: #00cf31;"
+        >
+          <Icon
+            slot="icon"
+            name="simple-icons:cashapp"
+            class="h-6 w-6"
+            aria-hidden="true"
+          />
+        </Link>
 
-      <Link
-        linktxt="Venmo"
-        bgcolor="bg-support-container"
-        link="https://venmo.com/u/Ayoub-Abedrabbo"
-        linkcolor="text-support"
-        id="venmo"
-      >
-        <Icon
-          slot="icon"
-          name="simple-icons:venmo"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
+        <Link
+          linktxt="Venmo"
+          bgcolor="brand-support-link"
+          link="https://venmo.com/u/Ayoub-Abedrabbo"
+          linkcolor=""
+          id="venmo"
+          border="border border-solid"
+          style="--brand-color: #008cff;"
+        >
+          <Icon
+            slot="icon"
+            name="simple-icons:venmo"
+            class="h-6 w-6"
+            aria-hidden="true"
+          />
+        </Link>
 
-      <Link
-        linktxt="Paypal"
-        bgcolor="bg-support-container"
-        link="https://paypal.me/AyoubAbedrabbo"
-        linkcolor="text-support"
-        id="paypal"
-      >
-        <Icon
-          slot="icon"
-          name="simple-icons:paypal"
-          class="h-6 w-6"
-          aria-hidden="true"
-        />
-      </Link>
-    </Section>
+        <Link
+          linktxt="Paypal"
+          bgcolor="brand-support-link"
+          link="https://paypal.me/AyoubAbedrabbo"
+          linkcolor=""
+          id="paypal"
+          border="border border-solid"
+          style="--brand-color: #003087; --brand-color-dark: #009cde;"
+        >
+          <Icon
+            slot="icon"
+            name="simple-icons:paypal"
+            class="h-6 w-6"
+            aria-hidden="true"
+          />
+        </Link>
+      </Section>
     </main>
 
     <footer
-      class="mt-12 w-full max-w-3xl px-4 pb-4 pt-6 text-center text-sm text-on-surface-variant"
+      class="text-on-surface-variant mt-12 w-full max-w-3xl px-4 pt-6 pb-4 text-center text-sm"
     >
-      <p class="mb-1">&copy; {currentYear} Ayoub Abedrabbo. All rights reserved.</p>
+      <p class="mb-1">
+        &copy; {currentYear} Ayoub Abedrabbo. All rights reserved.
+      </p>
       <p>
         Built with
         <a
           href="https://astro.build"
           target="_blank"
           rel="noopener"
-          class="underline text-primary hover:text-on-primary-container transition-colors"
+          class="text-primary hover:text-on-primary-container underline transition-colors"
         >
           Astro
         </a>
@@ -398,7 +455,7 @@ const socialLinks = [
           href="https://tailwindcss.com"
           target="_blank"
           rel="noopener"
-          class="underline text-primary hover:text-on-primary-container transition-colors"
+          class="text-primary hover:text-on-primary-container underline transition-colors"
         >
           Tailwind CSS
         </a>.

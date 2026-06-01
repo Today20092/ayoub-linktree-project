@@ -279,16 +279,96 @@
     0%,
     100% {
       transform: scale(1);
-      box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-primary) 36%, transparent);
+      box-shadow: 0 0 0 0
+        color-mix(in oklch, var(--color-primary) 36%, transparent);
     }
     50% {
       transform: scale(1.02);
-      box-shadow: 0 0 0 12px color-mix(in oklch, var(--color-primary) 0%, transparent);
+      box-shadow: 0 0 0 12px
+        color-mix(in oklch, var(--color-primary) 0%, transparent);
     }
   }
 
   .animate-button-pulse {
     animation: buttonPulse 2.5s infinite;
+  }
+
+  .brand-support-link {
+    background-color: color-mix(in srgb, var(--brand-color) 12%, white);
+    border-color: color-mix(in srgb, var(--brand-color) 24%, white);
+    color: var(--brand-color);
+  }
+
+  .brand-support-link:hover {
+    background-color: color-mix(in srgb, var(--brand-color) 18%, white);
+  }
+
+  .brand-action-link {
+    background-color: color-mix(in srgb, var(--brand-color) 88%, white);
+    border-color: color-mix(in srgb, var(--brand-color) 58%, white);
+    color: var(--brand-text-color);
+    box-shadow:
+      0 18px 40px oklch(0.23 0.01 255 / 0.1),
+      0 1px 0 color-mix(in srgb, white 34%, transparent) inset;
+    backdrop-filter: blur(14px) saturate(1.15);
+  }
+
+  .brand-action-link:hover {
+    background-color: color-mix(in srgb, var(--brand-color) 82%, white);
+    border-color: color-mix(in srgb, var(--brand-color) 46%, white);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .brand-support-link {
+      background-color: color-mix(
+        in srgb,
+        var(--brand-color-dark, var(--brand-color)) 22%,
+        var(--color-surface-container)
+      );
+      border-color: color-mix(
+        in srgb,
+        var(--brand-color-dark, var(--brand-color)) 42%,
+        var(--color-surface-container)
+      );
+      color: color-mix(
+        in srgb,
+        var(--brand-color-dark, var(--brand-color)) 78%,
+        white
+      );
+    }
+
+    .brand-support-link:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--brand-color-dark, var(--brand-color)) 30%,
+        var(--color-surface-container)
+      );
+    }
+
+    .brand-action-link {
+      background-color: color-mix(
+        in srgb,
+        var(--brand-color-dark, var(--brand-color)) 82%,
+        var(--color-surface-container)
+      );
+      border-color: color-mix(
+        in srgb,
+        var(--brand-color-dark, var(--brand-color)) 52%,
+        white
+      );
+      color: var(--brand-text-color);
+      box-shadow:
+        0 18px 48px oklch(0 0 0 / 0.34),
+        0 1px 0 oklch(1 0 0 / 0.08) inset;
+    }
+
+    .brand-action-link:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--brand-color-dark, var(--brand-color)) 74%,
+        var(--color-surface-container)
+      );
+    }
   }
 }
 

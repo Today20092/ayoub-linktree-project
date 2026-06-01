@@ -9,6 +9,7 @@ type LinkProps = {
   border?: string
   ariaLabel?: string
   truncate?: boolean
+  style?: string
 }
 
 const {
@@ -21,6 +22,7 @@ const {
   border = '',
   ariaLabel,
   truncate = false,
+  style,
 } = Astro.props as LinkProps
 ---
 
@@ -30,8 +32,9 @@ const {
   target="_blank"
   rel="noopener noreferrer"
   aria-label={ariaLabel ?? linktxt}
+  style={style}
   class:list={[
-    'w-full max-w-[560px] mx-auto block',
+    'mx-auto block w-full max-w-[560px]',
     'rounded-xl',
     bgcolor,
     linkcolor,
@@ -39,8 +42,8 @@ const {
     border,
     extraClasses,
     'transition-all duration-300 ease-out',
-    'hover:brightness-110 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl hover:elevation-4 cursor-pointer',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+    'hover:elevation-4 cursor-pointer hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl hover:brightness-110',
+    'focus-visible:ring-primary/70 focus-visible:ring-offset-surface focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
     'active:translate-y-0 active:scale-[0.98]',
   ]}
 >
@@ -54,10 +57,10 @@ const {
     <!-- Text: takes full width, centered with good spacing from icon -->
     <span
       class:list={[
-        'flex-1 text-center font-medium leading-snug pl-2',
+        'flex-1 pl-2 text-center leading-snug font-medium',
         truncate
-          ? 'whitespace-nowrap overflow-hidden text-ellipsis'
-          : 'whitespace-normal wrap-break-word',
+          ? 'overflow-hidden text-ellipsis whitespace-nowrap'
+          : 'wrap-break-word whitespace-normal',
       ]}
     >
       {linktxt}

@@ -11,10 +11,28 @@ type Video = {
 type LatestChannelVideoProps = {
   channelName: string
   channelDescription: string
+  channelLogoSrc: string
+  channelAccentColor: string
+  channelCardBackground: string
+  channelCardTint: string
+  channelLogoBackgroundColor: string
+  channelLogoFit?: 'cover' | 'contain'
+  channelLogoPaddingClass?: string
   video: Video
 }
 
-const { channelName, channelDescription, video } = Astro.props as LatestChannelVideoProps
+const {
+  channelName,
+  channelDescription,
+  channelLogoSrc,
+  channelAccentColor,
+  channelCardBackground,
+  channelCardTint,
+  channelLogoBackgroundColor,
+  channelLogoFit = 'cover',
+  channelLogoPaddingClass = '',
+  video,
+} = Astro.props as LatestChannelVideoProps
 
 const publishedDate = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -28,7 +46,8 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
   target="_blank"
   rel="noopener noreferrer"
   aria-label={`Watch latest ${channelName} video on YouTube: ${video.title}`}
-  class="group mx-auto block w-full max-w-[560px] overflow-hidden rounded-xl bg-surface-container-high text-left text-on-surface elevation-2 ring-1 ring-outline-variant/60 transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:bg-surface-container-highest hover:elevation-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:translate-y-0 active:scale-[0.98]"
+  style={`--channel-accent: ${channelAccentColor}; --channel-card-bg: ${channelCardBackground}; --channel-card-tint: ${channelCardTint}; --channel-logo-bg: ${channelLogoBackgroundColor};`}
+  class="group mx-auto block w-full max-w-[560px] overflow-hidden rounded-xl bg-[linear-gradient(180deg,var(--channel-card-tint),var(--channel-card-bg)_42%)] text-left text-on-surface shadow-[0_14px_36px_color-mix(in_srgb,var(--channel-accent)_16%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--channel-accent)_22%,transparent)] transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_18px_44px_color-mix(in_srgb,var(--channel-accent)_22%,transparent)] hover:ring-[color-mix(in_srgb,var(--channel-accent)_36%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--channel-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:translate-y-0 active:scale-[0.98]"
 >
   <span class="relative block aspect-video w-full overflow-hidden bg-surface-container-low">
     <img
@@ -42,7 +61,7 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
       class="absolute inset-0 flex items-center justify-center bg-scrim/25 transition-colors group-hover:bg-scrim/10"
       aria-hidden="true"
     >
-      <span class="grid h-14 w-14 place-items-center rounded-full bg-youtube text-youtube-container shadow-lg ring-4 ring-surface/70">
+      <span class="grid h-14 w-14 place-items-center rounded-full bg-[var(--channel-accent)] text-white shadow-lg ring-4 ring-[color-mix(in_srgb,var(--channel-card-bg)_78%,white)]">
         <Icon name="heroicons:play-solid" class="h-6 w-6 translate-x-[1px]" aria-hidden="true" />
       </span>
     </span>
@@ -50,11 +69,25 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
 
   <span class="block px-5 py-5 sm:px-6 sm:py-6">
     <span class="mb-5 flex min-w-0 items-center gap-3">
-      <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-youtube text-youtube-container">
-        <Icon name="heroicons:video-camera-solid" class="h-4 w-4" aria-hidden="true" />
+      <span
+        class:list={[
+          'grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--channel-logo-bg)] ring-2 ring-[color-mix(in_srgb,var(--channel-accent)_35%,transparent)]',
+          channelLogoPaddingClass,
+        ]}
+      >
+        <img
+          src={channelLogoSrc}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          class:list={[
+            'h-full w-full',
+            channelLogoFit === 'contain' ? 'object-contain' : 'object-cover',
+          ]}
+        />
       </span>
       <span class="min-w-0">
-        <span class="block text-[0.68rem] font-semibold uppercase tracking-wide text-on-surface-variant">
+        <span class="block text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--channel-accent)]">
           Channel
         </span>
         <span class="block truncate text-base font-bold leading-tight text-on-surface">
