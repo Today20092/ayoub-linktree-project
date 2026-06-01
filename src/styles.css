@@ -476,18 +476,26 @@
   }
 
   .brand-action-link {
-    background-color: color-mix(in srgb, var(--brand-color) 88%, white);
-    border-color: color-mix(in srgb, var(--brand-color) 58%, white);
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--brand-color) 94%, white) 0%,
+      color-mix(in oklch, var(--brand-color) 78%, white) 100%
+    );
+    border-color: color-mix(in oklch, var(--brand-color) 62%, white);
     color: var(--brand-text-color);
     box-shadow:
       0 18px 40px oklch(0.23 0.01 255 / 0.1),
-      0 1px 0 color-mix(in srgb, white 34%, transparent) inset;
+      0 1px 0 color-mix(in oklch, white 48%, transparent) inset;
     backdrop-filter: blur(14px) saturate(1.15);
   }
 
   .brand-action-link:hover {
-    background-color: color-mix(in srgb, var(--brand-color) 82%, white);
-    border-color: color-mix(in srgb, var(--brand-color) 46%, white);
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklch, var(--brand-color) 98%, white) 0%,
+      color-mix(in oklch, var(--brand-color) 84%, white) 100%
+    );
+    border-color: color-mix(in oklch, var(--brand-color) 70%, white);
   }
 
   :root[data-theme='dark'] .brand-support-link {
@@ -517,14 +525,24 @@
   }
 
   :root[data-theme='dark'] .brand-action-link {
-    background-color: color-mix(
-      in srgb,
-      var(--brand-color-dark, var(--brand-color)) 82%,
-      var(--color-surface-container)
+    background: linear-gradient(
+      135deg,
+      color-mix(
+          in oklch,
+          var(--brand-color-dark, var(--brand-color)) 96%,
+          white
+        )
+        0%,
+      color-mix(
+          in oklch,
+          var(--brand-color-dark, var(--brand-color)) 82%,
+          var(--color-surface-container)
+        )
+        100%
     );
     border-color: color-mix(
-      in srgb,
-      var(--brand-color-dark, var(--brand-color)) 52%,
+      in oklch,
+      var(--brand-color-dark, var(--brand-color)) 64%,
       white
     );
     color: var(--brand-text-color);
@@ -534,10 +552,20 @@
   }
 
   :root[data-theme='dark'] .brand-action-link:hover {
-    background-color: color-mix(
-      in srgb,
-      var(--brand-color-dark, var(--brand-color)) 74%,
-      var(--color-surface-container)
+    background: linear-gradient(
+      135deg,
+      color-mix(
+          in oklch,
+          var(--brand-color-dark, var(--brand-color)) 100%,
+          white
+        )
+        0%,
+      color-mix(
+          in oklch,
+          var(--brand-color-dark, var(--brand-color)) 88%,
+          var(--color-surface-container)
+        )
+        100%
     );
   }
 
@@ -569,14 +597,24 @@
     }
 
     :root:not([data-theme]) .brand-action-link {
-      background-color: color-mix(
-        in srgb,
-        var(--brand-color-dark, var(--brand-color)) 82%,
-        var(--color-surface-container)
+      background: linear-gradient(
+        135deg,
+        color-mix(
+            in oklch,
+            var(--brand-color-dark, var(--brand-color)) 96%,
+            white
+          )
+          0%,
+        color-mix(
+            in oklch,
+            var(--brand-color-dark, var(--brand-color)) 82%,
+            var(--color-surface-container)
+          )
+          100%
       );
       border-color: color-mix(
-        in srgb,
-        var(--brand-color-dark, var(--brand-color)) 52%,
+        in oklch,
+        var(--brand-color-dark, var(--brand-color)) 64%,
         white
       );
       color: var(--brand-text-color);
@@ -586,10 +624,20 @@
     }
 
     :root:not([data-theme]) .brand-action-link:hover {
-      background-color: color-mix(
-        in srgb,
-        var(--brand-color-dark, var(--brand-color)) 74%,
-        var(--color-surface-container)
+      background: linear-gradient(
+        135deg,
+        color-mix(
+            in oklch,
+            var(--brand-color-dark, var(--brand-color)) 100%,
+            white
+          )
+          0%,
+        color-mix(
+            in oklch,
+            var(--brand-color-dark, var(--brand-color)) 88%,
+            var(--color-surface-container)
+          )
+          100%
       );
     }
   }
