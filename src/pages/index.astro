@@ -61,7 +61,8 @@ const socialLinks = [
     url: 'https://github.com/Today20092',
     icon: 'simple-icons:github',
     label: 'GitHub',
-    color: '#181717'
+    color: '#181717',
+    darkColor: '#ffffff'
   },
   {
     id: 'telegram',
@@ -187,10 +188,13 @@ const socialLinks = [
             rel={social.rel || "noopener noreferrer"}
             aria-label={social.label}
             title={social.label}
-            class="flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-200
-                   hover:scale-110 hover:bg-surface-container-high
-                   focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:outline-none"
-            style={`color: ${social.color};`}
+            class:list={[
+              'flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-200',
+              'hover:scale-110 hover:bg-surface-container-high',
+              'focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:outline-none',
+              '[color:var(--social-color)] dark:[color:var(--social-color-dark)]',
+            ]}
+            style={`--social-color: ${social.color}; --social-color-dark: ${social.darkColor ?? social.color};`}
             href={social.url}
           >
             {social.id === 'tiktok' ? (
