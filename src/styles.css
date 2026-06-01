@@ -1,6 +1,8 @@
 @import url(https://rsms.me/inter/inter.css);
 @import 'tailwindcss';
 
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 @theme {
   /* Ink */
   --color-ink-50: oklch(0.985 0.004 255);
@@ -121,13 +123,71 @@
     color-scheme: light dark;
   }
 
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
   body {
     background-color: var(--color-surface);
     color: var(--color-on-surface);
   }
 
+  :root[data-theme='dark'] {
+    --color-primary: var(--color-sage-300);
+    --color-on-primary: var(--color-ink-950);
+    --color-primary-container: var(--color-sage-800);
+    --color-on-primary-container: var(--color-sage-50);
+
+    --color-secondary: var(--color-sand-200);
+    --color-on-secondary: var(--color-ink-950);
+    --color-secondary-container: var(--color-ink-800);
+    --color-on-secondary-container: var(--color-sand-50);
+
+    --color-tertiary: var(--color-sand-300);
+    --color-on-tertiary: var(--color-ink-950);
+    --color-tertiary-container: var(--color-sand-800);
+    --color-on-tertiary-container: var(--color-sand-50);
+
+    --color-surface: var(--color-ink-950);
+    --color-on-surface: var(--color-sand-50);
+    --color-surface-dim: var(--color-ink-950);
+    --color-surface-bright: var(--color-ink-700);
+    --color-surface-container-lowest: oklch(0.085 0.006 255);
+    --color-surface-container-low: var(--color-ink-900);
+    --color-surface-container: var(--color-ink-800);
+    --color-surface-container-high: oklch(0.255 0.011 255);
+    --color-surface-container-highest: oklch(0.31 0.012 255);
+
+    --color-surface-variant: var(--color-ink-800);
+    --color-on-surface-variant: var(--color-sand-200);
+
+    --color-outline: var(--color-ink-400);
+    --color-outline-variant: var(--color-ink-700);
+
+    --color-inverse-surface: var(--color-sand-50);
+    --color-inverse-on-surface: var(--color-ink-950);
+    --color-inverse-primary: var(--color-sage-700);
+
+    --color-contact: var(--color-sage-100);
+    --color-contact-container: var(--color-sage-900);
+    --color-youtube: oklch(0.78 0.12 28);
+    --color-youtube-container: oklch(0.235 0.075 28);
+    --color-company: var(--color-sand-100);
+    --color-company-container: var(--color-surface-container);
+    --color-support: var(--color-sage-100);
+    --color-support-container: oklch(0.205 0.035 145);
+
+    --color-shadow: oklch(0 0 0);
+    --color-scrim: oklch(0 0 0);
+  }
+
   @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-theme]) {
+      color-scheme: dark;
       --color-primary: var(--color-sage-300);
       --color-on-primary: var(--color-ink-950);
       --color-primary-container: var(--color-sage-800);
@@ -251,24 +311,46 @@
       0 6px 16px oklch(0.23 0.01 255 / 0.06);
   }
 
+  :root[data-theme='dark'] .elevation-1 {
+    box-shadow: 0 1px 2px oklch(0 0 0 / 0.2);
+  }
+
+  :root[data-theme='dark'] .elevation-2 {
+    box-shadow:
+      0 6px 18px oklch(0 0 0 / 0.28),
+      0 1px 0 oklch(1 0 0 / 0.04) inset;
+  }
+
+  :root[data-theme='dark'] .elevation-3 {
+    box-shadow:
+      0 14px 34px oklch(0 0 0 / 0.34),
+      0 1px 0 oklch(1 0 0 / 0.06) inset;
+  }
+
+  :root[data-theme='dark'] .elevation-4 {
+    box-shadow:
+      0 18px 48px oklch(0 0 0 / 0.42),
+      0 1px 0 oklch(1 0 0 / 0.07) inset;
+  }
+
   @media (prefers-color-scheme: dark) {
-    .elevation-1 {
+    :root:not([data-theme]) .elevation-1 {
       box-shadow: 0 1px 2px oklch(0 0 0 / 0.2);
     }
 
-    .elevation-2 {
+    :root:not([data-theme]) .elevation-2 {
       box-shadow:
         0 6px 18px oklch(0 0 0 / 0.28),
         0 1px 0 oklch(1 0 0 / 0.04) inset;
     }
 
-    .elevation-3 {
+    :root:not([data-theme]) .elevation-3 {
       box-shadow:
         0 14px 34px oklch(0 0 0 / 0.34),
         0 1px 0 oklch(1 0 0 / 0.06) inset;
     }
 
-    .elevation-4 {
+    :root:not([data-theme]) .elevation-4 {
       box-shadow:
         0 18px 48px oklch(0 0 0 / 0.42),
         0 1px 0 oklch(1 0 0 / 0.07) inset;
@@ -291,6 +373,47 @@
 
   .animate-button-pulse {
     animation: buttonPulse 2.5s infinite;
+  }
+
+  .theme-toggle {
+    display: inline-flex;
+    gap: 0.125rem;
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-full);
+    background-color: color-mix(
+      in srgb,
+      var(--color-surface-container-high) 86%,
+      transparent
+    );
+    padding: 0.25rem;
+    box-shadow:
+      0 8px 24px oklch(0.23 0.01 255 / 0.08),
+      0 1px 0 color-mix(in srgb, white 30%, transparent) inset;
+    backdrop-filter: blur(14px) saturate(1.1);
+  }
+
+  .theme-toggle__button {
+    display: grid;
+    height: 2.25rem;
+    width: 2.25rem;
+    place-items: center;
+    border-radius: var(--radius-full);
+    color: var(--color-on-surface-variant);
+    transition:
+      background-color 160ms ease,
+      color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .theme-toggle__button:hover {
+    background-color: var(--color-surface-container-highest);
+    color: var(--color-on-surface);
+    transform: translateY(-1px);
+  }
+
+  .theme-toggle__button[aria-pressed='true'] {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
   }
 
   .brand-support-link {
@@ -318,8 +441,59 @@
     border-color: color-mix(in srgb, var(--brand-color) 46%, white);
   }
 
+  :root[data-theme='dark'] .brand-support-link {
+    background-color: color-mix(
+      in srgb,
+      var(--brand-color-dark, var(--brand-color)) 22%,
+      var(--color-surface-container)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--brand-color-dark, var(--brand-color)) 42%,
+      var(--color-surface-container)
+    );
+    color: color-mix(
+      in srgb,
+      var(--brand-color-dark, var(--brand-color)) 78%,
+      white
+    );
+  }
+
+  :root[data-theme='dark'] .brand-support-link:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--brand-color-dark, var(--brand-color)) 30%,
+      var(--color-surface-container)
+    );
+  }
+
+  :root[data-theme='dark'] .brand-action-link {
+    background-color: color-mix(
+      in srgb,
+      var(--brand-color-dark, var(--brand-color)) 82%,
+      var(--color-surface-container)
+    );
+    border-color: color-mix(
+      in srgb,
+      var(--brand-color-dark, var(--brand-color)) 52%,
+      white
+    );
+    color: var(--brand-text-color);
+    box-shadow:
+      0 18px 48px oklch(0 0 0 / 0.34),
+      0 1px 0 oklch(1 0 0 / 0.08) inset;
+  }
+
+  :root[data-theme='dark'] .brand-action-link:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--brand-color-dark, var(--brand-color)) 74%,
+      var(--color-surface-container)
+    );
+  }
+
   @media (prefers-color-scheme: dark) {
-    .brand-support-link {
+    :root:not([data-theme]) .brand-support-link {
       background-color: color-mix(
         in srgb,
         var(--brand-color-dark, var(--brand-color)) 22%,
@@ -337,7 +511,7 @@
       );
     }
 
-    .brand-support-link:hover {
+    :root:not([data-theme]) .brand-support-link:hover {
       background-color: color-mix(
         in srgb,
         var(--brand-color-dark, var(--brand-color)) 30%,
@@ -345,7 +519,7 @@
       );
     }
 
-    .brand-action-link {
+    :root:not([data-theme]) .brand-action-link {
       background-color: color-mix(
         in srgb,
         var(--brand-color-dark, var(--brand-color)) 82%,
@@ -362,7 +536,7 @@
         0 1px 0 oklch(1 0 0 / 0.08) inset;
     }
 
-    .brand-action-link:hover {
+    :root:not([data-theme]) .brand-action-link:hover {
       background-color: color-mix(
         in srgb,
         var(--brand-color-dark, var(--brand-color)) 74%,

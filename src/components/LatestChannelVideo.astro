@@ -13,9 +13,13 @@ type LatestChannelVideoProps = {
   channelDescription: string
   channelLogoSrc: string
   channelAccentColor: string
+  channelDarkAccentColor: string
   channelCardBackground: string
+  channelDarkCardBackground: string
   channelCardTint: string
+  channelDarkCardTint: string
   channelLogoBackgroundColor: string
+  channelDarkLogoBackgroundColor?: string
   channelLogoFit?: 'cover' | 'contain'
   channelLogoPaddingClass?: string
   video: Video
@@ -26,9 +30,13 @@ const {
   channelDescription,
   channelLogoSrc,
   channelAccentColor,
+  channelDarkAccentColor,
   channelCardBackground,
+  channelDarkCardBackground,
   channelCardTint,
+  channelDarkCardTint,
   channelLogoBackgroundColor,
+  channelDarkLogoBackgroundColor,
   channelLogoFit = 'cover',
   channelLogoPaddingClass = '',
   video,
@@ -46,10 +54,14 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
   target="_blank"
   rel="noopener noreferrer"
   aria-label={`Watch latest ${channelName} video on YouTube: ${video.title}`}
-  style={`--channel-accent: ${channelAccentColor}; --channel-card-bg: ${channelCardBackground}; --channel-card-tint: ${channelCardTint}; --channel-logo-bg: ${channelLogoBackgroundColor};`}
-  class="group mx-auto block w-full max-w-[560px] overflow-hidden rounded-xl bg-[linear-gradient(180deg,var(--channel-card-tint),var(--channel-card-bg)_42%)] text-left text-on-surface shadow-[0_14px_36px_color-mix(in_srgb,var(--channel-accent)_16%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--channel-accent)_22%,transparent)] transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_18px_44px_color-mix(in_srgb,var(--channel-accent)_22%,transparent)] hover:ring-[color-mix(in_srgb,var(--channel-accent)_36%,transparent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--channel-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-surface active:translate-y-0 active:scale-[0.98]"
+  style={`--channel-accent: ${channelAccentColor}; --channel-accent-dark: ${channelDarkAccentColor}; --channel-card-bg: ${channelCardBackground}; --channel-card-bg-dark: ${channelDarkCardBackground}; --channel-card-tint: ${channelCardTint}; --channel-card-tint-dark: ${channelDarkCardTint}; --channel-logo-bg: ${channelLogoBackgroundColor}; --channel-logo-bg-dark: ${
+    channelDarkLogoBackgroundColor ?? channelLogoBackgroundColor
+  };`}
+  class="group text-on-surface focus-visible:ring-offset-surface mx-auto block w-full max-w-[560px] overflow-hidden rounded-xl bg-[linear-gradient(180deg,var(--channel-active-tint),var(--channel-active-bg)_42%)] text-left shadow-[0_14px_36px_color-mix(in_srgb,var(--channel-active-accent)_16%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--channel-active-accent)_22%,transparent)] transition-all duration-300 ease-out [--channel-active-accent:var(--channel-accent)] [--channel-active-bg:var(--channel-card-bg)] [--channel-active-logo-bg:var(--channel-logo-bg)] [--channel-active-tint:var(--channel-card-tint)] hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_18px_44px_color-mix(in_srgb,var(--channel-active-accent)_22%,transparent)] hover:ring-[color-mix(in_srgb,var(--channel-active-accent)_36%,transparent)] focus-visible:ring-2 focus-visible:ring-[var(--channel-active-accent)] focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-0 active:scale-[0.98] dark:[--channel-active-accent:var(--channel-accent-dark)] dark:[--channel-active-bg:var(--channel-card-bg-dark)] dark:[--channel-active-logo-bg:var(--channel-logo-bg-dark)] dark:[--channel-active-tint:var(--channel-card-tint-dark)]"
 >
-  <span class="relative block aspect-video w-full overflow-hidden bg-surface-container-low">
+  <span
+    class="bg-surface-container-low relative block aspect-video w-full overflow-hidden"
+  >
     <img
       src={video.thumbnail}
       alt=""
@@ -58,11 +70,17 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
     />
     <span
-      class="absolute inset-0 flex items-center justify-center bg-scrim/25 transition-colors group-hover:bg-scrim/10"
+      class="bg-scrim/25 group-hover:bg-scrim/10 absolute inset-0 flex items-center justify-center transition-colors"
       aria-hidden="true"
     >
-      <span class="grid h-14 w-14 place-items-center rounded-full bg-[var(--channel-accent)] text-white shadow-lg ring-4 ring-[color-mix(in_srgb,var(--channel-card-bg)_78%,white)]">
-        <Icon name="heroicons:play-solid" class="h-6 w-6 translate-x-[1px]" aria-hidden="true" />
+      <span
+        class="grid h-14 w-14 place-items-center rounded-full bg-[var(--channel-active-accent)] text-white shadow-lg ring-4 ring-[color-mix(in_srgb,var(--channel-active-bg)_78%,white)] dark:ring-[color-mix(in_srgb,var(--channel-active-bg)_72%,black)]"
+      >
+        <Icon
+          name="heroicons:play-solid"
+          class="h-6 w-6 translate-x-[1px]"
+          aria-hidden="true"
+        />
       </span>
     </span>
   </span>
@@ -71,7 +89,7 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
     <span class="mb-5 flex min-w-0 items-center gap-3">
       <span
         class:list={[
-          'grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--channel-logo-bg)] ring-2 ring-[color-mix(in_srgb,var(--channel-accent)_35%,transparent)]',
+          'grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--channel-active-logo-bg)] ring-2 ring-[color-mix(in_srgb,var(--channel-active-accent)_35%,transparent)]',
           channelLogoPaddingClass,
         ]}
       >
@@ -87,24 +105,32 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
         />
       </span>
       <span class="min-w-0">
-        <span class="block text-[0.68rem] font-semibold uppercase tracking-wide text-[var(--channel-accent)]">
+        <span
+          class="block text-[0.68rem] font-semibold tracking-wide text-[var(--channel-active-accent)] uppercase"
+        >
           Channel
         </span>
-        <span class="block truncate text-base font-bold leading-tight text-on-surface">
+        <span
+          class="text-on-surface block truncate text-base leading-tight font-bold"
+        >
           {channelName}
         </span>
       </span>
     </span>
 
-    <span class="mb-3 block text-lg font-bold leading-snug text-on-surface sm:text-xl">
+    <span
+      class="text-on-surface mb-3 block text-lg leading-snug font-bold sm:text-xl"
+    >
       {video.title}
     </span>
 
-    <span class="mb-5 block text-sm leading-relaxed text-on-surface-variant">
+    <span class="text-on-surface-variant mb-5 block text-sm leading-relaxed">
       {channelDescription}
     </span>
 
-    <span class="block text-xs font-normal leading-none text-on-surface-variant/75">
+    <span
+      class="text-on-surface-variant/75 block text-xs leading-none font-normal"
+    >
       Published {publishedDate}
     </span>
   </span>

@@ -28,27 +28,39 @@ const channelBranding = {
   alphabravomedia: {
     logoSrc: AlphaBravoMediaLogo.src,
     accentColor: '#8f3f37',
+    darkAccentColor: '#f0a097',
     cardBackground: '#fffafa',
+    darkCardBackground: '#211211',
     cardTint: '#f7ece8',
+    darkCardTint: '#341a17',
     logoBackgroundColor: '#15110d',
+    darkLogoBackgroundColor: '#15110d',
     logoFit: 'contain',
     logoPaddingClass: 'p-2',
   },
   personal: {
     logoSrc: Ayoub.src,
     accentColor: '#765247',
+    darkAccentColor: '#d9b5a9',
     cardBackground: '#fbf6ee',
+    darkCardBackground: '#201816',
     cardTint: '#eee5db',
+    darkCardTint: '#332620',
     logoBackgroundColor: '#d8ccc6',
+    darkLogoBackgroundColor: '#4a3933',
     logoFit: 'cover',
     logoPaddingClass: '',
   },
   'islamic-tampa-tv': {
     logoSrc: IslamicTampaTvLogo.src,
     accentColor: '#776a32',
+    darkAccentColor: '#d9c56c',
     cardBackground: '#fbf8ef',
+    darkCardBackground: '#1d1b12',
     cardTint: '#efe8d2',
+    darkCardTint: '#302b18',
     logoBackgroundColor: '#10120c',
+    darkLogoBackgroundColor: '#10120c',
     logoFit: 'cover',
     logoPaddingClass: '',
   },
@@ -116,6 +128,7 @@ const socialLinks = [
     icon: 'logos:tiktok-icon',
     label: 'TikTok',
     color: '#000000',
+    darkColor: '#ffffff',
   },
   /*
   {
@@ -154,12 +167,50 @@ const socialLinks = [
       name="theme-color"
       content="oklch(0.987 0.008 82)"
       media="(prefers-color-scheme: light)"
+      data-theme-color="light"
     />
     <meta
       name="theme-color"
       content="oklch(0.105 0.006 255)"
       media="(prefers-color-scheme: dark)"
+      data-theme-color="dark"
     />
+
+    <script is:inline>
+      ;(() => {
+        const lightThemeColor = 'oklch(0.987 0.008 82)'
+        const darkThemeColor = 'oklch(0.105 0.006 255)'
+        const storageKey = 'theme-preference'
+        const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
+        const savedPreference = (() => {
+          try {
+            return localStorage.getItem(storageKey)
+          } catch {
+            return null
+          }
+        })()
+        const preference = ['light', 'dark', 'system'].includes(savedPreference)
+          ? savedPreference
+          : 'system'
+        const theme =
+          preference === 'system'
+            ? systemQuery.matches
+              ? 'dark'
+              : 'light'
+            : preference
+
+        document.documentElement.dataset.theme = theme
+        document.documentElement.dataset.themePreference = preference
+        document.documentElement.style.colorScheme = theme
+
+        document
+          .querySelectorAll('meta[name="theme-color"]')
+          .forEach((meta) => {
+            meta.content = theme === 'dark' ? darkThemeColor : lightThemeColor
+            meta.media = ''
+          })
+      })()
+    </script>
 
     <meta
       property="og:title"
@@ -185,6 +236,49 @@ const socialLinks = [
     class="bg-surface mx-auto my-0 min-h-screen max-w-[90%] justify-center pt-10 pb-6 text-center text-lg subpixel-antialiased lg:max-w-3xl"
   >
     <main>
+      <div class="mb-6 flex justify-center">
+        <div
+          class="theme-toggle animate-fade-in-up"
+          role="group"
+          aria-label="Theme preference"
+        >
+          <button
+            type="button"
+            class="theme-toggle__button"
+            data-theme-option="system"
+            aria-label="Use system theme"
+            aria-pressed="true"
+            title="System"
+          >
+            <Icon
+              name="heroicons:computer-desktop"
+              class="h-5 w-5"
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            type="button"
+            class="theme-toggle__button"
+            data-theme-option="light"
+            aria-label="Use light theme"
+            aria-pressed="false"
+            title="Light"
+          >
+            <Icon name="heroicons:sun" class="h-5 w-5" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="theme-toggle__button"
+            data-theme-option="dark"
+            aria-label="Use dark theme"
+            aria-pressed="false"
+            title="Dark"
+          >
+            <Icon name="heroicons:moon" class="h-5 w-5" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+
       <div
         class="animate-float animate-fade-in-up ring-primary-container elevation-3 mx-auto size-40 overflow-hidden rounded-full ring-4"
       >
@@ -314,10 +408,20 @@ const socialLinks = [
               channelDescription={channel.description}
               channelLogoSrc={channelBranding[channel.id].logoSrc}
               channelAccentColor={channelBranding[channel.id].accentColor}
+              channelDarkAccentColor={
+                channelBranding[channel.id].darkAccentColor
+              }
               channelCardBackground={channelBranding[channel.id].cardBackground}
+              channelDarkCardBackground={
+                channelBranding[channel.id].darkCardBackground
+              }
               channelCardTint={channelBranding[channel.id].cardTint}
+              channelDarkCardTint={channelBranding[channel.id].darkCardTint}
               channelLogoBackgroundColor={
                 channelBranding[channel.id].logoBackgroundColor
+              }
+              channelDarkLogoBackgroundColor={
+                channelBranding[channel.id].darkLogoBackgroundColor
               }
               channelLogoFit={channelBranding[channel.id].logoFit}
               channelLogoPaddingClass={
@@ -381,6 +485,23 @@ const socialLinks = [
       </Section>
 
       <Section title="Support My Work" class="animate-fade-in-up delay-400">
+        <Link
+          linktxt="Ko-fi"
+          bgcolor="brand-support-link"
+          link="https://ko-fi.com/ayoubab1"
+          linkcolor=""
+          id="kofi"
+          border="border border-solid"
+          style="--brand-color: #ff5e5b; --brand-color-dark: #ff8a87;"
+        >
+          <Icon
+            slot="icon"
+            name="simple-icons:kofi"
+            class="h-6 w-6"
+            aria-hidden="true"
+          />
+        </Link>
+
         <Link
           linktxt="CashApp"
           bgcolor="brand-support-link"
@@ -461,5 +582,77 @@ const socialLinks = [
         </a>.
       </p>
     </footer>
+
+    <script is:inline>
+      ;(() => {
+        const storageKey = 'theme-preference'
+        const preferences = ['system', 'light', 'dark']
+        const lightThemeColor = 'oklch(0.987 0.008 82)'
+        const darkThemeColor = 'oklch(0.105 0.006 255)'
+        const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
+        const buttons = [...document.querySelectorAll('[data-theme-option]')]
+
+        const getPreference = () => {
+          let savedPreference = null
+          try {
+            savedPreference = localStorage.getItem(storageKey)
+          } catch {
+            savedPreference = null
+          }
+          return preferences.includes(savedPreference)
+            ? savedPreference
+            : 'system'
+        }
+
+        const resolveTheme = (preference) =>
+          preference === 'system'
+            ? systemQuery.matches
+              ? 'dark'
+              : 'light'
+            : preference
+
+        const applyTheme = (preference) => {
+          const theme = resolveTheme(preference)
+
+          document.documentElement.dataset.theme = theme
+          document.documentElement.dataset.themePreference = preference
+          document.documentElement.style.colorScheme = theme
+
+          document
+            .querySelectorAll('meta[name="theme-color"]')
+            .forEach((meta) => {
+              meta.content = theme === 'dark' ? darkThemeColor : lightThemeColor
+              meta.media = ''
+            })
+
+          buttons.forEach((button) => {
+            button.setAttribute(
+              'aria-pressed',
+              String(button.dataset.themeOption === preference),
+            )
+          })
+        }
+
+        buttons.forEach((button) => {
+          button.addEventListener('click', () => {
+            const preference = button.dataset.themeOption
+            if (!preferences.includes(preference)) return
+
+            try {
+              localStorage.setItem(storageKey, preference)
+            } catch {}
+            applyTheme(preference)
+          })
+        })
+
+        systemQuery.addEventListener('change', () => {
+          if (getPreference() === 'system') {
+            applyTheme('system')
+          }
+        })
+
+        applyTheme(getPreference())
+      })()
+    </script>
   </body>
 </html>
