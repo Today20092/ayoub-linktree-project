@@ -97,6 +97,7 @@
   /* Shadow and scrim */
   --color-shadow: var(--color-ink-950);
   --color-scrim: var(--color-ink-950);
+  --page-bg-texture: none;
 
   /* LiftKit-inspired spacing scale */
   --spacing-button-x: 1.25rem;
@@ -116,6 +117,13 @@
 @layer base {
   html {
     background-color: var(--color-surface);
+    background-image: var(--page-bg-texture);
+    background-attachment: fixed;
+    background-size:
+      auto,
+      auto,
+      auto,
+      6px 6px;
     font-family: 'Inter Variable', 'Inter', system-ui, sans-serif;
     font-feature-settings:
       'liga' 1,
@@ -133,6 +141,13 @@
 
   body {
     background-color: var(--color-surface);
+    background-image: var(--page-bg-texture);
+    background-attachment: fixed;
+    background-size:
+      auto,
+      auto,
+      auto,
+      6px 6px;
     color: var(--color-on-surface);
   }
 
@@ -152,15 +167,15 @@
     --color-tertiary-container: var(--color-sand-800);
     --color-on-tertiary-container: var(--color-sand-50);
 
-    --color-surface: var(--color-ink-950);
+    --color-surface: oklch(0.145 0.012 255);
     --color-on-surface: var(--color-sand-50);
-    --color-surface-dim: var(--color-ink-950);
+    --color-surface-dim: oklch(0.125 0.01 255);
     --color-surface-bright: var(--color-ink-700);
-    --color-surface-container-lowest: oklch(0.085 0.006 255);
-    --color-surface-container-low: var(--color-ink-900);
-    --color-surface-container: var(--color-ink-800);
-    --color-surface-container-high: oklch(0.255 0.011 255);
-    --color-surface-container-highest: oklch(0.31 0.012 255);
+    --color-surface-container-lowest: oklch(0.12 0.009 255);
+    --color-surface-container-low: oklch(0.17 0.011 255);
+    --color-surface-container: oklch(0.215 0.012 255);
+    --color-surface-container-high: oklch(0.27 0.013 255);
+    --color-surface-container-highest: oklch(0.33 0.014 255);
 
     --color-surface-variant: var(--color-ink-800);
     --color-on-surface-variant: var(--color-sand-200);
@@ -183,6 +198,23 @@
 
     --color-shadow: oklch(0 0 0);
     --color-scrim: oklch(0 0 0);
+    --page-bg-texture: radial-gradient(
+        circle at 18% 0%,
+        oklch(0.28 0.045 145 / 0.16),
+        transparent 32rem
+      ),
+      radial-gradient(
+        circle at 86% 14%,
+        oklch(0.3 0.07 28 / 0.12),
+        transparent 30rem
+      ),
+      linear-gradient(
+        145deg,
+        oklch(0.16 0.014 255) 0%,
+        oklch(0.135 0.012 255) 58%,
+        oklch(0.155 0.016 255) 100%
+      ),
+      radial-gradient(oklch(1 0 0 / 0.055) 0.7px, transparent 0.8px);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -203,15 +235,15 @@
       --color-tertiary-container: var(--color-sand-800);
       --color-on-tertiary-container: var(--color-sand-50);
 
-      --color-surface: var(--color-ink-950);
+      --color-surface: oklch(0.145 0.012 255);
       --color-on-surface: var(--color-sand-50);
-      --color-surface-dim: var(--color-ink-950);
+      --color-surface-dim: oklch(0.125 0.01 255);
       --color-surface-bright: var(--color-ink-700);
-      --color-surface-container-lowest: oklch(0.085 0.006 255);
-      --color-surface-container-low: var(--color-ink-900);
-      --color-surface-container: var(--color-ink-800);
-      --color-surface-container-high: oklch(0.255 0.011 255);
-      --color-surface-container-highest: oklch(0.31 0.012 255);
+      --color-surface-container-lowest: oklch(0.12 0.009 255);
+      --color-surface-container-low: oklch(0.17 0.011 255);
+      --color-surface-container: oklch(0.215 0.012 255);
+      --color-surface-container-high: oklch(0.27 0.013 255);
+      --color-surface-container-highest: oklch(0.33 0.014 255);
 
       --color-surface-variant: var(--color-ink-800);
       --color-on-surface-variant: var(--color-sand-200);
@@ -234,6 +266,23 @@
 
       --color-shadow: oklch(0 0 0);
       --color-scrim: oklch(0 0 0);
+      --page-bg-texture: radial-gradient(
+          circle at 18% 0%,
+          oklch(0.28 0.045 145 / 0.16),
+          transparent 32rem
+        ),
+        radial-gradient(
+          circle at 86% 14%,
+          oklch(0.3 0.07 28 / 0.12),
+          transparent 30rem
+        ),
+        linear-gradient(
+          145deg,
+          oklch(0.16 0.014 255) 0%,
+          oklch(0.135 0.012 255) 58%,
+          oklch(0.155 0.016 255) 100%
+        ),
+        radial-gradient(oklch(1 0 0 / 0.055) 0.7px, transparent 0.8px);
     }
   }
 }
