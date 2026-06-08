@@ -1,144 +1,127 @@
 ---
 import '../styles.css'
-import { Image } from 'astro:assets'
 
-// Import the Icon component
+import type { ImageMetadata } from 'astro'
 import { Icon } from 'astro-icon/components'
 
-import AlphaBravoPreviewCard from '../components/AlphaBravoPreviewCard.astro'
-import Link from '../components/Link.astro'
 import LatestChannelVideo from '../components/LatestChannelVideo.astro'
-import Section from '../components/Section.astro'
+import Link from '../components/Link.astro'
+import QrCodeButton from '../components/QrCodeButton.astro'
+import SocialLinkButton from '../components/SocialLinkButton'
+import VideoBentoGrid from '../components/VideoBentoGrid.astro'
 import latestYoutubeVideos from '../data/latest-youtube-videos.json'
-import youtubeChannels from '../data/youtube-channels.json'
+import {
+  getBaseUrl,
+  resolveSiteAsset,
+  siteConfig,
+} from '../lib/site-config'
 
-// Images
-import Ayoub from '../image/AyoubBayaan.jpg'
-import AlphaBravoMediaLogo from '../image/ABM.webp'
-import IslamicTampaTvLogo from '../image/IslamicTampaTV Logo.png'
-
-// Site Data
-const siteUrl = 'https://www.ayoubabed.xyz/'
-const ayoubImageUrl = Ayoub.src
+const {
+  pageTitle,
+  pageDescription,
+  siteName,
+  profileName,
+  twitterHandle,
+  heroImageAlt,
+  profileImage,
+  ogImage,
+} = siteConfig.site
+const { socialLinks, actionLinks, youtubeChannels } = siteConfig
+const baseUrl = getBaseUrl(import.meta.env.BASE_URL)
 const currentYear = new Date().getFullYear()
+const canonicalUrl = new URL(baseUrl, Astro.site).toString()
+const sitemapUrl = new URL(`${baseUrl}sitemap-index.xml`, Astro.site).toString()
+const heroImageUrl = new URL(resolveSiteAsset(baseUrl, ogImage), Astro.site).toString()
+
+const localImages = import.meta.glob('../image/*.{png,jpg,jpeg,webp}', {
+  eager: true,
+  import: 'default',
+}) as Record<string, ImageMetadata>
+
+const resolveLocalImage = (assetPath: string) => {
+  const filename = assetPath.replace(/^\/+/, '')
+  const match = Object.entries(localImages).find(([path]) => {
+    return decodeURIComponent(path.split('/').pop() ?? '') === filename
+  })
+
+  return match?.[1].src ?? resolveSiteAsset(baseUrl, assetPath)
+}
+
+const profileImageUrl = resolveLocalImage(profileImage)
 const latestVideoChannels = youtubeChannels.filter((channel) =>
   Boolean(latestYoutubeVideos[channel.id]),
 )
-const channelBranding = {
-  alphabravomedia: {
-    logoSrc: AlphaBravoMediaLogo.src,
-    accentColor: '#8f3f37',
-    darkAccentColor: '#f0a097',
-    cardBackground: '#fffafa',
-    darkCardBackground: '#211211',
-    cardTint: '#f7ece8',
-    darkCardTint: '#341a17',
-    logoBackgroundColor: '#15110d',
-    darkLogoBackgroundColor: '#15110d',
-    logoFit: 'contain',
-    logoPaddingClass: 'p-2',
-  },
-  personal: {
-    logoSrc: Ayoub.src,
-    accentColor: '#765247',
-    darkAccentColor: '#d9b5a9',
-    cardBackground: '#fbf6ee',
-    darkCardBackground: '#201816',
-    cardTint: '#eee5db',
-    darkCardTint: '#332620',
-    logoBackgroundColor: '#d8ccc6',
-    darkLogoBackgroundColor: '#4a3933',
-    logoFit: 'cover',
-    logoPaddingClass: '',
-  },
-  'islamic-tampa-tv': {
-    logoSrc: IslamicTampaTvLogo.src,
-    accentColor: '#776a32',
-    darkAccentColor: '#d9c56c',
-    cardBackground: '#fbf8ef',
-    darkCardBackground: '#1d1b12',
-    cardTint: '#efe8d2',
-    darkCardTint: '#302b18',
-    logoBackgroundColor: '#10120c',
-    darkLogoBackgroundColor: '#10120c',
-    logoFit: 'cover',
-    logoPaddingClass: '',
-  },
-}
+const channelBranding = Object.fromEntries(
+  youtubeChannels.map((channel) => [
+    channel.id,
+    {
+      ...channel.branding,
+      logoSrc: resolveLocalImage(channel.branding?.logoSrc ?? profileImage),
+    },
+  ]),
+)
+const sameAsUrls = socialLinks.map((link) => link.url)
+const primaryLinks = actionLinks.filter((link) => link.group === 'primary')
+const channelLinks = actionLinks.filter((link) => link.group === 'youtube')
+const supportLinks = actionLinks.filter((link) => link.group === 'support')
 
-// Social Media Data Map
-// FIX 1: Corrected names to remove the extra "fa-" prefix
-const socialLinks = [
-  {
-    id: 'instagram',
-    url: 'https://instagram.com/alphabravomedia',
-    icon: 'simple-icons:instagram',
-    label: 'Instagram: @AlphaBravoMedia',
-    color: '#FF0069',
+const linkStyle = (link: (typeof actionLinks)[number]) =>
+  link.color
+    ? [
+        `--brand-color: ${link.color}`,
+        `--brand-color-dark: ${link.darkColor ?? link.color}`,
+        link.textColor ? `--brand-text-color: ${link.textColor}` : '',
+      ]
+        .filter(Boolean)
+        .join('; ')
+    : undefined
+
+const brandCardStyle = (
+  item: Pick<
+    (typeof actionLinks)[number],
+    | 'color'
+    | 'color2'
+    | 'color3'
+    | 'darkColor'
+    | 'darkColor2'
+    | 'darkColor3'
+  >,
+) => ({
+  '--brand-color': item.color,
+  '--brand-color-2': item.color2 ?? item.color,
+  '--brand-color-3': item.color3 ?? item.color,
+  '--brand-color-dark': item.darkColor ?? item.color,
+  '--brand-color-dark-2': item.darkColor2 ?? item.color2 ?? item.color,
+  '--brand-color-dark-3': item.darkColor3 ?? item.color3 ?? item.color,
+})
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  '@id': `${canonicalUrl}#profile-page`,
+  url: canonicalUrl,
+  name: pageTitle,
+  description: pageDescription,
+  image: heroImageUrl,
+  inLanguage: 'en',
+  isPartOf: {
+    '@type': 'WebSite',
+    '@id': `${canonicalUrl}#website`,
+    url: canonicalUrl,
+    name: siteName,
   },
-  {
-    id: 'discord',
-    url: 'https://discordapp.com/users/279467079990640641',
-    icon: 'simple-icons:discord',
-    label: 'Discord profile',
-    color: '#5865F2',
+  mainEntity: {
+    '@type': 'Person',
+    '@id': `${canonicalUrl}#person`,
+    name: profileName,
+    alternateName: pageTitle,
+    description: pageDescription,
+    image: profileImageUrl,
+    url: canonicalUrl,
+    sameAs: sameAsUrls,
   },
-  {
-    id: 'linkedin',
-    url: 'https://www.linkedin.com/in/ayoubabedrabbo/',
-    icon: 'simple-icons:linkedin',
-    label: 'LinkedIn',
-    color: '#0A66C2',
-  },
-  /*
-  {
-    id: 'mastodon',
-    url: 'https://mastodon.social/@ayoubabedrabbo',
-    icon: 'fa-brands:mastodon',
-    label: 'Mastodon',
-    rel: 'me noopener noreferrer'
-  },
-  */
-  {
-    id: 'github',
-    url: 'https://github.com/Today20092',
-    icon: 'simple-icons:github',
-    label: 'GitHub',
-    color: '#181717',
-    darkColor: '#ffffff',
-  },
-  {
-    id: 'telegram',
-    url: 'https://t.me/AyoubAb1',
-    icon: 'simple-icons:telegram',
-    label: 'Telegram',
-    color: '#26A5E4',
-  },
-  /*
-  {
-    id: 'youtube',
-    url: 'https://www.youtube.com/channel/UCQ5YfTwU5n_khZx-WJEkZKQ',
-    icon: 'fa-brands:youtube',
-    label: 'YouTube channel'
-  },
-  */
-  {
-    id: 'tiktok',
-    url: 'https://www.tiktok.com/@ayoubabedrabbo',
-    icon: 'logos:tiktok-icon',
-    label: 'TikTok',
-    color: '#000000',
-    darkColor: '#ffffff',
-  },
-  /*
-  {
-    id: 'substack',
-    url: 'https://www.substack.com/@ayoubabedrabbo1',
-    icon: 'simple-icons:substack',
-    label: 'Substack'
-  }
-  */
-]
+  significantLink: sameAsUrls,
+}
 ---
 
 <!doctype html>
@@ -150,257 +133,180 @@ const socialLinks = [
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Ayoub Abedrabbo</title>
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
     <meta
-      name="description"
-      content="Ayoub Abedrabbo is an event photographer and videographer in Tampa, Florida. Photos and videos for all budgets. Find all links, contact, and support options here."
+      name="robots"
+      content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
     />
 
-    <!-- Favicons -->
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="icon" href={`${baseUrl}favicon.ico`} sizes="32x32" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href={`${baseUrl}favicon-16x16.png`}
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href={`${baseUrl}favicon-32x32.png`}
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href={`${baseUrl}apple-touch-icon.png`}
+    />
+    <link rel="manifest" href={`${baseUrl}site.webmanifest`} />
     <meta
       name="theme-color"
-      content="oklch(0.987 0.008 82)"
+      content="#fafafa"
       media="(prefers-color-scheme: light)"
-      data-theme-color="light"
     />
     <meta
       name="theme-color"
-      content="oklch(0.145 0.012 255)"
+      content="#18181b"
       media="(prefers-color-scheme: dark)"
-      data-theme-color="dark"
     />
 
     <script is:inline>
       ;(() => {
-        const lightThemeColor = 'oklch(0.987 0.008 82)'
-        const darkThemeColor = 'oklch(0.145 0.012 255)'
-        const storageKey = 'theme-preference'
+        const lightThemeColor = '#ffffff'
+        const darkThemeColor = '#1c1917'
         const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
-        const savedPreference = (() => {
-          try {
-            return localStorage.getItem(storageKey)
-          } catch {
-            return null
-          }
-        })()
-        const preference = ['light', 'dark', 'system'].includes(savedPreference)
-          ? savedPreference
-          : 'system'
-        const theme =
-          preference === 'system'
-            ? systemQuery.matches
-              ? 'dark'
-              : 'light'
-            : preference
 
-        document.documentElement.dataset.theme = theme
-        document.documentElement.dataset.themePreference = preference
-        document.documentElement.style.colorScheme = theme
+        const applyTheme = () => {
+          const isDark = systemQuery.matches
+          const theme = isDark ? 'dark' : 'light'
 
-        document
-          .querySelectorAll('meta[name="theme-color"]')
-          .forEach((meta) => {
-            meta.content = theme === 'dark' ? darkThemeColor : lightThemeColor
-            meta.media = ''
-          })
+          document.documentElement.classList.toggle('dark', isDark)
+          document.documentElement.style.colorScheme = theme
+
+          document
+            .querySelectorAll('meta[name="theme-color"]')
+            .forEach((meta) => {
+              meta.content = isDark ? darkThemeColor : lightThemeColor
+              meta.media = ''
+            })
+        }
+
+        applyTheme()
       })()
     </script>
 
-    <meta
-      property="og:title"
-      content="Ayoub Abedrabbo – Photographer & Videographer"
-    />
-    <meta
-      property="og:description"
-      content="Tampa-based event photographer & videographer. Book or support me here."
-    />
-    <meta property="og:image" content={ayoubImageUrl} />
-    <meta property="og:type" content="profile" />
-    <meta property="og:url" content={siteUrl} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:image" content={heroImageUrl} />
+    <meta property="og:image:alt" content={heroImageAlt} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="canonical" href={siteUrl} />
-    <meta name="robots" content="noindex,nofollow" />
+    <meta name="twitter:site" content={twitterHandle} />
+    <meta name="twitter:creator" content={twitterHandle} />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={heroImageUrl} />
+    <meta name="twitter:image:alt" content={heroImageAlt} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="sitemap" href={sitemapUrl} />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(structuredData)}
+    />
 
-    <link rel="preconnect" href="https://rsms.me/" />
-    <link rel="preload" href="https://rsms.me/inter/inter.css" as="style" />
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
 
   <body
-    class="bg-surface mx-auto my-0 min-h-screen max-w-[90%] justify-center pt-10 pb-6 text-center text-lg subpixel-antialiased lg:max-w-3xl"
+    class="linktree-page my-0 min-h-screen text-center text-lg subpixel-antialiased"
   >
-    <main>
-      <div class="mb-6 flex justify-center">
-        <div
-          class="theme-toggle animate-fade-in-up"
-          role="group"
-          aria-label="Theme preference"
-        >
-          <button
-            type="button"
-            class="theme-toggle__button"
-            data-theme-option="system"
-            aria-label="Use system theme"
-            aria-pressed="true"
-            title="System"
-          >
-            <Icon
-              name="heroicons:computer-desktop"
-              class="h-5 w-5"
-              aria-hidden="true"
-            />
-          </button>
-          <button
-            type="button"
-            class="theme-toggle__button"
-            data-theme-option="light"
-            aria-label="Use light theme"
-            aria-pressed="false"
-            title="Light"
-          >
-            <Icon name="heroicons:sun" class="h-5 w-5" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            class="theme-toggle__button"
-            data-theme-option="dark"
-            aria-label="Use dark theme"
-            aria-pressed="false"
-            title="Dark"
-          >
-            <Icon name="heroicons:moon" class="h-5 w-5" aria-hidden="true" />
-          </button>
-        </div>
-      </div>
-
-      <div
-        class="animate-float animate-fade-in-up ring-primary-container elevation-3 mx-auto size-40 overflow-hidden rounded-full ring-4"
+    <main class="linktree-shell mx-auto flex w-full flex-col pb-6">
+      <section
+        class="linktree-hero animate-fade-in-up"
+        aria-labelledby="profile-title"
       >
-        <Image
-          src={Ayoub}
-          alt="Portrait of Ayoub Abedrabbo"
-          class="h-44 w-full object-cover object-center"
+        <button
+          type="button"
+          class="linktree-hero__share"
+          aria-label={`Share ${pageTitle}`}
+          data-share-page
+          data-share-title={pageTitle}
+          data-share-text={pageDescription}
+          data-share-url={canonicalUrl}
+        >
+          <Icon
+            name="heroicons:arrow-up-tray"
+            class="size-5"
+            aria-hidden="true"
+          />
+        </button>
+        <img
+          src={profileImageUrl}
+          alt={heroImageAlt}
+          class="linktree-hero__image"
           decoding="async"
           loading="eager"
         />
-      </div>
+        <div class="linktree-hero__fade" aria-hidden="true"></div>
+      </section>
 
       <h1
-        class="animate-fade-in-up text-on-surface my-5 text-2xl font-bold delay-100"
+        id="profile-title"
+        class="font-display animate-fade-in-up text-foreground mx-auto mt-5 mb-4 w-full max-w-xl px-4 text-4xl leading-none font-extrabold delay-100 [text-shadow:0_2px_12px_color-mix(in_oklch,var(--color-shadow)_18%,transparent)] sm:px-6 sm:text-5xl"
       >
-        Ayoub Abedrabbo
+        <span class="block">
+          <span class="text-primary">Ayoub</span> Abedrabbo
+        </span>
       </h1>
       <p
-        class="animate-fade-in-up text-on-surface-variant mx-auto my-5 max-w-prose text-center delay-200"
+        class="animate-fade-in-up text-muted-foreground mx-auto mb-4 w-full max-w-xl px-4 text-center text-lg leading-relaxed delay-200 sm:px-6 sm:text-xl"
       >
-        Digital Media Specialist.<br />I create educational content about media
-        production/videography and support the Islamic community through local
-        journalism.
+        {pageDescription}
       </p>
 
-      <nav aria-label="Social media links">
-        <div
-          class="animate-fade-in-up text-on-surface my-6 flex flex-wrap items-center justify-center gap-1 text-3xl delay-300"
-        >
-          {
-            socialLinks.map((social) => (
-              <a
-                id={social.id}
-                target="_blank"
-                rel={social.rel || 'noopener noreferrer'}
-                aria-label={social.label}
-                title={social.label}
-                class:list={[
-                  'flex h-14 w-14 items-center justify-center rounded-xl transition-all duration-200',
-                  'hover:bg-surface-container-high hover:scale-110',
-                  'focus-visible:ring-primary/70 focus-visible:ring-2 focus-visible:outline-none',
-                  '[color:var(--social-color)] dark:[color:var(--social-color-dark)]',
-                ]}
-                style={`--social-color: ${social.color}; --social-color-dark: ${
-                  social.darkColor ?? social.color
-                };`}
-                href={social.url}
-              >
-                {social.id === 'tiktok' ? (
-                  <svg
-                    class="h-9 w-8"
-                    viewBox="0 0 256 290"
-                    role="img"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fill="#ff004f"
-                      d="M189.72 104.421c18.678 13.345 41.56 21.197 66.273 21.197v-47.53a67 67 0 0 1-13.918-1.456v37.413c-24.711 0-47.59-7.851-66.272-21.195v96.996c0 48.523-39.356 87.855-87.9 87.855c-18.113 0-34.949-5.473-48.934-14.86c15.962 16.313 38.222 26.432 62.848 26.432c48.548 0 87.905-39.332 87.905-87.857v-96.995zm17.17-47.952c-9.546-10.423-15.814-23.893-17.17-38.785v-6.113h-13.189c3.32 18.927 14.644 35.097 30.358 44.898M69.673 225.607a40 40 0 0 1-8.203-24.33c0-22.192 18.001-40.186 40.21-40.186a40.3 40.3 0 0 1 12.197 1.883v-48.593c-4.61-.631-9.262-.9-13.912-.801v37.822a40.3 40.3 0 0 0-12.203-1.882c-22.208 0-40.208 17.992-40.208 40.187c0 15.694 8.997 29.281 22.119 35.9"
-                    />
-                    <path d="M175.803 92.849c18.683 13.344 41.56 21.195 66.272 21.195V76.631c-13.794-2.937-26.005-10.141-35.186-20.162c-15.715-9.802-27.038-25.972-30.358-44.898h-34.643v189.843c-.079 22.132-18.049 40.052-40.21 40.052c-13.058 0-24.66-6.221-32.007-15.86c-13.12-6.618-22.118-20.206-22.118-35.898c0-22.193 18-40.187 40.208-40.187c4.255 0 8.356.662 12.203 1.882v-37.822c-47.692.985-86.047 39.933-86.047 87.834c0 23.912 9.551 45.589 25.053 61.428c13.985 9.385 30.82 14.86 48.934 14.86c48.545 0 87.9-39.335 87.9-87.857z" />
-                    <path
-                      fill="#00f2ea"
-                      d="M242.075 76.63V66.516a66.3 66.3 0 0 1-35.186-10.047a66.47 66.47 0 0 0 35.186 20.163M176.53 11.57a68 68 0 0 1-.728-5.457V0h-47.834v189.845c-.076 22.13-18.046 40.05-40.208 40.05a40.06 40.06 0 0 1-18.09-4.287c7.347 9.637 18.949 15.857 32.007 15.857c22.16 0 40.132-17.918 40.21-40.05V11.571zM99.966 113.58v-10.769a89 89 0 0 0-12.061-.818C39.355 101.993 0 141.327 0 189.845c0 30.419 15.467 57.227 38.971 72.996c-15.502-15.838-25.053-37.516-25.053-61.427c0-47.9 38.354-86.848 86.048-87.833"
-                    />
-                  </svg>
-                ) : (
-                  <Icon name={social.icon} class="h-8 w-8" aria-hidden="true" />
-                )}
-              </a>
-            ))
-          }
-        </div>
+      <QrCodeButton />
+
+      <nav
+        class="animate-fade-in-up mx-auto mt-6 flex w-full max-w-xl flex-col gap-4 px-4 delay-200 sm:px-6"
+        aria-label="Contact links"
+      >
+        {
+          primaryLinks.map((link) => (
+            <Link
+              linktxt={link.label}
+              bgcolor="brand-action-link"
+              link={link.url}
+              linkcolor=""
+              id={link.id}
+              border="border border-solid"
+              style={linkStyle(link)}
+              extraClasses={`py-3 text-xl font-bold ${
+                link.pulse ? 'animate-button-pulse' : ''
+              }`}
+            >
+              <Icon
+                slot="icon"
+                name={link.icon}
+                class="size-7"
+                aria-hidden="true"
+              />
+            </Link>
+          ))
+        }
       </nav>
 
-      <div class="animate-fade-in-up mb-8 flex flex-col gap-4 delay-400">
-        <Link
-          linktxt="1. Download my contact card"
-          bgcolor="brand-action-link"
-          link="https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf"
-          linkcolor=""
-          id="contact"
-          border="border border-solid"
-          style="--brand-color: oklch(0.76 0.13 238); --brand-color-dark: oklch(0.74 0.14 238); --brand-text-color: oklch(0.13 0.02 255);"
-          extraClasses="py-3 text-xl font-bold animate-button-pulse"
-        >
-          <Icon
-            slot="icon"
-            name="heroicons:identification"
-            class="h-7 w-7"
-            aria-hidden="true"
-          />
-        </Link>
+      <VideoBentoGrid />
 
-        <Link
-          linktxt="2. Send me a text"
-          bgcolor="brand-action-link"
-          link="sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
-          linkcolor=""
-          id="sms"
-          border="border border-solid"
-          style="--brand-color: oklch(0.78 0.15 38); --brand-color-dark: oklch(0.74 0.16 38); --brand-text-color: oklch(0.14 0.02 255);"
-          extraClasses="py-3 text-xl font-bold"
-        >
-          <Icon
-            slot="icon"
-            name="heroicons:chat-bubble-left-ellipsis"
-            class="h-7 w-7"
-            aria-hidden="true"
-          />
-        </Link>
-      </div>
-
-      <Section
-        title="My video & photo company"
-        description="Monthly content retainers, video production, photography, editing, and repurposing for Tampa businesses that need consistent, credible media. You can find my pricing, work, portfolio, and who we have worked with on this page."
-        class="animate-fade-in-up delay-400"
+      <section
+        class="animate-fade-in-up mt-8 mb-5 flex flex-col gap-4 delay-400"
+        aria-label="Latest YouTube videos"
       >
-        <AlphaBravoPreviewCard />
-      </Section>
-
-      <Section title="Watch on YouTube" class="animate-fade-in-up delay-400">
         {
           latestVideoChannels.map((channel) => (
             <LatestChannelVideo
@@ -431,178 +337,165 @@ const socialLinks = [
             />
           ))
         }
+      </section>
 
-        {
-          /*
-        Temporarily hidden while latest channel video cards are featured.
+      <section
+        class="animate-fade-in-up mx-auto mt-4 w-full max-w-xl px-4 text-left delay-500 sm:px-6"
+        aria-labelledby="youtube-links-title"
+      >
+        <div class="mb-4">
+          <p class="text-primary text-xs font-bold tracking-[0.18em] uppercase">
+            Watch more
+          </p>
+          <h2
+            id="youtube-links-title"
+            class="text-foreground mt-1 text-2xl font-extrabold"
+          >
+            YouTube channels
+          </h2>
+        </div>
+        <div class="flex flex-col gap-4">
+          {
+            channelLinks.map((link) => (
+              <SocialLinkButton
+                label={link.label}
+                href={link.url}
+                id={link.id}
+                style={brandCardStyle(link)}
+              >
+                <Icon name={link.icon} class="size-9" aria-hidden="true" />
+              </SocialLinkButton>
+            ))
+          }
+        </div>
+      </section>
 
-        <Link
-          linktxt="Subscribe to my YouTube Channel"
-          bgcolor="bg-youtube-container"
-          link="https://www.youtube.com/channel/UCQ5YfTwU5n_khZx-WJEkZKQ"
-          linkcolor="text-youtube"
-          id="youtube-personal"
-        >
-          <Icon
-            slot="icon"
-            name="heroicons:play-circle"
-            class="h-6 w-6"
-            aria-hidden="true"
-          />
-        </Link>
+      <section
+        class="animate-fade-in-up mx-auto mt-8 w-full max-w-xl px-4 text-left delay-500 sm:px-6"
+        aria-labelledby="social-links-title"
+      >
+        <div class="mb-4">
+          <p class="text-primary text-xs font-bold tracking-[0.18em] uppercase">
+            Social
+          </p>
+          <h2
+            id="social-links-title"
+            class="text-foreground mt-1 text-2xl font-extrabold"
+          >
+            Social links
+          </h2>
+        </div>
+        <nav class="flex flex-col gap-4" aria-label="Official social links">
+          {
+            socialLinks.map((social) => (
+              <SocialLinkButton
+                label={social.label}
+                href={social.url}
+                id={social.id}
+                style={{
+                  '--brand-color': social.color,
+                  '--brand-color-2': social.color2,
+                  '--brand-color-3': social.color3,
+                  '--brand-color-dark': social.darkColor ?? social.color,
+                  '--brand-color-dark-2': social.darkColor2 ?? social.color2,
+                  '--brand-color-dark-3': social.darkColor3 ?? social.color3,
+                }}
+              >
+                <Icon name={social.icon} class="size-9" aria-hidden="true" />
+              </SocialLinkButton>
+            ))
+          }
+        </nav>
+      </section>
 
-        <Link
-          linktxt="Visit AlphaBravoMedia YouTube"
-          bgcolor="bg-youtube-container"
-          link="https://youtube.com/@alphabravomedia"
-          linkcolor="text-youtube"
-          id="youtube-alphabravomedia"
-        >
-          <Icon
-            slot="icon"
-            name="heroicons:play-circle"
-            class="h-6 w-6"
-            aria-hidden="true"
-          />
-        </Link>
+      <section
+        class="animate-fade-in-up mx-auto mt-8 w-full max-w-xl px-4 text-left delay-500 sm:px-6"
+        aria-labelledby="support-links-title"
+      >
+        <div class="mb-4">
+          <p class="text-primary text-xs font-bold tracking-[0.18em] uppercase">
+            Payments
+          </p>
+          <h2
+            id="support-links-title"
+            class="text-foreground mt-1 text-2xl font-extrabold"
+          >
+            Support
+          </h2>
+        </div>
+        <div class="flex flex-col gap-4">
+          {
+            supportLinks.map((link) => (
+              <SocialLinkButton
+                label={link.label}
+                href={link.url}
+                id={link.id}
+                style={brandCardStyle(link)}
+              >
+                <Icon name={link.icon} class="size-9" aria-hidden="true" />
+              </SocialLinkButton>
+            ))
+          }
+        </div>
+      </section>
 
-        <Link
-          linktxt="Visit Islamic Tampa TV YouTube"
-          bgcolor="bg-youtube-container"
-          link="https://www.youtube.com/@islamicTampaTV"
-          linkcolor="text-youtube"
-          id="youtube-islamic"
-        >
-          <Icon
-            slot="icon"
-            name="heroicons:play-circle"
-            class="h-6 w-6"
-            aria-hidden="true"
-          />
-        </Link>
-      */
-        }
-      </Section>
-
-      <Section title="Support My Work" class="animate-fade-in-up delay-400">
-        <Link
-          linktxt="Ko-fi"
-          bgcolor="brand-support-link"
-          link="https://ko-fi.com/ayoubab1"
-          linkcolor=""
-          id="kofi"
-          border="border border-solid"
-          style="--brand-color: #ff5e5b; --brand-color-dark: #ff8a87;"
-        >
-          <Icon
-            slot="icon"
-            name="simple-icons:kofi"
-            class="h-6 w-6"
-            aria-hidden="true"
-          />
-        </Link>
-
-        <Link
-          linktxt="CashApp"
-          bgcolor="brand-support-link"
-          link="https://cash.app/ayoubab1"
-          linkcolor=""
-          id="cash-app"
-          border="border border-solid"
-          style="--brand-color: #00cf31;"
-        >
-          <Icon
-            slot="icon"
-            name="simple-icons:cashapp"
-            class="h-6 w-6"
-            aria-hidden="true"
-          />
-        </Link>
-
-        <Link
-          linktxt="Venmo"
-          bgcolor="brand-support-link"
-          link="https://venmo.com/u/Ayoub-Abedrabbo"
-          linkcolor=""
-          id="venmo"
-          border="border border-solid"
-          style="--brand-color: #008cff;"
-        >
-          <Icon
-            slot="icon"
-            name="simple-icons:venmo"
-            class="h-6 w-6"
-            aria-hidden="true"
-          />
-        </Link>
-
-        <Link
-          linktxt="Paypal"
-          bgcolor="brand-support-link"
-          link="https://paypal.me/AyoubAbedrabbo"
-          linkcolor=""
-          id="paypal"
-          border="border border-solid"
-          style="--brand-color: #003087; --brand-color-dark: #009cde;"
-        >
-          <Icon
-            slot="icon"
-            name="simple-icons:paypal"
-            class="h-6 w-6"
-            aria-hidden="true"
-          />
-        </Link>
-      </Section>
+      <footer
+        class="text-muted-foreground mt-auto w-full px-4 pt-12 pb-4 text-center text-sm"
+      >
+        <p class="mb-1">
+          &copy; {currentYear}
+          {pageTitle}. All rights reserved.
+        </p>
+        <p>
+          Built with
+          <a
+            href="https://astro.build"
+            target="_blank"
+            rel="noopener"
+            class="text-primary hover:text-primary/80 underline transition-colors"
+          >
+            Astro
+          </a>
+          &amp;
+          <a
+            href="https://tailwindcss.com"
+            target="_blank"
+            rel="noopener"
+            class="text-primary hover:text-primary/80 underline transition-colors"
+          >
+            Tailwind CSS
+          </a>.
+        </p>
+      </footer>
     </main>
-
-    <footer
-      class="text-on-surface-variant mt-12 w-full max-w-3xl px-4 pt-6 pb-4 text-center text-sm"
-    >
-      <p class="mb-1">
-        &copy; {currentYear} Ayoub Abedrabbo. All rights reserved.
-      </p>
-      <p>
-        Built with
-        <a
-          href="https://astro.build"
-          target="_blank"
-          rel="noopener"
-          class="text-primary hover:text-on-primary-container underline transition-colors"
-        >
-          Astro
-        </a>
-        &amp;
-        <a
-          href="https://tailwindcss.com"
-          target="_blank"
-          rel="noopener"
-          class="text-primary hover:text-on-primary-container underline transition-colors"
-        >
-          Tailwind CSS
-        </a>.
-      </p>
-    </footer>
 
     <script is:inline>
       ;(() => {
-        const storageKey = 'theme-preference'
         const preferences = ['system', 'light', 'dark']
-        const lightThemeColor = 'oklch(0.987 0.008 82)'
-        const darkThemeColor = 'oklch(0.145 0.012 255)'
+        const lightThemeColor = '#ffffff'
+        const darkThemeColor = '#1c1917'
         const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
         const buttons = [...document.querySelectorAll('[data-theme-option]')]
+        const hasThemeControls = buttons.length > 0
 
-        const getPreference = () => {
-          let savedPreference = null
+        const getStoredTheme = () => {
+          if (!hasThemeControls) return null
+
           try {
-            savedPreference = localStorage.getItem(storageKey)
+            return localStorage.getItem('theme')
           } catch {
-            savedPreference = null
+            return null
           }
-          return preferences.includes(savedPreference)
-            ? savedPreference
-            : 'system'
         }
+
+        const setStoredTheme = (theme) => {
+          try {
+            if (theme === 'system') localStorage.removeItem('theme')
+            else localStorage.setItem('theme', theme)
+          } catch {}
+        }
+
+        const getPreference = () => getStoredTheme() ?? 'system'
 
         const resolveTheme = (preference) =>
           preference === 'system'
@@ -611,11 +504,10 @@ const socialLinks = [
               : 'light'
             : preference
 
-        const applyTheme = (preference) => {
+        const applyTheme = (preference = 'system') => {
           const theme = resolveTheme(preference)
 
-          document.documentElement.dataset.theme = theme
-          document.documentElement.dataset.themePreference = preference
+          document.documentElement.classList.toggle('dark', theme === 'dark')
           document.documentElement.style.colorScheme = theme
 
           document
@@ -638,20 +530,72 @@ const socialLinks = [
             const preference = button.dataset.themeOption
             if (!preferences.includes(preference)) return
 
-            try {
-              localStorage.setItem(storageKey, preference)
-            } catch {}
+            setStoredTheme(preference)
             applyTheme(preference)
           })
         })
 
-        systemQuery.addEventListener('change', () => {
-          if (getPreference() === 'system') {
-            applyTheme('system')
+        const handleSystemChange = () => {
+          if (getPreference() === 'system') applyTheme('system')
+        }
+
+        systemQuery.addEventListener('change', handleSystemChange)
+        applyTheme(getPreference())
+      })()
+    </script>
+
+    <script is:inline>
+      ;(() => {
+        const shareButton = document.querySelector('[data-share-page]')
+        if (!shareButton) return
+
+        const defaultLabel =
+          shareButton.getAttribute('aria-label') || 'Share Ayoub Abedrabbo'
+        const shareData = {
+          title: shareButton.dataset.shareTitle,
+          text: shareButton.dataset.shareText,
+          url: shareButton.dataset.shareUrl,
+        }
+        const fallbackShareText = [shareData.title, shareData.text, shareData.url]
+          .filter(Boolean)
+          .join('\n')
+
+        const restoreLabel = () => {
+          window.setTimeout(() => {
+            shareButton.setAttribute('aria-label', defaultLabel)
+          }, 2200)
+        }
+
+        const copyLink = async () => {
+          if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(fallbackShareText)
+            shareButton.setAttribute('aria-label', 'Share text copied')
+            restoreLabel()
+            return
+          }
+
+          window.location.href = shareData.url
+        }
+
+        shareButton.addEventListener('click', async () => {
+          if (
+            navigator.share &&
+            (!navigator.canShare || navigator.canShare(shareData))
+          ) {
+            try {
+              await navigator.share(shareData)
+              return
+            } catch (error) {
+              if (error?.name === 'AbortError') return
+            }
+          }
+
+          try {
+            await copyLink()
+          } catch {
+            window.location.href = shareData.url
           }
         })
-
-        applyTheme(getPreference())
       })()
     </script>
   </body>

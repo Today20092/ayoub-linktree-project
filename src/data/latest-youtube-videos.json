@@ -2,12 +2,110 @@
   "alphabravomedia": {
     "channelId": "UCVAZXZ90b8aw3i1MQngo_WQ",
     "channelTitle": "Alpha Bravo Media",
-    "videoId": "RrEYbrO8qQk",
-    "title": "Link your proxies faster using the correct folder structure in DaVinci Resolve.",
-    "url": "https://www.youtube.com/watch?v=RrEYbrO8qQk",
-    "thumbnail": "https://i3.ytimg.com/vi/RrEYbrO8qQk/hqdefault.jpg",
-    "published": "2026-06-01T09:46:11+00:00",
-    "updated": "2026-06-01T09:47:12+00:00"
+    "videoId": "xN_Lb-3IyGA",
+    "title": "Do photo styles matter when taking RAW photos with Lumix?",
+    "url": "https://www.youtube.com/watch?v=xN_Lb-3IyGA",
+    "thumbnail": "https://i1.ytimg.com/vi/xN_Lb-3IyGA/hqdefault.jpg",
+    "published": "2026-05-20T08:12:39+00:00",
+    "updated": "2026-05-23T21:48:01+00:00",
+    "videos": [
+      {
+        "videoId": "xN_Lb-3IyGA",
+        "title": "Do photo styles matter when taking RAW photos with Lumix?",
+        "url": "https://www.youtube.com/watch?v=xN_Lb-3IyGA",
+        "thumbnail": "https://i1.ytimg.com/vi/xN_Lb-3IyGA/hqdefault.jpg",
+        "published": "2026-05-20T08:12:39+00:00",
+        "updated": "2026-05-23T21:48:01+00:00"
+      },
+      {
+        "videoId": "d6trLf_Nki8",
+        "title": "What is chroma subsampling in cameras? 422 vs 420",
+        "url": "https://www.youtube.com/watch?v=d6trLf_Nki8",
+        "thumbnail": "https://i1.ytimg.com/vi/d6trLf_Nki8/hqdefault.jpg",
+        "published": "2026-05-18T02:37:35+00:00",
+        "updated": "2026-05-23T01:35:39+00:00"
+      },
+      {
+        "videoId": "P1vP9F0URms",
+        "title": "Edit Lumix RAW Photos in DaVinci Resolve for FREE (RW2 Support)",
+        "url": "https://www.youtube.com/watch?v=P1vP9F0URms",
+        "thumbnail": "https://i1.ytimg.com/vi/P1vP9F0URms/hqdefault.jpg",
+        "published": "2026-05-15T05:11:06+00:00",
+        "updated": "2026-05-20T06:29:01+00:00"
+      },
+      {
+        "videoId": "djdKMeeiL9U",
+        "title": "Why the Lumix S5 IIX is the Best Value for Professional Work",
+        "url": "https://www.youtube.com/watch?v=djdKMeeiL9U",
+        "thumbnail": "https://i1.ytimg.com/vi/djdKMeeiL9U/hqdefault.jpg",
+        "published": "2026-05-10T04:24:49+00:00",
+        "updated": "2026-05-20T06:33:28+00:00"
+      },
+      {
+        "videoId": "NmpZSuSdFW0",
+        "title": "DaVinci Resolve Beginner Guide: Pricing, Pages Explained, and Your First Edit in 2026",
+        "url": "https://www.youtube.com/watch?v=NmpZSuSdFW0",
+        "thumbnail": "https://i3.ytimg.com/vi/NmpZSuSdFW0/hqdefault.jpg",
+        "published": "2026-05-02T20:23:17+00:00",
+        "updated": "2026-06-05T16:11:19+00:00"
+      },
+      {
+        "videoId": "UrK1rGKn014",
+        "title": "How to Archive DaVinci Resolve Projects Without Keeping All Your Raw Footage",
+        "url": "https://www.youtube.com/watch?v=UrK1rGKn014",
+        "thumbnail": "https://i2.ytimg.com/vi/UrK1rGKn014/hqdefault.jpg",
+        "published": "2026-05-01T21:08:00+00:00",
+        "updated": "2026-06-02T10:29:09+00:00"
+      },
+      {
+        "videoId": "OFMBzhx7MGs",
+        "title": "DaVinci Resolve 21: Is the New MainConcept Encoder Worth It?",
+        "url": "https://www.youtube.com/watch?v=OFMBzhx7MGs",
+        "thumbnail": "https://i4.ytimg.com/vi/OFMBzhx7MGs/hqdefault.jpg",
+        "published": "2026-04-30T00:56:06+00:00",
+        "updated": "2026-06-07T15:49:00+00:00"
+      },
+      {
+        "videoId": "geiboac0ZYw",
+        "title": "The FREE and Open Source WhisperFlow Alternative",
+        "url": "https://www.youtube.com/watch?v=geiboac0ZYw",
+        "thumbnail": "https://i4.ytimg.com/vi/geiboac0ZYw/hqdefault.jpg",
+        "published": "2026-04-25T18:30:55+00:00",
+        "updated": "2026-05-29T23:54:56+00:00"
+      },
+      {
+        "videoId": "fwnOEfC48HU",
+        "title": "Free False Color LUT Builder: Monitor Exposure AND White Balance at the Same Time",
+        "url": "https://www.youtube.com/watch?v=fwnOEfC48HU",
+        "thumbnail": "https://i.ytimg.com/vi/fwnOEfC48HU/hqdefault.jpg",
+        "published": "2026-03-15T13:47:25-07:00",
+        "updated": "2026-03-15T13:47:25-07:00"
+      },
+      {
+        "videoId": "U5sJN8DHa_k",
+        "title": "PA System Setup Guide: Live Audio Fundamentals for Filmmakers",
+        "url": "https://www.youtube.com/watch?v=U5sJN8DHa_k",
+        "thumbnail": "https://i.ytimg.com/vi/U5sJN8DHa_k/hqdefault.jpg",
+        "published": "2026-03-10T18:38:14-07:00",
+        "updated": "2026-03-10T18:38:14-07:00"
+      },
+      {
+        "videoId": "ouMQaZcPxAE",
+        "title": "Live Audio Setup: How to Properly Configure a PA System",
+        "url": "https://www.youtube.com/watch?v=ouMQaZcPxAE",
+        "thumbnail": "https://i.ytimg.com/vi/ouMQaZcPxAE/hqdefault.jpg",
+        "published": "2026-03-10T18:38:05-07:00",
+        "updated": "2026-03-10T18:38:05-07:00"
+      },
+      {
+        "videoId": "jav2Pyus5Pw",
+        "title": "OBS Advanced Settings Simplified: Stream & Record Like a Pro in 8 Minutes",
+        "url": "https://www.youtube.com/watch?v=jav2Pyus5Pw",
+        "thumbnail": "https://i.ytimg.com/vi/jav2Pyus5Pw/hqdefault.jpg",
+        "published": "2026-01-17T17:43:24-08:00",
+        "updated": "2026-01-17T17:43:24-08:00"
+      }
+    ]
   },
   "personal": {
     "channelId": "UCQ5YfTwU5n_khZx-WJEkZKQ",
@@ -17,7 +115,249 @@
     "url": "https://www.youtube.com/watch?v=hDuT3eXkJTA",
     "thumbnail": "https://i1.ytimg.com/vi/hDuT3eXkJTA/hqdefault.jpg",
     "published": "2026-06-07T02:20:03+00:00",
-    "updated": "2026-06-07T02:26:11+00:00"
+    "updated": "2026-06-07T02:26:11+00:00",
+    "videos": [
+      {
+        "videoId": "hDuT3eXkJTA",
+        "title": "Do Muslims want to change America or do they want to be part of it?",
+        "url": "https://www.youtube.com/watch?v=hDuT3eXkJTA",
+        "thumbnail": "https://i1.ytimg.com/vi/hDuT3eXkJTA/hqdefault.jpg",
+        "published": "2026-06-07T02:20:03+00:00",
+        "updated": "2026-06-07T02:26:11+00:00"
+      },
+      {
+        "videoId": "u09rOS1C2YM",
+        "title": "Have you ever spoke to a Muslim before?",
+        "url": "https://www.youtube.com/watch?v=u09rOS1C2YM",
+        "thumbnail": "https://i2.ytimg.com/vi/u09rOS1C2YM/hqdefault.jpg",
+        "published": "2026-06-07T02:18:48+00:00",
+        "updated": "2026-06-07T02:20:08+00:00"
+      },
+      {
+        "videoId": "sEl0AFmBLuE",
+        "title": "What should people know about Islam in America?",
+        "url": "https://www.youtube.com/watch?v=sEl0AFmBLuE",
+        "thumbnail": "https://i4.ytimg.com/vi/sEl0AFmBLuE/hqdefault.jpg",
+        "published": "2026-06-06T00:25:48+00:00",
+        "updated": "2026-06-06T00:27:38+00:00"
+      },
+      {
+        "videoId": "1yuMFJqXuAI",
+        "title": "Will America ever be a Muslim country?",
+        "url": "https://www.youtube.com/watch?v=1yuMFJqXuAI",
+        "thumbnail": "https://i2.ytimg.com/vi/1yuMFJqXuAI/hqdefault.jpg",
+        "published": "2026-06-06T00:25:37+00:00",
+        "updated": "2026-06-06T00:29:58+00:00"
+      },
+      {
+        "videoId": "0REF27FymCw",
+        "title": "Do people know what Islam is in America?",
+        "url": "https://www.youtube.com/watch?v=0REF27FymCw",
+        "thumbnail": "https://i1.ytimg.com/vi/0REF27FymCw/hqdefault.jpg",
+        "published": "2026-06-06T00:24:53+00:00",
+        "updated": "2026-06-06T00:28:06+00:00"
+      },
+      {
+        "videoId": "6VFNvFu1c8A",
+        "title": "What do people think Islam means in Detroit, Michigan?",
+        "url": "https://www.youtube.com/watch?v=6VFNvFu1c8A",
+        "thumbnail": "https://i3.ytimg.com/vi/6VFNvFu1c8A/hqdefault.jpg",
+        "published": "2026-06-03T17:00:17+00:00",
+        "updated": "2026-06-03T17:01:02+00:00"
+      },
+      {
+        "videoId": "gW4fANUnVu0",
+        "title": "What is religous freedom in Dearborn, Michigan?",
+        "url": "https://www.youtube.com/watch?v=gW4fANUnVu0",
+        "thumbnail": "https://i4.ytimg.com/vi/gW4fANUnVu0/hqdefault.jpg",
+        "published": "2026-06-02T21:23:56+00:00",
+        "updated": "2026-06-02T21:29:26+00:00"
+      },
+      {
+        "videoId": "m9wtaW0GJqY",
+        "title": "Dearborn, Michigan. Is there Islamophobia here?",
+        "url": "https://www.youtube.com/watch?v=m9wtaW0GJqY",
+        "thumbnail": "https://i2.ytimg.com/vi/m9wtaW0GJqY/hqdefault.jpg",
+        "published": "2026-06-02T01:51:27+00:00",
+        "updated": "2026-06-02T01:54:56+00:00"
+      },
+      {
+        "videoId": "fvu7CGGSy9Y",
+        "title": "Reading the Holy Quran In English Tiktok Live May 29, 2026",
+        "url": "https://www.youtube.com/watch?v=fvu7CGGSy9Y",
+        "thumbnail": "https://i3.ytimg.com/vi/fvu7CGGSy9Y/hqdefault.jpg",
+        "published": "2026-05-29T09:58:02+00:00",
+        "updated": "2026-05-29T11:52:36+00:00"
+      },
+      {
+        "videoId": "5FNGxilaRQY",
+        "title": "Reading the Holy Quran In English Tiktok Live May 27, 2026",
+        "url": "https://www.youtube.com/watch?v=5FNGxilaRQY",
+        "thumbnail": "https://i2.ytimg.com/vi/5FNGxilaRQY/hqdefault.jpg",
+        "published": "2026-05-27T08:07:10+00:00",
+        "updated": "2026-05-27T08:07:10+00:00"
+      },
+      {
+        "videoId": "1xh7Y3xKqkM",
+        "title": "Reading the Holy Quran In English Tiktok Live May 26, 2026",
+        "url": "https://www.youtube.com/watch?v=1xh7Y3xKqkM",
+        "thumbnail": "https://i2.ytimg.com/vi/1xh7Y3xKqkM/hqdefault.jpg",
+        "published": "2026-05-27T08:06:53+00:00",
+        "updated": "2026-05-27T08:06:54+00:00"
+      },
+      {
+        "videoId": "QXloTfa5UHk",
+        "title": "Reading the Holy Quran In English Tiktok Live May 23, 2026",
+        "url": "https://www.youtube.com/watch?v=QXloTfa5UHk",
+        "thumbnail": "https://i2.ytimg.com/vi/QXloTfa5UHk/hqdefault.jpg",
+        "published": "2026-05-23T05:30:11+00:00",
+        "updated": "2026-05-23T06:22:20+00:00"
+      },
+      {
+        "videoId": "yabWC514RE4",
+        "title": "The 3 Questions That Tell You Which Career Helps the Most People (80K Hours Ch 4)",
+        "url": "https://www.youtube.com/watch?v=yabWC514RE4",
+        "thumbnail": "https://i2.ytimg.com/vi/yabWC514RE4/hqdefault.jpg",
+        "published": "2026-05-22T07:39:02+00:00",
+        "updated": "2026-05-23T20:18:18+00:00"
+      },
+      {
+        "videoId": "HbVg-MkLhpk",
+        "title": "Reading the Holy Quran In English Tiktok Live May 18, 2026",
+        "url": "https://www.youtube.com/watch?v=HbVg-MkLhpk",
+        "thumbnail": "https://i1.ytimg.com/vi/HbVg-MkLhpk/hqdefault.jpg",
+        "published": "2026-05-19T21:35:02+00:00",
+        "updated": "2026-05-19T21:35:02+00:00"
+      },
+      {
+        "videoId": "fidhZQG_FaE",
+        "title": "Reading the Holy Quran In English Tiktok Live May 17, 2026",
+        "url": "https://www.youtube.com/watch?v=fidhZQG_FaE",
+        "thumbnail": "https://i3.ytimg.com/vi/fidhZQG_FaE/hqdefault.jpg",
+        "published": "2026-05-18T06:58:22+00:00",
+        "updated": "2026-05-18T08:50:52+00:00"
+      },
+      {
+        "videoId": "HVmHxSztp_A",
+        "title": "How to Get Accurate Islamic Answers from AI (My Exact Setup)",
+        "url": "https://www.youtube.com/watch?v=HVmHxSztp_A",
+        "thumbnail": "https://i.ytimg.com/vi/HVmHxSztp_A/hqdefault.jpg",
+        "published": "2026-05-17T16:37:43-07:00",
+        "updated": "2026-05-17T16:37:43-07:00"
+      },
+      {
+        "videoId": "UdpiGb5YlyQ",
+        "title": "Reading the Holy Quran In English Tiktok Live May 16, 2026",
+        "url": "https://www.youtube.com/watch?v=UdpiGb5YlyQ",
+        "thumbnail": "https://i.ytimg.com/vi/UdpiGb5YlyQ/hqdefault.jpg",
+        "published": "2026-05-16T00:03:23-07:00",
+        "updated": "2026-05-16T00:03:23-07:00"
+      },
+      {
+        "videoId": "7uDa49QxQWc",
+        "title": "Reading the Holy Quran In English Tiktok Live May 14, 2026",
+        "url": "https://www.youtube.com/watch?v=7uDa49QxQWc",
+        "thumbnail": "https://i.ytimg.com/vi/7uDa49QxQWc/hqdefault.jpg",
+        "published": "2026-05-15T02:45:14-07:00",
+        "updated": "2026-05-15T02:45:14-07:00"
+      },
+      {
+        "videoId": "yZQJi4CP5KQ",
+        "title": "Reading the Holy Quran In English Tiktok Live May 10, 2026",
+        "url": "https://www.youtube.com/watch?v=yZQJi4CP5KQ",
+        "thumbnail": "https://i.ytimg.com/vi/yZQJi4CP5KQ/hqdefault.jpg",
+        "published": "2026-05-11T09:48:07-07:00",
+        "updated": "2026-05-11T09:48:07-07:00"
+      },
+      {
+        "videoId": "9DOkCWm7yQc",
+        "title": "Reading the Holy Quran In English Tiktok Live May 9, 2026",
+        "url": "https://www.youtube.com/watch?v=9DOkCWm7yQc",
+        "thumbnail": "https://i.ytimg.com/vi/9DOkCWm7yQc/hqdefault.jpg",
+        "published": "2026-05-08T21:19:49-07:00",
+        "updated": "2026-05-08T21:19:49-07:00"
+      },
+      {
+        "videoId": "IFWLeyl4nrI",
+        "title": "Reading the Holy Quran In English Tiktok Live May 1, 2026",
+        "url": "https://www.youtube.com/watch?v=IFWLeyl4nrI",
+        "thumbnail": "https://i.ytimg.com/vi/IFWLeyl4nrI/hqdefault.jpg",
+        "published": "2026-05-08T14:24:08-07:00",
+        "updated": "2026-05-08T14:24:08-07:00"
+      },
+      {
+        "videoId": "nHawmX8muc0",
+        "title": "Reading the Holy Quran In English Tiktok Live May 2, 2026",
+        "url": "https://www.youtube.com/watch?v=nHawmX8muc0",
+        "thumbnail": "https://i.ytimg.com/vi/nHawmX8muc0/hqdefault.jpg",
+        "published": "2026-05-08T14:23:48-07:00",
+        "updated": "2026-05-08T14:23:48-07:00"
+      },
+      {
+        "videoId": "S0YV3fh3sRE",
+        "title": "Reading the Holy Quran In English Tiktok Live April 30, 2026 & Discussion with Live Guest",
+        "url": "https://www.youtube.com/watch?v=S0YV3fh3sRE",
+        "thumbnail": "https://i.ytimg.com/vi/S0YV3fh3sRE/hqdefault.jpg",
+        "published": "2026-04-30T12:27:28-07:00",
+        "updated": "2026-04-30T12:27:28-07:00"
+      },
+      {
+        "videoId": "yGFEi6fKEsg",
+        "title": "Reading the Holy Quran In English Tiktok Live April 29, 2026",
+        "url": "https://www.youtube.com/watch?v=yGFEi6fKEsg",
+        "thumbnail": "https://i.ytimg.com/vi/yGFEi6fKEsg/hqdefault.jpg",
+        "published": "2026-04-30T12:04:23-07:00",
+        "updated": "2026-04-30T12:04:23-07:00"
+      },
+      {
+        "videoId": "CsqPaj05k6U",
+        "title": "Why Women Are a Test for Men — Guarding Your Eyes, Heart & Marriage in Islam",
+        "url": "https://www.youtube.com/watch?v=CsqPaj05k6U",
+        "thumbnail": "https://i.ytimg.com/vi/CsqPaj05k6U/hqdefault.jpg",
+        "published": "2026-04-21T07:52:14-07:00",
+        "updated": "2026-04-21T07:52:14-07:00"
+      },
+      {
+        "videoId": "EBifLz8ghhA",
+        "title": "Reading the Holy Quran In English Tiktok Live March 23, 2026",
+        "url": "https://www.youtube.com/watch?v=EBifLz8ghhA",
+        "thumbnail": "https://i.ytimg.com/vi/EBifLz8ghhA/hqdefault.jpg",
+        "published": "2026-03-23T00:07:17-07:00",
+        "updated": "2026-03-23T00:07:17-07:00"
+      },
+      {
+        "videoId": "WRDe8QE776k",
+        "title": "Reading the Holy Quran In English Tiktok Live March 22, 2026",
+        "url": "https://www.youtube.com/watch?v=WRDe8QE776k",
+        "thumbnail": "https://i.ytimg.com/vi/WRDe8QE776k/hqdefault.jpg",
+        "published": "2026-03-22T13:50:05-07:00",
+        "updated": "2026-03-22T13:50:05-07:00"
+      },
+      {
+        "videoId": "EGrjDX3rk9c",
+        "title": "Reading the Holy Quran In English Tiktok Live March 16, 2026",
+        "url": "https://www.youtube.com/watch?v=EGrjDX3rk9c",
+        "thumbnail": "https://i.ytimg.com/vi/EGrjDX3rk9c/hqdefault.jpg",
+        "published": "2026-03-21T22:45:52-07:00",
+        "updated": "2026-03-21T22:45:52-07:00"
+      },
+      {
+        "videoId": "9fkngFTaKPI",
+        "title": "Reading the Holy Quran In English Tiktok Live March 14 2026",
+        "url": "https://www.youtube.com/watch?v=9fkngFTaKPI",
+        "thumbnail": "https://i.ytimg.com/vi/9fkngFTaKPI/hqdefault.jpg",
+        "published": "2026-03-21T22:45:20-07:00",
+        "updated": "2026-03-21T22:45:20-07:00"
+      },
+      {
+        "videoId": "k28gk2lh-j0",
+        "title": "Reading the Holy Quran In English Tiktok Live March 15, 2026",
+        "url": "https://www.youtube.com/watch?v=k28gk2lh-j0",
+        "thumbnail": "https://i.ytimg.com/vi/k28gk2lh-j0/hqdefault.jpg",
+        "published": "2026-03-21T22:45:12-07:00",
+        "updated": "2026-03-21T22:45:12-07:00"
+      }
+    ]
   },
   "islamic-tampa-tv": {
     "channelId": "UCw7ZJOSz1GuYbRGKBu2tFfw",
@@ -27,6 +367,128 @@
     "url": "https://www.youtube.com/watch?v=_pnYTxBV6m4",
     "thumbnail": "https://i4.ytimg.com/vi/_pnYTxBV6m4/hqdefault.jpg",
     "published": "2026-05-31T08:12:27+00:00",
-    "updated": "2026-05-31T13:42:59+00:00"
+    "updated": "2026-05-31T13:42:59+00:00",
+    "videos": [
+      {
+        "videoId": "_pnYTxBV6m4",
+        "title": "Istaba Eid Bazaar 2026 – Tampa Muslim Community Tour",
+        "url": "https://www.youtube.com/watch?v=_pnYTxBV6m4",
+        "thumbnail": "https://i4.ytimg.com/vi/_pnYTxBV6m4/hqdefault.jpg",
+        "published": "2026-05-31T08:12:27+00:00",
+        "updated": "2026-05-31T13:42:59+00:00"
+      },
+      {
+        "videoId": "_IcCAFu1Gt4",
+        "title": "Sunnah Initiative Eid BBQ 2025: Food, Sports & Brotherhood at Rowlett Park",
+        "url": "https://www.youtube.com/watch?v=_IcCAFu1Gt4",
+        "thumbnail": "https://i4.ytimg.com/vi/_IcCAFu1Gt4/hqdefault.jpg",
+        "published": "2026-04-08T13:21:02+00:00",
+        "updated": "2026-05-09T17:09:41+00:00"
+      },
+      {
+        "videoId": "kvcV94BAvDY",
+        "title": "Inside Tampa's Refugee Organization Helping Women Start Businesses | Radiant Hands Story",
+        "url": "https://www.youtube.com/watch?v=kvcV94BAvDY",
+        "thumbnail": "https://i4.ytimg.com/vi/kvcV94BAvDY/hqdefault.jpg",
+        "published": "2026-01-04T23:50:16+00:00",
+        "updated": "2026-04-13T16:31:14+00:00"
+      },
+      {
+        "videoId": "j-Ms9qVE1PI",
+        "title": "Tampa Muslim Community Event at the Deen Center (Valrico) | Bazaar, Speakers & Unity",
+        "url": "https://www.youtube.com/watch?v=j-Ms9qVE1PI",
+        "thumbnail": "https://i3.ytimg.com/vi/j-Ms9qVE1PI/hqdefault.jpg",
+        "published": "2025-12-15T03:04:38+00:00",
+        "updated": "2026-04-13T19:02:23+00:00"
+      },
+      {
+        "videoId": "6DMzPI58Wig",
+        "title": "Raised $300K in One Night: The School Every Muslim Parent Needs to See",
+        "url": "https://www.youtube.com/watch?v=6DMzPI58Wig",
+        "thumbnail": "https://i3.ytimg.com/vi/6DMzPI58Wig/hqdefault.jpg",
+        "published": "2025-12-03T02:53:50+00:00",
+        "updated": "2026-05-05T01:02:01+00:00"
+      },
+      {
+        "videoId": "GH9hU953kbc",
+        "title": "UNITY at USF: From 10 to 100+ at Fajr After Harassment | Tampa Muslims Stand Together",
+        "url": "https://www.youtube.com/watch?v=GH9hU953kbc",
+        "thumbnail": "https://i.ytimg.com/vi/GH9hU953kbc/hqdefault.jpg",
+        "published": "2025-11-26T13:17:13-08:00",
+        "updated": "2025-11-26T13:17:13-08:00"
+      },
+      {
+        "videoId": "NHoxl9QgM2A",
+        "title": "Full Khutba USF TMC by Sh Hassan Sultan after the attack on Muslims at USF",
+        "url": "https://www.youtube.com/watch?v=NHoxl9QgM2A",
+        "thumbnail": "https://i.ytimg.com/vi/NHoxl9QgM2A/hqdefault.jpg",
+        "published": "2025-11-23T13:33:24-08:00",
+        "updated": "2025-11-23T13:33:24-08:00"
+      },
+      {
+        "videoId": "gaVTW7c3HuM",
+        "title": "Inside Florida's $132M Marine Science Center",
+        "url": "https://www.youtube.com/watch?v=gaVTW7c3HuM",
+        "thumbnail": "https://i.ytimg.com/vi/gaVTW7c3HuM/hqdefault.jpg",
+        "published": "2025-11-18T16:18:29-08:00",
+        "updated": "2025-11-18T16:18:29-08:00"
+      },
+      {
+        "videoId": "6VFNvFu1c8A",
+        "title": "What do people think Islam means in Detroit, Michigan?",
+        "url": "https://www.youtube.com/watch?v=6VFNvFu1c8A",
+        "thumbnail": "https://i.ytimg.com/vi/6VFNvFu1c8A/hqdefault.jpg",
+        "published": "2026-06-03T10:00:17-07:00",
+        "updated": "2026-06-03T10:00:17-07:00"
+      },
+      {
+        "videoId": "gW4fANUnVu0",
+        "title": "What is religous freedom in Dearborn, Michigan?",
+        "url": "https://www.youtube.com/watch?v=gW4fANUnVu0",
+        "thumbnail": "https://i.ytimg.com/vi/gW4fANUnVu0/maxresdefault.jpg?sqp\\u003d-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGEYgXChlMA8\\u003d\\u0026rs\\u003dAOn4CLAtNZHobIcCVPgTvzw066uMdjYT_w",
+        "published": "2026-06-02T14:23:56-07:00",
+        "updated": "2026-06-02T14:23:56-07:00"
+      },
+      {
+        "videoId": "m9wtaW0GJqY",
+        "title": "Dearborn, Michigan. Is there Islamophobia here?",
+        "url": "https://www.youtube.com/watch?v=m9wtaW0GJqY",
+        "thumbnail": "https://i.ytimg.com/vi/m9wtaW0GJqY/hqdefault.jpg",
+        "published": "2026-06-01T18:51:27-07:00",
+        "updated": "2026-06-01T18:51:27-07:00"
+      },
+      {
+        "videoId": "yabWC514RE4",
+        "title": "The 3 Questions That Tell You Which Career Helps the Most People (80K Hours Ch 4)",
+        "url": "https://www.youtube.com/watch?v=yabWC514RE4",
+        "thumbnail": "https://i.ytimg.com/vi/yabWC514RE4/hqdefault.jpg",
+        "published": "2026-05-22T00:39:02-07:00",
+        "updated": "2026-05-22T00:39:02-07:00"
+      },
+      {
+        "videoId": "ubEEU2vxXws",
+        "title": "معهد القراءات والعلوم القرآنية في تامبا، فلوريدا | Institute of Quranic Readings & Sciences Tampa FL",
+        "url": "https://www.youtube.com/watch?v=ubEEU2vxXws",
+        "thumbnail": "https://i.ytimg.com/vi/ubEEU2vxXws/hqdefault.jpg",
+        "published": "2026-04-05T16:14:40-07:00",
+        "updated": "2026-04-05T16:14:40-07:00"
+      },
+      {
+        "videoId": "Zw3ey05XKoU",
+        "title": "Three ways anyone can make a difference no matter their job to save 40 lives over your career.",
+        "url": "https://www.youtube.com/watch?v=Zw3ey05XKoU",
+        "thumbnail": "https://i.ytimg.com/vi/Zw3ey05XKoU/hqdefault.jpg",
+        "published": "2026-01-09T14:45:34-08:00",
+        "updated": "2026-01-09T14:45:34-08:00"
+      },
+      {
+        "videoId": "MfWetrnX4u8",
+        "title": "Chapter 2: Can One Person Really Make a Difference? | 80,000 Hours",
+        "url": "https://www.youtube.com/watch?v=MfWetrnX4u8",
+        "thumbnail": "https://i.ytimg.com/vi/MfWetrnX4u8/hqdefault.jpg",
+        "published": "2026-01-06T11:04:49-08:00",
+        "updated": "2026-01-06T11:04:49-08:00"
+      }
+    ]
   }
 }
