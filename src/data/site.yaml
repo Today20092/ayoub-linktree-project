@@ -1,0 +1,236 @@
+site:
+  pageTitle: Ayoub Abedrabbo
+  pageDescription: "Ayoub Abedrabbo is an event photographer and videographer in Tampa, Florida. Photos and videos for all budgets. Find all links, contact, and support options here."
+  siteName: Ayoub Abedrabbo
+  profileName: Ayoub
+  twitterHandle: "@ayoubabedrabbo"
+  heroImageAlt: Portrait of Ayoub Abedrabbo
+  profileImage: AyoubBayaan.jpg
+  ogImage: AyoubContactCardImage.jpg
+
+socialLinks:
+  - id: instagram
+    url: https://instagram.com/alphabravomedia
+    icon: simple-icons:instagram
+    label: "Instagram: @AlphaBravoMedia"
+    color: "#c13584"
+    color2: "#f56040"
+    color3: "#833ab4"
+    darkColor: "#c13584"
+    darkColor2: "#f56040"
+    darkColor3: "#4f1f78"
+  - id: discord
+    url: https://discordapp.com/users/279467079990640641
+    icon: simple-icons:discord
+    label: Discord profile
+    color: "#5865f2"
+    color2: "#7b83ff"
+    color3: "#1e1f47"
+    darkColor: "#8b95ff"
+    darkColor2: "#5865f2"
+    darkColor3: "#1e1f47"
+  - id: linkedin
+    url: https://www.linkedin.com/in/ayoubabedrabbo/
+    icon: simple-icons:linkedin
+    label: LinkedIn
+    color: "#0a66c2"
+    color2: "#62a6e8"
+    color3: "#07345f"
+    darkColor: "#68b7ff"
+    darkColor2: "#0a66c2"
+    darkColor3: "#082846"
+  - id: github
+    url: https://github.com/Today20092
+    icon: simple-icons:github
+    label: GitHub
+    color: "#181717"
+    color2: "#6e7681"
+    color3: "#0d1117"
+    darkColor: "#30363d"
+    darkColor2: "#6e7681"
+    darkColor3: "#0d1117"
+  - id: telegram
+    url: https://t.me/AyoubAb1
+    icon: simple-icons:telegram
+    label: Telegram
+    color: "#147fb8"
+    color2: "#36aee2"
+    color3: "#07354d"
+    darkColor: "#147fb8"
+    darkColor2: "#36aee2"
+    darkColor3: "#0b2f45"
+  - id: tiktok
+    url: https://www.tiktok.com/@ayoubabedrabbo
+    icon: simple-icons:tiktok
+    label: TikTok
+    color: "#010101"
+    color2: "#25f4ee"
+    color3: "#fe2c55"
+    darkColor: "#25f4ee"
+    darkColor2: "#fe2c55"
+    darkColor3: "#010101"
+  # - id: substack
+  #   url: https://www.substack.com/@ayoubabedrabbo1
+  #   icon: simple-icons:substack
+  #   label: Substack
+  #   color: "#ff6719"
+  #   color2: "#ff9b66"
+  #   color3: "#ffffff"
+  #   darkColor: "#ff9b66"
+  #   darkColor2: "#ff6719"
+  #   darkColor3: "#3d1708"
+
+actionLinks:
+  - id: contact
+    label: "1. Download my contact card"
+    url: https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf
+    icon: heroicons:identification
+    group: primary
+    color: "oklch(0.76 0.13 238)"
+    darkColor: "oklch(0.74 0.14 238)"
+    textColor: "oklch(0.13 0.02 255)"
+    pulse: true
+  - id: sms
+    label: "2. Send me a text"
+    url: "sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
+    icon: heroicons:chat-bubble-left-ellipsis
+    group: primary
+    color: "oklch(0.78 0.15 38)"
+    darkColor: "oklch(0.74 0.16 38)"
+    textColor: "oklch(0.14 0.02 255)"
+  - id: youtube-personal
+    label: Ayoub Abedrabbo
+    url: https://www.youtube.com/channel/UCQ5YfTwU5n_khZx-WJEkZKQ
+    icon: simple-icons:youtube
+    group: youtube
+    color: "#ff0000"
+    color2: "#ff6b6b"
+    color3: "#ffffff"
+    darkColor: "#ff6b6b"
+    darkColor2: "#ff0000"
+    darkColor3: "#3b0a0a"
+  - id: youtube-alphabravomedia
+    label: AlphaBravoMedia
+    url: https://youtube.com/@alphabravomedia
+    icon: simple-icons:youtube
+    group: youtube
+    color: "#8f3f37"
+    color2: "#f0a097"
+    color3: "#15110d"
+    darkColor: "#f0a097"
+    darkColor2: "#8f3f37"
+    darkColor3: "#211211"
+  - id: youtube-islamic
+    label: Islamic Tampa TV
+    url: https://www.youtube.com/@islamicTampaTV
+    icon: simple-icons:youtube
+    group: youtube
+    color: "#776a32"
+    color2: "#d9c56c"
+    color3: "#10120c"
+    darkColor: "#d9c56c"
+    darkColor2: "#776a32"
+    darkColor3: "#1d1b12"
+  - id: kofi
+    label: Ko-fi
+    url: https://ko-fi.com/ayoubab1
+    icon: simple-icons:kofi
+    group: support
+    color: "#ff5e5b"
+    color2: "#ff9b98"
+    color3: "#ffffff"
+    darkColor: "#ff8a87"
+    darkColor2: "#ff5e5b"
+    darkColor3: "#3d1010"
+  - id: cash-app
+    label: CashApp
+    url: https://cash.app/ayoubab1
+    icon: simple-icons:cashapp
+    group: support
+    color: "#00cf31"
+    color2: "#7df39a"
+    color3: "#082b12"
+    darkColor: "#49ef70"
+    darkColor2: "#00cf31"
+    darkColor3: "#063511"
+  - id: venmo
+    label: Venmo
+    url: https://venmo.com/u/Ayoub-Abedrabbo
+    icon: simple-icons:venmo
+    group: support
+    color: "#008cff"
+    color2: "#83cbff"
+    color3: "#ffffff"
+    darkColor: "#65bfff"
+    darkColor2: "#008cff"
+    darkColor3: "#06233d"
+  - id: paypal
+    label: Paypal
+    url: https://paypal.me/AyoubAbedrabbo
+    icon: simple-icons:paypal
+    group: support
+    color: "#003087"
+    color2: "#009cde"
+    color3: "#dcecff"
+    darkColor: "#009cde"
+    darkColor2: "#003087"
+    darkColor3: "#061936"
+
+youtubeChannels:
+  - id: alphabravomedia
+    channelId: UCVAZXZ90b8aw3i1MQngo_WQ
+    videosUrl: https://youtube.com/@alphabravomedia
+    name: AlphaBravoMedia
+    description: Videography, editing, DaVinci Resolve, Lumix cameras, exposure, and practical media production tutorials.
+    branding:
+      logoSrc: ABM.webp
+      accentColor: "#8f3f37"
+      darkAccentColor: "#f0a097"
+      cardBackground: "#fffafa"
+      darkCardBackground: "#211211"
+      cardTint: "#f7ece8"
+      darkCardTint: "#341a17"
+      logoBackgroundColor: "#15110d"
+      darkLogoBackgroundColor: "#15110d"
+      logoFit: contain
+      logoPaddingClass: p-2
+  - id: personal
+    channelId: UCQ5YfTwU5n_khZx-WJEkZKQ
+    videosUrl: https://www.youtube.com/channel/UCQ5YfTwU5n_khZx-WJEkZKQ/videos
+    name: Ayoub Abedrabbo
+    description: Personal educational videos, live Quran readings, reflections, books, and useful things I am learning.
+    branding:
+      logoSrc: AyoubBayaan.jpg
+      accentColor: "#765247"
+      darkAccentColor: "#d9b5a9"
+      cardBackground: "#fbf6ee"
+      darkCardBackground: "#201816"
+      cardTint: "#eee5db"
+      darkCardTint: "#332620"
+      logoBackgroundColor: "#d8ccc6"
+      darkLogoBackgroundColor: "#4a3933"
+      logoFit: cover
+      logoPaddingClass: ""
+  - id: islamic-tampa-tv
+    channelId: UCw7ZJOSz1GuYbRGKBu2tFfw
+    videosUrl: https://www.youtube.com/@islamicTampaTV
+    name: Islamic Tampa TV
+    description: Local Tampa Islamic community coverage, including events, gatherings, announcements, and community news.
+    branding:
+      logoSrc: "IslamicTampaTV Logo.png"
+      accentColor: "#776a32"
+      darkAccentColor: "#d9c56c"
+      cardBackground: "#fbf8ef"
+      darkCardBackground: "#1d1b12"
+      cardTint: "#efe8d2"
+      darkCardTint: "#302b18"
+      logoBackgroundColor: "#10120c"
+      darkLogoBackgroundColor: "#10120c"
+      logoFit: cover
+      logoPaddingClass: ""
+
+featuredEpisodes: []
+
+socialReach:
+  updatedAt: "2026-06-08"
+  items: []
