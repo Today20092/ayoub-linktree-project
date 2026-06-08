@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400..900;1,400..900&family=Raleway:wght@500..900&display=swap');
 @import 'tailwindcss';
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -13,8 +13,8 @@
   --card-foreground: oklch(0.147 0.004 49.25);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.147 0.004 49.25);
-  --primary: oklch(0.597 0.223 20.955);
-  --primary-foreground: oklch(1 0 0);
+  --primary: oklch(0.696 0.17 162.48);
+  --primary-foreground: oklch(0.262 0.051 172.552);
   --secondary: oklch(0.94 0.035 282.737);
   --secondary-foreground: oklch(0.306 0.101 282.737);
   --muted: oklch(0.97 0.001 106.424);
@@ -24,7 +24,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.923 0.003 48.717);
   --input: oklch(0.923 0.003 48.717);
-  --ring: oklch(0.597 0.223 20.955);
+  --ring: oklch(0.696 0.17 162.48);
   --chart-1: oklch(0.785 0.115 274.713);
   --chart-2: oklch(0.585 0.233 277.117);
   --chart-3: oklch(0.511 0.262 276.966);
@@ -33,24 +33,24 @@
   --radius: 0.45rem;
   --sidebar: oklch(0.985 0.001 106.423);
   --sidebar-foreground: oklch(0.147 0.004 49.25);
-  --sidebar-primary: oklch(0.597 0.223 20.955);
-  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(0.696 0.17 162.48);
+  --sidebar-primary-foreground: oklch(0.262 0.051 172.552);
   --sidebar-accent: oklch(0.97 0.001 106.424);
   --sidebar-accent-foreground: oklch(0.216 0.006 56.043);
   --sidebar-border: oklch(0.923 0.003 48.717);
-  --sidebar-ring: oklch(0.597 0.223 20.955);
+  --sidebar-ring: oklch(0.696 0.17 162.48);
 
-  --color-brand-50: oklch(0.966 0.015 12.55);
-  --color-brand-100: oklch(0.927 0.034 13.41);
-  --color-brand-200: oklch(0.863 0.069 13.06);
-  --color-brand-300: oklch(0.79 0.115 13.31);
-  --color-brand-400: oklch(0.728 0.159 14.73);
-  --color-brand-500: oklch(0.656 0.217 16.38);
-  --color-brand-600: oklch(0.586 0.222 17.59);
-  --color-brand-700: oklch(0.48 0.181 17.62);
-  --color-brand-800: oklch(0.362 0.137 17.73);
-  --color-brand-900: oklch(0.253 0.097 17.65);
-  --color-brand-950: oklch(0.197 0.074 18.15);
+  --color-brand-50: oklch(0.979 0.021 166.113);
+  --color-brand-100: oklch(0.95 0.052 163.051);
+  --color-brand-200: oklch(0.905 0.093 164.15);
+  --color-brand-300: oklch(0.845 0.143 164.978);
+  --color-brand-400: oklch(0.765 0.177 163.223);
+  --color-brand-500: oklch(0.696 0.17 162.48);
+  --color-brand-600: oklch(0.596 0.145 163.225);
+  --color-brand-700: oklch(0.508 0.118 165.612);
+  --color-brand-800: oklch(0.432 0.095 166.913);
+  --color-brand-900: oklch(0.378 0.077 168.94);
+  --color-brand-950: oklch(0.262 0.051 172.552);
   --color-logo-purple: oklch(0.306 0.101 282.737);
   --color-logo-purple-container: oklch(0.94 0.035 282.737);
   --color-sage-50: oklch(0.948 0.078 163.11);
@@ -93,7 +93,7 @@
   --color-scrim: oklch(0.147 0.004 49.25);
   --page-bg-texture: none;
   --radius-full: 9999px;
-  --font-display: 'Playfair Display', Georgia, serif;
+  --font-display: 'Raleway', sans-serif;
 }
 
 .dark {
@@ -103,8 +103,8 @@
   --card-foreground: oklch(0.985 0.001 106.423);
   --popover: oklch(0.216 0.006 56.043);
   --popover-foreground: oklch(0.985 0.001 106.423);
-  --primary: oklch(0.695 0.195 23.657);
-  --primary-foreground: oklch(0.147 0.004 49.25);
+  --primary: oklch(0.696 0.17 162.48);
+  --primary-foreground: oklch(0.262 0.051 172.552);
   --secondary: oklch(0.306 0.101 282.737);
   --secondary-foreground: oklch(1 0 0);
   --muted: oklch(0.268 0.007 34.298);
@@ -114,7 +114,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.695 0.195 23.657);
+  --ring: oklch(0.696 0.17 162.48);
   --chart-1: oklch(0.785 0.115 274.713);
   --chart-2: oklch(0.585 0.233 277.117);
   --chart-3: oklch(0.511 0.262 276.966);
@@ -122,12 +122,12 @@
   --chart-5: oklch(0.398 0.195 277.366);
   --sidebar: oklch(0.216 0.006 56.043);
   --sidebar-foreground: oklch(0.985 0.001 106.423);
-  --sidebar-primary: oklch(0.695 0.195 23.657);
-  --sidebar-primary-foreground: oklch(0.147 0.004 49.25);
+  --sidebar-primary: oklch(0.696 0.17 162.48);
+  --sidebar-primary-foreground: oklch(0.262 0.051 172.552);
   --sidebar-accent: oklch(0.268 0.007 34.298);
   --sidebar-accent-foreground: oklch(0.985 0.001 106.423);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.695 0.195 23.657);
+  --sidebar-ring: oklch(0.696 0.17 162.48);
 
   --color-contact: var(--primary);
   --color-contact-container: var(--muted);
@@ -145,8 +145,8 @@
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-heading: 'Raleway', sans-serif;
+  --font-sans: 'Public Sans', sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -543,35 +543,32 @@
   .brand-social-link {
     background: linear-gradient(
       128deg,
-      color-mix(in oklch, var(--brand-color-2, var(--brand-color)) 78%, black)
+      color-mix(in oklch, var(--brand-color-2, var(--brand-color)) 72%, black)
         0%,
-      color-mix(in oklch, var(--brand-color) 94%, black) 40%,
-      color-mix(in oklch, var(--brand-color) 82%, black) 58%,
-      color-mix(in oklch, var(--brand-color-3, var(--brand-color)) 88%, black)
+      color-mix(in oklch, var(--brand-color) 86%, black) 42%,
+      color-mix(in oklch, var(--brand-color) 76%, black) 58%,
+      color-mix(in oklch, var(--brand-color-3, var(--brand-color)) 82%, black)
         100%
     );
     border-color: color-mix(
       in oklch,
-      var(--brand-color-2, var(--brand-color)) 62%,
+      var(--brand-color-2, var(--brand-color)) 28%,
       white
     );
     color: white;
     box-shadow:
-      0 18px 42px color-mix(in srgb, var(--brand-color) 30%, transparent),
-      0 1px 0 color-mix(in srgb, white 34%, transparent) inset,
-      0 -18px 38px color-mix(in srgb, black 12%, transparent) inset;
-    backdrop-filter: blur(18px) saturate(1.3);
-    text-shadow: 0 1px 2px oklch(0 0 0 / 0.42);
+      0 1px 2px color-mix(in srgb, black 14%, transparent),
+      0 1px 0 color-mix(in srgb, white 22%, transparent) inset;
   }
 
   .brand-social-link:hover {
     background: linear-gradient(
       128deg,
-      color-mix(in oklch, var(--brand-color-2, var(--brand-color)) 88%, black)
+      color-mix(in oklch, var(--brand-color-2, var(--brand-color)) 78%, black)
         0%,
-      color-mix(in oklch, var(--brand-color) 96%, black) 42%,
-      color-mix(in oklch, var(--brand-color) 86%, black) 58%,
-      color-mix(in oklch, var(--brand-color-3, var(--brand-color)) 94%, black)
+      color-mix(in oklch, var(--brand-color) 90%, black) 42%,
+      color-mix(in oklch, var(--brand-color) 80%, black) 58%,
+      color-mix(in oklch, var(--brand-color-3, var(--brand-color)) 86%, black)
         100%
     );
   }
@@ -653,16 +650,57 @@
       color-mix(
           in oklch,
           var(--brand-color-dark-2, var(--brand-color-dark, var(--brand-color)))
+            70%,
+          black
+        )
+        0%,
+      color-mix(
+          in oklch,
+          var(--brand-color-dark, var(--brand-color)) 84%,
+          black
+        )
+        42%,
+      color-mix(
+          in oklch,
+          var(--brand-color-dark, var(--brand-color)) 74%,
+          black
+        )
+        58%,
+      color-mix(
+          in oklch,
+          var(--brand-color-dark-3, var(--brand-color-dark, var(--brand-color)))
+            80%,
+          black
+        )
+        100%
+    );
+    border-color: color-mix(
+      in oklch,
+      var(--brand-color-dark-2, var(--brand-color-dark, var(--brand-color))) 30%,
+      white
+    );
+    color: white;
+    box-shadow:
+      0 1px 2px oklch(0 0 0 / 0.22),
+      0 1px 0 oklch(1 0 0 / 0.12) inset;
+  }
+
+  .dark .brand-social-link:hover {
+    background: linear-gradient(
+      128deg,
+      color-mix(
+          in oklch,
+          var(--brand-color-dark-2, var(--brand-color-dark, var(--brand-color)))
             76%,
           black
         )
         0%,
       color-mix(
           in oklch,
-          var(--brand-color-dark, var(--brand-color)) 92%,
+          var(--brand-color-dark, var(--brand-color)) 88%,
           black
         )
-        40%,
+        42%,
       color-mix(
           in oklch,
           var(--brand-color-dark, var(--brand-color)) 78%,
@@ -672,55 +710,7 @@
       color-mix(
           in oklch,
           var(--brand-color-dark-3, var(--brand-color-dark, var(--brand-color)))
-            86%,
-          black
-        )
-        100%
-    );
-    border-color: color-mix(
-      in oklch,
-      var(--brand-color-dark-2, var(--brand-color-dark, var(--brand-color))) 72%,
-      white
-    );
-    color: white;
-    box-shadow:
-      0 18px 48px
-        color-mix(
-          in srgb,
-          var(--brand-color-dark, var(--brand-color)) 34%,
-          transparent
-        ),
-      0 1px 0 oklch(1 0 0 / 0.12) inset,
-      0 -18px 38px oklch(0 0 0 / 0.16) inset;
-    text-shadow: 0 1px 2px oklch(0 0 0 / 0.5);
-  }
-
-  .dark .brand-social-link:hover {
-    background: linear-gradient(
-      128deg,
-      color-mix(
-          in oklch,
-          var(--brand-color-dark-2, var(--brand-color-dark, var(--brand-color)))
-            90%,
-          black
-        )
-        0%,
-      color-mix(
-          in oklch,
-          var(--brand-color-dark, var(--brand-color)) 94%,
-          black
-        )
-        42%,
-      color-mix(
-          in oklch,
-          var(--brand-color-dark, var(--brand-color)) 82%,
-          black
-        )
-        58%,
-      color-mix(
-          in oklch,
-          var(--brand-color-dark-3, var(--brand-color-dark, var(--brand-color)))
-            92%,
+            84%,
           black
         )
         100%

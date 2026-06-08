@@ -86,26 +86,26 @@ actionLinks:
     url: https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf
     icon: heroicons:identification
     group: primary
-    color: "var(--card)"
-    color2: "var(--muted)"
-    color3: "var(--background)"
-    darkColor: "var(--card)"
-    darkColor2: "var(--muted)"
-    darkColor3: "var(--background)"
-    textColor: "var(--card-foreground)"
+    color: "var(--color-brand-500)"
+    color2: "var(--color-brand-400)"
+    color3: "var(--color-brand-700)"
+    darkColor: "var(--color-brand-500)"
+    darkColor2: "var(--color-brand-400)"
+    darkColor3: "var(--color-brand-700)"
+    textColor: "var(--primary-foreground)"
     pulse: true
   - id: sms
     label: "2. Send me a text"
     url: "sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
     icon: heroicons:chat-bubble-left-ellipsis
     group: primary
-    color: "var(--secondary)"
-    color2: "var(--accent)"
-    color3: "var(--background)"
-    darkColor: "var(--secondary)"
-    darkColor2: "var(--accent)"
-    darkColor3: "var(--background)"
-    textColor: "var(--secondary-foreground)"
+    color: "var(--color-brand-600)"
+    color2: "var(--color-brand-500)"
+    color3: "var(--color-brand-800)"
+    darkColor: "var(--color-brand-600)"
+    darkColor2: "var(--color-brand-500)"
+    darkColor3: "var(--color-brand-800)"
+    textColor: "var(--primary-foreground)"
   - id: youtube-personal
     label: Ayoub Abedrabbo
     url: https://www.youtube.com/channel/UCQ5YfTwU5n_khZx-WJEkZKQ
