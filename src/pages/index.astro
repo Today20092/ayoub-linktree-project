@@ -5,7 +5,6 @@ import type { ImageMetadata } from 'astro'
 import { Icon } from 'astro-icon/components'
 
 import LatestChannelVideo from '../components/LatestChannelVideo.astro'
-import Link from '../components/Link.astro'
 import QrCodeButton from '../components/QrCodeButton.astro'
 import SocialLinkButton from '../components/SocialLinkButton'
 import VideoBentoGrid from '../components/VideoBentoGrid.astro'
@@ -64,17 +63,6 @@ const sameAsUrls = socialLinks.map((link) => link.url)
 const primaryLinks = actionLinks.filter((link) => link.group === 'primary')
 const channelLinks = actionLinks.filter((link) => link.group === 'youtube')
 const supportLinks = actionLinks.filter((link) => link.group === 'support')
-
-const linkStyle = (link: (typeof actionLinks)[number]) =>
-  link.color
-    ? [
-        `--brand-color: ${link.color}`,
-        `--brand-color-dark: ${link.darkColor ?? link.color}`,
-        link.textColor ? `--brand-text-color: ${link.textColor}` : '',
-      ]
-        .filter(Boolean)
-        .join('; ')
-    : undefined
 
 const brandCardStyle = (
   item: Pick<
@@ -278,25 +266,15 @@ const structuredData = {
       >
         {
           primaryLinks.map((link) => (
-            <Link
-              linktxt={link.label}
-              bgcolor="brand-action-link"
-              link={link.url}
-              linkcolor=""
+            <SocialLinkButton
+              label={link.label}
+              href={link.url}
               id={link.id}
-              border="border border-solid"
-              style={linkStyle(link)}
-              extraClasses={`py-3 text-xl font-bold ${
-                link.pulse ? 'animate-button-pulse' : ''
-              }`}
+              style={brandCardStyle(link)}
+              className={link.pulse ? 'animate-button-pulse' : undefined}
             >
-              <Icon
-                slot="icon"
-                name={link.icon}
-                class="size-7"
-                aria-hidden="true"
-              />
-            </Link>
+              <Icon name={link.icon} class="size-9" aria-hidden="true" />
+            </SocialLinkButton>
           ))
         }
       </nav>
