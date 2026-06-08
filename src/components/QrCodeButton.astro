@@ -11,7 +11,8 @@ const displayUrl = (() => {
     return pageUrl.replace(/^https?:\/\//, '')
   }
 })()
-const qrDataUrl = await QRCode.toDataURL(pageUrl, {
+const qrSvg = await QRCode.toString(pageUrl, {
+  type: 'svg',
   color: {
     dark: '#020617',
     light: '#ffffff',
@@ -20,6 +21,7 @@ const qrDataUrl = await QRCode.toDataURL(pageUrl, {
   margin: 2,
   width: 512,
 })
+const qrDataUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(qrSvg)}`
 ---
 
 <div class="mx-auto mt-5 flex justify-center lg:hidden">

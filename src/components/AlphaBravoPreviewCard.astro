@@ -1,5 +1,22 @@
 ---
+import { badgeVariants } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
+
 const href = 'https://alphabravomedia.co'
+
+const baseBadgeClass = 'h-7 px-3 text-xs font-bold shadow-sm'
+const cardBadgeClass = badgeVariants({
+  variant: 'outline',
+  className: baseBadgeClass,
+})
+const primaryBadgeClass = badgeVariants({
+  className: baseBadgeClass,
+})
+const arrowButtonClass = buttonVariants({
+  size: 'icon-lg',
+  className:
+    'size-11 rounded-full transition-transform duration-300 group-hover/card:translate-x-1 sm:size-14',
+})
 ---
 
 <a
@@ -8,21 +25,23 @@ const href = 'https://alphabravomedia.co'
   target="_blank"
   rel="noopener noreferrer"
   aria-label="AlphaBravoMedia homepage preview"
-  class="group border-outline-variant/70 bg-surface-container-high text-company elevation-2 hover:elevation-4 focus-visible:ring-primary/70 focus-visible:ring-offset-surface mx-auto block w-full max-w-[560px] overflow-hidden rounded-2xl border transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.01] hover:brightness-105 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-0 active:scale-[0.99]"
+  data-slot="card"
+  data-size="default"
+  class="group/card bg-card text-card-foreground ring-foreground/10 focus-visible:border-ring focus-visible:ring-ring/30 mx-auto flex w-full max-w-[560px] flex-col gap-4 overflow-hidden rounded-xl py-4 text-sm ring-1 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg focus-visible:ring-3 focus-visible:outline-none active:translate-y-0 sm:gap-5 sm:py-5"
 >
-  <span class="block p-3 sm:p-4">
+  <span data-slot="card-content" class="px-4 sm:px-5">
     <span
-      class="border-outline-variant/60 relative block aspect-[16/10] overflow-hidden rounded-xl border bg-[#f7f3ea] shadow-inner dark:bg-[#191512]"
+      class="bg-muted ring-border/70 relative block aspect-[16/10] overflow-hidden rounded-lg ring-1"
     >
       <img
         src="/previews/alphabravomedia-homepage.png"
         alt=""
         loading="lazy"
         decoding="async"
-        class="h-full w-full object-cover object-[35%_18%] transition-transform duration-500 group-hover:scale-[1.03]"
+        class="h-full w-full object-cover object-[35%_18%] transition-transform duration-500 group-hover/card:scale-[1.03]"
       />
       <span
-        class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#f6efe6] via-[#f6efe6]/75 to-transparent dark:from-[#15110f] dark:via-[#15110f]/80"
+        class="from-card via-card/75 absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t to-transparent"
         aria-hidden="true"
       >
       </span>
@@ -30,37 +49,47 @@ const href = 'https://alphabravomedia.co'
         class="absolute right-3 bottom-3 left-3 flex flex-wrap items-center gap-2"
       >
         <span
-          class="rounded-full bg-[#c76533] px-3 py-1.5 text-xs font-bold text-white shadow-md"
+          data-slot="badge"
+          data-variant="default"
+          class={primaryBadgeClass}
         >
           Pricing
         </span>
-        <span
-          class="rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-[#3b3028] shadow-md ring-1 ring-[#d7c9ba] dark:bg-[#2b241f]/95 dark:text-[#f5eee8] dark:ring-[#5a4639]"
-        >
+        <span data-slot="badge" data-variant="outline" class={cardBadgeClass}>
           Portfolio
         </span>
-        <span
-          class="rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-[#3b3028] shadow-md ring-1 ring-[#d7c9ba] dark:bg-[#2b241f]/95 dark:text-[#f5eee8] dark:ring-[#5a4639]"
-        >
+        <span data-slot="badge" data-variant="outline" class={cardBadgeClass}>
           Client work
         </span>
       </span>
     </span>
+  </span>
 
-    <span class="flex items-center justify-between gap-3 px-1 pt-4">
-      <span class="text-left">
-        <span class="text-on-surface block text-lg leading-tight font-bold">
-          See our work at AlphaBravoMedia
-        </span>
-        <span class="text-on-surface-variant block text-sm">
-          View portfolio, pricing, and media services
-        </span>
+  <span
+    data-slot="card-footer"
+    class="bg-muted/50 flex items-center justify-between gap-3 border-t px-4 pt-4 sm:px-5 sm:pt-5"
+  >
+    <span class="text-left">
+      <span
+        data-slot="card-title"
+        class="font-heading text-card-foreground block text-lg leading-tight font-medium sm:text-xl"
+      >
+        See our work at AlphaBravoMedia
       </span>
       <span
-        class="bg-company text-surface grid h-11 w-11 shrink-0 place-items-center rounded-full transition-transform duration-300 group-hover:translate-x-1"
+        data-slot="card-description"
+        class="text-muted-foreground block text-sm"
       >
-        <span aria-hidden="true">→</span>
+        View portfolio, pricing, and media services
       </span>
+    </span>
+    <span
+      data-slot="button"
+      data-variant="default"
+      data-size="icon-lg"
+      class={arrowButtonClass}
+    >
+      <span aria-hidden="true">→</span>
     </span>
   </span>
 </a>

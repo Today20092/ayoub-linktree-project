@@ -86,18 +86,26 @@ actionLinks:
     url: https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf
     icon: heroicons:identification
     group: primary
-    color: "oklch(0.76 0.13 238)"
-    darkColor: "oklch(0.74 0.14 238)"
-    textColor: "oklch(0.13 0.02 255)"
+    color: "var(--card)"
+    color2: "var(--muted)"
+    color3: "var(--background)"
+    darkColor: "var(--card)"
+    darkColor2: "var(--muted)"
+    darkColor3: "var(--background)"
+    textColor: "var(--card-foreground)"
     pulse: true
   - id: sms
     label: "2. Send me a text"
     url: "sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
     icon: heroicons:chat-bubble-left-ellipsis
     group: primary
-    color: "oklch(0.78 0.15 38)"
-    darkColor: "oklch(0.74 0.16 38)"
-    textColor: "oklch(0.14 0.02 255)"
+    color: "var(--secondary)"
+    color2: "var(--accent)"
+    color3: "var(--background)"
+    darkColor: "var(--secondary)"
+    darkColor2: "var(--accent)"
+    darkColor3: "var(--background)"
+    textColor: "var(--secondary-foreground)"
   - id: youtube-personal
     label: Ayoub Abedrabbo
     url: https://www.youtube.com/channel/UCQ5YfTwU5n_khZx-WJEkZKQ
