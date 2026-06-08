@@ -283,8 +283,19 @@ const structuredData = {
 
       <section
         class="animate-fade-in-up mt-8 mb-5 flex flex-col gap-4 delay-400"
-        aria-label="Latest YouTube videos"
+        aria-labelledby="latest-youtube-title"
       >
+        <div class="mx-auto w-full max-w-xl px-4 text-left sm:px-6">
+          <p class="text-primary text-xs font-bold tracking-[0.18em] uppercase">
+            Latest uploads
+          </p>
+          <h2
+            id="latest-youtube-title"
+            class="text-foreground mt-1 text-2xl font-extrabold"
+          >
+            My YouTube channels
+          </h2>
+        </div>
         {
           latestVideoChannels.map((channel) => (
             <LatestChannelVideo
