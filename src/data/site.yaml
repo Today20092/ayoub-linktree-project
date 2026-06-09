@@ -13,62 +13,62 @@ socialLinks:
     url: https://instagram.com/alphabravomedia
     icon: simple-icons:instagram
     label: "Instagram: @AlphaBravoMedia"
-    color: "#c13584"
-    color2: "#f56040"
-    color3: "#833ab4"
-    darkColor: "#c13584"
-    darkColor2: "#f56040"
-    darkColor3: "#4f1f78"
+    color: "oklch(0.59 0.2 350)"
+    color2: "oklch(0.72 0.16 38)"
+    color3: "oklch(0.36 0.16 304)"
+    darkColor: "oklch(0.61 0.19 350)"
+    darkColor2: "oklch(0.7 0.15 38)"
+    darkColor3: "oklch(0.28 0.13 304)"
   - id: discord
     url: https://discordapp.com/users/279467079990640641
     icon: simple-icons:discord
     label: Discord profile
-    color: "#5865f2"
-    color2: "#7b83ff"
-    color3: "#1e1f47"
-    darkColor: "#8b95ff"
-    darkColor2: "#5865f2"
-    darkColor3: "#1e1f47"
+    color: "oklch(0.57 0.2 278)"
+    color2: "oklch(0.68 0.15 274)"
+    color3: "oklch(0.25 0.08 277)"
+    darkColor: "oklch(0.65 0.17 276)"
+    darkColor2: "oklch(0.58 0.19 278)"
+    darkColor3: "oklch(0.22 0.07 277)"
   - id: linkedin
     url: https://www.linkedin.com/in/ayoubabedrabbo/
     icon: simple-icons:linkedin
     label: LinkedIn
-    color: "#0a66c2"
-    color2: "#62a6e8"
-    color3: "#07345f"
-    darkColor: "#68b7ff"
-    darkColor2: "#0a66c2"
-    darkColor3: "#082846"
+    color: "oklch(0.52 0.17 254)"
+    color2: "oklch(0.7 0.12 236)"
+    color3: "oklch(0.3 0.1 250)"
+    darkColor: "oklch(0.65 0.14 246)"
+    darkColor2: "oklch(0.55 0.16 254)"
+    darkColor3: "oklch(0.24 0.08 250)"
   - id: github
     url: https://github.com/Today20092
     icon: simple-icons:github
     label: GitHub
-    color: "#181717"
-    color2: "#6e7681"
-    color3: "#0d1117"
-    darkColor: "#30363d"
-    darkColor2: "#6e7681"
-    darkColor3: "#0d1117"
+    color: "oklch(0.26 0.012 255)"
+    color2: "oklch(0.46 0.025 255)"
+    color3: "oklch(0.14 0.014 255)"
+    darkColor: "oklch(0.31 0.018 255)"
+    darkColor2: "oklch(0.5 0.024 255)"
+    darkColor3: "oklch(0.17 0.014 255)"
   - id: telegram
     url: https://t.me/AyoubAb1
     icon: simple-icons:telegram
     label: Telegram
-    color: "#147fb8"
-    color2: "#36aee2"
-    color3: "#07354d"
-    darkColor: "#147fb8"
-    darkColor2: "#36aee2"
-    darkColor3: "#0b2f45"
+    color: "oklch(0.55 0.13 235)"
+    color2: "oklch(0.75 0.13 215)"
+    color3: "oklch(0.28 0.08 225)"
+    darkColor: "oklch(0.6 0.13 230)"
+    darkColor2: "oklch(0.72 0.12 215)"
+    darkColor3: "oklch(0.23 0.07 225)"
   - id: tiktok
     url: https://www.tiktok.com/@ayoubabedrabbo
     icon: simple-icons:tiktok
     label: TikTok
-    color: "#010101"
-    color2: "#25f4ee"
-    color3: "#fe2c55"
-    darkColor: "#25f4ee"
-    darkColor2: "#fe2c55"
-    darkColor3: "#010101"
+    color: "oklch(0.15 0.008 250)"
+    color2: "oklch(0.82 0.15 190)"
+    color3: "oklch(0.58 0.22 18)"
+    darkColor: "oklch(0.18 0.01 250)"
+    darkColor2: "oklch(0.78 0.14 190)"
+    darkColor3: "oklch(0.52 0.2 18)"
   # - id: substack
   #   url: https://www.substack.com/@ayoubabedrabbo1
   #   icon: simple-icons:substack

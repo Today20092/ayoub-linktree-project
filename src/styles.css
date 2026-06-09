@@ -542,35 +542,44 @@
 
   .brand-social-link {
     background: linear-gradient(
-      128deg,
+      135deg,
+      var(--brand-color) 0%,
       color-mix(in oklch, var(--brand-color-2, var(--brand-color)) 72%, black)
-        0%,
-      color-mix(in oklch, var(--brand-color) 86%, black) 42%,
-      color-mix(in oklch, var(--brand-color) 76%, black) 58%,
-      color-mix(in oklch, var(--brand-color-3, var(--brand-color)) 82%, black)
+        52%,
+      var(--brand-color-3, var(--brand-color))
         100%
     );
-    border-color: color-mix(
-      in oklch,
-      var(--brand-color-2, var(--brand-color)) 28%,
-      white
-    );
+    border-color: oklch(1 0 0 / 0.18);
     color: white;
+    text-shadow: 0 1px 1px oklch(0 0 0 / 0.2);
     box-shadow:
-      0 1px 2px color-mix(in srgb, black 14%, transparent),
-      0 1px 0 color-mix(in srgb, white 22%, transparent) inset;
+      0 14px 32px color-mix(in oklch, var(--brand-color) 22%, transparent),
+      0 1px 0 color-mix(in oklch, white 28%, transparent) inset;
   }
 
   .brand-social-link:hover {
-    background: linear-gradient(
-      128deg,
-      color-mix(in oklch, var(--brand-color-2, var(--brand-color)) 78%, black)
-        0%,
-      color-mix(in oklch, var(--brand-color) 90%, black) 42%,
-      color-mix(in oklch, var(--brand-color) 80%, black) 58%,
-      color-mix(in oklch, var(--brand-color-3, var(--brand-color)) 86%, black)
-        100%
+    border-color: color-mix(
+      in oklch,
+      var(--brand-color-2, var(--brand-color)) 34%,
+      white
     );
+    box-shadow:
+      0 18px 38px color-mix(in oklch, var(--brand-color) 28%, transparent),
+      0 1px 0 color-mix(in oklch, white 34%, transparent) inset;
+  }
+
+  .brand-social-link:focus-visible {
+    --tw-ring-color: color-mix(
+      in oklch,
+      var(--brand-color-2, var(--brand-color)) 48%,
+      white
+    );
+  }
+
+  .brand-social-link:active {
+    box-shadow:
+      0 8px 20px color-mix(in oklch, var(--brand-color) 18%, transparent),
+      0 1px 0 color-mix(in oklch, white 22%, transparent) inset;
   }
 
   .dark .brand-support-link {
@@ -646,74 +655,53 @@
 
   .dark .brand-social-link {
     background: linear-gradient(
-      128deg,
+      135deg,
+      var(--brand-color-dark, var(--brand-color)) 0%,
       color-mix(
           in oklch,
-          var(--brand-color-dark-2, var(--brand-color-dark, var(--brand-color)))
-            70%,
+          var(--brand-color-dark-2, var(--brand-color-2, var(--brand-color)))
+            72%,
           black
         )
-        0%,
-      color-mix(
-          in oklch,
-          var(--brand-color-dark, var(--brand-color)) 84%,
-          black
-        )
-        42%,
-      color-mix(
-          in oklch,
-          var(--brand-color-dark, var(--brand-color)) 74%,
-          black
-        )
-        58%,
-      color-mix(
-          in oklch,
-          var(--brand-color-dark-3, var(--brand-color-dark, var(--brand-color)))
-            80%,
-          black
-        )
+        52%,
+      var(--brand-color-dark-3, var(--brand-color-3, var(--brand-color)))
         100%
     );
-    border-color: color-mix(
-      in oklch,
-      var(--brand-color-dark-2, var(--brand-color-dark, var(--brand-color))) 30%,
-      white
-    );
+    border-color: oklch(1 0 0 / 0.12);
     color: white;
     box-shadow:
-      0 1px 2px oklch(0 0 0 / 0.22),
-      0 1px 0 oklch(1 0 0 / 0.12) inset;
+      0 16px 36px
+        color-mix(
+          in oklch,
+          var(--brand-color-dark, var(--brand-color)) 26%,
+          transparent
+        ),
+      0 1px 0 color-mix(in oklch, white 18%, transparent) inset;
   }
 
   .dark .brand-social-link:hover {
-    background: linear-gradient(
-      128deg,
-      color-mix(
+    border-color: color-mix(
+      in oklch,
+      var(--brand-color-dark-2, var(--brand-color-dark, var(--brand-color)))
+        30%,
+      white
+    );
+    box-shadow:
+      0 20px 44px
+        color-mix(
           in oklch,
-          var(--brand-color-dark-2, var(--brand-color-dark, var(--brand-color)))
-            76%,
-          black
-        )
-        0%,
-      color-mix(
-          in oklch,
-          var(--brand-color-dark, var(--brand-color)) 88%,
-          black
-        )
-        42%,
-      color-mix(
-          in oklch,
-          var(--brand-color-dark, var(--brand-color)) 78%,
-          black
-        )
-        58%,
-      color-mix(
-          in oklch,
-          var(--brand-color-dark-3, var(--brand-color-dark, var(--brand-color)))
-            84%,
-          black
-        )
-        100%
+          var(--brand-color-dark, var(--brand-color)) 32%,
+          transparent
+        ),
+      0 1px 0 color-mix(in oklch, white 24%, transparent) inset;
+  }
+
+  .dark .brand-social-link:focus-visible {
+    --tw-ring-color: color-mix(
+      in oklch,
+      var(--brand-color-dark-2, var(--brand-color-dark, var(--brand-color)))
+        46%,
+      white
     );
   }
 }

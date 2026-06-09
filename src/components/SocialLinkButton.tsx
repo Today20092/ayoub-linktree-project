@@ -28,7 +28,7 @@ export default function SocialLinkButton({
       variant="outline"
       size="lg"
       className={cn(
-        'brand-social-link mx-auto h-auto w-full cursor-pointer rounded-xl border border-solid px-5 py-4 text-lg font-semibold tracking-normal text-foreground shadow-sm transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-105 focus-visible:ring-ring/30 focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 active:translate-y-0',
+        'brand-social-link mx-auto h-auto w-full cursor-pointer rounded-xl border border-solid px-5 py-4 text-lg font-semibold tracking-normal text-white transition-all duration-200 ease-out hover:-translate-y-0.5 hover:brightness-[1.04] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0 active:brightness-95',
         className,
       )}
     >
