@@ -22,3 +22,9 @@ pnpm-debug.log*
 
 #claude
 CLAUDE.MD
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
