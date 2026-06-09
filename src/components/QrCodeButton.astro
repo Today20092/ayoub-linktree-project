@@ -1,5 +1,5 @@
 ---
-import { Icon } from 'astro-icon/components'
+import { QrCode, X } from 'lucide-react'
 import QRCode from 'qrcode'
 
 const pageUrl = Astro.url.toString()
@@ -32,7 +32,7 @@ const qrDataUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(qrSvg)}
     aria-haspopup="dialog"
     aria-controls="qr-dialog"
   >
-    <Icon name="heroicons:qr-code" class="size-5" aria-hidden="true" />
+    <QrCode className="size-5" aria-hidden="true" />
     <span>QR code</span>
   </button>
 </div>
@@ -72,7 +72,7 @@ const qrDataUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(qrSvg)}
         class="hover:bg-accent focus-visible:ring-ring/30 grid size-10 place-items-center rounded-xl transition-colors focus-visible:ring-2 focus-visible:outline-none"
         aria-label="Close QR code"
       >
-        <Icon name="heroicons:x-mark" class="size-6" aria-hidden="true" />
+        <X className="size-6" aria-hidden="true" />
       </button>
     </div>
     <div

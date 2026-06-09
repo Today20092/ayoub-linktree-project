@@ -1,5 +1,5 @@
 ---
-import { Icon } from 'astro-icon/components'
+import { Play } from 'lucide-react'
 
 type Video = {
   title: string
@@ -80,9 +80,8 @@ const publishedDate = new Intl.DateTimeFormat('en-US', {
           <span
             class="grid size-10 place-items-center rounded-full bg-background/95 text-[var(--channel-active-accent)] shadow-[0_8px_24px_color-mix(in_srgb,var(--foreground)_20%,transparent)] ring-1 ring-border backdrop-blur-sm dark:bg-[color-mix(in_srgb,var(--channel-active-bg)_86%,white)] dark:text-[var(--channel-active-accent-dark)]"
           >
-            <Icon
-              name="heroicons:play-solid"
-              class="size-5 translate-x-[1px]"
+            <Play
+              className="size-5 translate-x-[1px] fill-current"
               aria-hidden="true"
             />
           </span>

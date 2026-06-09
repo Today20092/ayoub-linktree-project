@@ -3,6 +3,7 @@ import '../styles.css'
 
 import type { ImageMetadata } from 'astro'
 import { Icon } from 'astro-icon/components'
+import { IdCard, MessageSquareText, Upload } from 'lucide-react'
 
 import AlphaBravoPreviewCard from '../components/AlphaBravoPreviewCard.astro'
 import LatestChannelVideo from '../components/LatestChannelVideo.astro'
@@ -62,6 +63,10 @@ const channelBranding = Object.fromEntries(
 const sameAsUrls = socialLinks.map((link) => link.url)
 const primaryLinks = actionLinks.filter((link) => link.group === 'primary')
 const supportLinks = actionLinks.filter((link) => link.group === 'support')
+const lucideActionIcons = {
+  'lucide:id-card': IdCard,
+  'lucide:message-square-text': MessageSquareText,
+}
 
 const brandCardStyle = (
   item: Pick<
@@ -222,11 +227,7 @@ const structuredData = {
           data-share-text={pageDescription}
           data-share-url={canonicalUrl}
         >
-          <Icon
-            name="heroicons:arrow-up-tray"
-            class="size-5"
-            aria-hidden="true"
-          />
+          <Upload className="size-5" aria-hidden="true" />
         </button>
         <img
           src={profileImageUrl}
@@ -259,17 +260,24 @@ const structuredData = {
         aria-label="Contact links"
       >
         {
-          primaryLinks.map((link) => (
-            <SocialLinkButton
-              label={link.label}
-              href={link.url}
-              id={link.id}
-              style={brandCardStyle(link)}
-              className={link.pulse ? 'animate-button-pulse' : undefined}
-            >
-              <Icon name={link.icon} class="size-9" aria-hidden="true" />
-            </SocialLinkButton>
-          ))
+          primaryLinks.map((link) => {
+            const LinkIcon =
+              lucideActionIcons[link.icon as keyof typeof lucideActionIcons]
+
+            return (
+              <SocialLinkButton
+                label={link.label}
+                href={link.url}
+                id={link.id}
+                style={brandCardStyle(link)}
+                className={link.pulse ? 'animate-button-pulse' : undefined}
+              >
+                {LinkIcon && (
+                  <LinkIcon className="size-9" aria-hidden="true" />
+                )}
+              </SocialLinkButton>
+            )
+          })
         }
       </nav>
 

@@ -84,7 +84,7 @@ actionLinks:
   - id: contact
     label: "1. Download my contact card"
     url: https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf
-    icon: heroicons:identification
+    icon: lucide:id-card
     group: primary
     color: "var(--color-brand-500)"
     color2: "var(--color-brand-400)"
@@ -97,7 +97,7 @@ actionLinks:
   - id: sms
     label: "2. Send me a text"
     url: "sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
-    icon: heroicons:chat-bubble-left-ellipsis
+    icon: lucide:message-square-text
     group: primary
     color: "var(--color-brand-600)"
     color2: "var(--color-brand-500)"
