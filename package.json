@@ -7,10 +7,13 @@
     "start": "astro dev",
     "update:youtube": "node scripts/update-latest-youtube-video.mjs",
     "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "preview": "npm run build && wrangler dev",
+    "astro": "astro",
+    "deploy": "npm run build && wrangler deploy",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "12",
     "@astrojs/react": "^4.4.2",
     "@fontsource-variable/geist": "^5.2.9",
     "@iconify-json/fa-brands": "^1.2.2",
@@ -38,6 +41,7 @@
     "prettier": "^3.1.1",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "wrangler": "^4.102.0"
   }
 }
