@@ -1,7 +1,7 @@
 ---
 import '../../styles.css'
 
-import { ArrowLeft, ArrowUpRight } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, Play } from 'lucide-react'
 
 import type { PortfolioProject } from '../../data/portfolio'
 import { portfolioProjects } from '../../data/portfolio'
@@ -24,6 +24,17 @@ const canonicalUrl = new URL(
 ).toString()
 const socialImageUrl = new URL(project.heroImage, Astro.site).toString()
 const projectTitle = `${project.title} - Ayoub Abedrabbo`
+const comparisonVideos =
+  project.videos?.filter((video) => video.comparisonRole) ?? []
+const milestoneVideos =
+  project.videos?.filter((video) => !video.comparisonRole) ?? []
+const formatVideoDate = (date: string) =>
+  new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(new Date(`${date}T00:00:00Z`))
 const hasDetails = Boolean(
   project.role ||
     project.collaborators?.length ||
@@ -56,6 +67,7 @@ const hasDetails = Boolean(
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="preconnect" href="https://api.fontshare.com" />
+    <link rel="preconnect" href="https://i.ytimg.com" />
     <link
       rel="stylesheet"
       href="https://api.fontshare.com/v2/css?f[]=plus-jakarta-sans@1,2&f[]=zodiak@1,2&display=swap"
@@ -217,6 +229,124 @@ const hasDetails = Boolean(
                   </div>
                 )}
               </dl>
+            </section>
+          )
+        }
+
+        {
+          comparisonVideos.length > 0 && (
+            <section
+              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              aria-labelledby="comparison-title"
+            >
+              <p class="text-primary text-xs font-bold tracking-wider uppercase">
+                Production comparison
+              </p>
+              <h2
+                id="comparison-title"
+                class="font-heading mt-2 text-2xl font-bold"
+              >
+                Before and after
+              </h2>
+              <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
+                These episodes show the change in recording, lighting, color,
+                and sound quality from before our partnership to the current
+                production workflow.
+              </p>
+
+              <div class="mt-7 grid gap-8 lg:grid-cols-2">
+                {comparisonVideos.map((video) => (
+                  <article class="flex flex-col gap-4">
+                    <div>
+                      <p class="text-primary text-xs font-bold tracking-wider uppercase">
+                        {video.label}
+                      </p>
+                      <p class="text-muted-foreground mt-1 text-sm font-medium">
+                        {formatVideoDate(video.publishedAt)}
+                      </p>
+                    </div>
+                    <div class="bg-muted relative aspect-video overflow-hidden">
+                      <iframe
+                        src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}`}
+                        title={`${video.label}: ${video.title}`}
+                        loading="lazy"
+                        class="absolute inset-0 size-full border-0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen
+                      />
+                    </div>
+                    <p class="text-muted-foreground leading-7">
+                      {video.description}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          )
+        }
+
+        {
+          milestoneVideos.length > 0 && (
+            <section
+              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              aria-labelledby="milestones-title"
+            >
+              <h2 id="milestones-title" class="font-heading text-2xl font-bold">
+                First collaborations
+              </h2>
+              <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
+                These October 2025 uploads mark the beginning of my production
+                work with Ya Hala.
+              </p>
+              <ol class="mt-6 grid gap-6 sm:grid-cols-2">
+                {milestoneVideos.map((video) => (
+                  <li>
+                    <a
+                      href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+                      aria-label={`Watch ${video.label} on YouTube: ${video.title}`}
+                    >
+                      <div class="bg-muted relative aspect-video overflow-hidden">
+                        <img
+                          src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
+                          alt=""
+                          width="320"
+                          height="180"
+                          loading="lazy"
+                          decoding="async"
+                          class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                        />
+                        <span class="bg-background/90 text-foreground absolute inset-0 m-auto inline-flex size-12 items-center justify-center rounded-full shadow-sm">
+                          <Play
+                            className="size-5 fill-current"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </div>
+                      <div class="border-border border-b py-4">
+                        <div class="flex items-start justify-between gap-4">
+                          <div>
+                            <p class="font-bold">{video.label}</p>
+                            <p class="text-muted-foreground mt-1 text-sm">
+                              {formatVideoDate(video.publishedAt)}
+                            </p>
+                          </div>
+                          <ArrowUpRight
+                            className="mt-1 size-4 shrink-0"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <p class="text-muted-foreground mt-3 text-sm leading-6">
+                          {video.description}
+                        </p>
+                      </div>
+                    </a>
+                  </li>
+                ))}
+              </ol>
             </section>
           )
         }

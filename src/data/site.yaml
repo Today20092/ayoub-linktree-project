@@ -12,6 +12,16 @@ features:
   showTampaWork: false
 
 socialLinks:
+  - id: alphabravomedia-website
+    url: https://alphabravomedia.co
+    icon: simple-icons:googlechrome
+    label: "My business — AlphaBravoMedia"
+    color: "#8f3f37"
+    color2: "#f0a097"
+    color3: "#15110d"
+    darkColor: "#f0a097"
+    darkColor2: "#8f3f37"
+    darkColor3: "#211211"
   - id: instagram
     url: https://instagram.com/alphabravomedia
     icon: simple-icons:instagram
