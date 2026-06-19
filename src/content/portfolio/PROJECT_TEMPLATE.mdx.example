@@ -1,0 +1,47 @@
+---
+order: 99
+title: Project name
+status: placeholder
+category: Video production
+summary: A short description used on the portfolio page and in search metadata.
+thumbnail: /previews/client-work/project-name.webp
+heroImage: /previews/client-work/project-name.webp
+imageAlt: A useful description of the project image
+imageWidth: 1280
+imageHeight: 720
+services:
+  - Service one
+  - Service two
+links:
+  - label: Visit website
+    url: https://example.com
+# Optional fields:
+# role: Videographer and colorist
+# collaborators:
+#   - Collaborator name
+# duration: January 2026-present
+# tools:
+#   - DaVinci Resolve
+# outcomes:
+#   - A concrete project result
+# gallery:
+#   - src: /previews/client-work/project-behind-the-scenes.webp
+#     alt: Description of the gallery image
+#     caption: Optional visible caption
+# videos:
+#   - youtubeId: VIDEO_ID
+#     label: Finished production
+#     title: Accessible video title
+#     publishedAt: "2026-01-01"
+#     description: What this video demonstrates.
+#     comparisonRole: after
+---
+
+## Overview
+
+Write the project story here using normal Markdown. The filename becomes the URL:
+
+`project-name.mdx` becomes `/portfolio/project-name`.
+
+You can add paragraphs, lists, links, and additional headings. Delete the body
+entirely if the project does not have a written case study yet.

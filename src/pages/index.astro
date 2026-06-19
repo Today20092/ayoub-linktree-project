@@ -1,8 +1,9 @@
 ---
 import '../styles.css'
 
+import { getCollection } from 'astro:content'
+
 import PortfolioIndex from '../components/PortfolioIndex.astro'
-import { portfolioProjects } from '../data/portfolio'
 import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
 const {
@@ -31,6 +32,17 @@ const profileImageUrl = new URL(
 const primaryLinks = actionLinks.filter((link) => link.group === 'primary')
 const supportLinks = actionLinks.filter((link) => link.group === 'support')
 const sameAsUrls = socialLinks.map((link) => link.url)
+const portfolioProjects = (await getCollection('portfolio'))
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((entry) => ({
+    slug: entry.id,
+    title: entry.data.title,
+    category: entry.data.category,
+    thumbnail: entry.data.thumbnail,
+    imageAlt: entry.data.imageAlt,
+    imageWidth: entry.data.imageWidth,
+    imageHeight: entry.data.imageHeight,
+  }))
 
 const structuredData = {
   '@context': 'https://schema.org',
