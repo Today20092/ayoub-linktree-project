@@ -112,9 +112,15 @@ const socialColumns = [
                 href={channel.videosUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-foreground hover:text-primary focus-visible:ring-ring rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+                class="text-foreground hover:text-primary focus-visible:ring-ring grid grid-cols-[1rem_minmax(0,1fr)] items-start gap-1.5 rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
               >
-                {channel.name}
+                <span
+                  class="inline-flex h-6 w-4 items-center justify-center"
+                  aria-hidden="true"
+                >
+                  <Icon name="simple-icons:youtube" class="size-3.5" />
+                </span>
+                <span>{channel.name}</span>
               </a>
             ))
           }
@@ -141,13 +147,14 @@ const socialColumns = [
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex min-w-0 items-start gap-1.5 rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+                    class="text-foreground hover:text-primary focus-visible:ring-ring grid min-w-0 grid-cols-[1rem_minmax(0,1fr)] items-start gap-1.5 rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
                   >
-                    <Icon
-                      name={link.icon}
-                      class="mt-[5px] size-3.5 shrink-0"
+                    <span
+                      class="inline-flex h-6 w-4 items-center justify-center"
                       aria-hidden="true"
-                    />
+                    >
+                      <Icon name={link.icon} class="size-3.5" />
+                    </span>
                     <span>{link.label}</span>
                   </a>
                 ))}
@@ -164,13 +171,14 @@ const socialColumns = [
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-start gap-1.5 rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+                class="text-foreground hover:text-primary focus-visible:ring-ring grid grid-cols-[1rem_minmax(0,1fr)] items-start gap-1.5 rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
               >
-                <Icon
-                  name={link.icon}
-                  class="mt-[5px] size-3.5 shrink-0"
+                <span
+                  class="inline-flex h-6 w-4 items-center justify-center"
                   aria-hidden="true"
-                />
+                >
+                  <Icon name={link.icon} class="size-3.5" />
+                </span>
                 <span>{link.label}</span>
               </a>
             ))
