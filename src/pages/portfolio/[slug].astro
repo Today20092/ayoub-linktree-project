@@ -30,6 +30,7 @@ const comparisonVideos = projectData.videos.filter(
 const milestoneVideos = projectData.videos.filter(
   (video) => !video.comparisonRole,
 )
+const isYaHalaProject = project.id === 'ya-hala'
 const formatVideoDate = (date: string) =>
   new Intl.DateTimeFormat('en-US', {
     month: 'long',
@@ -285,60 +286,90 @@ const hasDetails = Boolean(
               aria-labelledby="milestones-title"
             >
               <h2 id="milestones-title" class="font-heading text-2xl font-bold">
-                First collaborations
+                {isYaHalaProject ? 'First collaborations' : 'Featured video'}
               </h2>
               <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
-                These October 2025 uploads mark the beginning of my production
-                work with Ya Hala.
+                {isYaHalaProject
+                  ? 'These October 2025 uploads mark the beginning of my production work with Ya Hala.'
+                  : 'Watch the finished production directly from the client project.'}
               </p>
-              <ol class="mt-6 grid gap-6 sm:grid-cols-2">
-                {milestoneVideos.map((video) => (
-                  <li>
-                    <a
-                      href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:outline-none"
-                      aria-label={`Watch ${video.label} on YouTube: ${video.title}`}
-                    >
-                      <div class="bg-muted relative aspect-video overflow-hidden">
-                        <img
-                          src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
-                          alt=""
-                          width="320"
-                          height="180"
-                          loading="lazy"
-                          decoding="async"
-                          class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                        />
-                        <span class="bg-background/90 text-foreground absolute inset-0 m-auto inline-flex size-12 items-center justify-center rounded-full shadow-sm">
-                          <Play
-                            className="size-5 fill-current"
-                            aria-hidden="true"
+              {isYaHalaProject ? (
+                <ol class="mt-6 grid gap-6 sm:grid-cols-2">
+                  {milestoneVideos.map((video) => (
+                    <li>
+                      <a
+                        href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+                        aria-label={`Watch ${video.label} on YouTube: ${video.title}`}
+                      >
+                        <div class="bg-muted relative aspect-video overflow-hidden">
+                          <img
+                            src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
+                            alt=""
+                            width="320"
+                            height="180"
+                            loading="lazy"
+                            decoding="async"
+                            class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                           />
-                        </span>
+                          <span class="bg-background/90 text-foreground absolute inset-0 m-auto inline-flex size-12 items-center justify-center rounded-full shadow-sm">
+                            <Play
+                              className="size-5 fill-current"
+                              aria-hidden="true"
+                            />
+                          </span>
+                        </div>
+                        <div class="border-border border-b py-4">
+                          <div class="flex items-start justify-between gap-4">
+                            <div>
+                              <p class="font-bold">{video.label}</p>
+                              <p class="text-muted-foreground mt-1 text-sm">
+                                {formatVideoDate(video.publishedAt)}
+                              </p>
+                            </div>
+                            <ArrowUpRight
+                              className="mt-1 size-4 shrink-0"
+                              aria-hidden="true"
+                            />
+                          </div>
+                          <p class="text-muted-foreground mt-3 text-sm leading-6">
+                            {video.description}
+                          </p>
+                        </div>
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <div class="mt-6 space-y-8">
+                  {milestoneVideos.map((video) => (
+                    <article>
+                      <div class="bg-muted relative aspect-video overflow-hidden">
+                        <iframe
+                          src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}`}
+                          title={`${video.label}: ${video.title}`}
+                          loading="lazy"
+                          class="absolute inset-0 size-full border-0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          referrerpolicy="strict-origin-when-cross-origin"
+                          allowfullscreen
+                        />
                       </div>
                       <div class="border-border border-b py-4">
-                        <div class="flex items-start justify-between gap-4">
-                          <div>
-                            <p class="font-bold">{video.label}</p>
-                            <p class="text-muted-foreground mt-1 text-sm">
-                              {formatVideoDate(video.publishedAt)}
-                            </p>
-                          </div>
-                          <ArrowUpRight
-                            className="mt-1 size-4 shrink-0"
-                            aria-hidden="true"
-                          />
-                        </div>
-                        <p class="text-muted-foreground mt-3 text-sm leading-6">
+                        <p class="font-bold">{video.title}</p>
+                        <p class="text-muted-foreground mt-1 text-sm">
+                          {formatVideoDate(video.publishedAt)}
+                        </p>
+                        <p class="text-muted-foreground mt-3 leading-7">
                           {video.description}
                         </p>
                       </div>
-                    </a>
-                  </li>
-                ))}
-              </ol>
+                    </article>
+                  ))}
+                </div>
+              )}
             </section>
           )
         }
@@ -370,11 +401,25 @@ const hasDetails = Boolean(
               aria-labelledby="gallery-title"
             >
               <h2 id="gallery-title" class="font-heading text-2xl font-bold">
-                Additional visuals
+                {project.id === 'bayaan-academy'
+                  ? 'Photography'
+                  : 'Additional visuals'}
               </h2>
-              <div class="mt-6 space-y-8">
+              <div
+                class:list={[
+                  'mt-6',
+                  project.id === 'bayaan-academy'
+                    ? 'columns-1 gap-4 sm:columns-2'
+                    : 'space-y-8',
+                ]}
+              >
                 {projectData.gallery.map((image) => (
-                  <figure>
+                  <figure
+                    class:list={[
+                      project.id === 'bayaan-academy' &&
+                        'mb-6 break-inside-avoid',
+                    ]}
+                  >
                     <img
                       src={image.src}
                       alt={image.alt}
