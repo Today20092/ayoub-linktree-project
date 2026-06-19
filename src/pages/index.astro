@@ -1,16 +1,8 @@
 ---
 import '../styles.css'
 
-import type { ImageMetadata } from 'astro'
-import { Icon } from 'astro-icon/components'
-import { IdCard, MessageSquareText, Upload } from 'lucide-react'
-
-import AlphaBravoPreviewCard from '../components/AlphaBravoPreviewCard.astro'
-import LatestChannelVideo from '../components/LatestChannelVideo.astro'
-import QrCodeButton from '../components/QrCodeButton.astro'
-import SocialLinkButton from '../components/SocialLinkButton'
-import VideoBentoGrid from '../components/VideoBentoGrid.astro'
-import latestYoutubeVideos from '../data/latest-youtube-videos.json'
+import PortfolioIndex from '../components/PortfolioIndex.astro'
+import { portfolioProjects } from '../data/portfolio'
 import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
 const {
@@ -32,55 +24,13 @@ const heroImageUrl = new URL(
   resolveSiteAsset(baseUrl, ogImage),
   Astro.site,
 ).toString()
-
-const localImages = import.meta.glob('../image/*.{png,jpg,jpeg,webp}', {
-  eager: true,
-  import: 'default',
-}) as Record<string, ImageMetadata>
-
-const resolveLocalImage = (assetPath: string) => {
-  const filename = assetPath.replace(/^\/+/, '')
-  const match = Object.entries(localImages).find(([path]) => {
-    return decodeURIComponent(path.split('/').pop() ?? '') === filename
-  })
-
-  return match?.[1].src ?? resolveSiteAsset(baseUrl, assetPath)
-}
-
-const profileImageUrl = resolveLocalImage(profileImage)
-const latestVideoChannels = youtubeChannels.filter((channel) =>
-  Boolean(latestYoutubeVideos[channel.id]),
-)
-const channelBranding = Object.fromEntries(
-  youtubeChannels.map((channel) => [
-    channel.id,
-    {
-      ...channel.branding,
-      logoSrc: resolveLocalImage(channel.branding?.logoSrc ?? profileImage),
-    },
-  ]),
-)
-const sameAsUrls = socialLinks.map((link) => link.url)
+const profileImageUrl = new URL(
+  resolveSiteAsset(baseUrl, profileImage),
+  Astro.site,
+).toString()
 const primaryLinks = actionLinks.filter((link) => link.group === 'primary')
 const supportLinks = actionLinks.filter((link) => link.group === 'support')
-const lucideActionIcons = {
-  'lucide:id-card': IdCard,
-  'lucide:message-square-text': MessageSquareText,
-}
-
-const brandCardStyle = (
-  item: Pick<
-    (typeof actionLinks)[number],
-    'color' | 'color2' | 'color3' | 'darkColor' | 'darkColor2' | 'darkColor3'
-  >,
-) => ({
-  '--brand-color': item.color,
-  '--brand-color-2': item.color2 ?? item.color,
-  '--brand-color-3': item.color3 ?? item.color,
-  '--brand-color-dark': item.darkColor ?? item.color,
-  '--brand-color-dark-2': item.darkColor2 ?? item.color2 ?? item.color,
-  '--brand-color-dark-3': item.darkColor3 ?? item.color3 ?? item.color,
-})
+const sameAsUrls = socialLinks.map((link) => link.url)
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -115,7 +65,6 @@ const structuredData = {
 <html lang="en" class="box-border">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
@@ -146,41 +95,18 @@ const structuredData = {
       href={`${baseUrl}apple-touch-icon.png`}
     />
     <link rel="manifest" href={`${baseUrl}site.webmanifest`} />
+    <link rel="sitemap" href={sitemapUrl} />
+
     <meta
       name="theme-color"
-      content="#fafafa"
+      content="#ffffff"
       media="(prefers-color-scheme: light)"
     />
     <meta
       name="theme-color"
-      content="#18181b"
+      content="#1c1917"
       media="(prefers-color-scheme: dark)"
     />
-
-    <script is:inline>
-      ;(() => {
-        const lightThemeColor = '#ffffff'
-        const darkThemeColor = '#1c1917'
-        const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
-
-        const applyTheme = () => {
-          const isDark = systemQuery.matches
-          const theme = isDark ? 'dark' : 'light'
-
-          document.documentElement.classList.toggle('dark', isDark)
-          document.documentElement.style.colorScheme = theme
-
-          document
-            .querySelectorAll('meta[name="theme-color"]')
-            .forEach((meta) => {
-              meta.content = isDark ? darkThemeColor : lightThemeColor
-              meta.media = ''
-            })
-        }
-
-        applyTheme()
-      })()
-    </script>
 
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
@@ -198,397 +124,39 @@ const structuredData = {
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={pageDescription} />
     <meta name="twitter:image" content={heroImageUrl} />
-    <meta name="twitter:image:alt" content={heroImageAlt} />
     <link rel="canonical" href={canonicalUrl} />
-    <link rel="sitemap" href={sitemapUrl} />
+
+    <script is:inline>
+      ;(() => {
+        const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+        const applyTheme = () => {
+          const isDark = systemQuery.matches
+          document.documentElement.classList.toggle('dark', isDark)
+          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
+        }
+
+        applyTheme()
+        systemQuery.addEventListener('change', applyTheme)
+      })()
+    </script>
+
     <script
       type="application/ld+json"
       set:html={JSON.stringify(structuredData)}
     />
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
-
   <body
-    class="linktree-page my-0 min-h-screen text-center text-lg subpixel-antialiased"
+    class="bg-background text-foreground min-h-[100dvh] subpixel-antialiased"
   >
-    <main class="linktree-shell mx-auto flex w-full flex-col pb-6">
-      <section
-        class="linktree-hero animate-fade-in-up"
-        aria-labelledby="profile-title"
-      >
-        <button
-          type="button"
-          class="linktree-hero__share"
-          aria-label={`Share ${pageTitle}`}
-          data-share-page
-          data-share-title={pageTitle}
-          data-share-text={pageDescription}
-          data-share-url={canonicalUrl}
-        >
-          <Upload className="size-5" aria-hidden="true" />
-        </button>
-        <img
-          src={profileImageUrl}
-          alt={heroImageAlt}
-          class="linktree-hero__image"
-          decoding="async"
-          loading="eager"
-        />
-        <div class="linktree-hero__fade" aria-hidden="true"></div>
-      </section>
-
-      <h1
-        id="profile-title"
-        class="font-heading animate-fade-in-up text-foreground mx-auto mt-6 mb-4 w-full max-w-xl px-4 text-4xl leading-[0.95] font-extrabold delay-100 sm:px-6 sm:text-5xl"
-      >
-        <span class="block text-balance">
-          <span class="text-primary">Ayoub</span> Abedrabbo
-        </span>
-      </h1>
-      <p
-        class="animate-fade-in-up text-muted-foreground mx-auto mb-4 w-full max-w-xl px-4 text-center text-lg leading-relaxed delay-200 sm:px-6 sm:text-xl"
-      >
-        {pageDescription}
-      </p>
-
-      <QrCodeButton />
-
-      <nav
-        class="animate-fade-in-up mx-auto mt-6 flex w-full max-w-xl flex-col gap-4 px-4 delay-200 sm:px-6"
-        aria-label="Contact links"
-      >
-        {
-          primaryLinks.map((link) => {
-            const LinkIcon =
-              lucideActionIcons[link.icon as keyof typeof lucideActionIcons]
-
-            return (
-              <SocialLinkButton
-                label={link.label}
-                href={link.url}
-                id={link.id}
-                style={brandCardStyle(link)}
-                className={link.pulse ? 'animate-button-pulse' : undefined}
-              >
-                {LinkIcon && (
-                  <LinkIcon className="size-9" aria-hidden="true" />
-                )}
-              </SocialLinkButton>
-            )
-          })
-        }
-      </nav>
-
-      <section
-        class="animate-fade-in-up mx-auto mt-8 w-full max-w-xl px-4 text-center delay-300 sm:px-6"
-        aria-labelledby="company-title"
-      >
-        <div class="mb-4">
-          <p
-            class="text-primary text-center text-xs font-bold tracking-[0.18em] uppercase"
-          >
-            Tampa work
-          </p>
-          <h2
-            id="company-title"
-            class="text-foreground mt-1 text-center text-2xl font-extrabold"
-          >
-            AlphaBravoMedia.co
-          </h2>
-          <p
-            class="text-muted-foreground mx-auto mt-2 max-w-lg text-center text-sm leading-relaxed"
-          >
-            Monthly content retainers, video production, photography, editing,
-            and repurposing for Tampa businesses that need consistent, credible
-            media.
-          </p>
-        </div>
-        <AlphaBravoPreviewCard />
-      </section>
-
-      <VideoBentoGrid />
-
-      <section
-        class="animate-fade-in-up mt-8 mb-5 flex flex-col gap-4 delay-400"
-        aria-labelledby="latest-youtube-title"
-      >
-        <div class="mx-auto w-full max-w-xl px-4 text-center sm:px-6">
-          <p class="text-primary text-xs font-bold tracking-[0.18em] uppercase">
-            Latest uploads
-          </p>
-          <h2
-            id="latest-youtube-title"
-            class="text-foreground mt-1 text-2xl font-extrabold"
-          >
-            My YouTube channels
-          </h2>
-        </div>
-        {
-          latestVideoChannels.map((channel) => (
-            <LatestChannelVideo
-              channelName={channel.name}
-              channelDescription={channel.description}
-              channelLogoSrc={channelBranding[channel.id].logoSrc}
-              channelAccentColor={channelBranding[channel.id].accentColor}
-              channelDarkAccentColor={
-                channelBranding[channel.id].darkAccentColor
-              }
-              channelCardBackground={channelBranding[channel.id].cardBackground}
-              channelDarkCardBackground={
-                channelBranding[channel.id].darkCardBackground
-              }
-              channelCardTint={channelBranding[channel.id].cardTint}
-              channelDarkCardTint={channelBranding[channel.id].darkCardTint}
-              channelLogoBackgroundColor={
-                channelBranding[channel.id].logoBackgroundColor
-              }
-              channelDarkLogoBackgroundColor={
-                channelBranding[channel.id].darkLogoBackgroundColor
-              }
-              channelLogoFit={channelBranding[channel.id].logoFit}
-              channelLogoPaddingClass={
-                channelBranding[channel.id].logoPaddingClass
-              }
-              channelUrl={channel.videosUrl}
-              video={latestYoutubeVideos[channel.id]}
-            />
-          ))
-        }
-      </section>
-
-      <section
-        class="animate-fade-in-up mx-auto mt-8 w-full max-w-xl px-4 text-center delay-500 sm:px-6"
-        aria-labelledby="social-links-title"
-      >
-        <div class="mb-4">
-          <p class="text-primary text-xs font-bold tracking-[0.18em] uppercase">
-            Social
-          </p>
-          <h2
-            id="social-links-title"
-            class="text-foreground mt-1 text-2xl font-extrabold"
-          >
-            Social links
-          </h2>
-        </div>
-        <nav class="flex flex-col gap-4" aria-label="Official social links">
-          {
-            socialLinks.map((social) => (
-              <SocialLinkButton
-                label={social.label}
-                href={social.url}
-                id={social.id}
-                style={{
-                  '--brand-color': social.color,
-                  '--brand-color-2': social.color2,
-                  '--brand-color-3': social.color3,
-                  '--brand-color-dark': social.darkColor ?? social.color,
-                  '--brand-color-dark-2': social.darkColor2 ?? social.color2,
-                  '--brand-color-dark-3': social.darkColor3 ?? social.color3,
-                }}
-              >
-                <Icon name={social.icon} class="size-9" aria-hidden="true" />
-              </SocialLinkButton>
-            ))
-          }
-        </nav>
-      </section>
-
-      <section
-        class="animate-fade-in-up mx-auto mt-8 w-full max-w-xl px-4 text-left delay-500 sm:px-6"
-        aria-labelledby="support-links-title"
-      >
-        <div class="mb-4">
-          <p class="text-primary text-xs font-bold tracking-[0.18em] uppercase">
-            Payments
-          </p>
-          <h2
-            id="support-links-title"
-            class="text-foreground mt-1 text-2xl font-extrabold"
-          >
-            Support
-          </h2>
-        </div>
-        <div class="flex flex-col gap-4">
-          {
-            supportLinks.map((link) => (
-              <SocialLinkButton
-                label={link.label}
-                href={link.url}
-                id={link.id}
-                style={brandCardStyle(link)}
-              >
-                <Icon name={link.icon} class="size-9" aria-hidden="true" />
-              </SocialLinkButton>
-            ))
-          }
-        </div>
-      </section>
-
-      <footer
-        class="text-muted-foreground mt-auto w-full px-4 pt-12 pb-4 text-center text-sm"
-      >
-        <p class="mb-1">
-          &copy; {currentYear}
-          {pageTitle}. All rights reserved.
-        </p>
-        <p>
-          Built with
-          <a
-            href="https://astro.build"
-            target="_blank"
-            rel="noopener"
-            class="text-primary hover:text-primary/80 underline transition-colors"
-          >
-            Astro
-          </a>
-          &amp;
-          <a
-            href="https://tailwindcss.com"
-            target="_blank"
-            rel="noopener"
-            class="text-primary hover:text-primary/80 underline transition-colors"
-          >
-            Tailwind CSS
-          </a>.
-        </p>
-      </footer>
-    </main>
-
-    <script is:inline>
-      ;(() => {
-        const preferences = ['system', 'light', 'dark']
-        const lightThemeColor = '#ffffff'
-        const darkThemeColor = '#1c1917'
-        const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
-        const buttons = [...document.querySelectorAll('[data-theme-option]')]
-        const hasThemeControls = buttons.length > 0
-
-        const getStoredTheme = () => {
-          if (!hasThemeControls) return null
-
-          try {
-            return localStorage.getItem('theme')
-          } catch {
-            return null
-          }
-        }
-
-        const setStoredTheme = (theme) => {
-          try {
-            if (theme === 'system') localStorage.removeItem('theme')
-            else localStorage.setItem('theme', theme)
-          } catch {}
-        }
-
-        const getPreference = () => getStoredTheme() ?? 'system'
-
-        const resolveTheme = (preference) =>
-          preference === 'system'
-            ? systemQuery.matches
-              ? 'dark'
-              : 'light'
-            : preference
-
-        const applyTheme = (preference = 'system') => {
-          const theme = resolveTheme(preference)
-
-          document.documentElement.classList.toggle('dark', theme === 'dark')
-          document.documentElement.style.colorScheme = theme
-
-          document
-            .querySelectorAll('meta[name="theme-color"]')
-            .forEach((meta) => {
-              meta.content = theme === 'dark' ? darkThemeColor : lightThemeColor
-              meta.media = ''
-            })
-
-          buttons.forEach((button) => {
-            button.setAttribute(
-              'aria-pressed',
-              String(button.dataset.themeOption === preference),
-            )
-          })
-        }
-
-        buttons.forEach((button) => {
-          button.addEventListener('click', () => {
-            const preference = button.dataset.themeOption
-            if (!preferences.includes(preference)) return
-
-            setStoredTheme(preference)
-            applyTheme(preference)
-          })
-        })
-
-        const handleSystemChange = () => {
-          if (getPreference() === 'system') applyTheme('system')
-        }
-
-        systemQuery.addEventListener('change', handleSystemChange)
-        applyTheme(getPreference())
-      })()
-    </script>
-
-    <script is:inline>
-      ;(() => {
-        const shareButton = document.querySelector('[data-share-page]')
-        if (!shareButton) return
-
-        const defaultLabel =
-          shareButton.getAttribute('aria-label') || 'Share Ayoub Abedrabbo'
-        const shareData = {
-          title: shareButton.dataset.shareTitle,
-          text: shareButton.dataset.shareText,
-          url: shareButton.dataset.shareUrl,
-        }
-        const fallbackShareText = [
-          shareData.title,
-          shareData.text,
-          shareData.url,
-        ]
-          .filter(Boolean)
-          .join('\n')
-
-        const restoreLabel = () => {
-          window.setTimeout(() => {
-            shareButton.setAttribute('aria-label', defaultLabel)
-          }, 2200)
-        }
-
-        const copyLink = async () => {
-          if (navigator.clipboard?.writeText) {
-            await navigator.clipboard.writeText(fallbackShareText)
-            shareButton.setAttribute('aria-label', 'Share text copied')
-            restoreLabel()
-            return
-          }
-
-          window.location.href = shareData.url
-        }
-
-        shareButton.addEventListener('click', async () => {
-          if (
-            navigator.share &&
-            (!navigator.canShare || navigator.canShare(shareData))
-          ) {
-            try {
-              await navigator.share(shareData)
-              return
-            } catch (error) {
-              if (error?.name === 'AbortError') return
-            }
-          }
-
-          try {
-            await copyLink()
-          } catch {
-            window.location.href = shareData.url
-          }
-        })
-      })()
-    </script>
+    <PortfolioIndex
+      pageDescription={pageDescription}
+      currentYear={currentYear}
+      primaryLinks={primaryLinks}
+      socialLinks={socialLinks}
+      supportLinks={supportLinks}
+      channels={youtubeChannels}
+      projects={portfolioProjects}
+    />
   </body>
 </html>

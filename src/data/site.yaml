@@ -8,6 +8,9 @@ site:
   profileImage: AyoubBayaan.jpg
   ogImage: AyoubContactCardImage.jpg
 
+features:
+  showTampaWork: false
+
 socialLinks:
   - id: instagram
     url: https://instagram.com/alphabravomedia

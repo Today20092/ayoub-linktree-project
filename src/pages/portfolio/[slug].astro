@@ -1,0 +1,298 @@
+---
+import '../../styles.css'
+
+import { ArrowLeft, ArrowUpRight } from 'lucide-react'
+
+import type { PortfolioProject } from '../../data/portfolio'
+import { portfolioProjects } from '../../data/portfolio'
+
+export function getStaticPaths() {
+  return portfolioProjects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }))
+}
+
+type Props = {
+  project: PortfolioProject
+}
+
+const { project } = Astro.props
+const canonicalUrl = new URL(
+  `/portfolio/${project.slug}`,
+  Astro.site,
+).toString()
+const socialImageUrl = new URL(project.heroImage, Astro.site).toString()
+const projectTitle = `${project.title} - Ayoub Abedrabbo`
+const hasDetails = Boolean(
+  project.role ||
+    project.collaborators?.length ||
+    project.duration ||
+    project.tools?.length,
+)
+---
+
+<!doctype html>
+<html lang="en" class="box-border">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>{projectTitle}</title>
+    <meta name="description" content={project.summary} />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta property="og:title" content={projectTitle} />
+    <meta property="og:description" content={project.summary} />
+    <meta property="og:image" content={socialImageUrl} />
+    <meta property="og:image:alt" content={project.imageAlt} />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={projectTitle} />
+    <meta name="twitter:description" content={project.summary} />
+    <meta name="twitter:image" content={socialImageUrl} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#1c1917"
+      media="(prefers-color-scheme: dark)"
+    />
+    <script is:inline>
+      ;(() => {
+        const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+        const applyTheme = () => {
+          const isDark = systemQuery.matches
+          document.documentElement.classList.toggle('dark', isDark)
+          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
+        }
+
+        applyTheme()
+        systemQuery.addEventListener('change', applyTheme)
+      })()
+    </script>
+  </head>
+  <body
+    class="bg-background text-foreground min-h-[100dvh] subpixel-antialiased"
+  >
+    <main
+      class="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+    >
+      <header
+        class="border-border flex items-center justify-between gap-4 border-b pb-6"
+      >
+        <a
+          href="/#portfolio"
+          class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
+          aria-label="Back to portfolio"
+        >
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          <span>Ayoub Abedrabbo</span>
+        </a>
+        <span class="text-muted-foreground text-sm font-medium">Portfolio</span>
+      </header>
+
+      <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
+        <img
+          src={project.heroImage}
+          alt={project.imageAlt}
+          width={project.imageWidth}
+          height={project.imageHeight}
+          loading="eager"
+          decoding="async"
+          class="bg-muted block h-auto w-full"
+        />
+
+        <div class="mx-auto max-w-4xl py-10 sm:py-14">
+          <p class="text-primary text-xs font-bold tracking-wider uppercase">
+            {project.category}
+          </p>
+          <h1
+            class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl lg:text-6xl"
+          >
+            {project.title}
+          </h1>
+          <p
+            class="text-muted-foreground mt-6 max-w-3xl text-lg leading-8 sm:text-xl"
+          >
+            {project.summary}
+          </p>
+        </div>
+
+        {
+          project.overview?.length && (
+            <section
+              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              aria-labelledby="overview-title"
+            >
+              <h2 id="overview-title" class="font-heading text-2xl font-bold">
+                Overview
+              </h2>
+              <div class="text-muted-foreground mt-5 max-w-3xl space-y-4 leading-7">
+                {project.overview.map((paragraph) => (
+                  <p>{paragraph}</p>
+                ))}
+              </div>
+            </section>
+          )
+        }
+
+        {
+          project.services?.length && (
+            <section
+              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              aria-labelledby="services-title"
+            >
+              <h2 id="services-title" class="font-heading text-2xl font-bold">
+                Work
+              </h2>
+              <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+                {project.services.map((service) => (
+                  <li class="border-border border-b pb-3 font-semibold">
+                    {service}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {
+          hasDetails && (
+            <section
+              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              aria-labelledby="details-title"
+            >
+              <h2 id="details-title" class="font-heading text-2xl font-bold">
+                Details
+              </h2>
+              <dl class="mt-5 grid gap-6 sm:grid-cols-2">
+                {project.role && (
+                  <div>
+                    <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                      Role
+                    </dt>
+                    <dd class="mt-1 font-semibold">{project.role}</dd>
+                  </div>
+                )}
+                {project.collaborators?.length && (
+                  <div>
+                    <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                      Collaborators
+                    </dt>
+                    <dd class="mt-1 font-semibold">
+                      {project.collaborators.join(', ')}
+                    </dd>
+                  </div>
+                )}
+                {project.duration && (
+                  <div>
+                    <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                      Duration
+                    </dt>
+                    <dd class="mt-1 font-semibold">{project.duration}</dd>
+                  </div>
+                )}
+                {project.tools?.length && (
+                  <div>
+                    <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                      Tools
+                    </dt>
+                    <dd class="mt-1 font-semibold">
+                      {project.tools.join(', ')}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+            </section>
+          )
+        }
+
+        {
+          project.outcomes?.length && (
+            <section
+              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              aria-labelledby="outcomes-title"
+            >
+              <h2 id="outcomes-title" class="font-heading text-2xl font-bold">
+                Outcomes
+              </h2>
+              <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+                {project.outcomes.map((outcome) => (
+                  <li class="border-border border-b pb-3 font-semibold">
+                    {outcome}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+
+        {
+          project.gallery?.length && (
+            <section
+              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              aria-labelledby="gallery-title"
+            >
+              <h2 id="gallery-title" class="font-heading text-2xl font-bold">
+                Additional visuals
+              </h2>
+              <div class="mt-6 space-y-8">
+                {project.gallery.map((image) => (
+                  <figure>
+                    <img
+                      src={image.src}
+                      alt={image.alt}
+                      loading="lazy"
+                      class="block h-auto w-full"
+                    />
+                    {image.caption && (
+                      <figcaption class="text-muted-foreground mt-2 text-sm">
+                        {image.caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                ))}
+              </div>
+            </section>
+          )
+        }
+
+        <section
+          class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+          aria-labelledby="links-title"
+        >
+          <h2 id="links-title" class="font-heading text-2xl font-bold">
+            Project links
+          </h2>
+          <div class="mt-5">
+            {
+              project.links.map((link) => (
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="border-border text-foreground hover:text-primary focus-visible:ring-ring flex items-center justify-between gap-4 border-b py-4 font-bold focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  <span>{link.label}</span>
+                  <ArrowUpRight
+                    className="size-4 shrink-0"
+                    aria-hidden="true"
+                  />
+                </a>
+              ))
+            }
+          </div>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
