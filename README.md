@@ -37,7 +37,7 @@ preference.
 - React for the small number of React components
 - astro-icon and Lucide for icons
 - Prettier for formatting
-- Cloudflare Pages/Workers for hosting
+- Cloudflare Workers with static assets for hosting
 
 The production site is built from the linked GitHub repository and deployed to
 Cloudflare.
@@ -77,55 +77,43 @@ page layout.
 ```text
 /
 ├── public/
-│   ├── previews/
-│   │   ├── alphabravomedia-homepage.webp
-│   │   └── client-work/
-│   │       ├── arqam-academy.webp
-│   │       ├── aya-academy.webp
-│   │       ├── bayaan-academy.webp
-│   │       ├── konan-bbq-podcast.webp
-│   │       ├── lavena-health.webp
-│   │       ├── maan-academy.webp
-│   │       ├── omar-erchid-law-firm.webp
-│   │       └── ya-hala.webp
 │   ├── _redirects
-│   ├── AyoubA-Contact-Card.vcf
-│   ├── AyoubContactCardImage.jpg
-│   ├── favicon files
-│   └── site.webmanifest
+│   ├── _headers
+│   ├── previews/
+│   └── contact card, favicon, manifest, and crawler files
 ├── scripts/
 │   ├── generate-favicons.js
 │   └── update-latest-youtube-video.mjs
 ├── src/
+│   ├── assets/
+│   │   ├── client-work/
+│   │   └── portraits/
 │   ├── components/
 │   │   ├── PortfolioIndex.astro
 │   │   └── ui/
 │   ├── content/
 │   │   └── portfolio/
 │   │       ├── PROJECT_TEMPLATE.mdx.example
-│   │       ├── ya-hala.mdx
-│   │       ├── omar-erchid-law-firm.mdx
 │   │       └── other project MDX files
 │   ├── data/
 │   │   ├── site.yaml
 │   │   ├── youtube-channels.json
 │   │   └── latest-youtube-videos.json
 │   ├── image/
-│   │   └── logos and interface images
+│   │   └── imported logos and interface images
 │   ├── lib/
-│   │   ├── site-config.ts
-│   │   └── utils.ts
 │   ├── pages/
 │   │   ├── index.astro
 │   │   └── portfolio/
-│   │       ├── [slug].astro
-│   │       └── alphabravomedia.astro
 │   ├── content.config.ts
 │   └── styles.css
+├── .agents/, .claude/, and .vscode/
+│   └── agent and editor configuration
 ├── astro.config.mjs
 ├── components.json
 ├── package.json
-└── prettier.config.cjs
+├── tsconfig.json
+└── wrangler.jsonc
 ```
 
 ## Where to edit common things
@@ -138,7 +126,7 @@ page layout.
 | Homepage portfolio card layout                | `src/components/PortfolioIndex.astro`    |
 | Homepage metadata and data loading            | `src/pages/index.astro`                  |
 | Social, contact, payment, and channel links   | `src/data/site.yaml`                     |
-| Portfolio images                              | `public/previews/client-work/`           |
+| Portfolio images                              | `src/assets/client-work/`                |
 | General logos and imported images             | `src/image/`                             |
 | Colors, typography, dark mode, and MDX styles | `src/styles.css`                         |
 | Astro integrations and production URL         | `astro.config.mjs`                       |
@@ -197,8 +185,8 @@ title: Example Project
 status: complete
 category: Video production
 summary: A short summary of the project.
-thumbnail: /previews/client-work/example-project.webp
-heroImage: /previews/client-work/example-project.webp
+thumbnail: ../../assets/client-work/example-project.webp
+heroImage: ../../assets/client-work/example-project.webp
 imageAlt: Description of the project image
 imageWidth: 1280
 imageHeight: 720
@@ -287,7 +275,7 @@ outcomes:
 
 ```yaml
 gallery:
-  - src: /previews/client-work/example-behind-the-scenes.webp
+  - src: ../../assets/client-work/example-behind-the-scenes.webp
     alt: Ayoub adjusting a light before recording
     caption: Optional visible caption
 ```
@@ -356,13 +344,13 @@ collaborations section.
 5. Add local images to:
 
    ```text
-   public/previews/client-work/
+   src/assets/client-work/
    ```
 
-6. Reference local images without including `public`:
+6. Reference them relative to the portfolio MDX file:
 
    ```yaml
-   thumbnail: /previews/client-work/new-client.webp
+   thumbnail: ../../assets/client-work/new-client.webp
    ```
 
 7. Choose an unused `order` number.
@@ -472,23 +460,45 @@ shared page renders a lazy-loaded OpenStreetMap preview and a Google Maps link.
 
 ## Images
 
-### Public images
+### Portfolio and content images
 
-Images under `public/` are served directly from the site root.
+Store local content images in `src/assets/`. Portfolio thumbnails, hero images,
+and gallery images normally belong in:
 
 ```text
-public/previews/client-work/example.webp
-→ /previews/client-work/example.webp
+src/assets/client-work/
 ```
 
-Use this location for portfolio thumbnails, hero images, and gallery images
-that are referenced by path in MDX frontmatter.
+The portfolio collection uses Astro's `image()` schema helper, so MDX
+frontmatter resolves these paths to image metadata. Pass that metadata to
+Astro's `Image` component from `astro:assets`; do not add raw HTML `<img>` tags.
 
-### Source images
+Paths in a portfolio MDX file are relative to
+`src/content/portfolio/project-name.mdx`:
+
+```yaml
+thumbnail: ../../assets/client-work/example.webp
+heroImage: ../../assets/client-work/example.webp
+gallery:
+  - src: ../../assets/client-work/example-detail.webp
+    alt: Description of the image
+```
+
+Astro optimizes these source images and generates responsive output during the
+build.
+
+### Other imported images
 
 The `src/image/` folder contains imported logos and other images used by the
 application. These assets are resolved through the site configuration and
 Astro's build process.
+
+### Public files
+
+Use `public/` only for files that must be copied and served as-is, such as
+favicons, the web manifest, contact-card downloads, crawler files, redirects,
+headers, and the legacy AlphaBravoMedia preview. Reference public files from the
+site root.
 
 ## YouTube data updater
 
@@ -623,7 +633,11 @@ npm run astro -- add integration-name
 
 ## Before deploying
 
-At minimum:
+For a documentation-only change that affects only files excluded by
+Cloudflare's Build watch paths, format and review the changed documentation.
+Do not run the Astro build solely for those files.
+
+For changes that can affect the website or deployment, run at minimum:
 
 ```bash
 npm run verify
@@ -643,7 +657,7 @@ Then check:
 ## Deployment
 
 - Domain: [ayoubabed.xyz](https://ayoubabed.xyz)
-- Hosting: Cloudflare Pages/Workers
+- Hosting: Cloudflare Workers with static assets
 - Source: GitHub repository connected to Cloudflare
 - Required Node version: 22 or newer
 - Build command: `npm run build`
@@ -654,6 +668,45 @@ Then check:
 Pushing changes to the connected GitHub branch triggers the Cloudflare build
 and deployment workflow. The repository does not deploy a second copy through
 GitHub Pages.
+
+### Cloudflare Build watch paths
+
+Cloudflare normally builds after any tracked file changes. In the Cloudflare
+dashboard, maintain the exclusions under:
+
+```text
+Workers project → Settings → Build → Build watch paths
+```
+
+The exclusion list for this repository is:
+
+```text
+README.md
+AGENTS.md
+CLAUDE.md
+CLAUDE.MD
+.agents/*
+.claude/*
+.vscode/*
+skills-lock.json
+.gitignore
+.prettierignore
+prettier.config.cjs
+components.json
+```
+
+These files contain documentation, agent instructions, editor settings, skill
+metadata, formatting configuration, or component-generator configuration.
+When a push changes only excluded paths, Cloudflare should skip the build.
+
+Do not exclude `*.md`: Astro Content Collections can use Markdown files for
+real website content. Builds must continue to run for `src/*`, `public/*`,
+`scripts/*`, `material-theme/*`, dependency manifests, and Astro, TypeScript,
+or Wrangler configuration.
+
+Build watch paths are Cloudflare dashboard settings and are not stored in
+`wrangler.jsonc`. Recheck this list when repository tooling or directory roles
+change.
 
 ## Accepted audit warnings
 
