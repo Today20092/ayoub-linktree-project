@@ -466,6 +466,10 @@ It is responsible for:
 Edit an individual `.mdx` file to change one project. Edit `[slug].astro` only
 when changing the design or behavior of every portfolio page.
 
+Portfolio frontmatter can also include an optional `location` object with an
+address, latitude, longitude, Plus Code, and Google Maps URL. When present, the
+shared page renders a lazy-loaded OpenStreetMap preview and a Google Maps link.
+
 ## Images
 
 ### Public images
@@ -554,6 +558,12 @@ This file defines:
 - Reduced-motion behavior
 
 The site follows the visitor's operating-system light or dark preference.
+
+Portfolio heading and paragraph spacing is controlled by `.portfolio-prose`,
+not by the number of blank lines in an MDX file. Markdown blank lines separate
+content in the source, but they do not create extra visual space in the rendered
+HTML. Adjust the shared prose rules when vertical rhythm needs to change so
+every case study remains consistent.
 
 ## Development commands
 

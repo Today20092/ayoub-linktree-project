@@ -8,6 +8,13 @@ This is a personal portfolio website for Ayoub Abedrabbo, a Tampa-based photogra
 
 use `npm astro add` to add dependecies like tailwind or other astro plugins.
 
+## Images
+
+- Always render images with Astro's `Image` component from `astro:assets`. Do not add raw HTML `<img>` tags.
+- Store local content images in `src/assets` so Astro can import, optimize, and generate responsive image output.
+- For images referenced by content collections, use Astro's `image()` schema helper and pass the resulting image metadata directly to `<Image />`.
+- Remote images should also use `<Image />` with explicit dimensions or an authorized remote image configuration.
+
 ## Code Formatting
 
 The project uses Prettier with specific configurations:

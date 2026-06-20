@@ -138,7 +138,11 @@
   }
 
   .portfolio-prose h2 {
-    @apply font-heading text-foreground mb-5 text-2xl font-bold;
+    @apply font-heading text-foreground mt-10 mb-4 text-2xl font-bold;
+  }
+
+  .portfolio-prose h2:first-child {
+    @apply mt-0;
   }
 
   .portfolio-prose h3 {

@@ -1,5 +1,7 @@
 ---
 import { Icon } from 'astro-icon/components'
+import { Image } from 'astro:assets'
+import type { ImageMetadata } from 'astro'
 
 type LinkItem = {
   id: string
@@ -18,7 +20,7 @@ type PortfolioCard = {
   slug: string
   title: string
   category: string
-  thumbnail: string
+  thumbnail: string | ImageMetadata
   imageAlt: string
   imageWidth: number
   imageHeight: number
@@ -207,11 +209,12 @@ const socialColumns = [
               class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none"
               aria-label={`View ${project.title} project`}
             >
-              <img
+              <Image
                 src={project.thumbnail}
                 alt={project.imageAlt}
                 width={project.imageWidth}
                 height={project.imageHeight}
+                layout="constrained"
                 loading={index === 0 ? 'eager' : 'lazy'}
                 decoding="async"
                 class="bg-muted block h-auto w-full transition-opacity duration-200 group-hover:opacity-90"

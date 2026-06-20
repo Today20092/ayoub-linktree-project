@@ -1,0 +1,130 @@
+---
+import { Image } from 'astro:assets'
+import type { ImageMetadata } from 'astro'
+
+type Props = {
+  youtubeId: string
+  title: string
+  autoplay?: boolean
+  poster?: string | ImageMetadata
+  posterAlt?: string
+  class?: string
+}
+
+const {
+  youtubeId,
+  title,
+  autoplay = true,
+  poster,
+  posterAlt = '',
+  class: className,
+} = Astro.props
+---
+
+<div
+  class:list={[
+    'youtube-embed bg-muted relative aspect-video overflow-hidden',
+    className,
+  ]}
+  data-youtube-embed
+  data-youtube-id={youtubeId}
+  data-youtube-title={title}
+  data-youtube-autoplay={autoplay ? 'true' : 'false'}
+>
+  {
+    poster && (
+      <Image
+        src={poster}
+        alt={posterAlt}
+        width={1280}
+        height={720}
+        layout="full-width"
+        loading="eager"
+        decoding="async"
+        class="absolute inset-0 size-full object-cover"
+        data-youtube-poster
+      />
+    )
+  }
+  <div
+    class="absolute inset-0 flex items-center justify-center"
+    data-youtube-player
+  >
+    <span class="sr-only">Loading video player</span>
+  </div>
+</div>
+
+<script>
+  const initializeYouTubeEmbeds = () => {
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches
+
+    const loadEmbed = (embed: HTMLElement) => {
+      if (embed.dataset.youtubeLoaded === 'true') return
+
+      const youtubeId = embed.dataset.youtubeId
+      const title = embed.dataset.youtubeTitle
+      const player = embed.querySelector<HTMLElement>('[data-youtube-player]')
+      const poster = embed.querySelector<HTMLElement>('[data-youtube-poster]')
+
+      if (!youtubeId || !title || !player) return
+
+      const shouldAutoplay =
+        embed.dataset.youtubeAutoplay === 'true' && !reducedMotion
+      const params = new URLSearchParams({
+        autoplay: shouldAutoplay ? '1' : '0',
+        mute: '1',
+        playsinline: '1',
+        loop: '1',
+        playlist: youtubeId,
+        controls: '1',
+        rel: '0',
+      })
+      const iframe = document.createElement('iframe')
+
+      iframe.src = `https://www.youtube-nocookie.com/embed/${youtubeId}?${params}`
+      iframe.title = title
+      iframe.className = 'absolute inset-0 size-full border-0 opacity-0'
+      iframe.allow =
+        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin'
+      iframe.allowFullscreen = true
+      iframe.addEventListener(
+        'load',
+        () => {
+          iframe.classList.remove('opacity-0')
+          poster?.classList.add('invisible')
+        },
+        { once: true },
+      )
+
+      player.replaceChildren(iframe)
+      embed.dataset.youtubeLoaded = 'true'
+    }
+
+    const embeds = document.querySelectorAll<HTMLElement>(
+      '[data-youtube-embed]:not([data-youtube-loaded="true"])',
+    )
+
+    if (!('IntersectionObserver' in window)) {
+      embeds.forEach(loadEmbed)
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          loadEmbed(entry.target as HTMLElement)
+          observer.unobserve(entry.target)
+        })
+      },
+      { rootMargin: '400px 0px' },
+    )
+
+    embeds.forEach((embed) => observer.observe(embed))
+  }
+
+  initializeYouTubeEmbeds()
+</script>

@@ -1,8 +1,11 @@
 ---
 import '../../styles.css'
 
+import { Image } from 'astro:assets'
 import { getCollection, render, type CollectionEntry } from 'astro:content'
 import { ArrowLeft, ArrowUpRight, Play } from 'lucide-react'
+import PortfolioLocation from '../../components/PortfolioLocation.astro'
+import YouTubeEmbed from '../../components/YouTubeEmbed.astro'
 
 export async function getStaticPaths() {
   const projects = await getCollection('portfolio')
@@ -22,7 +25,12 @@ const { Content } = await render(project)
 const projectData = project.data
 const hasBody = Boolean(project.body?.trim())
 const canonicalUrl = new URL(`/portfolio/${project.id}`, Astro.site).toString()
-const socialImageUrl = new URL(projectData.heroImage, Astro.site).toString()
+const socialImageUrl = new URL(
+  typeof projectData.heroImage === 'string'
+    ? projectData.heroImage
+    : projectData.heroImage.src,
+  Astro.site,
+).toString()
 const projectTitle = `${projectData.title} - Ayoub Abedrabbo`
 const comparisonVideos = projectData.videos.filter(
   (video) => video.comparisonRole,
@@ -32,8 +40,8 @@ const milestoneVideos = projectData.videos.filter(
 )
 const isYaHalaProject = project.id === 'ya-hala'
 const bayaanLandscapeImages = new Set([
-  '/previews/client-work/bayaan-academy/fundraising-event-students.webp',
-  '/previews/client-work/bayaan-academy/fundraising-event-group.webp',
+  'Bayaan Academy students standing together onstage during a fundraising event',
+  'Bayaan Academy students and adults gathered onstage during a fundraising event',
 ])
 const bayaanGalleryGroups = projectData.gallery.reduce<
   Array<
@@ -41,7 +49,7 @@ const bayaanGalleryGroups = projectData.gallery.reduce<
     | { type: 'landscape'; image: (typeof projectData.gallery)[number] }
   >
 >((groups, image) => {
-  if (bayaanLandscapeImages.has(image.src)) {
+  if (bayaanLandscapeImages.has(image.alt)) {
     groups.push({ type: 'landscape', image })
     return groups
   }
@@ -68,6 +76,11 @@ const hasDetails = Boolean(
     projectData.duration ||
     projectData.tools.length,
 )
+const galleryHeading =
+  projectData.galleryHeading ??
+  (project.id === 'bayaan-academy' || project.id === 'arqam-academy'
+    ? 'Photography'
+    : 'Additional visuals')
 ---
 
 <!doctype html>
@@ -145,15 +158,27 @@ const hasDetails = Boolean(
       </header>
 
       <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
-        <img
-          src={projectData.heroImage}
-          alt={projectData.imageAlt}
-          width={projectData.imageWidth}
-          height={projectData.imageHeight}
-          loading="eager"
-          decoding="async"
-          class="bg-muted block h-auto w-full"
-        />
+        {
+          projectData.heroVideo ? (
+            <YouTubeEmbed
+              youtubeId={projectData.heroVideo}
+              title={`${projectData.title} featured video`}
+              poster={projectData.heroImage}
+              posterAlt={projectData.imageAlt}
+            />
+          ) : (
+            <Image
+              src={projectData.heroImage}
+              alt={projectData.imageAlt}
+              width={projectData.imageWidth}
+              height={projectData.imageHeight}
+              layout="full-width"
+              loading="eager"
+              decoding="async"
+              class="bg-muted block h-auto w-full"
+            />
+          )
+        }
 
         <div class="mx-auto max-w-4xl py-10 sm:py-14">
           <p class="text-primary text-xs font-bold tracking-wider uppercase">
@@ -176,6 +201,15 @@ const hasDetails = Boolean(
             <section class="portfolio-prose border-border mx-auto max-w-4xl border-t py-8 sm:py-10">
               <Content />
             </section>
+          )
+        }
+
+        {
+          projectData.location && (
+            <PortfolioLocation
+              title={projectData.title}
+              {...projectData.location}
+            />
           )
         }
 
@@ -282,17 +316,10 @@ const hasDetails = Boolean(
                         {formatVideoDate(video.publishedAt)}
                       </p>
                     </div>
-                    <div class="bg-muted relative aspect-video overflow-hidden">
-                      <iframe
-                        src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}`}
-                        title={`${video.label}: ${video.title}`}
-                        loading="lazy"
-                        class="absolute inset-0 size-full border-0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerpolicy="strict-origin-when-cross-origin"
-                        allowfullscreen
-                      />
-                    </div>
+                    <YouTubeEmbed
+                      youtubeId={video.youtubeId}
+                      title={`${video.label}: ${video.title}`}
+                    />
                     <p class="text-muted-foreground leading-7">
                       {video.description}
                     </p>
@@ -310,7 +337,11 @@ const hasDetails = Boolean(
               aria-labelledby="milestones-title"
             >
               <h2 id="milestones-title" class="font-heading text-2xl font-bold">
-                {isYaHalaProject ? 'First collaborations' : 'Featured video'}
+                {isYaHalaProject
+                  ? 'First collaborations'
+                  : milestoneVideos.length > 1
+                    ? 'Featured videos'
+                    : 'Featured video'}
               </h2>
               <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
                 {isYaHalaProject
@@ -329,11 +360,11 @@ const hasDetails = Boolean(
                         aria-label={`Watch ${video.label} on YouTube: ${video.title}`}
                       >
                         <div class="bg-muted relative aspect-video overflow-hidden">
-                          <img
+                          <Image
                             src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
                             alt=""
-                            width="320"
-                            height="180"
+                            width={320}
+                            height={180}
                             loading="lazy"
                             decoding="async"
                             class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
@@ -370,17 +401,10 @@ const hasDetails = Boolean(
                 <div class="mt-6 space-y-8">
                   {milestoneVideos.map((video) => (
                     <article>
-                      <div class="bg-muted relative aspect-video overflow-hidden">
-                        <iframe
-                          src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}`}
-                          title={`${video.label}: ${video.title}`}
-                          loading="lazy"
-                          class="absolute inset-0 size-full border-0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          referrerpolicy="strict-origin-when-cross-origin"
-                          allowfullscreen
-                        />
-                      </div>
+                      <YouTubeEmbed
+                        youtubeId={video.youtubeId}
+                        title={`${video.label}: ${video.title}`}
+                      />
                       <div class="border-border border-b py-4">
                         <p class="font-bold">{video.title}</p>
                         <p class="text-muted-foreground mt-1 text-sm">
@@ -389,6 +413,14 @@ const hasDetails = Boolean(
                         <p class="text-muted-foreground mt-3 leading-7">
                           {video.description}
                         </p>
+                        <a
+                          href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          class="text-primary mt-4 inline-flex font-bold underline underline-offset-4"
+                        >
+                          Watch on YouTube
+                        </a>
                       </div>
                     </article>
                   ))}
@@ -425,18 +457,37 @@ const hasDetails = Boolean(
               aria-labelledby="gallery-title"
             >
               <h2 id="gallery-title" class="font-heading text-2xl font-bold">
-                {project.id === 'bayaan-academy'
-                  ? 'Photography'
-                  : 'Additional visuals'}
+                {galleryHeading}
               </h2>
-              {project.id === 'bayaan-academy' ? (
+              {projectData.galleryLayout === 'masonry' ? (
+                <div class="mt-6 columns-1 gap-4 sm:columns-2">
+                  {projectData.gallery.map((image) => (
+                    <figure class="mb-6 break-inside-avoid">
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        layout="full-width"
+                        loading="lazy"
+                        decoding="async"
+                        class="block h-auto w-full"
+                      />
+                      {image.caption && (
+                        <figcaption class="text-muted-foreground mt-2 text-sm">
+                          {image.caption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  ))}
+                </div>
+              ) : project.id === 'bayaan-academy' ? (
                 <div class="mt-6 space-y-6">
                   {bayaanGalleryGroups.map((group) =>
                     group.type === 'landscape' ? (
                       <figure>
-                        <img
+                        <Image
                           src={group.image.src}
                           alt={group.image.alt}
+                          layout="full-width"
                           loading="lazy"
                           class="block h-auto w-full"
                         />
@@ -450,9 +501,10 @@ const hasDetails = Boolean(
                       <div class="columns-1 gap-4 sm:columns-2">
                         {group.images.map((image) => (
                           <figure class="mb-6 break-inside-avoid">
-                            <img
+                            <Image
                               src={image.src}
                               alt={image.alt}
+                              layout="full-width"
                               loading="lazy"
                               class="block h-auto w-full"
                             />
@@ -467,13 +519,33 @@ const hasDetails = Boolean(
                     ),
                   )}
                 </div>
+              ) : project.id === 'arqam-academy' ? (
+                <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                  {projectData.gallery.map((image) => (
+                    <figure>
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        layout="full-width"
+                        loading="lazy"
+                        class="block h-auto w-full"
+                      />
+                      {image.caption && (
+                        <figcaption class="text-muted-foreground mt-2 text-sm">
+                          {image.caption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  ))}
+                </div>
               ) : (
                 <div class="mt-6 space-y-8">
                   {projectData.gallery.map((image) => (
                     <figure>
-                      <img
+                      <Image
                         src={image.src}
                         alt={image.alt}
+                        layout="full-width"
                         loading="lazy"
                         class="block h-auto w-full"
                       />
@@ -490,32 +562,34 @@ const hasDetails = Boolean(
           )
         }
 
-        <section
-          class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
-          aria-labelledby="links-title"
-        >
-          <h2 id="links-title" class="font-heading text-2xl font-bold">
-            Project links
-          </h2>
-          <div class="mt-5">
-            {
-              projectData.links.map((link) => (
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="border-border text-foreground hover:text-primary focus-visible:ring-ring flex items-center justify-between gap-4 border-b py-4 font-bold focus-visible:ring-2 focus-visible:outline-none"
-                >
-                  <span>{link.label}</span>
-                  <ArrowUpRight
-                    className="size-4 shrink-0"
-                    aria-hidden="true"
-                  />
-                </a>
-              ))
-            }
-          </div>
-        </section>
+        {
+          projectData.links.length > 0 && (
+            <section
+              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              aria-labelledby="links-title"
+            >
+              <h2 id="links-title" class="font-heading text-2xl font-bold">
+                Project links
+              </h2>
+              <div class="mt-5">
+                {projectData.links.map((link) => (
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="border-border text-foreground hover:text-primary focus-visible:ring-ring flex items-center justify-between gap-4 border-b py-4 font-bold focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    <span>{link.label}</span>
+                    <ArrowUpRight
+                      className="size-4 shrink-0"
+                      aria-hidden="true"
+                    />
+                  </a>
+                ))}
+              </div>
+            </section>
+          )
+        }
       </article>
     </main>
   </body>
