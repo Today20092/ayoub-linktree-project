@@ -31,6 +31,30 @@ const milestoneVideos = projectData.videos.filter(
   (video) => !video.comparisonRole,
 )
 const isYaHalaProject = project.id === 'ya-hala'
+const bayaanLandscapeImages = new Set([
+  '/previews/client-work/bayaan-academy/fundraising-event-students.webp',
+  '/previews/client-work/bayaan-academy/fundraising-event-group.webp',
+])
+const bayaanGalleryGroups = projectData.gallery.reduce<
+  Array<
+    | { type: 'portraits'; images: typeof projectData.gallery }
+    | { type: 'landscape'; image: (typeof projectData.gallery)[number] }
+  >
+>((groups, image) => {
+  if (bayaanLandscapeImages.has(image.src)) {
+    groups.push({ type: 'landscape', image })
+    return groups
+  }
+
+  const lastGroup = groups.at(-1)
+  if (lastGroup?.type === 'portraits') {
+    lastGroup.images.push(image)
+  } else {
+    groups.push({ type: 'portraits', images: [image] })
+  }
+
+  return groups
+}, [])
 const formatVideoDate = (date: string) =>
   new Intl.DateTimeFormat('en-US', {
     month: 'long',
@@ -405,35 +429,63 @@ const hasDetails = Boolean(
                   ? 'Photography'
                   : 'Additional visuals'}
               </h2>
-              <div
-                class:list={[
-                  'mt-6',
-                  project.id === 'bayaan-academy'
-                    ? 'columns-1 gap-4 sm:columns-2'
-                    : 'space-y-8',
-                ]}
-              >
-                {projectData.gallery.map((image) => (
-                  <figure
-                    class:list={[
-                      project.id === 'bayaan-academy' &&
-                        'mb-6 break-inside-avoid',
-                    ]}
-                  >
-                    <img
-                      src={image.src}
-                      alt={image.alt}
-                      loading="lazy"
-                      class="block h-auto w-full"
-                    />
-                    {image.caption && (
-                      <figcaption class="text-muted-foreground mt-2 text-sm">
-                        {image.caption}
-                      </figcaption>
-                    )}
-                  </figure>
-                ))}
-              </div>
+              {project.id === 'bayaan-academy' ? (
+                <div class="mt-6 space-y-6">
+                  {bayaanGalleryGroups.map((group) =>
+                    group.type === 'landscape' ? (
+                      <figure>
+                        <img
+                          src={group.image.src}
+                          alt={group.image.alt}
+                          loading="lazy"
+                          class="block h-auto w-full"
+                        />
+                        {group.image.caption && (
+                          <figcaption class="text-muted-foreground mt-2 text-sm">
+                            {group.image.caption}
+                          </figcaption>
+                        )}
+                      </figure>
+                    ) : (
+                      <div class="columns-1 gap-4 sm:columns-2">
+                        {group.images.map((image) => (
+                          <figure class="mb-6 break-inside-avoid">
+                            <img
+                              src={image.src}
+                              alt={image.alt}
+                              loading="lazy"
+                              class="block h-auto w-full"
+                            />
+                            {image.caption && (
+                              <figcaption class="text-muted-foreground mt-2 text-sm">
+                                {image.caption}
+                              </figcaption>
+                            )}
+                          </figure>
+                        ))}
+                      </div>
+                    ),
+                  )}
+                </div>
+              ) : (
+                <div class="mt-6 space-y-8">
+                  {projectData.gallery.map((image) => (
+                    <figure>
+                      <img
+                        src={image.src}
+                        alt={image.alt}
+                        loading="lazy"
+                        class="block h-auto w-full"
+                      />
+                      {image.caption && (
+                        <figcaption class="text-muted-foreground mt-2 text-sm">
+                          {image.caption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  ))}
+                </div>
+              )}
             </section>
           )
         }
