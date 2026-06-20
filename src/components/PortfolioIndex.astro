@@ -2,6 +2,7 @@
 import { Icon } from 'astro-icon/components'
 import { Image } from 'astro:assets'
 import type { ImageMetadata } from 'astro'
+import { IdCard, MessageSquareText } from 'lucide-react'
 
 type LinkItem = {
   id: string
@@ -85,25 +86,47 @@ const socialColumns = [
         </p>
       </div>
 
-      <nav class="lg:col-span-2" aria-label="Contact links">
+      <nav class="col-span-2 lg:col-span-2" aria-label="Contact links">
         <p
-          class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
+          class="text-muted-foreground text-xs font-semibold tracking-wider uppercase"
         >
           Contact
         </p>
-        <div class="flex flex-col items-start text-sm leading-6 font-bold">
+        <p class="text-muted-foreground mt-1 text-xs leading-5">
+          Save my contact, then say hello.
+        </p>
+        <div class="mt-3 flex w-full flex-col gap-2">
           {
             primaryLinks.map((link, index) => (
               <a
                 href={link.url}
                 class:list={[
-                  'focus-visible:ring-ring rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none',
+                  'focus-visible:ring-ring focus-visible:ring-offset-background inline-flex min-h-12 w-full items-center gap-3 rounded-sm px-3 py-2.5 text-sm leading-5 font-bold no-underline transition-[color,background-color,border-color,transform] duration-150 select-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]',
                   index === 0
-                    ? 'text-primary decoration-primary'
-                    : 'text-foreground decoration-border hover:text-primary',
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                    : 'border-border text-foreground hover:border-primary hover:bg-secondary border',
                 ]}
               >
-                {cleanContactLabel(link.label)}
+                <span
+                  class:list={[
+                    'inline-flex size-7 shrink-0 items-center justify-center rounded-sm',
+                    index === 0 ? 'bg-primary-foreground/10' : 'bg-secondary',
+                  ]}
+                  aria-hidden="true"
+                >
+                  {link.id === 'contact' ? (
+                    <IdCard className="size-4" strokeWidth={2} />
+                  ) : (
+                    <MessageSquareText className="size-4" strokeWidth={2} />
+                  )}
+                </span>
+                <span class="min-w-0">
+                  <span class="mr-1.5 tabular-nums">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <span aria-hidden="true">— </span>
+                  {cleanContactLabel(link.label)}
+                </span>
               </a>
             ))
           }
