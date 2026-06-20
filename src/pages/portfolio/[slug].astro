@@ -7,6 +7,17 @@ import { getCollection, render, type CollectionEntry } from 'astro:content'
 import { ArrowLeft, ArrowRight, ArrowUpRight, Play } from 'lucide-react'
 import PortfolioLocation from '../../components/PortfolioLocation.astro'
 import YouTubeEmbed from '../../components/YouTubeEmbed.astro'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '../../components/ui/breadcrumb'
+import { buttonVariants } from '../../components/ui/button'
+import { Separator } from '../../components/ui/separator'
+import { cn } from '../../lib/utils'
 
 export async function getStaticPaths() {
   const projects = (await getCollection('portfolio')).sort(
@@ -175,17 +186,23 @@ const galleryHeading =
       id="main-content"
       class="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
     >
-      <header
-        class="border-border flex items-center justify-between gap-4 border-b pb-6"
-      >
-        <a
-          href="/#portfolio"
-          class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
-        >
-          <ArrowLeft className="size-4" aria-hidden="true" />
-          <span>Back to portfolio</span>
-        </a>
-        <span class="text-muted-foreground text-sm font-medium">Portfolio</span>
+      <header class="mx-auto max-w-4xl">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                href="/#portfolio"
+                className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+              >
+                Portfolio
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{projectData.title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       </header>
 
       <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
@@ -231,7 +248,7 @@ const galleryHeading =
 
         {
           hasBody && (
-            <section class="portfolio-prose border-border mx-auto max-w-4xl border-t py-8 sm:py-10">
+            <section class="portfolio-prose mx-auto max-w-4xl py-8 sm:py-10">
               <Content />
             </section>
           )
@@ -249,7 +266,7 @@ const galleryHeading =
         {
           projectData.services.length > 0 && (
             <section
-              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              class="mx-auto max-w-4xl py-8 sm:py-10"
               aria-labelledby="services-title"
             >
               <h2 id="services-title" class="font-heading text-2xl font-bold">
@@ -257,9 +274,7 @@ const galleryHeading =
               </h2>
               <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
                 {projectData.services.map((service) => (
-                  <li class="border-border border-b pb-3 font-semibold">
-                    {service}
-                  </li>
+                  <li class="py-1 leading-snug font-semibold">{service}</li>
                 ))}
               </ul>
             </section>
@@ -269,7 +284,7 @@ const galleryHeading =
         {
           hasDetails && (
             <section
-              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              class="mx-auto max-w-4xl py-8 sm:py-10"
               aria-labelledby="details-title"
             >
               <h2 id="details-title" class="font-heading text-2xl font-bold">
@@ -320,7 +335,7 @@ const galleryHeading =
         {
           comparisonVideos.length > 0 && (
             <section
-              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              class="mx-auto max-w-4xl py-8 sm:py-10"
               aria-labelledby="comparison-title"
             >
               <p class="text-primary text-xs font-bold tracking-wider uppercase">
@@ -366,7 +381,7 @@ const galleryHeading =
         {
           milestoneVideos.length > 0 && (
             <section
-              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              class="mx-auto max-w-4xl py-8 sm:py-10"
               aria-labelledby="milestones-title"
             >
               <h2 id="milestones-title" class="font-heading text-2xl font-bold">
@@ -411,7 +426,7 @@ const galleryHeading =
                             />
                           </span>
                         </div>
-                        <div class="border-border border-b py-4">
+                        <div class="py-4">
                           <div class="flex items-start justify-between gap-4">
                             <div>
                               <p class="font-bold">{video.label}</p>
@@ -440,7 +455,7 @@ const galleryHeading =
                         youtubeId={video.youtubeId}
                         title={`${video.label}: ${video.title}`}
                       />
-                      <div class="border-border border-b py-4">
+                      <div class="py-4">
                         <p class="font-bold">{video.title}</p>
                         <p class="text-muted-foreground mt-1 text-sm">
                           {formatVideoDate(video.publishedAt)}
@@ -468,7 +483,7 @@ const galleryHeading =
         {
           projectData.outcomes.length > 0 && (
             <section
-              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              class="mx-auto max-w-4xl py-8 sm:py-10"
               aria-labelledby="outcomes-title"
             >
               <h2 id="outcomes-title" class="font-heading text-2xl font-bold">
@@ -476,9 +491,7 @@ const galleryHeading =
               </h2>
               <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
                 {projectData.outcomes.map((outcome) => (
-                  <li class="border-border border-b pb-3 font-semibold">
-                    {outcome}
-                  </li>
+                  <li class="py-1 leading-snug font-semibold">{outcome}</li>
                 ))}
               </ul>
             </section>
@@ -488,7 +501,7 @@ const galleryHeading =
         {
           galleryImages.length > 0 && (
             <section
-              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
+              class="mx-auto max-w-4xl py-8 sm:py-10"
               aria-labelledby="gallery-title"
             >
               <h2 id="gallery-title" class="font-heading text-2xl font-bold">
@@ -614,74 +627,95 @@ const galleryHeading =
 
         {
           projectData.links.length > 0 && (
-            <section
-              class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
-              aria-labelledby="links-title"
-            >
-              <h2 id="links-title" class="font-heading text-2xl font-bold">
-                Project links
-              </h2>
-              <div class="mt-5">
-                {projectData.links.map((link) => (
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="border-border text-foreground hover:text-primary focus-visible:ring-ring flex items-center justify-between gap-4 border-b py-4 font-bold focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    <span>
-                      {link.label === 'Website'
-                        ? `${projectData.title} website`
-                        : link.label}
-                    </span>
-                    <ArrowUpRight
-                      className="size-4 shrink-0"
-                      aria-hidden="true"
-                    />
-                  </a>
-                ))}
-              </div>
-            </section>
+            <>
+              <Separator className="mx-auto max-w-4xl" />
+              <section
+                class="mx-auto max-w-4xl py-8 sm:py-10"
+                aria-labelledby="links-title"
+              >
+                <h2 id="links-title" class="font-heading text-2xl font-bold">
+                  Project links
+                </h2>
+                <div class="mt-4 flex flex-col gap-1">
+                  {projectData.links.map((link) => (
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class={cn(
+                        buttonVariants({
+                          variant: 'ghost',
+                          size: 'lg',
+                        }),
+                        'h-auto w-full justify-between px-3 py-3 text-left font-bold whitespace-normal',
+                      )}
+                    >
+                      <span>
+                        {link.label === 'Website'
+                          ? `${projectData.title} website`
+                          : link.label}
+                      </span>
+                      <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
+                    </a>
+                  ))}
+                </div>
+              </section>
+            </>
           )
         }
 
         {
           (previousProject || nextProject) && (
-            <nav
-              class="border-border mx-auto grid max-w-4xl gap-4 border-t pt-8 sm:grid-cols-2 sm:pt-10"
-              aria-label="More portfolio projects"
-            >
-              {previousProject ? (
-                <a
-                  href={`/portfolio/${previousProject.id}/`}
-                  class="border-border hover:border-primary focus-visible:ring-ring flex items-center gap-3 border p-4 font-bold focus-visible:ring-2 focus-visible:outline-none"
-                >
-                  <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
-                  <span>
-                    <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
-                      Previous project
-                    </small>
-                    {previousProject.title}
-                  </span>
-                </a>
-              ) : (
-                <span aria-hidden="true" />
-              )}
-              {nextProject && (
-                <a
-                  href={`/portfolio/${nextProject.id}/`}
-                  class="border-border hover:border-primary focus-visible:ring-ring flex items-center justify-between gap-3 border p-4 text-right font-bold focus-visible:ring-2 focus-visible:outline-none"
-                >
-                  <span>
-                    <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
-                      Next project
-                    </small>
-                    {nextProject.title}
-                  </span>
-                  <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
-                </a>
-              )}
-            </nav>
+            <>
+              <Separator className="mx-auto max-w-4xl" />
+              <nav
+                class="mx-auto grid max-w-4xl gap-2 pt-6 sm:grid-cols-2 sm:pt-8"
+                aria-label="More portfolio projects"
+              >
+                {previousProject && (
+                  <a
+                    href={`/portfolio/${previousProject.id}/`}
+                    aria-label={`Previous project: ${previousProject.title}`}
+                    class={cn(
+                      buttonVariants({
+                        variant: 'ghost',
+                        size: 'lg',
+                      }),
+                      'h-auto w-full justify-start px-3 py-3 text-left whitespace-normal',
+                    )}
+                  >
+                    <ArrowLeft data-icon="inline-start" aria-hidden="true" />
+                    <span class="min-w-0">
+                      <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
+                        Previous project
+                      </small>
+                      <span class="font-bold">{previousProject.title}</span>
+                    </span>
+                  </a>
+                )}
+                {nextProject && (
+                  <a
+                    href={`/portfolio/${nextProject.id}/`}
+                    aria-label={`Next project: ${nextProject.title}`}
+                    class={cn(
+                      buttonVariants({
+                        variant: 'ghost',
+                        size: 'lg',
+                      }),
+                      'h-auto w-full justify-end px-3 py-3 text-right whitespace-normal sm:col-start-2',
+                    )}
+                  >
+                    <span class="min-w-0">
+                      <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
+                        Next project
+                      </small>
+                      <span class="font-bold">{nextProject.title}</span>
+                    </span>
+                    <ArrowRight data-icon="inline-end" aria-hidden="true" />
+                  </a>
+                )}
+              </nav>
+            </>
           )
         }
       </article>
