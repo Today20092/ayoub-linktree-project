@@ -4,7 +4,7 @@ import { z } from 'astro/zod'
 
 const portfolioLink = z.object({
   label: z.string(),
-  url: z.string().url(),
+  url: z.url(),
 })
 
 const portfolioLocation = z.object({
@@ -12,7 +12,7 @@ const portfolioLocation = z.object({
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   plusCode: z.string(),
-  googleMapsUrl: z.string().url(),
+  googleMapsUrl: z.url(),
 })
 
 const portfolioVideo = z.object({
@@ -30,7 +30,7 @@ const portfolio = defineCollection({
     pattern: '**/*.{md,mdx}',
   }),
   schema: ({ image }) => {
-    const portfolioAsset = z.union([image(), z.string().url()])
+    const portfolioAsset = image()
     const portfolioImage = z.object({
       src: portfolioAsset,
       alt: z.string(),
@@ -40,6 +40,8 @@ const portfolio = defineCollection({
     return z.object({
       order: z.number().int().nonnegative(),
       title: z.string(),
+      seoTitle: z.string().optional(),
+      seoDescription: z.string().optional(),
       status: z.enum(['complete', 'placeholder']),
       category: z.string(),
       summary: z.string(),

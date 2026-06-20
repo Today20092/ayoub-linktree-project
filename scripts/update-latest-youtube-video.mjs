@@ -1,10 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { parse } from 'yaml'
 
-const siteConfigPath = new URL(
-  '../src/data/site.yaml',
-  import.meta.url,
-)
+const siteConfigPath = new URL('../src/data/site.yaml', import.meta.url)
 const outputPath = new URL(
   '../src/data/latest-youtube-videos.json',
   import.meta.url,

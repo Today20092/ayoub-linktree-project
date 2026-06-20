@@ -6,7 +6,7 @@ type Props = {
   youtubeId: string
   title: string
   autoplay?: boolean
-  poster?: string | ImageMetadata
+  poster?: ImageMetadata
   posterAlt?: string
   class?: string
 }
@@ -39,8 +39,10 @@ const {
         width={1280}
         height={720}
         layout="full-width"
-        loading="eager"
-        decoding="async"
+        widths={[640, 960, 1280]}
+        sizes="(min-width: 1280px) 1216px, 100vw"
+        quality={80}
+        priority
         class="absolute inset-0 size-full object-cover"
         data-youtube-poster
       />

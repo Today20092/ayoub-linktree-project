@@ -44,6 +44,8 @@ mapUrl.searchParams.set('marker', `${latitude},${longitude}`)
       <iframe
         src={mapUrl.toString()}
         title={`Map showing ${title} at ${address}`}
+        width="800"
+        height="500"
         loading="lazy"
         class="absolute inset-0 size-full border-0 contrast-[.92] saturate-[.55] transition-[filter] duration-300 hover:saturate-75 focus:saturate-75 dark:brightness-[.8] dark:contrast-[1.05]"
       >
@@ -89,7 +91,7 @@ mapUrl.searchParams.set('marker', `${latitude},${longitude}`)
       <a
         href={googleMapsUrl}
         target="_blank"
-        rel="noreferrer"
+        rel="noopener noreferrer"
         class={buttonVariants({
           variant: 'outline',
           size: 'lg',

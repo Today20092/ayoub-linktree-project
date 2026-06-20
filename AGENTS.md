@@ -25,7 +25,7 @@ npx prettier --write .
 ```
 
 ## deployment
+
 - ayoubabed.xyz
 - hosted on cloudflare pages using workers
 - builds from github which is linked to the git repo and cloudflare pages.
-

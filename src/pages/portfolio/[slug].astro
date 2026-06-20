@@ -1,37 +1,61 @@
 ---
 import '../../styles.css'
 
+import type { ImageMetadata } from 'astro'
 import { Image } from 'astro:assets'
 import { getCollection, render, type CollectionEntry } from 'astro:content'
-import { ArrowLeft, ArrowUpRight, Play } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ArrowUpRight, Play } from 'lucide-react'
 import PortfolioLocation from '../../components/PortfolioLocation.astro'
 import YouTubeEmbed from '../../components/YouTubeEmbed.astro'
 
 export async function getStaticPaths() {
-  const projects = await getCollection('portfolio')
+  const projects = (await getCollection('portfolio')).sort(
+    (a, b) => a.data.order - b.data.order,
+  )
 
-  return projects.map((project) => ({
+  return projects.map((project, index) => ({
     params: { slug: project.id },
-    props: { project },
+    props: {
+      project,
+      previousProject:
+        index > 0
+          ? {
+              id: projects[index - 1].id,
+              title: projects[index - 1].data.title,
+            }
+          : undefined,
+      nextProject:
+        index < projects.length - 1
+          ? {
+              id: projects[index + 1].id,
+              title: projects[index + 1].data.title,
+            }
+          : undefined,
+    },
   }))
 }
 
 type Props = {
   project: CollectionEntry<'portfolio'>
+  previousProject?: { id: string; title: string }
+  nextProject?: { id: string; title: string }
 }
 
-const { project } = Astro.props
+const { project, previousProject, nextProject } = Astro.props as Props
 const { Content } = await render(project)
 const projectData = project.data
+const heroImage = projectData.heroImage as ImageMetadata
+const galleryImages = projectData.gallery.map((image) => ({
+  ...image,
+  src: image.src as ImageMetadata,
+}))
 const hasBody = Boolean(project.body?.trim())
 const canonicalUrl = new URL(`/portfolio/${project.id}`, Astro.site).toString()
-const socialImageUrl = new URL(
-  typeof projectData.heroImage === 'string'
-    ? projectData.heroImage
-    : projectData.heroImage.src,
-  Astro.site,
-).toString()
-const projectTitle = `${projectData.title} - Ayoub Abedrabbo`
+const socialImageUrl = new URL(heroImage.src, Astro.site).toString()
+const projectTitle =
+  projectData.seoTitle ?? `${projectData.title} - Ayoub Abedrabbo`
+const projectDescription = projectData.seoDescription ?? projectData.summary
+const sitemapUrl = new URL('/sitemap-index.xml', Astro.site).toString()
 const comparisonVideos = projectData.videos.filter(
   (video) => video.comparisonRole,
 )
@@ -43,10 +67,10 @@ const bayaanLandscapeImages = new Set([
   'Bayaan Academy students standing together onstage during a fundraising event',
   'Bayaan Academy students and adults gathered onstage during a fundraising event',
 ])
-const bayaanGalleryGroups = projectData.gallery.reduce<
+const bayaanGalleryGroups = galleryImages.reduce<
   Array<
-    | { type: 'portraits'; images: typeof projectData.gallery }
-    | { type: 'landscape'; image: (typeof projectData.gallery)[number] }
+    | { type: 'portraits'; images: typeof galleryImages }
+    | { type: 'landscape'; image: (typeof galleryImages)[number] }
   >
 >((groups, image) => {
   if (bayaanLandscapeImages.has(image.alt)) {
@@ -72,9 +96,9 @@ const formatVideoDate = (date: string) =>
   }).format(new Date(`${date}T00:00:00Z`))
 const hasDetails = Boolean(
   projectData.role ||
-    projectData.collaborators.length ||
-    projectData.duration ||
-    projectData.tools.length,
+  projectData.collaborators.length ||
+  projectData.duration ||
+  projectData.tools.length,
 )
 const galleryHeading =
   projectData.galleryHeading ??
@@ -92,19 +116,20 @@ const galleryHeading =
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>{projectTitle}</title>
-    <meta name="description" content={projectData.summary} />
+    <meta name="description" content={projectDescription} />
     <meta name="robots" content="index,follow,max-image-preview:large" />
     <meta property="og:title" content={projectTitle} />
-    <meta property="og:description" content={projectData.summary} />
+    <meta property="og:description" content={projectDescription} />
     <meta property="og:image" content={socialImageUrl} />
     <meta property="og:image:alt" content={projectData.imageAlt} />
     <meta property="og:type" content="article" />
     <meta property="og:url" content={canonicalUrl} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={projectTitle} />
-    <meta name="twitter:description" content={projectData.summary} />
+    <meta name="twitter:description" content={projectDescription} />
     <meta name="twitter:image" content={socialImageUrl} />
     <link rel="canonical" href={canonicalUrl} />
+    <link rel="sitemap" href={sitemapUrl} />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="preconnect" href="https://api.fontshare.com" />
     <link rel="preconnect" href="https://i.ytimg.com" />
@@ -140,7 +165,14 @@ const galleryHeading =
   <body
     class="bg-background text-foreground min-h-[100dvh] subpixel-antialiased"
   >
+    <a
+      href="#main-content"
+      class="bg-background text-foreground focus-visible:ring-ring fixed top-3 left-3 z-50 -translate-y-20 rounded-sm px-4 py-2 font-bold shadow-md focus:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
+    >
+      Skip to content
+    </a>
     <main
+      id="main-content"
       class="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
     >
       <header
@@ -149,10 +181,9 @@ const galleryHeading =
         <a
           href="/#portfolio"
           class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
-          aria-label="Back to portfolio"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
-          <span>Ayoub Abedrabbo</span>
+          <span>Back to portfolio</span>
         </a>
         <span class="text-muted-foreground text-sm font-medium">Portfolio</span>
       </header>
@@ -163,18 +194,20 @@ const galleryHeading =
             <YouTubeEmbed
               youtubeId={projectData.heroVideo}
               title={`${projectData.title} featured video`}
-              poster={projectData.heroImage}
+              poster={heroImage}
               posterAlt={projectData.imageAlt}
             />
           ) : (
             <Image
-              src={projectData.heroImage}
+              src={heroImage}
               alt={projectData.imageAlt}
               width={projectData.imageWidth}
               height={projectData.imageHeight}
               layout="full-width"
-              loading="eager"
-              decoding="async"
+              widths={[640, 960, 1280, 1600]}
+              sizes="(min-width: 1280px) 1216px, 100vw"
+              quality={82}
+              priority
               class="bg-muted block h-auto w-full"
             />
           )
@@ -357,14 +390,16 @@ const galleryHeading =
                         target="_blank"
                         rel="noopener noreferrer"
                         class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:outline-none"
-                        aria-label={`Watch ${video.label} on YouTube: ${video.title}`}
                       >
                         <div class="bg-muted relative aspect-video overflow-hidden">
                           <Image
                             src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
-                            alt=""
+                            alt={`Video thumbnail for ${video.title}`}
                             width={320}
                             height={180}
+                            layout="constrained"
+                            widths={[320, 480, 640]}
+                            sizes="(min-width: 640px) 50vw, 100vw"
                             loading="lazy"
                             decoding="async"
                             class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
@@ -416,10 +451,10 @@ const galleryHeading =
                         <a
                           href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
                           target="_blank"
-                          rel="noreferrer"
+                          rel="noopener noreferrer"
                           class="text-primary mt-4 inline-flex font-bold underline underline-offset-4"
                         >
-                          Watch on YouTube
+                          Watch {video.title} on YouTube
                         </a>
                       </div>
                     </article>
@@ -451,7 +486,7 @@ const galleryHeading =
         }
 
         {
-          projectData.gallery.length > 0 && (
+          galleryImages.length > 0 && (
             <section
               class="border-border mx-auto max-w-4xl border-t py-8 sm:py-10"
               aria-labelledby="gallery-title"
@@ -461,12 +496,15 @@ const galleryHeading =
               </h2>
               {projectData.galleryLayout === 'masonry' ? (
                 <div class="mt-6 columns-1 gap-4 sm:columns-2">
-                  {projectData.gallery.map((image) => (
+                  {galleryImages.map((image) => (
                     <figure class="mb-6 break-inside-avoid">
                       <Image
                         src={image.src}
                         alt={image.alt}
                         layout="full-width"
+                        widths={[480, 768, 1024, 1280, 1600]}
+                        sizes="(min-width: 640px) 50vw, 100vw"
+                        quality={80}
                         loading="lazy"
                         decoding="async"
                         class="block h-auto w-full"
@@ -488,6 +526,9 @@ const galleryHeading =
                           src={group.image.src}
                           alt={group.image.alt}
                           layout="full-width"
+                          widths={[640, 960, 1280, 1600]}
+                          sizes="(min-width: 1280px) 896px, 100vw"
+                          quality={80}
                           loading="lazy"
                           class="block h-auto w-full"
                         />
@@ -505,6 +546,9 @@ const galleryHeading =
                               src={image.src}
                               alt={image.alt}
                               layout="full-width"
+                              widths={[480, 768, 1024]}
+                              sizes="(min-width: 640px) 50vw, 100vw"
+                              quality={80}
                               loading="lazy"
                               class="block h-auto w-full"
                             />
@@ -521,12 +565,15 @@ const galleryHeading =
                 </div>
               ) : project.id === 'arqam-academy' ? (
                 <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                  {projectData.gallery.map((image) => (
+                  {galleryImages.map((image) => (
                     <figure>
                       <Image
                         src={image.src}
                         alt={image.alt}
                         layout="full-width"
+                        widths={[480, 768, 1024]}
+                        sizes="(min-width: 640px) 50vw, 100vw"
+                        quality={80}
                         loading="lazy"
                         class="block h-auto w-full"
                       />
@@ -540,12 +587,15 @@ const galleryHeading =
                 </div>
               ) : (
                 <div class="mt-6 space-y-8">
-                  {projectData.gallery.map((image) => (
+                  {galleryImages.map((image) => (
                     <figure>
                       <Image
                         src={image.src}
                         alt={image.alt}
                         layout="full-width"
+                        widths={[640, 960, 1280, 1600]}
+                        sizes="(min-width: 1280px) 896px, 100vw"
+                        quality={80}
                         loading="lazy"
                         class="block h-auto w-full"
                       />
@@ -579,7 +629,11 @@ const galleryHeading =
                     rel="noopener noreferrer"
                     class="border-border text-foreground hover:text-primary focus-visible:ring-ring flex items-center justify-between gap-4 border-b py-4 font-bold focus-visible:ring-2 focus-visible:outline-none"
                   >
-                    <span>{link.label}</span>
+                    <span>
+                      {link.label === 'Website'
+                        ? `${projectData.title} website`
+                        : link.label}
+                    </span>
                     <ArrowUpRight
                       className="size-4 shrink-0"
                       aria-hidden="true"
@@ -588,6 +642,46 @@ const galleryHeading =
                 ))}
               </div>
             </section>
+          )
+        }
+
+        {
+          (previousProject || nextProject) && (
+            <nav
+              class="border-border mx-auto grid max-w-4xl gap-4 border-t pt-8 sm:grid-cols-2 sm:pt-10"
+              aria-label="More portfolio projects"
+            >
+              {previousProject ? (
+                <a
+                  href={`/portfolio/${previousProject.id}`}
+                  class="border-border hover:border-primary focus-visible:ring-ring flex items-center gap-3 border p-4 font-bold focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
+                  <span>
+                    <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
+                      Previous project
+                    </small>
+                    {previousProject.title}
+                  </span>
+                </a>
+              ) : (
+                <span aria-hidden="true" />
+              )}
+              {nextProject && (
+                <a
+                  href={`/portfolio/${nextProject.id}`}
+                  class="border-border hover:border-primary focus-visible:ring-ring flex items-center justify-between gap-3 border p-4 text-right font-bold focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  <span>
+                    <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
+                      Next project
+                    </small>
+                    {nextProject.title}
+                  </span>
+                  <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+                </a>
+              )}
+            </nav>
           )
         }
       </article>

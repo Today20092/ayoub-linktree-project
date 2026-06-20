@@ -78,7 +78,7 @@ page layout.
 /
 ├── public/
 │   ├── previews/
-│   │   ├── alphabravomedia-homepage.png
+│   │   ├── alphabravomedia-homepage.webp
 │   │   └── client-work/
 │   │       ├── arqam-academy.webp
 │   │       ├── aya-academy.webp
@@ -626,8 +626,8 @@ npm run astro -- add integration-name
 At minimum:
 
 ```bash
-npx prettier --write .
-npm run build
+npm run verify
+npm run audit:prod
 ```
 
 Then check:
@@ -645,10 +645,22 @@ Then check:
 - Domain: [ayoubabed.xyz](https://ayoubabed.xyz)
 - Hosting: Cloudflare Pages/Workers
 - Source: GitHub repository connected to Cloudflare
+- Required Node version: 22 or newer
+- Build command: `npm run build`
+- Build output directory: `dist`
 - Production builds use the commands and dependencies in `package.json`
 
 Pushing changes to the connected GitHub branch triggers the Cloudflare build
-and deployment workflow.
+and deployment workflow. The repository does not deploy a second copy through
+GitHub Pages.
+
+## Accepted audit warnings
+
+The site intentionally keeps its About and Contact information on the homepage
+instead of creating separate routes. Squirrel may therefore report missing
+dedicated About, Contact, and Privacy pages. These are accepted warnings for the
+current release. The `sms:` contact action and LinkedIn's crawler response can
+also appear as broken external links even when they work correctly for visitors.
 
 ## Notes for AI coding agents
 

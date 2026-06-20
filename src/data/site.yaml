@@ -1,9 +1,9 @@
 site:
-  pageTitle: Ayoub Abedrabbo
-  pageDescription: "Ayoub Abedrabbo shares Islam, learning, and media work from Tampa. His content spans reflections, books, YouTube, and AlphaBravoMedia production."
+  pageTitle: Ayoub Abedrabbo | Tampa Photographer & Videographer
+  pageDescription: 'Ayoub Abedrabbo shares Islam, learning, and media work from Tampa. His content spans reflections, books, YouTube, and AlphaBravoMedia production.'
   siteName: Ayoub Abedrabbo
   profileName: Ayoub
-  twitterHandle: "@ayoubabedrabbo"
+  twitterHandle: '@ayoubabedrabbo'
   heroImageAlt: Portrait of Ayoub Abedrabbo
   profileImage: AyoubBayaan.jpg
   ogImage: AyoubContactCardImage.jpg
@@ -15,73 +15,73 @@ socialLinks:
   - id: alphabravomedia-website
     url: https://alphabravomedia.co
     icon: simple-icons:googlechrome
-    label: "My business — AlphaBravoMedia"
-    color: "#8f3f37"
-    color2: "#f0a097"
-    color3: "#15110d"
-    darkColor: "#f0a097"
-    darkColor2: "#8f3f37"
-    darkColor3: "#211211"
+    label: 'My business — AlphaBravoMedia'
+    color: '#8f3f37'
+    color2: '#f0a097'
+    color3: '#15110d'
+    darkColor: '#f0a097'
+    darkColor2: '#8f3f37'
+    darkColor3: '#211211'
   - id: instagram
     url: https://instagram.com/alphabravomedia
     icon: simple-icons:instagram
-    label: "Instagram: @AlphaBravoMedia"
-    color: "oklch(0.59 0.2 350)"
-    color2: "oklch(0.72 0.16 38)"
-    color3: "oklch(0.36 0.16 304)"
-    darkColor: "oklch(0.61 0.19 350)"
-    darkColor2: "oklch(0.7 0.15 38)"
-    darkColor3: "oklch(0.28 0.13 304)"
+    label: 'Instagram: @AlphaBravoMedia'
+    color: 'oklch(0.59 0.2 350)'
+    color2: 'oklch(0.72 0.16 38)'
+    color3: 'oklch(0.36 0.16 304)'
+    darkColor: 'oklch(0.61 0.19 350)'
+    darkColor2: 'oklch(0.7 0.15 38)'
+    darkColor3: 'oklch(0.28 0.13 304)'
   - id: discord
     url: https://discordapp.com/users/279467079990640641
     icon: simple-icons:discord
     label: Discord profile
-    color: "oklch(0.57 0.2 278)"
-    color2: "oklch(0.68 0.15 274)"
-    color3: "oklch(0.25 0.08 277)"
-    darkColor: "oklch(0.65 0.17 276)"
-    darkColor2: "oklch(0.58 0.19 278)"
-    darkColor3: "oklch(0.22 0.07 277)"
+    color: 'oklch(0.57 0.2 278)'
+    color2: 'oklch(0.68 0.15 274)'
+    color3: 'oklch(0.25 0.08 277)'
+    darkColor: 'oklch(0.65 0.17 276)'
+    darkColor2: 'oklch(0.58 0.19 278)'
+    darkColor3: 'oklch(0.22 0.07 277)'
   - id: linkedin
     url: https://www.linkedin.com/in/ayoubabedrabbo/
     icon: simple-icons:linkedin
     label: LinkedIn
-    color: "oklch(0.52 0.17 254)"
-    color2: "oklch(0.7 0.12 236)"
-    color3: "oklch(0.3 0.1 250)"
-    darkColor: "oklch(0.65 0.14 246)"
-    darkColor2: "oklch(0.55 0.16 254)"
-    darkColor3: "oklch(0.24 0.08 250)"
+    color: 'oklch(0.52 0.17 254)'
+    color2: 'oklch(0.7 0.12 236)'
+    color3: 'oklch(0.3 0.1 250)'
+    darkColor: 'oklch(0.65 0.14 246)'
+    darkColor2: 'oklch(0.55 0.16 254)'
+    darkColor3: 'oklch(0.24 0.08 250)'
   - id: github
     url: https://github.com/Today20092
     icon: simple-icons:github
     label: GitHub
-    color: "oklch(0.26 0.012 255)"
-    color2: "oklch(0.46 0.025 255)"
-    color3: "oklch(0.14 0.014 255)"
-    darkColor: "oklch(0.31 0.018 255)"
-    darkColor2: "oklch(0.5 0.024 255)"
-    darkColor3: "oklch(0.17 0.014 255)"
+    color: 'oklch(0.26 0.012 255)'
+    color2: 'oklch(0.46 0.025 255)'
+    color3: 'oklch(0.14 0.014 255)'
+    darkColor: 'oklch(0.31 0.018 255)'
+    darkColor2: 'oklch(0.5 0.024 255)'
+    darkColor3: 'oklch(0.17 0.014 255)'
   - id: telegram
     url: https://t.me/AyoubAb1
     icon: simple-icons:telegram
     label: Telegram
-    color: "oklch(0.55 0.13 235)"
-    color2: "oklch(0.75 0.13 215)"
-    color3: "oklch(0.28 0.08 225)"
-    darkColor: "oklch(0.6 0.13 230)"
-    darkColor2: "oklch(0.72 0.12 215)"
-    darkColor3: "oklch(0.23 0.07 225)"
+    color: 'oklch(0.55 0.13 235)'
+    color2: 'oklch(0.75 0.13 215)'
+    color3: 'oklch(0.28 0.08 225)'
+    darkColor: 'oklch(0.6 0.13 230)'
+    darkColor2: 'oklch(0.72 0.12 215)'
+    darkColor3: 'oklch(0.23 0.07 225)'
   - id: tiktok
     url: https://www.tiktok.com/@ayoubabedrabbo
     icon: simple-icons:tiktok
     label: TikTok
-    color: "oklch(0.15 0.008 250)"
-    color2: "oklch(0.82 0.15 190)"
-    color3: "oklch(0.58 0.22 18)"
-    darkColor: "oklch(0.18 0.01 250)"
-    darkColor2: "oklch(0.78 0.14 190)"
-    darkColor3: "oklch(0.52 0.2 18)"
+    color: 'oklch(0.15 0.008 250)'
+    color2: 'oklch(0.82 0.15 190)'
+    color3: 'oklch(0.58 0.22 18)'
+    darkColor: 'oklch(0.18 0.01 250)'
+    darkColor2: 'oklch(0.78 0.14 190)'
+    darkColor3: 'oklch(0.52 0.2 18)'
   # - id: substack
   #   url: https://www.substack.com/@ayoubabedrabbo1
   #   icon: simple-icons:substack
@@ -95,107 +95,107 @@ socialLinks:
 
 actionLinks:
   - id: contact
-    label: "1. Download my contact card"
+    label: '1. Download my contact card'
     url: https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf
     icon: lucide:id-card
     group: primary
-    color: "var(--color-brand-500)"
-    color2: "var(--color-brand-400)"
-    color3: "var(--color-brand-700)"
-    darkColor: "var(--color-brand-500)"
-    darkColor2: "var(--color-brand-400)"
-    darkColor3: "var(--color-brand-700)"
-    textColor: "var(--primary-foreground)"
+    color: 'var(--color-brand-500)'
+    color2: 'var(--color-brand-400)'
+    color3: 'var(--color-brand-700)'
+    darkColor: 'var(--color-brand-500)'
+    darkColor2: 'var(--color-brand-400)'
+    darkColor3: 'var(--color-brand-700)'
+    textColor: 'var(--primary-foreground)'
     pulse: true
   - id: sms
-    label: "2. Send me a text"
-    url: "sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you."
+    label: '2. Send me a text'
+    url: 'sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you.'
     icon: lucide:message-square-text
     group: primary
-    color: "var(--color-brand-600)"
-    color2: "var(--color-brand-500)"
-    color3: "var(--color-brand-800)"
-    darkColor: "var(--color-brand-600)"
-    darkColor2: "var(--color-brand-500)"
-    darkColor3: "var(--color-brand-800)"
-    textColor: "var(--primary-foreground)"
+    color: 'var(--color-brand-600)'
+    color2: 'var(--color-brand-500)'
+    color3: 'var(--color-brand-800)'
+    darkColor: 'var(--color-brand-600)'
+    darkColor2: 'var(--color-brand-500)'
+    darkColor3: 'var(--color-brand-800)'
+    textColor: 'var(--primary-foreground)'
   - id: youtube-personal
     label: Ayoub Abedrabbo
     url: https://www.youtube.com/channel/UCQ5YfTwU5n_khZx-WJEkZKQ
     icon: simple-icons:youtube
     group: youtube
-    color: "#ff0000"
-    color2: "#ff6b6b"
-    color3: "#ffffff"
-    darkColor: "#ff6b6b"
-    darkColor2: "#ff0000"
-    darkColor3: "#3b0a0a"
+    color: '#ff0000'
+    color2: '#ff6b6b'
+    color3: '#ffffff'
+    darkColor: '#ff6b6b'
+    darkColor2: '#ff0000'
+    darkColor3: '#3b0a0a'
   - id: youtube-alphabravomedia
     label: AlphaBravoMedia
     url: https://youtube.com/@alphabravomedia
     icon: simple-icons:youtube
     group: youtube
-    color: "#8f3f37"
-    color2: "#f0a097"
-    color3: "#15110d"
-    darkColor: "#f0a097"
-    darkColor2: "#8f3f37"
-    darkColor3: "#211211"
+    color: '#8f3f37'
+    color2: '#f0a097'
+    color3: '#15110d'
+    darkColor: '#f0a097'
+    darkColor2: '#8f3f37'
+    darkColor3: '#211211'
   - id: youtube-islamic
     label: Islamic Tampa TV
     url: https://www.youtube.com/@islamicTampaTV
     icon: simple-icons:youtube
     group: youtube
-    color: "#776a32"
-    color2: "#d9c56c"
-    color3: "#10120c"
-    darkColor: "#d9c56c"
-    darkColor2: "#776a32"
-    darkColor3: "#1d1b12"
+    color: '#776a32'
+    color2: '#d9c56c'
+    color3: '#10120c'
+    darkColor: '#d9c56c'
+    darkColor2: '#776a32'
+    darkColor3: '#1d1b12'
   - id: kofi
     label: Ko-fi
     url: https://ko-fi.com/ayoubab1
     icon: simple-icons:kofi
     group: support
-    color: "#ff5e5b"
-    color2: "#ff9b98"
-    color3: "#ffffff"
-    darkColor: "#ff8a87"
-    darkColor2: "#ff5e5b"
-    darkColor3: "#3d1010"
+    color: '#ff5e5b'
+    color2: '#ff9b98'
+    color3: '#ffffff'
+    darkColor: '#ff8a87'
+    darkColor2: '#ff5e5b'
+    darkColor3: '#3d1010'
   - id: cash-app
     label: CashApp
     url: https://cash.app/ayoubab1
     icon: simple-icons:cashapp
     group: support
-    color: "#00cf31"
-    color2: "#7df39a"
-    color3: "#082b12"
-    darkColor: "#49ef70"
-    darkColor2: "#00cf31"
-    darkColor3: "#063511"
+    color: '#00cf31'
+    color2: '#7df39a'
+    color3: '#082b12'
+    darkColor: '#49ef70'
+    darkColor2: '#00cf31'
+    darkColor3: '#063511'
   - id: venmo
     label: Venmo
     url: https://venmo.com/u/Ayoub-Abedrabbo
     icon: simple-icons:venmo
     group: support
-    color: "#008cff"
-    color2: "#83cbff"
-    color3: "#ffffff"
-    darkColor: "#65bfff"
-    darkColor2: "#008cff"
-    darkColor3: "#06233d"
+    color: '#008cff'
+    color2: '#83cbff'
+    color3: '#ffffff'
+    darkColor: '#65bfff'
+    darkColor2: '#008cff'
+    darkColor3: '#06233d'
   - id: paypal
     label: Paypal
     url: https://paypal.me/AyoubAbedrabbo
     icon: simple-icons:paypal
     group: support
-    color: "#003087"
-    color2: "#009cde"
-    color3: "#dcecff"
-    darkColor: "#009cde"
-    darkColor2: "#003087"
-    darkColor3: "#061936"
+    color: '#003087'
+    color2: '#009cde'
+    color3: '#dcecff'
+    darkColor: '#009cde'
+    darkColor2: '#003087'
+    darkColor3: '#061936'
 
 youtubeChannels:
   - id: alphabravomedia
@@ -205,14 +205,14 @@ youtubeChannels:
     description: Videography, editing, DaVinci Resolve, Lumix cameras, exposure, and practical media production tutorials.
     branding:
       logoSrc: ABM.webp
-      accentColor: "#8f3f37"
-      darkAccentColor: "#f0a097"
-      cardBackground: "#fffafa"
-      darkCardBackground: "#211211"
-      cardTint: "#f7ece8"
-      darkCardTint: "#341a17"
-      logoBackgroundColor: "#15110d"
-      darkLogoBackgroundColor: "#15110d"
+      accentColor: '#8f3f37'
+      darkAccentColor: '#f0a097'
+      cardBackground: '#fffafa'
+      darkCardBackground: '#211211'
+      cardTint: '#f7ece8'
+      darkCardTint: '#341a17'
+      logoBackgroundColor: '#15110d'
+      darkLogoBackgroundColor: '#15110d'
       logoFit: contain
       logoPaddingClass: p-2
   - id: personal
@@ -222,36 +222,36 @@ youtubeChannels:
     description: Personal educational videos, live Quran readings, reflections, books, and useful things I am learning.
     branding:
       logoSrc: AyoubBayaan.jpg
-      accentColor: "#765247"
-      darkAccentColor: "#d9b5a9"
-      cardBackground: "#fbf6ee"
-      darkCardBackground: "#201816"
-      cardTint: "#eee5db"
-      darkCardTint: "#332620"
-      logoBackgroundColor: "#d8ccc6"
-      darkLogoBackgroundColor: "#4a3933"
+      accentColor: '#765247'
+      darkAccentColor: '#d9b5a9'
+      cardBackground: '#fbf6ee'
+      darkCardBackground: '#201816'
+      cardTint: '#eee5db'
+      darkCardTint: '#332620'
+      logoBackgroundColor: '#d8ccc6'
+      darkLogoBackgroundColor: '#4a3933'
       logoFit: cover
-      logoPaddingClass: ""
+      logoPaddingClass: ''
   - id: islamic-tampa-tv
     channelId: UCw7ZJOSz1GuYbRGKBu2tFfw
     videosUrl: https://www.youtube.com/@islamicTampaTV
     name: Islamic Tampa TV
     description: Local Tampa Islamic community coverage, including events, gatherings, announcements, and community news.
     branding:
-      logoSrc: "IslamicTampaTV Logo.png"
-      accentColor: "#776a32"
-      darkAccentColor: "#d9c56c"
-      cardBackground: "#fbf8ef"
-      darkCardBackground: "#1d1b12"
-      cardTint: "#efe8d2"
-      darkCardTint: "#302b18"
-      logoBackgroundColor: "#10120c"
-      darkLogoBackgroundColor: "#10120c"
+      logoSrc: 'IslamicTampaTV Logo.png'
+      accentColor: '#776a32'
+      darkAccentColor: '#d9c56c'
+      cardBackground: '#fbf8ef'
+      darkCardBackground: '#1d1b12'
+      cardTint: '#efe8d2'
+      darkCardTint: '#302b18'
+      logoBackgroundColor: '#10120c'
+      darkLogoBackgroundColor: '#10120c'
       logoFit: cover
-      logoPaddingClass: ""
+      logoPaddingClass: ''
 
 featuredEpisodes: []
 
 socialReach:
-  updatedAt: "2026-06-08"
+  updatedAt: '2026-06-08'
   items: []
