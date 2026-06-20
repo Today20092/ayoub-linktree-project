@@ -647,6 +647,7 @@ Then check:
 - Source: GitHub repository connected to Cloudflare
 - Required Node version: 22 or newer
 - Build command: `npm run build`
+- Deploy command: `npm run deploy`
 - Build output directory: `dist`
 - Production builds use the commands and dependencies in `package.json`
 
