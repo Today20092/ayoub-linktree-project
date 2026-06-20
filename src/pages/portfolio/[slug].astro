@@ -50,7 +50,7 @@ const galleryImages = projectData.gallery.map((image) => ({
   src: image.src as ImageMetadata,
 }))
 const hasBody = Boolean(project.body?.trim())
-const canonicalUrl = new URL(`/portfolio/${project.id}`, Astro.site).toString()
+const canonicalUrl = new URL(`/portfolio/${project.id}/`, Astro.site).toString()
 const socialImageUrl = new URL(heroImage.src, Astro.site).toString()
 const projectTitle =
   projectData.seoTitle ?? `${projectData.title} - Ayoub Abedrabbo`
@@ -653,7 +653,7 @@ const galleryHeading =
             >
               {previousProject ? (
                 <a
-                  href={`/portfolio/${previousProject.id}`}
+                  href={`/portfolio/${previousProject.id}/`}
                   class="border-border hover:border-primary focus-visible:ring-ring flex items-center gap-3 border p-4 font-bold focus-visible:ring-2 focus-visible:outline-none"
                 >
                   <ArrowLeft className="size-4 shrink-0" aria-hidden="true" />
@@ -669,7 +669,7 @@ const galleryHeading =
               )}
               {nextProject && (
                 <a
-                  href={`/portfolio/${nextProject.id}`}
+                  href={`/portfolio/${nextProject.id}/`}
                   class="border-border hover:border-primary focus-visible:ring-ring flex items-center justify-between gap-3 border p-4 text-right font-bold focus-visible:ring-2 focus-visible:outline-none"
                 >
                   <span>
