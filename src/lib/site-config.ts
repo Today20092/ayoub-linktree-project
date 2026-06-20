@@ -13,6 +13,10 @@ export type SiteInfo = {
   ogImage: string
 }
 
+export type SiteFeatures = {
+  showTampaWork: boolean
+}
+
 export type SocialLink = {
   id: string
   url: string
@@ -84,6 +88,7 @@ export type ActionLink = {
 
 export type SiteConfig = {
   site: SiteInfo
+  features: SiteFeatures
   socialLinks: SocialLink[]
   actionLinks: ActionLink[]
   youtubeChannels: YoutubeChannel[]

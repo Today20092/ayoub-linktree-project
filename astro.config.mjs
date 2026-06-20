@@ -1,13 +1,35 @@
-import { defineConfig } from "astro/config";
-import tailwindcss from "@tailwindcss/vite";
-import icon from "astro-icon";
-import react from "@astrojs/react";
+import { defineConfig } from 'astro/config'
+import tailwindcss from '@tailwindcss/vite'
+import icon from 'astro-icon'
+import mdx from '@astrojs/mdx'
+import react from '@astrojs/react'
+import sitemap from '@astrojs/sitemap'
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://ayoubabed.xyz",
-  integrations: [icon(), react()],
+  site: 'https://ayoubabed.xyz',
+  integrations: [
+    icon(),
+    mdx(),
+    react(),
+    sitemap({
+      filter: (page) =>
+        page !== 'https://ayoubabed.xyz/portfolio/alphabravomedia/',
+    }),
+  ],
+  image: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i1.ytimg.com',
+      },
+    ],
+  },
   vite: {
     plugins: [tailwindcss()],
   },
-});
+})

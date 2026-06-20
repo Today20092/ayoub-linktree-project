@@ -1,0 +1,267 @@
+---
+import { Icon } from 'astro-icon/components'
+import { Image } from 'astro:assets'
+import type { ImageMetadata } from 'astro'
+
+type LinkItem = {
+  id: string
+  label: string
+  url: string
+  icon?: string
+}
+
+type Channel = {
+  id: string
+  name: string
+  videosUrl: string
+}
+
+type PortfolioCard = {
+  slug: string
+  title: string
+  category: string
+  thumbnail: ImageMetadata
+  imageAlt: string
+  imageWidth: number
+  imageHeight: number
+}
+
+type Props = {
+  pageDescription: string
+  currentYear: number
+  primaryLinks: LinkItem[]
+  socialLinks: LinkItem[]
+  supportLinks: LinkItem[]
+  channels: Channel[]
+  projects: PortfolioCard[]
+}
+
+const {
+  pageDescription,
+  currentYear,
+  primaryLinks,
+  socialLinks,
+  supportLinks,
+  channels,
+  projects,
+} = Astro.props as Props
+
+const cleanContactLabel = (label: string) => label.replace(/^\d+\.\s*/, '')
+const socialColumns = [
+  socialLinks.filter((_, index) => index % 2 === 0),
+  socialLinks.filter((_, index) => index % 2 === 1),
+]
+---
+
+<main
+  id="main-content"
+  class="mx-auto w-full max-w-screen-2xl px-4 py-6 text-left sm:px-6 sm:py-8 lg:px-8"
+>
+  <header class="border-border border-b pb-8 lg:pb-12">
+    <div
+      class="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-12 lg:items-start"
+    >
+      <div class="lg:col-span-3">
+        <h1 class="font-heading text-foreground text-base font-extrabold">
+          Ayoub Abedrabbo
+        </h1>
+        <p
+          class="text-muted-foreground mt-2 text-xs font-semibold tracking-wider uppercase"
+        >
+          Photographer and videographer
+        </p>
+      </div>
+
+      <div class="col-span-2 lg:col-span-5">
+        <p
+          class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
+        >
+          About
+        </p>
+        <p
+          class="text-foreground max-w-2xl text-sm leading-6 font-semibold sm:text-base sm:leading-7"
+        >
+          {pageDescription}
+        </p>
+      </div>
+
+      <nav class="lg:col-span-2" aria-label="Contact links">
+        <p
+          class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
+        >
+          Contact
+        </p>
+        <div class="flex flex-col items-start text-sm leading-6 font-bold">
+          {
+            primaryLinks.map((link, index) => (
+              <a
+                href={link.url}
+                class:list={[
+                  'focus-visible:ring-ring rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none',
+                  index === 0
+                    ? 'text-primary decoration-primary'
+                    : 'text-foreground decoration-border hover:text-primary',
+                ]}
+              >
+                {cleanContactLabel(link.label)}
+              </a>
+            ))
+          }
+        </div>
+      </nav>
+
+      <nav class="lg:col-span-2" aria-label="YouTube channels">
+        <p
+          class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
+        >
+          Channels
+        </p>
+        <div class="flex flex-col items-start text-sm leading-6 font-bold">
+          {
+            channels.map((channel) => (
+              <a
+                href={channel.videosUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-foreground hover:text-primary focus-visible:ring-ring grid grid-cols-[1rem_minmax(0,1fr)] items-start gap-1.5 rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <span
+                  class="inline-flex h-6 w-4 items-center justify-center"
+                  aria-hidden="true"
+                >
+                  <Icon name="simple-icons:youtube" class="size-3.5" />
+                </span>
+                <span>{channel.name}</span>
+              </a>
+            ))
+          }
+        </div>
+      </nav>
+
+      <nav
+        class="col-span-2 lg:col-span-2 lg:col-start-11"
+        aria-label="Social links"
+      >
+        <p
+          class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
+        >
+          Social
+        </p>
+        <div
+          class="grid grid-cols-2 gap-x-6 text-sm leading-6 font-bold lg:hidden"
+        >
+          {
+            socialColumns.map((column) => (
+              <div class="flex min-w-0 flex-col items-start">
+                {column.map((link) => (
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-foreground hover:text-primary focus-visible:ring-ring grid min-w-0 grid-cols-[1rem_minmax(0,1fr)] items-start gap-1.5 rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    <span
+                      class="inline-flex h-6 w-4 items-center justify-center"
+                      aria-hidden="true"
+                    >
+                      <Icon name={link.icon} class="size-3.5" />
+                    </span>
+                    <span>{link.label}</span>
+                  </a>
+                ))}
+              </div>
+            ))
+          }
+        </div>
+        <div
+          class="hidden flex-col items-start text-sm leading-6 font-bold lg:flex"
+        >
+          {
+            socialLinks.map((link) => (
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-foreground hover:text-primary focus-visible:ring-ring grid grid-cols-[1rem_minmax(0,1fr)] items-start gap-1.5 rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <span
+                  class="inline-flex h-6 w-4 items-center justify-center"
+                  aria-hidden="true"
+                >
+                  <Icon name={link.icon} class="size-3.5" />
+                </span>
+                <span>{link.label}</span>
+              </a>
+            ))
+          }
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <section id="portfolio" class="scroll-mt-6 pt-10 lg:pt-16">
+    <h2 class="sr-only">Portfolio</h2>
+    <div class="columns-1 gap-4 space-y-8 md:columns-2 lg:gap-6 xl:columns-3">
+      {
+        projects.map((project, index) => (
+          <article class="break-inside-avoid">
+            <a
+              href={`/portfolio/${project.slug}/`}
+              class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none"
+            >
+              <Image
+                src={project.thumbnail}
+                alt={project.imageAlt}
+                width={project.imageWidth}
+                height={project.imageHeight}
+                layout="constrained"
+                widths={[480, 720, 960]}
+                sizes="(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"
+                quality={80}
+                priority={index === 0}
+                class="bg-muted block h-auto w-full transition-opacity duration-200 group-hover:opacity-90"
+              />
+              <span class="mt-3 block">
+                <strong class="font-heading text-foreground block text-base leading-5 font-extrabold">
+                  {project.title}
+                </strong>
+                <small class="text-muted-foreground mt-1 block text-xs font-medium tracking-wider uppercase">
+                  {project.category}
+                </small>
+              </span>
+            </a>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <footer
+    class="border-border text-muted-foreground mt-16 flex flex-col gap-8 border-t py-8 text-sm sm:flex-row sm:items-end sm:justify-between lg:mt-24"
+  >
+    <div>
+      <p class="mb-3 text-xs font-semibold tracking-wider uppercase">Support</p>
+      <nav
+        class="flex flex-wrap gap-x-6 gap-y-3"
+        aria-label="Support and payment links"
+      >
+        {
+          supportLinks.map((link) => (
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+            >
+              {link.icon && (
+                <Icon name={link.icon} class="size-4" aria-hidden="true" />
+              )}
+              <span>{link.label}</span>
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+    <p>&copy; {currentYear} Ayoub Abedrabbo</p>
+  </footer>
+</main>

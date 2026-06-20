@@ -1,5 +1,5 @@
 import sharp from 'sharp'
-import { readFileSync, writeFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
 
@@ -53,7 +53,7 @@ async function createCircularPortrait(size) {
   const mask = Buffer.from(
     `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
       <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="#fff"/>
-    </svg>`
+    </svg>`,
   )
 
   return sharp(sourceImage)
@@ -81,7 +81,7 @@ async function generateFavicons() {
     [16, 32, 48].map(async (size) => ({
       size,
       buffer: await createCircularPortrait(size),
-    }))
+    })),
   )
 
   writeFileSync(join(publicDir, 'favicon.ico'), pngToIco(icoImages))
@@ -110,7 +110,7 @@ async function generateFavicons() {
 
   writeFileSync(
     join(publicDir, 'site.webmanifest'),
-    `${JSON.stringify(manifest, null, 2)}\n`
+    `${JSON.stringify(manifest, null, 2)}\n`,
   )
   console.log('  Created site.webmanifest')
 
