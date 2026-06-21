@@ -19,6 +19,7 @@ import {
 } from '../../components/ui/breadcrumb'
 import { buttonVariants } from '../../components/ui/button'
 import { Separator } from '../../components/ui/separator'
+import { eventGalleries } from '../../data/event-galleries'
 import { cn } from '../../lib/utils'
 
 export async function getStaticPaths() {
@@ -65,14 +66,16 @@ const heroImage =
     ? heroImageAsset.src
     : (heroImageAsset as ImageMetadata | string)
 const remoteGalleryImages = projectData.eventGallery
-  ? projectData.gallery.filter(
-      (
-        image,
-      ): image is Extract<
-        (typeof projectData.gallery)[number],
-        { filename: string }
-      > => 'filename' in image,
-    )
+  ? projectData.gallery.length > 0
+    ? projectData.gallery.filter(
+        (
+          image,
+        ): image is Extract<
+          (typeof projectData.gallery)[number],
+          { filename: string }
+        > => 'filename' in image,
+      )
+    : (eventGalleries[project.id] ?? [])
   : []
 const galleryImages = projectData.eventGallery
   ? []
