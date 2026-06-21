@@ -1,0 +1,102 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content'
+
+import {
+  eventGalleries,
+  type RemoteEventGalleryImage,
+} from '../../../../data/event-galleries'
+
+type SharePageProps = {
+  project: CollectionEntry<'portfolio'>
+  image: RemoteEventGalleryImage
+  photoNumber: number
+  photoCount: number
+}
+
+export async function getStaticPaths() {
+  const projects = await getCollection('portfolio')
+
+  return projects.flatMap((project) => {
+    if (!project.data.eventGallery) return []
+
+    const inlineImages = project.data.gallery.filter(
+      (
+        image,
+      ): image is Extract<
+        (typeof project.data.gallery)[number],
+        { filename: string }
+      > => 'filename' in image,
+    )
+    const images =
+      inlineImages.length > 0
+        ? inlineImages
+        : (eventGalleries[project.id] ?? [])
+
+    return images.map((image, index) => ({
+      params: {
+        slug: project.id,
+        photo: String(index + 1),
+      },
+      props: {
+        project,
+        image,
+        photoNumber: index + 1,
+        photoCount: images.length,
+      },
+    }))
+  })
+}
+
+const { project, image, photoNumber, photoCount } =
+  Astro.props as SharePageProps
+const shareUrl = new URL(
+  `/portfolio/${project.id}/photo/${photoNumber}/`,
+  Astro.site,
+).toString()
+const destinationPath = `/portfolio/${project.id}/?photo=${photoNumber}`
+
+const title = `${project.data.title} | Photograph ${photoNumber} of ${photoCount}`
+const description = `${image.alt}. View this photograph from ${project.data.title}.`
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex,follow,max-image-preview:large" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image.src} />
+    <meta property="og:image:secure_url" content={image.src} />
+    <meta property="og:image:alt" content={image.alt} />
+    <meta property="og:image:width" content={String(image.width)} />
+    <meta property="og:image:height" content={String(image.height)} />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={shareUrl} />
+    <meta property="og:site_name" content="Ayoub Abedrabbo" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image.src} />
+    <meta name="twitter:image:alt" content={image.alt} />
+    <link rel="canonical" href={shareUrl} />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <script is:inline define:vars={{ destinationPath }}>
+      window.location.replace(destinationPath)
+    </script>
+  </head>
+  <body>
+    <main>
+      <p>
+        Opening photograph {photoNumber} from {project.data.title}.
+        <a href={destinationPath}>Continue to the photograph</a>
+      </p>
+    </main>
+  </body>
+</html>

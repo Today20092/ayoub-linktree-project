@@ -21,6 +21,7 @@ type GalleryImage = {
 type EventLightboxProps = {
   galleryId: string
   heading: string
+  projectSlug: string
   projectTitle: string
   images: GalleryImage[]
   downloadAllUrl?: string
@@ -48,6 +49,7 @@ async function downloadFile(url: string, filename: string) {
 export default function EventLightbox({
   galleryId,
   heading,
+  projectSlug,
   projectTitle,
   images,
   downloadAllUrl,
@@ -58,6 +60,26 @@ export default function EventLightbox({
   const slidesRef = React.useRef<HTMLDivElement>(null)
   const lastFocusedRef = React.useRef<HTMLElement | null>(null)
   const wasOpenRef = React.useRef(false)
+
+  const syncVisibleSlide = React.useCallback(
+    (container: HTMLDivElement, index: number) => {
+      const slides = container.querySelectorAll<HTMLElement>(
+        '[data-gallery-slide]',
+      )
+      slides.forEach((slide, slideIndex) => {
+        slide.hidden = slideIndex !== index
+      })
+    },
+    [],
+  )
+
+  const setSlidesContainer = React.useCallback(
+    (container: HTMLDivElement | null) => {
+      slidesRef.current = container
+      if (container) syncVisibleSlide(container, currentIndex)
+    },
+    [currentIndex, syncVisibleSlide],
+  )
 
   const getPhotoIndexFromUrl = React.useCallback(() => {
     const value = new URL(window.location.href).searchParams.get('photo')
@@ -107,13 +129,10 @@ export default function EventLightbox({
   )
 
   React.useEffect(() => {
-    const slides = slidesRef.current?.querySelectorAll<HTMLElement>(
-      '[data-gallery-slide]',
-    )
-    slides?.forEach((slide, index) => {
-      slide.hidden = index !== currentIndex
-    })
-  }, [currentIndex, open])
+    if (slidesRef.current) {
+      syncVisibleSlide(slidesRef.current, currentIndex)
+    }
+  }, [currentIndex, open, syncVisibleSlide])
 
   React.useEffect(() => {
     const gallery = document.getElementById(galleryId)
@@ -179,8 +198,10 @@ export default function EventLightbox({
   const shareCurrentPhoto = async () => {
     if (!currentImage) return
 
-    const url = new URL(window.location.href)
-    url.searchParams.set('photo', String(currentIndex + 1))
+    const url = new URL(
+      `/portfolio/${projectSlug}/photo/${currentIndex + 1}/`,
+      window.location.origin,
+    )
     const title = `${projectTitle} — Photograph ${currentIndex + 1} of ${images.length}`
     const text = `${currentImage.alt}. View this photograph from ${projectTitle}.`
     const shareData = { title, text, url: url.toString() }
@@ -284,7 +305,7 @@ export default function EventLightbox({
               </Button>
 
               <div
-                ref={slidesRef}
+                ref={setSlidesContainer}
                 className="flex h-full min-h-0 w-full items-center justify-center"
               >
                 {children}

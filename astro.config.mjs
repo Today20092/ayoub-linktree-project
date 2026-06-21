@@ -14,7 +14,8 @@ export default defineConfig({
     react(),
     sitemap({
       filter: (page) =>
-        page !== 'https://ayoubabed.xyz/portfolio/alphabravomedia/',
+        page !== 'https://ayoubabed.xyz/portfolio/alphabravomedia/' &&
+        !page.includes('/photo/'),
     }),
   ],
   image: {
