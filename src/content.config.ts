@@ -24,6 +24,12 @@ const portfolioVideo = z.object({
   comparisonRole: z.enum(['before', 'after']).optional(),
 })
 
+const upcomingPortfolioVideo = z.object({
+  label: z.string(),
+  title: z.string(),
+  description: z.string(),
+})
+
 const portfolio = defineCollection({
   loader: glob({
     base: './src/content/portfolio',
@@ -31,11 +37,22 @@ const portfolio = defineCollection({
   }),
   schema: ({ image }) => {
     const portfolioAsset = image()
-    const portfolioImage = z.object({
+    const localPortfolioImage = z.object({
       src: portfolioAsset,
       alt: z.string(),
       caption: z.string().optional(),
     })
+    const remotePortfolioImage = z.object({
+      src: z.url(),
+      width: z.number().int().positive(),
+      height: z.number().int().positive(),
+      alt: z.string(),
+      filename: z.string().min(1),
+      caption: z.string().optional(),
+      featured: z.boolean().default(false),
+    })
+    const portfolioImage = z.union([remotePortfolioImage, localPortfolioImage])
+    const portfolioHeroAsset = z.union([remotePortfolioImage, portfolioAsset])
 
     return z.object({
       order: z.number().int().nonnegative(),
@@ -45,8 +62,8 @@ const portfolio = defineCollection({
       status: z.enum(['complete', 'placeholder']),
       category: z.string(),
       summary: z.string(),
-      thumbnail: portfolioAsset,
-      heroImage: portfolioAsset,
+      thumbnail: portfolioHeroAsset,
+      heroImage: portfolioHeroAsset,
       heroVideo: z.string().optional(),
       imageAlt: z.string(),
       imageWidth: z.number().int().positive(),
@@ -61,8 +78,12 @@ const portfolio = defineCollection({
       outcomes: z.array(z.string()).default([]),
       galleryHeading: z.string().optional(),
       galleryLayout: z.enum(['stack', 'masonry']).default('stack'),
+      eventGallery: z.boolean().default(false),
+      galleryDescription: z.string().optional(),
+      downloadAllUrl: z.url().optional(),
       gallery: z.array(portfolioImage).default([]),
       videos: z.array(portfolioVideo).default([]),
+      upcomingVideo: upcomingPortfolioVideo.optional(),
     })
   },
 })

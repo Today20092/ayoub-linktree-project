@@ -1,0 +1,44 @@
+---
+order: 0
+title: Event title
+seoTitle: Event Photography in Tampa | Ayoub Abedrabbo
+seoDescription: Event photography and attendee portraits by Ayoub Abedrabbo.
+status: complete
+category: Event photography
+summary: A concise summary of the event, client, and photography assignment.
+thumbnail:
+  src: https://photos.ayoubabed.xyz/events/event-slug/images/featured.jpg
+  width: 2400
+  height: 1600
+  alt: Featured photograph from the event
+  filename: featured.jpg
+  featured: true
+heroImage:
+  src: https://photos.ayoubabed.xyz/events/event-slug/images/featured.jpg
+  width: 2400
+  height: 1600
+  alt: Featured photograph from the event
+  filename: featured.jpg
+  featured: true
+imageAlt: Featured photograph from the event
+imageWidth: 2400
+imageHeight: 1600
+services:
+  - Event photography
+  - Attendee portraits
+role: Event photographer and videographer
+galleryHeading: Event photographs
+galleryDescription: Select a photograph to view it larger or download a web-ready copy.
+galleryLayout: masonry
+eventGallery: true
+downloadAllUrl: https://photos.ayoubabed.xyz/events/event-slug/downloads/event-slug.zip
+gallery: []
+---
+
+## Overview
+
+Add the project story here. Generate the `gallery` entries with:
+
+```bash
+npm run gallery:manifest -- "C:\path\to\exports" "https://photos.ayoubabed.xyz/events/event-slug/images/" --output gallery.yml
+```

@@ -35,15 +35,24 @@ const supportLinks = actionLinks.filter((link) => link.group === 'support')
 const sameAsUrls = socialLinks.map((link) => link.url)
 const portfolioProjects = (await getCollection('portfolio'))
   .sort((a, b) => a.data.order - b.data.order)
-  .map((entry) => ({
-    slug: entry.id,
-    title: entry.data.title,
-    category: entry.data.category,
-    thumbnail: entry.data.thumbnail as ImageMetadata,
-    imageAlt: entry.data.imageAlt,
-    imageWidth: entry.data.imageWidth,
-    imageHeight: entry.data.imageHeight,
-  }))
+  .map((entry) => {
+    const thumbnail = entry.data.thumbnail
+
+    return {
+      slug: entry.id,
+      title: entry.data.title,
+      category: entry.data.category,
+      thumbnail:
+        typeof thumbnail === 'object' &&
+        thumbnail !== null &&
+        'filename' in thumbnail
+          ? thumbnail.src
+          : (thumbnail as ImageMetadata | string),
+      imageAlt: entry.data.imageAlt,
+      imageWidth: entry.data.imageWidth,
+      imageHeight: entry.data.imageHeight,
+    }
+  })
 
 const structuredData = {
   '@context': 'https://schema.org',

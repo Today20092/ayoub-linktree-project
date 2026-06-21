@@ -1,0 +1,18 @@
+[
+  {
+    "AllowedOrigins": [
+      "https://ayoubabed.xyz",
+      "http://localhost:4321",
+      "http://127.0.0.1:4321"
+    ],
+    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedHeaders": ["Range"],
+    "ExposeHeaders": [
+      "Content-Length",
+      "Content-Range",
+      "Content-Type",
+      "ETag"
+    ],
+    "MaxAgeSeconds": 86400
+  }
+]

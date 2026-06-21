@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "update:youtube": "node scripts/update-latest-youtube-video.mjs",
+    "gallery:manifest": "node scripts/generate-event-gallery-manifest.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "deploy": "npm run build && wrangler deploy",

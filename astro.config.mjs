@@ -27,6 +27,11 @@ export default defineConfig({
         protocol: 'https',
         hostname: 'i1.ytimg.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'photos.ayoubabed.xyz',
+        pathname: '/events/**',
+      },
     ],
   },
   vite: {
