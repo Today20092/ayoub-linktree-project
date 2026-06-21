@@ -59,7 +59,7 @@ type Props = {
 const { project, previousProject, nextProject } = Astro.props as Props
 const { Content } = await render(project)
 const projectData = project.data
-const heroImageAsset = projectData.heroImage
+const heroImageAsset = projectData.heroImage ?? projectData.featuredImage
 const heroImage =
   typeof heroImageAsset === 'object' &&
   heroImageAsset !== null &&
@@ -72,6 +72,18 @@ const heroImageAlt =
   'alt' in heroImageAsset
     ? heroImageAsset.alt
     : projectData.imageAlt
+const heroImageWidth =
+  typeof heroImageAsset === 'object' &&
+  heroImageAsset !== null &&
+  'width' in heroImageAsset
+    ? heroImageAsset.width
+    : projectData.imageWidth
+const heroImageHeight =
+  typeof heroImageAsset === 'object' &&
+  heroImageAsset !== null &&
+  'height' in heroImageAsset
+    ? heroImageAsset.height
+    : projectData.imageHeight
 const remoteGalleryImages = projectData.eventGallery
   ? projectData.gallery.length > 0
     ? projectData.gallery.filter(
@@ -251,8 +263,8 @@ const galleryHeading =
             <Image
               src={heroImage}
               alt={heroImageAlt}
-              width={projectData.imageWidth}
-              height={projectData.imageHeight}
+              width={heroImageWidth}
+              height={heroImageHeight}
               layout="full-width"
               widths={[640, 960, 1280, 1600]}
               sizes="(min-width: 1280px) 1216px, 100vw"
@@ -264,8 +276,8 @@ const galleryHeading =
             <Image
               src={heroImage}
               alt={heroImageAlt}
-              width={projectData.imageWidth}
-              height={projectData.imageHeight}
+              width={heroImageWidth}
+              height={heroImageHeight}
               layout="full-width"
               widths={[640, 960, 1280, 1600]}
               sizes="(min-width: 1280px) 1216px, 100vw"

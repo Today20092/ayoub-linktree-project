@@ -6,20 +6,29 @@ seoDescription: Event photography and attendee portraits by Ayoub Abedrabbo.
 status: complete
 category: Event photography
 summary: A concise summary of the event, client, and photography assignment.
-thumbnail:
+featuredImage:
   src: https://photos.ayoubabed.xyz/events/event-slug/images/featured.jpg
   width: 2400
   height: 1600
   alt: Featured photograph from the event
   filename: featured.jpg
   featured: true
-heroImage:
-  src: https://photos.ayoubabed.xyz/events/event-slug/images/featured.jpg
-  width: 2400
-  height: 1600
-  alt: Featured photograph from the event
-  filename: featured.jpg
-  featured: true
+# Optional landing-page override:
+# thumbnail:
+#   src: https://photos.ayoubabed.xyz/events/event-slug/images/card.jpg
+#   width: 2400
+#   height: 1600
+#   alt: Alternate card photograph from the event
+#   filename: card.jpg
+#   featured: true
+# Optional detail-page override:
+# heroImage:
+#   src: https://photos.ayoubabed.xyz/events/event-slug/images/hero.jpg
+#   width: 2400
+#   height: 1600
+#   alt: Alternate hero photograph from the event
+#   filename: hero.jpg
+#   featured: true
 imageAlt: Featured photograph from the event
 imageWidth: 2400
 imageHeight: 1600

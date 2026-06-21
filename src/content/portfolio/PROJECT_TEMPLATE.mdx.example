@@ -4,8 +4,10 @@ title: Project name
 status: placeholder
 category: Video production
 summary: A short description used on the portfolio page and in search metadata.
-thumbnail: ../../assets/client-work/project-name.webp
-heroImage: ../../assets/client-work/project-name.webp
+featuredImage: ../../assets/client-work/project-name.webp
+# Optional overrides when the landing card or detail hero should differ:
+# thumbnail: ../../assets/client-work/project-name-card.webp
+# heroImage: ../../assets/client-work/project-name-hero.webp
 # Optional YouTube video ID. When present, this replaces the detail-page hero image.
 # heroVideo: dQw4w9WgXcQ
 imageAlt: A useful description of the project image

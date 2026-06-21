@@ -37,21 +37,40 @@ const sameAsUrls = socialLinks.map((link) => link.url)
 const portfolioProjects = (await getCollection('portfolio'))
   .sort(sortPortfolioProjects)
   .map((entry) => {
-    const thumbnail = entry.data.thumbnail
+    const thumbnailAsset = entry.data.thumbnail ?? entry.data.featuredImage
+    const thumbnail =
+      typeof thumbnailAsset === 'object' &&
+      thumbnailAsset !== null &&
+      'filename' in thumbnailAsset
+        ? thumbnailAsset.src
+        : (thumbnailAsset as ImageMetadata | string)
+    const thumbnailAlt =
+      typeof thumbnailAsset === 'object' &&
+      thumbnailAsset !== null &&
+      'alt' in thumbnailAsset
+        ? thumbnailAsset.alt
+        : entry.data.imageAlt
+    const thumbnailWidth =
+      typeof thumbnailAsset === 'object' &&
+      thumbnailAsset !== null &&
+      'width' in thumbnailAsset
+        ? thumbnailAsset.width
+        : entry.data.imageWidth
+    const thumbnailHeight =
+      typeof thumbnailAsset === 'object' &&
+      thumbnailAsset !== null &&
+      'height' in thumbnailAsset
+        ? thumbnailAsset.height
+        : entry.data.imageHeight
 
     return {
       slug: entry.id,
       title: entry.data.title,
       category: entry.data.category,
-      thumbnail:
-        typeof thumbnail === 'object' &&
-        thumbnail !== null &&
-        'filename' in thumbnail
-          ? thumbnail.src
-          : (thumbnail as ImageMetadata | string),
-      imageAlt: entry.data.imageAlt,
-      imageWidth: entry.data.imageWidth,
-      imageHeight: entry.data.imageHeight,
+      thumbnail,
+      imageAlt: thumbnailAlt,
+      imageWidth: thumbnailWidth,
+      imageHeight: thumbnailHeight,
     }
   })
 

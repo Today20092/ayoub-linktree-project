@@ -52,7 +52,10 @@ const portfolio = defineCollection({
       featured: z.boolean().default(false),
     })
     const portfolioImage = z.union([remotePortfolioImage, localPortfolioImage])
-    const portfolioHeroAsset = z.union([remotePortfolioImage, portfolioAsset])
+    const portfolioDisplayImage = z.union([
+      remotePortfolioImage,
+      portfolioAsset,
+    ])
 
     return z.object({
       order: z.number().int().nonnegative(),
@@ -62,8 +65,9 @@ const portfolio = defineCollection({
       status: z.enum(['complete', 'placeholder']),
       category: z.string(),
       summary: z.string(),
-      thumbnail: portfolioHeroAsset,
-      heroImage: portfolioHeroAsset,
+      featuredImage: portfolioDisplayImage,
+      thumbnail: portfolioDisplayImage.optional(),
+      heroImage: portfolioDisplayImage.optional(),
       heroVideo: z.string().optional(),
       imageAlt: z.string(),
       imageWidth: z.number().int().positive(),
