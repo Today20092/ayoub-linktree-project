@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { ChevronLeft, ChevronRight, Download, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, Share2, X } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -9,6 +10,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Toaster } from '@/components/ui/sonner'
 
 type GalleryImage = {
   src: string
@@ -19,6 +21,7 @@ type GalleryImage = {
 type EventLightboxProps = {
   galleryId: string
   heading: string
+  projectTitle: string
   images: GalleryImage[]
   downloadAllUrl?: string
   children: React.ReactNode
@@ -45,6 +48,7 @@ async function downloadFile(url: string, filename: string) {
 export default function EventLightbox({
   galleryId,
   heading,
+  projectTitle,
   images,
   downloadAllUrl,
   children,
@@ -55,12 +59,51 @@ export default function EventLightbox({
   const lastFocusedRef = React.useRef<HTMLElement | null>(null)
   const wasOpenRef = React.useRef(false)
 
-  const showSlide = React.useCallback(
-    (nextIndex: number) => {
-      if (images.length === 0) return
-      setCurrentIndex((nextIndex + images.length) % images.length)
+  const getPhotoIndexFromUrl = React.useCallback(() => {
+    const value = new URL(window.location.href).searchParams.get('photo')
+    if (!value || !/^\d+$/.test(value)) return null
+
+    const index = Number(value) - 1
+    return index >= 0 && index < images.length ? index : null
+  }, [images.length])
+
+  const updatePhotoUrl = React.useCallback(
+    (index: number | null, mode: 'push' | 'replace' = 'replace') => {
+      const url = new URL(window.location.href)
+
+      if (index === null) {
+        url.searchParams.delete('photo')
+      } else {
+        url.searchParams.set('photo', String(index + 1))
+      }
+
+      window.history[mode === 'push' ? 'pushState' : 'replaceState'](
+        window.history.state,
+        '',
+        url,
+      )
     },
-    [images.length],
+    [],
+  )
+
+  const showSlide = React.useCallback(
+    (nextIndex: number, updateUrl = true) => {
+      if (images.length === 0) return
+      const normalizedIndex = (nextIndex + images.length) % images.length
+      setCurrentIndex(normalizedIndex)
+      if (updateUrl) updatePhotoUrl(normalizedIndex)
+    },
+    [images.length, updatePhotoUrl],
+  )
+
+  const handleOpenChange = React.useCallback(
+    (nextOpen: boolean) => {
+      setOpen(nextOpen)
+      if (!nextOpen && getPhotoIndexFromUrl() !== null) {
+        updatePhotoUrl(null)
+      }
+    },
+    [getPhotoIndexFromUrl, updatePhotoUrl],
   )
 
   React.useEffect(() => {
@@ -83,7 +126,9 @@ export default function EventLightbox({
       if (opener) {
         event.preventDefault()
         lastFocusedRef.current = opener
-        showSlide(Number(opener.dataset.galleryOpen ?? 0))
+        const index = Number(opener.dataset.galleryOpen ?? 0)
+        showSlide(index, false)
+        updatePhotoUrl(index, 'push')
         setOpen(true)
         return
       }
@@ -103,7 +148,24 @@ export default function EventLightbox({
 
     gallery.addEventListener('click', handleClick)
     return () => gallery.removeEventListener('click', handleClick)
-  }, [galleryId, showSlide])
+  }, [galleryId, showSlide, updatePhotoUrl])
+
+  React.useEffect(() => {
+    const syncFromUrl = () => {
+      const index = getPhotoIndexFromUrl()
+      if (index === null) {
+        setOpen(false)
+        return
+      }
+
+      showSlide(index, false)
+      setOpen(true)
+    }
+
+    syncFromUrl()
+    window.addEventListener('popstate', syncFromUrl)
+    return () => window.removeEventListener('popstate', syncFromUrl)
+  }, [getPhotoIndexFromUrl, showSlide])
 
   React.useEffect(() => {
     if (wasOpenRef.current && !open) {
@@ -113,6 +175,32 @@ export default function EventLightbox({
   }, [open])
 
   const currentImage = images[currentIndex]
+
+  const shareCurrentPhoto = async () => {
+    if (!currentImage) return
+
+    const url = new URL(window.location.href)
+    url.searchParams.set('photo', String(currentIndex + 1))
+    const title = `${projectTitle} — Photograph ${currentIndex + 1} of ${images.length}`
+    const text = `${currentImage.alt}. View this photograph from ${projectTitle}.`
+    const shareData = { title, text, url: url.toString() }
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData)
+        return
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareData.url)
+      toast.success('Photo link copied')
+    } catch {
+      toast.error('Unable to copy the photo link')
+    }
+  }
 
   return (
     <>
@@ -125,7 +213,9 @@ export default function EventLightbox({
         </Button>
       )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Toaster position="bottom-center" />
+
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
           showCloseButton={false}
           className="flex h-dvh max-h-none w-screen max-w-none flex-col gap-0 rounded-none bg-black p-0 text-white shadow-none ring-0 sm:max-w-none"
@@ -149,15 +239,25 @@ export default function EventLightbox({
               </p>
               <div className="flex items-center gap-2">
                 {currentImage && (
-                  <Button
-                    variant="secondary"
-                    onClick={() =>
-                      downloadFile(currentImage.src, currentImage.filename)
-                    }
-                  >
-                    <Download data-icon="inline-start" aria-hidden="true" />
-                    Download
-                  </Button>
+                  <>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      onClick={shareCurrentPhoto}
+                      aria-label={`Share photograph ${currentIndex + 1}`}
+                    >
+                      <Share2 aria-hidden="true" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      onClick={() =>
+                        downloadFile(currentImage.src, currentImage.filename)
+                      }
+                    >
+                      <Download data-icon="inline-start" aria-hidden="true" />
+                      Download
+                    </Button>
+                  </>
                 )}
                 <DialogClose asChild>
                   <Button

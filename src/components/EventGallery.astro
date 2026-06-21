@@ -16,11 +16,13 @@ type GalleryImage = {
 type Props = {
   images: GalleryImage[]
   heading: string
+  projectTitle: string
   description?: string
   downloadAllUrl?: string
 }
 
-const { images, heading, description, downloadAllUrl } = Astro.props as Props
+const { images, heading, projectTitle, description, downloadAllUrl } =
+  Astro.props as Props
 const featuredImages = images.filter((image) => image.featured)
 const curatedImages =
   featuredImages.length > 0 ? featuredImages : images.slice(0, 12)
@@ -57,6 +59,7 @@ const galleryId = `event-gallery-${heading
       client:idle={{ timeout: 500 }}
       galleryId={galleryId}
       heading={heading}
+      projectTitle={projectTitle}
       images={images.map(({ src, filename, alt }) => ({ src, filename, alt }))}
       downloadAllUrl={downloadAllUrl}
     >
