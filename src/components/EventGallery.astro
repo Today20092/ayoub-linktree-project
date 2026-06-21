@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets'
-import { Download, Images } from 'lucide-react'
+import { ChevronDown, Download } from 'lucide-react'
 import EventLightbox from './EventLightbox'
 
 type GalleryImage = {
@@ -129,27 +129,18 @@ const galleryId = `event-gallery-${heading
     <summary
       class="focus-visible:ring-ring flex cursor-pointer list-none items-center justify-between gap-4 py-5 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset [&::-webkit-details-marker]:hidden"
     >
-      <span class="flex items-center gap-3">
-        <span
-          class="bg-muted text-primary inline-flex size-10 items-center justify-center rounded-full"
-        >
-          <Images className="size-5" aria-hidden="true" />
-        </span>
-        <span>
-          <strong class="font-heading block text-lg font-bold">
-            View all {images.length} photographs
-          </strong>
-          <span class="text-muted-foreground mt-0.5 block text-sm">
-            Portraits, workshop coverage, and downloadable event photographs
-          </span>
+      <span>
+        <strong class="font-heading block text-lg font-bold">
+          View all {images.length} photographs
+        </strong>
+        <span class="text-muted-foreground mt-1 block text-sm">
+          Portraits, workshop coverage, and downloadable event photographs
         </span>
       </span>
-      <span
-        class="text-muted-foreground shrink-0 text-2xl leading-none transition-transform group-open:rotate-45"
+      <ChevronDown
+        className="text-muted-foreground size-5 shrink-0 transition-transform group-open:rotate-180"
         aria-hidden="true"
-      >
-        +
-      </span>
+      />
     </summary>
 
     <div class="border-border border-t pt-6">
