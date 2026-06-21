@@ -66,6 +66,12 @@ const heroImage =
   'filename' in heroImageAsset
     ? heroImageAsset.src
     : (heroImageAsset as ImageMetadata | string)
+const heroImageAlt =
+  typeof heroImageAsset === 'object' &&
+  heroImageAsset !== null &&
+  'alt' in heroImageAsset
+    ? heroImageAsset.alt
+    : projectData.imageAlt
 const remoteGalleryImages = projectData.eventGallery
   ? projectData.gallery.length > 0
     ? projectData.gallery.filter(
@@ -159,7 +165,7 @@ const galleryHeading =
     <meta property="og:title" content={projectTitle} />
     <meta property="og:description" content={projectDescription} />
     <meta property="og:image" content={socialImageUrl} />
-    <meta property="og:image:alt" content={projectData.imageAlt} />
+    <meta property="og:image:alt" content={heroImageAlt} />
     <meta property="og:type" content="article" />
     <meta property="og:url" content={canonicalUrl} />
     <meta name="twitter:card" content="summary_large_image" />
@@ -239,12 +245,12 @@ const galleryHeading =
               youtubeId={projectData.heroVideo}
               title={`${projectData.title} featured video`}
               poster={heroImage}
-              posterAlt={projectData.imageAlt}
+              posterAlt={heroImageAlt}
             />
           ) : typeof heroImage === 'string' ? (
             <Image
               src={heroImage}
-              alt={projectData.imageAlt}
+              alt={heroImageAlt}
               width={projectData.imageWidth}
               height={projectData.imageHeight}
               layout="full-width"
@@ -257,7 +263,7 @@ const galleryHeading =
           ) : (
             <Image
               src={heroImage}
-              alt={projectData.imageAlt}
+              alt={heroImageAlt}
               width={projectData.imageWidth}
               height={projectData.imageHeight}
               layout="full-width"
