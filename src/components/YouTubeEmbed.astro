@@ -6,7 +6,7 @@ type Props = {
   youtubeId: string
   title: string
   autoplay?: boolean
-  poster?: ImageMetadata
+  poster?: ImageMetadata | string
   posterAlt?: string
   class?: string
 }
@@ -19,6 +19,8 @@ const {
   posterAlt = '',
   class: className,
 } = Astro.props
+const remotePoster = typeof poster === 'string' ? poster : undefined
+const localPoster = typeof poster === 'string' ? undefined : poster
 ---
 
 <div
@@ -32,9 +34,9 @@ const {
   data-youtube-autoplay={autoplay ? 'true' : 'false'}
 >
   {
-    poster && (
+    remotePoster ? (
       <Image
-        src={poster}
+        src={remotePoster}
         alt={posterAlt}
         width={1280}
         height={720}
@@ -46,7 +48,21 @@ const {
         class="absolute inset-0 size-full object-cover"
         data-youtube-poster
       />
-    )
+    ) : localPoster ? (
+      <Image
+        src={localPoster}
+        alt={posterAlt}
+        width={1280}
+        height={720}
+        layout="full-width"
+        widths={[640, 960, 1280]}
+        sizes="(min-width: 1280px) 1216px, 100vw"
+        quality={80}
+        priority
+        class="absolute inset-0 size-full object-cover"
+        data-youtube-poster
+      />
+    ) : null
   }
   <div
     class="absolute inset-0 flex items-center justify-center"

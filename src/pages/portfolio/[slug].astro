@@ -5,7 +5,9 @@ import type { ImageMetadata } from 'astro'
 import { Image } from 'astro:assets'
 import { getCollection, render, type CollectionEntry } from 'astro:content'
 import { ArrowLeft, ArrowRight, ArrowUpRight, Play } from 'lucide-react'
+import EventGallery from '../../components/EventGallery.astro'
 import PortfolioLocation from '../../components/PortfolioLocation.astro'
+import UpcomingVideo from '../../components/UpcomingVideo'
 import YouTubeEmbed from '../../components/YouTubeEmbed.astro'
 import {
   Breadcrumb,
@@ -55,14 +57,35 @@ type Props = {
 const { project, previousProject, nextProject } = Astro.props as Props
 const { Content } = await render(project)
 const projectData = project.data
-const heroImage = projectData.heroImage as ImageMetadata
-const galleryImages = projectData.gallery.map((image) => ({
-  ...image,
-  src: image.src as ImageMetadata,
-}))
+const heroImageAsset = projectData.heroImage
+const heroImage =
+  typeof heroImageAsset === 'object' &&
+  heroImageAsset !== null &&
+  'filename' in heroImageAsset
+    ? heroImageAsset.src
+    : (heroImageAsset as ImageMetadata | string)
+const remoteGalleryImages = projectData.eventGallery
+  ? projectData.gallery.filter(
+      (
+        image,
+      ): image is Extract<
+        (typeof projectData.gallery)[number],
+        { filename: string }
+      > => 'filename' in image,
+    )
+  : []
+const galleryImages = projectData.eventGallery
+  ? []
+  : projectData.gallery.map((image) => ({
+      ...image,
+      src: image.src as ImageMetadata,
+    }))
 const hasBody = Boolean(project.body?.trim())
 const canonicalUrl = new URL(`/portfolio/${project.id}/`, Astro.site).toString()
-const socialImageUrl = new URL(heroImage.src, Astro.site).toString()
+const socialImageUrl =
+  typeof heroImage === 'string'
+    ? heroImage
+    : new URL(heroImage.src, Astro.site).toString()
 const projectTitle =
   projectData.seoTitle ?? `${projectData.title} - Ayoub Abedrabbo`
 const projectDescription = projectData.seoDescription ?? projectData.summary
@@ -213,6 +236,19 @@ const galleryHeading =
               title={`${projectData.title} featured video`}
               poster={heroImage}
               posterAlt={projectData.imageAlt}
+            />
+          ) : typeof heroImage === 'string' ? (
+            <Image
+              src={heroImage}
+              alt={projectData.imageAlt}
+              width={projectData.imageWidth}
+              height={projectData.imageHeight}
+              layout="full-width"
+              widths={[640, 960, 1280, 1600]}
+              sizes="(min-width: 1280px) 1216px, 100vw"
+              quality={82}
+              priority
+              class="bg-muted block h-auto w-full"
             />
           ) : (
             <Image
@@ -481,6 +517,12 @@ const galleryHeading =
         }
 
         {
+          projectData.upcomingVideo && (
+            <UpcomingVideo {...projectData.upcomingVideo} />
+          )
+        }
+
+        {
           projectData.outcomes.length > 0 && (
             <section
               class="mx-auto max-w-4xl py-8 sm:py-10"
@@ -499,7 +541,14 @@ const galleryHeading =
         }
 
         {
-          galleryImages.length > 0 && (
+          projectData.eventGallery && remoteGalleryImages.length > 0 ? (
+            <EventGallery
+              images={remoteGalleryImages}
+              heading={galleryHeading}
+              description={projectData.galleryDescription}
+              downloadAllUrl={projectData.downloadAllUrl}
+            />
+          ) : galleryImages.length > 0 ? (
             <section
               class="mx-auto max-w-4xl py-8 sm:py-10"
               aria-labelledby="gallery-title"
@@ -622,7 +671,7 @@ const galleryHeading =
                 </div>
               )}
             </section>
-          )
+          ) : null
         }
 
         {
