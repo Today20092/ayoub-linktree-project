@@ -104,13 +104,13 @@ const socialColumns = [
                   'focus-visible:ring-ring focus-visible:ring-offset-background inline-flex min-h-12 w-full items-center gap-3 rounded-sm px-3 py-2.5 text-sm leading-5 font-bold no-underline transition-[color,background-color,border-color,transform] duration-150 select-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none active:scale-[0.98]',
                   index === 0
                     ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                    : 'border-border text-foreground hover:border-primary hover:bg-secondary border',
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground bg-transparent',
                 ]}
               >
                 <span
                   class:list={[
                     'inline-flex size-7 shrink-0 items-center justify-center rounded-sm',
-                    index === 0 ? 'bg-primary-foreground/10' : 'bg-secondary',
+                    index === 0 ? 'bg-primary-foreground/10' : 'bg-transparent',
                   ]}
                   aria-hidden="true"
                 >
