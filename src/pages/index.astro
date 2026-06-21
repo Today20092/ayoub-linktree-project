@@ -5,6 +5,7 @@ import type { ImageMetadata } from 'astro'
 import { getCollection } from 'astro:content'
 
 import PortfolioIndex from '../components/PortfolioIndex.astro'
+import { sortPortfolioProjects } from '../lib/portfolio-order'
 import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
 const {
@@ -34,7 +35,7 @@ const primaryLinks = actionLinks.filter((link) => link.group === 'primary')
 const supportLinks = actionLinks.filter((link) => link.group === 'support')
 const sameAsUrls = socialLinks.map((link) => link.url)
 const portfolioProjects = (await getCollection('portfolio'))
-  .sort((a, b) => a.data.order - b.data.order)
+  .sort(sortPortfolioProjects)
   .map((entry) => {
     const thumbnail = entry.data.thumbnail
 

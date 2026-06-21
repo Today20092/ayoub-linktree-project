@@ -20,11 +20,12 @@ import {
 import { buttonVariants } from '../../components/ui/button'
 import { Separator } from '../../components/ui/separator'
 import { eventGalleries } from '../../data/event-galleries'
+import { sortPortfolioProjects } from '../../lib/portfolio-order'
 import { cn } from '../../lib/utils'
 
 export async function getStaticPaths() {
   const projects = (await getCollection('portfolio')).sort(
-    (a, b) => a.data.order - b.data.order,
+    sortPortfolioProjects,
   )
 
   return projects.map((project, index) => ({
