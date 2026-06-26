@@ -16,21 +16,7 @@ const { title, address, latitude, longitude, plusCode, googleMapsUrl } =
 
 const [streetAddress, ...localityParts] = address.split(', ')
 const locality = localityParts.join(', ')
-const longitudeOffset = 0.008
-const latitudeOffset = 0.005
-const mapUrl = new URL('https://www.openstreetmap.org/export/embed.html')
-
-mapUrl.searchParams.set(
-  'bbox',
-  [
-    longitude - longitudeOffset,
-    latitude - latitudeOffset,
-    longitude + longitudeOffset,
-    latitude + latitudeOffset,
-  ].join(','),
-)
-mapUrl.searchParams.set('layer', 'mapnik')
-mapUrl.searchParams.set('marker', `${latitude},${longitude}`)
+const mapContainerId = `map-container-${Math.random().toString(36).slice(2, 9)}`
 ---
 
 <section
@@ -41,15 +27,80 @@ mapUrl.searchParams.set('marker', `${latitude},${longitude}`)
     class="bg-muted/35 ring-border/70 grid overflow-hidden ring-1 md:grid-cols-[minmax(0,1.2fr)_minmax(20rem,0.8fr)]"
   >
     <div class="bg-muted relative min-h-72 overflow-hidden md:min-h-80">
-      <iframe
-        src={mapUrl.toString()}
-        title={`Map showing ${title} at ${address}`}
-        width="800"
-        height="500"
-        loading="lazy"
-        class="absolute inset-0 size-full border-0 contrast-[.92] saturate-[.55] transition-[filter] duration-300 hover:saturate-75 focus:saturate-75 dark:brightness-[.8] dark:contrast-[1.05]"
-      >
-      </iframe>
+      <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+      />
+      <div
+        id={mapContainerId}
+        class="size-full contrast-[.92] saturate-[.55] transition-[filter] duration-300 hover:saturate-75 focus:saturate-75 dark:brightness-[.8] dark:contrast-[1.05]"
+      ></div>
+      <script
+        is:inline
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+      ></script>
+      <script is:inline>
+        ;(() => {
+          const container = document.getElementById('{mapContainerId}')
+          if (!container) return
+
+          const map = L.map(container, {
+            center: [{latitude}, {longitude}],
+            zoom: 15,
+            zoomControl: false,
+            attributionControl: false,
+            scrollWheelZoom: false,
+            dragging: false,
+            doubleClickZoom: false,
+            boxZoom: false,
+            keyboard: false,
+          })
+
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+          }).addTo(map)
+
+          const customIcon = L.divIcon({
+            className: 'custom-pin-icon',
+            html: `<div style="
+              width: 32px;
+              height: 32px;
+              background: #2563eb;
+              border: 3px solid white;
+              border-radius: 50% 50% 50% 0;
+              transform: rotate(-45deg);
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+              cursor: pointer;
+            ">
+              <div style="
+                width: 10px;
+                height: 10px;
+                background: white;
+                border-radius: 50%;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+              "></div>
+            </div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+          })
+
+          const marker = L.marker([{latitude}, {longitude}], {
+            icon: customIcon,
+            interactive: true,
+          }).addTo(map)
+
+          marker.on('click', () => {
+            window.open('{googleMapsUrl}', '_blank', 'noopener,noreferrer')
+          })
+        })()
+      </script>
     </div>
 
     <div
