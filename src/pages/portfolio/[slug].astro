@@ -116,7 +116,7 @@ const comparisonVideos = projectData.videos.filter(
   (video) => video.comparisonRole,
 )
 const milestoneVideos = projectData.videos.filter(
-  (video) => !video.comparisonRole,
+  (video) => !video.comparisonRole && video.youtubeId !== projectData.heroVideo,
 )
 const isYaHalaProject = project.id === 'ya-hala'
 const bayaanLandscapeImages = new Set([
