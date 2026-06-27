@@ -154,7 +154,7 @@ actionLinks:
     darkColor3: '#1d1b12'
   - id: kofi
     label: Ko-fi
-    url: https://ko-fi.com/ayoubab1
+    url: https://ko-fi.com/ayoubab1/10
     icon: simple-icons:kofi
     group: support
     color: '#ff5e5b'

@@ -2,7 +2,7 @@
 import '../../../styles.css'
 
 import { Image } from 'astro:assets'
-import { ArrowRight, Download } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { getCollection, type CollectionEntry } from 'astro:content'
 
 import EventLightbox from '../../../components/EventLightbox'
@@ -15,14 +15,9 @@ import {
   BreadcrumbSeparator,
 } from '../../../components/ui/breadcrumb'
 import { Badge } from '../../../components/ui/badge'
-import { Button, buttonVariants } from '../../../components/ui/button'
 import { eventGalleries } from '../../../data/event-galleries'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
-import {
-  computeJustifiedRows,
-  type RowImage,
-} from '../../../lib/justified-rows'
-import { cn } from '../../../lib/utils'
+import { siteConfig } from '../../../lib/site-config'
 
 type RemoteGalleryImage = {
   src: string
@@ -64,7 +59,7 @@ const rawImages: RemoteGalleryImage[] =
     ? (inlineImages as unknown as RemoteGalleryImage[])
     : fallbackImages
 
-const images: RowImage[] = rawImages.map((image) => ({
+const images = rawImages.map((image) => ({
   src: image.src,
   width: image.width,
   height: image.height,
@@ -74,15 +69,18 @@ const images: RowImage[] = rawImages.map((image) => ({
   featured: image.featured,
 }))
 
-const rows = computeJustifiedRows(images)
-
 const galleryId = `gallery-${project.id}`
 const galleryUrl = new URL(`/galleries/${project.id}/`, Astro.site).toString()
 const portfolioUrl = `/portfolio/${project.id}/`
 const summary = data.galleryDescription ?? data.summary
 const title = `${data.title} — Event Gallery`
-const ogImage = images[0]?.src ?? data.featuredImage
+const ogImage =
+  images[0]?.src ??
+  (typeof data.featuredImage === 'string'
+    ? data.featuredImage
+    : data.featuredImage.src)
 const eventDate = data.eventDate
+const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
 
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', {
@@ -91,8 +89,6 @@ const formatDate = (date: Date) =>
     year: 'numeric',
     timeZone: 'UTC',
   }).format(date)
-
-let runningIndex = 0
 ---
 
 <BaseLayout
@@ -163,6 +159,7 @@ let runningIndex = 0
           heading={data.title}
           projectSlug={project.id}
           projectTitle={data.title}
+          tipUrl={tipUrl}
           images={images.map(({ src, filename, alt }) => ({
             src,
             filename,
@@ -197,69 +194,36 @@ let runningIndex = 0
             ))
           }
         </EventLightbox>
-        {
-          data.downloadAllUrl && (
-            <a
-              href={data.downloadAllUrl}
-              download
-              class={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}
-            >
-              <Download data-icon="inline-start" aria-hidden="true" />
-              Download all
-            </a>
-          )
-        }
       </div>
     </header>
 
     <section
       id={galleryId}
       class="mt-10"
-      style="--gallery-row-height: clamp(140px, 6rem + 14vw, 260px);"
       aria-label={`${data.title} photographs`}
     >
-      <div class="flex flex-col gap-2">
+      <div class="columns-1 gap-1 sm:columns-2 lg:columns-3">
         {
-          rows.map((row) => (
-            <div
-              class:list={[
-                'gallery-row flex w-full gap-2',
-                row.isLast ? 'flex-wrap' : '',
-              ]}
-              style={
-                !row.isLast ? `aspect-ratio: ${row.aspectRatio};` : undefined
-              }
+          images.map((image, index) => (
+            <a
+              href={image.src}
+              data-gallery-open={index}
+              aria-label={`Open photograph ${index + 1}: ${image.alt}`}
+              class="group bg-muted focus-visible:ring-ring mb-1 block break-inside-avoid overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
-              {row.images.map((image) => {
-                const index = runningIndex++
-                return (
-                  <a
-                    href={image.src}
-                    data-gallery-open={index}
-                    aria-label={`Open photograph ${index + 1}: ${image.alt}`}
-                    class="group bg-muted focus-visible:ring-ring relative block overflow-hidden rounded-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                    style={
-                      row.isLast
-                        ? 'flex: none; height: var(--gallery-row-height);'
-                        : `flex: ${image.width / image.height} 1 0%; min-width: 0;`
-                    }
-                  >
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      width={image.width}
-                      height={image.height}
-                      layout="constrained"
-                      widths={[480, 720, 960, 1280]}
-                      sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
-                      loading="lazy"
-                      decoding="async"
-                      class="size-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.02]"
-                    />
-                  </a>
-                )
-              })}
-            </div>
+              <Image
+                src={image.src}
+                alt={image.alt}
+                width={image.width}
+                height={image.height}
+                layout="full-width"
+                widths={[480, 720, 960, 1280]}
+                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                loading="lazy"
+                decoding="async"
+                class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+              />
+            </a>
           ))
         }
       </div>
@@ -276,17 +240,3 @@ let runningIndex = 0
     </footer>
   </main>
 </BaseLayout>
-
-<style is:global>
-  @media (max-width: 639px) {
-    .gallery-row {
-      aspect-ratio: auto !important;
-      flex-wrap: wrap;
-    }
-    .gallery-row > a {
-      flex: 1 1 calc(50% - 0.25rem) !important;
-      height: 140px !important;
-      min-width: 0 !important;
-    }
-  }
-</style>
