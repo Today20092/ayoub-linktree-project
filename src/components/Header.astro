@@ -1,0 +1,57 @@
+---
+type Props = {
+  activeNav?: 'home' | 'galleries' | 'contact'
+}
+
+const { activeNav } = Astro.props as Props
+
+const navItems: Array<{
+  href: string
+  label: string
+  key: 'home' | 'galleries' | 'contact'
+}> = [
+  { href: '/', label: 'Home', key: 'home' },
+  { href: '/galleries', label: 'Galleries', key: 'galleries' },
+  { href: '/#contact', label: 'Contact', key: 'contact' },
+]
+---
+
+<header
+  class="bg-background/80 supports-backdrop-filter:bg-background/60 border-border sticky top-0 z-40 border-b backdrop-blur"
+>
+  <div
+    class="mx-auto flex h-14 w-full max-w-screen-xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8"
+  >
+    <a
+      href="/"
+      class="text-foreground hover:text-primary focus-visible:ring-ring font-heading rounded-sm text-sm font-extrabold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
+    >
+      Ayoub Abedrabbo
+    </a>
+    <nav aria-label="Primary">
+      <ul class="flex items-center gap-1 sm:gap-2">
+        {
+          navItems.map((item) => {
+            const isActive = item.key === activeNav
+            return (
+              <li>
+                <a
+                  href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
+                  class:list={[
+                    'focus-visible:ring-ring inline-flex items-center rounded-sm px-2.5 py-1.5 text-xs font-bold tracking-wide no-underline transition-colors focus-visible:ring-2 focus-visible:outline-none sm:px-3 sm:text-sm',
+                    isActive
+                      ? 'text-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground',
+                  ]}
+                >
+                  {item.label}
+                </a>
+              </li>
+            )
+          })
+        }
+      </ul>
+    </nav>
+  </div>
+</header>

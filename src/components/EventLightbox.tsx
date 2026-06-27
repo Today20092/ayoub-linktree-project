@@ -199,7 +199,7 @@ export default function EventLightbox({
     if (!currentImage) return
 
     const url = new URL(
-      `/portfolio/${projectSlug}/photo/${currentIndex + 1}/`,
+      `/galleries/${projectSlug}/photo/${currentIndex + 1}/`,
       window.location.origin,
     )
     const title = `${projectTitle} — Photograph ${currentIndex + 1} of ${images.length}`

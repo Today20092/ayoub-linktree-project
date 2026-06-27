@@ -5,6 +5,7 @@ import type { ImageMetadata } from 'astro'
 import { getCollection } from 'astro:content'
 
 import PortfolioIndex from '../components/PortfolioIndex.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
 import { sortPortfolioProjects } from '../lib/portfolio-order'
 import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
@@ -35,6 +36,7 @@ const primaryLinks = actionLinks.filter((link) => link.group === 'primary')
 const supportLinks = actionLinks.filter((link) => link.group === 'support')
 const sameAsUrls = socialLinks.map((link) => link.url)
 const portfolioProjects = (await getCollection('portfolio'))
+  .filter((entry) => !entry.data.eventGallery)
   .sort(sortPortfolioProjects)
   .map((entry) => {
     const thumbnailAsset = entry.data.thumbnail ?? entry.data.featuredImage
@@ -103,114 +105,25 @@ const structuredData = {
 }
 ---
 
-<!doctype html>
-<html lang="en" class="box-border">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <title>{pageTitle}</title>
-    <meta name="description" content={pageDescription} />
-    <meta
-      name="robots"
-      content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
-    />
-
-    <link rel="icon" href={`${baseUrl}favicon.ico`} sizes="32x32" />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href={`${baseUrl}favicon-16x16.png`}
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="32x32"
-      href={`${baseUrl}favicon-32x32.png`}
-    />
-    <link
-      rel="apple-touch-icon"
-      sizes="180x180"
-      href={`${baseUrl}apple-touch-icon.png`}
-    />
-    <link rel="manifest" href={`${baseUrl}site.webmanifest`} />
-    <link rel="sitemap" href={sitemapUrl} />
-    <link rel="preconnect" href="https://api.fontshare.com" />
-    <link
-      rel="stylesheet"
-      href="https://api.fontshare.com/v2/css?f[]=plus-jakarta-sans@1,2&f[]=zodiak@1,2&display=swap"
-    />
-
-    <meta
-      name="theme-color"
-      content="#ffffff"
-      media="(prefers-color-scheme: light)"
-    />
-    <meta
-      name="theme-color"
-      content="#1c1917"
-      media="(prefers-color-scheme: dark)"
-    />
-
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={pageDescription} />
-    <meta property="og:image" content={heroImageUrl} />
-    <meta property="og:image:alt" content={heroImageAlt} />
-    <meta property="og:image:width" content="960" />
-    <meta property="og:image:height" content="1200" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:site_name" content={siteName} />
-    <meta property="og:locale" content="en_US" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content={twitterHandle} />
-    <meta name="twitter:creator" content={twitterHandle} />
-    <meta name="twitter:title" content={pageTitle} />
-    <meta name="twitter:description" content={pageDescription} />
-    <meta name="twitter:image" content={heroImageUrl} />
-    <link rel="canonical" href={canonicalUrl} />
-
-    <script is:inline>
-      ;(() => {
-        const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
-
-        const applyTheme = () => {
-          const isDark = systemQuery.matches
-          document.documentElement.classList.toggle('dark', isDark)
-          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
-        }
-
-        applyTheme()
-        systemQuery.addEventListener('change', applyTheme)
-      })()
-    </script>
-
-    <script
-      is:inline
-      type="application/ld+json"
-      set:html={JSON.stringify(structuredData)}
-    />
-  </head>
-  <body
-    class="bg-background text-foreground min-h-[100dvh] subpixel-antialiased"
-  >
-    <a
-      href="#main-content"
-      class="bg-background text-foreground focus-visible:ring-ring fixed top-3 left-3 z-50 -translate-y-20 rounded-sm px-4 py-2 font-bold shadow-md focus:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
-    >
-      Skip to content
-    </a>
-    <PortfolioIndex
-      pageDescription={pageDescription}
-      currentYear={currentYear}
-      primaryLinks={primaryLinks}
-      socialLinks={socialLinks}
-      supportLinks={supportLinks}
-      channels={youtubeChannels}
-      projects={portfolioProjects}
-    />
-  </body>
-</html>
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonicalUrl={canonicalUrl}
+  ogImage={heroImageUrl}
+  ogImageAlt={heroImageAlt}
+  ogType="website"
+  twitterHandle={twitterHandle}
+  sitemapUrl={sitemapUrl}
+  structuredData={structuredData}
+  activeNav="home"
+>
+  <PortfolioIndex
+    pageDescription={pageDescription}
+    currentYear={currentYear}
+    primaryLinks={primaryLinks}
+    socialLinks={socialLinks}
+    supportLinks={supportLinks}
+    channels={youtubeChannels}
+    projects={portfolioProjects}
+  />
+</BaseLayout>

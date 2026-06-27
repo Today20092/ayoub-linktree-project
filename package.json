@@ -39,7 +39,6 @@
     "radix-ui": "^1.5.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "shadcn": "^4.10.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.1.18",
@@ -52,6 +51,7 @@
     "prettier": "^3.1.1",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "shadcn": "^4.11.1",
     "sharp": "^0.34.5",
     "typescript": "^5.9.3",
     "wrangler": "^4.103.0"

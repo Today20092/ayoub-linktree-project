@@ -50,10 +50,10 @@ export async function getStaticPaths() {
 const { project, image, photoNumber, photoCount } =
   Astro.props as SharePageProps
 const shareUrl = new URL(
-  `/portfolio/${project.id}/photo/${photoNumber}/`,
+  `/galleries/${project.id}/photo/${photoNumber}/`,
   Astro.site,
 ).toString()
-const destinationPath = `/portfolio/${project.id}/?photo=${photoNumber}`
+const destinationPath = `/galleries/${project.id}/?photo=${photoNumber}`
 
 const title = `${project.data.title} | Photograph ${photoNumber} of ${photoCount}`
 const description = `${image.alt}. View this photograph from ${project.data.title}.`
