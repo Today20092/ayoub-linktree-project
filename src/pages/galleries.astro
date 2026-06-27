@@ -47,6 +47,7 @@ const galleries = collections
       category: entry.data.category,
       eventDate: entry.data.eventDate,
       photoCount,
+      isRemote,
       cover: isRemote
         ? (coverAsset as { src: string }).src
         : (coverAsset as ImageMetadata),
@@ -71,7 +72,9 @@ const galleries = collections
 const title = 'Event Galleries — Ayoub Abedrabbo'
 const description =
   'Browse every event and wedding photography gallery by date. Find your gallery, view photographs full screen, and download copies.'
-const ogImage = galleries[0]?.cover ?? '/og.jpg'
+const firstCover = galleries[0]?.cover
+const ogImage =
+  typeof firstCover === 'string' ? firstCover : (firstCover?.src ?? '/og.jpg')
 ---
 
 <BaseLayout
@@ -126,18 +129,31 @@ const ogImage = galleries[0]?.cover ?? '/og.jpg'
                 class="group focus-visible:ring-ring block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none"
               >
                 <div class="bg-muted relative aspect-[4/3] overflow-hidden rounded-xl">
-                  <Image
-                    src={gallery.cover}
-                    alt={gallery.coverAlt}
-                    width={gallery.coverWidth}
-                    height={gallery.coverHeight}
-                    layout="constrained"
-                    widths={[480, 720, 960]}
-                    sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
-                    quality={80}
-                    priority={index === 0}
-                    class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                  />
+                  {gallery.isRemote ? (
+                    <Image
+                      src={gallery.cover as string}
+                      alt={gallery.coverAlt}
+                      width={gallery.coverWidth}
+                      height={gallery.coverHeight}
+                      layout="constrained"
+                      widths={[480, 720, 960]}
+                      sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
+                      quality={80}
+                      priority={index === 0}
+                      class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <Image
+                      src={gallery.cover as ImageMetadata}
+                      alt={gallery.coverAlt}
+                      layout="constrained"
+                      widths={[480, 720, 960]}
+                      sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
+                      quality={80}
+                      priority={index === 0}
+                      class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                    />
+                  )}
                   {gallery.eventDate && (
                     <span class="bg-background/85 text-foreground ring-foreground/10 absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-sm backdrop-blur sm:top-4 sm:right-4">
                       <Calendar className="size-3" aria-hidden="true" />

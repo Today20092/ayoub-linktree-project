@@ -60,9 +60,9 @@ const socialColumns = [
 >
   <header class="border-border border-b pb-8 lg:pb-12">
     <div
-      class="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-12 lg:items-start"
+      class="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-12 lg:items-start lg:gap-y-10"
     >
-      <div class="lg:col-span-3">
+      <div class="lg:col-span-3 lg:row-start-1">
         <h1 class="font-heading text-foreground text-base font-extrabold">
           Ayoub Abedrabbo
         </h1>
@@ -73,7 +73,7 @@ const socialColumns = [
         </p>
       </div>
 
-      <div class="col-span-2 lg:col-span-5">
+      <div class="col-span-2 lg:col-span-5 lg:row-start-1">
         <p
           class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
         >
@@ -88,7 +88,7 @@ const socialColumns = [
 
       <nav
         id="contact"
-        class="col-span-2 scroll-mt-20 lg:col-span-2"
+        class="col-span-2 scroll-mt-20 lg:col-span-4 lg:row-start-1"
         aria-label="Contact links"
       >
         <p
@@ -124,20 +124,17 @@ const socialColumns = [
                     <MessageSquareText className="size-4" strokeWidth={2} />
                   )}
                 </span>
-                <span class="min-w-0">
-                  <span class="mr-1.5 tabular-nums">
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
-                  <span aria-hidden="true">— </span>
-                  {cleanContactLabel(link.label)}
-                </span>
+                <span class="min-w-0">{cleanContactLabel(link.label)}</span>
               </a>
             ))
           }
         </div>
       </nav>
 
-      <nav class="lg:col-span-2" aria-label="YouTube channels">
+      <nav
+        class="col-span-2 lg:col-span-3 lg:col-start-4 lg:row-start-2"
+        aria-label="YouTube channels"
+      >
         <p
           class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
         >
@@ -166,7 +163,7 @@ const socialColumns = [
       </nav>
 
       <nav
-        class="col-span-2 lg:col-span-2 lg:col-start-11"
+        class="col-span-2 lg:col-span-6 lg:col-start-7 lg:row-start-2"
         aria-label="Social links"
       >
         <p
@@ -174,9 +171,7 @@ const socialColumns = [
         >
           Social
         </p>
-        <div
-          class="grid grid-cols-2 gap-x-6 text-sm leading-6 font-bold lg:hidden"
-        >
+        <div class="grid grid-cols-2 gap-x-8 text-sm leading-6 font-bold">
           {
             socialColumns.map((column) => (
               <div class="flex min-w-0 flex-col items-start">
@@ -197,28 +192,6 @@ const socialColumns = [
                   </a>
                 ))}
               </div>
-            ))
-          }
-        </div>
-        <div
-          class="hidden flex-col items-start text-sm leading-6 font-bold lg:flex"
-        >
-          {
-            socialLinks.map((link) => (
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-foreground hover:text-primary focus-visible:ring-ring grid grid-cols-[1rem_minmax(0,1fr)] items-start gap-1.5 rounded-sm underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
-              >
-                <span
-                  class="inline-flex h-6 w-4 items-center justify-center"
-                  aria-hidden="true"
-                >
-                  <Icon name={link.icon} class="size-3.5" />
-                </span>
-                <span>{link.label}</span>
-              </a>
             ))
           }
         </div>
