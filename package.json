@@ -48,14 +48,12 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
-    "@types/yazl": "^3.3.1",
     "prettier": "^3.1.1",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "shadcn": "^4.11.1",
     "sharp": "^0.34.5",
     "typescript": "^5.9.3",
-    "wrangler": "^4.103.0",
-    "yazl": "^3.3.1"
+    "wrangler": "^4.103.0"
   }
 }
