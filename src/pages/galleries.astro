@@ -1,0 +1,185 @@
+---
+import '../styles.css'
+
+import type { ImageMetadata } from 'astro'
+import { Image } from 'astro:assets'
+import { getCollection } from 'astro:content'
+import { Calendar, Images } from 'lucide-react'
+
+import { Badge } from '../components/ui/badge'
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '../components/ui/empty'
+import { eventGalleries } from '../data/event-galleries'
+import BaseLayout from '../layouts/BaseLayout.astro'
+
+const canonicalUrl = new URL('/galleries/', Astro.site).toString()
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(date)
+
+const collections = await getCollection('portfolio')
+const galleries = collections
+  .filter((entry) => entry.data.eventGallery)
+  .map((entry) => {
+    const coverAsset = entry.data.thumbnail ?? entry.data.featuredImage
+    const isRemote =
+      typeof coverAsset === 'object' &&
+      coverAsset !== null &&
+      'filename' in coverAsset
+    const inlineRemoteCount = entry.data.gallery.filter(
+      (image) => 'filename' in image,
+    ).length
+    const fallbackCount = eventGalleries[entry.id]?.length ?? 0
+    const photoCount = inlineRemoteCount > 0 ? inlineRemoteCount : fallbackCount
+    return {
+      id: entry.id,
+      title: entry.data.title,
+      category: entry.data.category,
+      eventDate: entry.data.eventDate,
+      photoCount,
+      isRemote,
+      cover: isRemote
+        ? (coverAsset as { src: string }).src
+        : (coverAsset as ImageMetadata),
+      coverAlt: isRemote
+        ? (coverAsset as { alt: string }).alt
+        : entry.data.imageAlt,
+      coverWidth: isRemote
+        ? (coverAsset as { width: number }).width
+        : entry.data.imageWidth,
+      coverHeight: isRemote
+        ? (coverAsset as { height: number }).height
+        : entry.data.imageHeight,
+    }
+  })
+  .sort((a, b) => {
+    const aTime = a.eventDate?.getTime() ?? 0
+    const bTime = b.eventDate?.getTime() ?? 0
+    if (bTime !== aTime) return bTime - aTime
+    return 0
+  })
+
+const title = 'Event Galleries — Ayoub Abedrabbo'
+const description =
+  'Browse every event and wedding photography gallery by date. Find your gallery, view photographs full screen, and download copies.'
+const firstCover = galleries[0]?.cover
+const ogImage =
+  typeof firstCover === 'string' ? firstCover : (firstCover?.src ?? '/og.jpg')
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  ogImageAlt="Ayoub Abedrabbo event galleries"
+  ogType="website"
+  activeNav="galleries"
+>
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-16"
+  >
+    <header class="max-w-2xl">
+      <h1
+        class="font-heading text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
+      >
+        Event galleries
+      </h1>
+      <p class="text-muted-foreground mt-5 max-w-xl text-lg leading-8">
+        Every wedding and event gallery, sorted by date. Open a gallery to
+        browse photographs full screen, share, or download a copy.
+      </p>
+    </header>
+
+    {
+      galleries.length === 0 ? (
+        <div class="mt-16">
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Images aria-hidden="true" />
+              </EmptyMedia>
+              <EmptyTitle>No galleries yet</EmptyTitle>
+              <EmptyDescription>
+                Event galleries will appear here as soon as one is published.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </div>
+      ) : (
+        <section
+          class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 xl:grid-cols-3"
+          aria-label="Event galleries"
+        >
+          {galleries.map((gallery, index) => (
+            <article>
+              <a
+                href={`/galleries/${gallery.id}/`}
+                class="group focus-visible:ring-ring block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none"
+              >
+                <div class="bg-muted relative aspect-[4/3] overflow-hidden rounded-xl">
+                  {gallery.isRemote ? (
+                    <Image
+                      src={gallery.cover as string}
+                      alt={gallery.coverAlt}
+                      width={gallery.coverWidth}
+                      height={gallery.coverHeight}
+                      layout="constrained"
+                      widths={[480, 720, 960]}
+                      sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
+                      quality={80}
+                      priority={index === 0}
+                      class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                    />
+                  ) : (
+                    <Image
+                      src={gallery.cover as ImageMetadata}
+                      alt={gallery.coverAlt}
+                      layout="constrained"
+                      widths={[480, 720, 960]}
+                      sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
+                      quality={80}
+                      priority={index === 0}
+                      class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                    />
+                  )}
+                  {gallery.eventDate && (
+                    <span class="bg-background/85 text-foreground ring-foreground/10 absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-sm backdrop-blur sm:top-4 sm:right-4">
+                      <Calendar className="size-3" aria-hidden="true" />
+                      {formatDate(gallery.eventDate)}
+                    </span>
+                  )}
+                </div>
+                <div class="mt-4 px-1">
+                  <h2 class="font-heading text-foreground text-lg leading-snug font-extrabold">
+                    {gallery.title}
+                  </h2>
+                  <div class="text-muted-foreground mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
+                    <Badge variant="secondary">{gallery.category}</Badge>
+                    {gallery.photoCount > 0 && (
+                      <span class="font-semibold">
+                        {gallery.photoCount}{' '}
+                        {gallery.photoCount === 1 ? 'photo' : 'photos'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </a>
+            </article>
+          ))}
+        </section>
+      )
+    }
+  </main>
+</BaseLayout>

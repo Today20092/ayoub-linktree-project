@@ -4,8 +4,13 @@ import '../../styles.css'
 import type { ImageMetadata } from 'astro'
 import { Image } from 'astro:assets'
 import { getCollection, render, type CollectionEntry } from 'astro:content'
-import { ArrowLeft, ArrowRight, ArrowUpRight, Play } from 'lucide-react'
-import EventGallery from '../../components/EventGallery.astro'
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  Download,
+  Play,
+} from 'lucide-react'
 import PortfolioLocation from '../../components/PortfolioLocation.astro'
 import UpcomingVideo from '../../components/UpcomingVideo'
 import YouTubeEmbed from '../../components/YouTubeEmbed.astro'
@@ -20,6 +25,7 @@ import {
 import { buttonVariants } from '../../components/ui/button'
 import { Separator } from '../../components/ui/separator'
 import { eventGalleries } from '../../data/event-galleries'
+import BaseLayout from '../../layouts/BaseLayout.astro'
 import { sortPortfolioProjects } from '../../lib/portfolio-order'
 import { cn } from '../../lib/utils'
 
@@ -163,521 +169,441 @@ const galleryHeading =
     : 'Additional visuals')
 ---
 
-<!doctype html>
-<html lang="en" class="box-border">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <title>{projectTitle}</title>
-    <meta name="description" content={projectDescription} />
-    <meta name="robots" content="index,follow,max-image-preview:large" />
-    <meta property="og:title" content={projectTitle} />
-    <meta property="og:description" content={projectDescription} />
-    <meta property="og:image" content={socialImageUrl} />
-    <meta property="og:image:alt" content={heroImageAlt} />
-    <meta property="og:type" content="article" />
-    <meta property="og:url" content={canonicalUrl} />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content={projectTitle} />
-    <meta name="twitter:description" content={projectDescription} />
-    <meta name="twitter:image" content={socialImageUrl} />
-    <link rel="canonical" href={canonicalUrl} />
-    <link rel="sitemap" href={sitemapUrl} />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="preconnect" href="https://api.fontshare.com" />
-    <link rel="preconnect" href="https://i.ytimg.com" />
-    <link
-      rel="stylesheet"
-      href="https://api.fontshare.com/v2/css?f[]=plus-jakarta-sans@1,2&f[]=zodiak@1,2&display=swap"
-    />
-    <meta
-      name="theme-color"
-      content="#ffffff"
-      media="(prefers-color-scheme: light)"
-    />
-    <meta
-      name="theme-color"
-      content="#1c1917"
-      media="(prefers-color-scheme: dark)"
-    />
-    <script is:inline>
-      ;(() => {
-        const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
-
-        const applyTheme = () => {
-          const isDark = systemQuery.matches
-          document.documentElement.classList.toggle('dark', isDark)
-          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
-        }
-
-        applyTheme()
-        systemQuery.addEventListener('change', applyTheme)
-      })()
-    </script>
-  </head>
-  <body
-    class="bg-background text-foreground min-h-[100dvh] subpixel-antialiased"
+<BaseLayout
+  title={projectTitle}
+  description={projectDescription}
+  canonicalUrl={canonicalUrl}
+  ogImage={socialImageUrl}
+  ogImageAlt={heroImageAlt}
+  ogType="article"
+  robots="index,follow,max-image-preview:large"
+  sitemapUrl={sitemapUrl}
+  preconnectHints={['https://api.fontshare.com', 'https://i.ytimg.com']}
+>
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
   >
-    <a
-      href="#main-content"
-      class="bg-background text-foreground focus-visible:ring-ring fixed top-3 left-3 z-50 -translate-y-20 rounded-sm px-4 py-2 font-bold shadow-md focus:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
-    >
-      Skip to content
-    </a>
-    <main
-      id="main-content"
-      class="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
-    >
-      <header class="mx-auto max-w-4xl">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink
-                href="/#portfolio"
-                className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
-              >
-                Portfolio
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{projectData.title}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
-
-      <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
-        {
-          projectData.heroVideo ? (
-            <YouTubeEmbed
-              youtubeId={projectData.heroVideo}
-              title={`${projectData.title} featured video`}
-              poster={heroImage}
-              posterAlt={heroImageAlt}
-            />
-          ) : typeof heroImage === 'string' ? (
-            <Image
-              src={heroImage}
-              alt={heroImageAlt}
-              width={heroImageWidth}
-              height={heroImageHeight}
-              layout="full-width"
-              widths={[640, 960, 1280, 1600]}
-              sizes="(min-width: 1280px) 1216px, 100vw"
-              quality={82}
-              priority
-              class="bg-muted block h-auto w-full"
-            />
-          ) : (
-            <Image
-              src={heroImage}
-              alt={heroImageAlt}
-              width={heroImageWidth}
-              height={heroImageHeight}
-              layout="full-width"
-              widths={[640, 960, 1280, 1600]}
-              sizes="(min-width: 1280px) 1216px, 100vw"
-              quality={82}
-              priority
-              class="bg-muted block h-auto w-full"
-            />
-          )
-        }
-
-        <div class="mx-auto max-w-4xl py-10 sm:py-14">
-          <p class="text-primary text-xs font-bold tracking-wider uppercase">
-            {projectData.category}
-          </p>
-          <h1
-            class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl lg:text-6xl"
-          >
-            {projectData.title}
-          </h1>
-          <p
-            class="text-muted-foreground mt-6 max-w-3xl text-lg leading-8 sm:text-xl"
-          >
-            {projectData.summary}
-          </p>
-        </div>
-
-        {
-          hasBody && (
-            <section class="portfolio-prose mx-auto max-w-4xl py-8 sm:py-10">
-              <Content />
-            </section>
-          )
-        }
-
-        {
-          projectData.location && (
-            <PortfolioLocation
-              title={projectData.title}
-              {...projectData.location}
-            />
-          )
-        }
-
-        {
-          projectData.services.length > 0 && (
-            <section
-              class="mx-auto max-w-4xl py-8 sm:py-10"
-              aria-labelledby="services-title"
+    <header class="mx-auto max-w-4xl">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              href="/#portfolio"
+              className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
             >
-              <h2 id="services-title" class="font-heading text-2xl font-bold">
-                Work
-              </h2>
-              <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
-                {projectData.services.map((service) => (
-                  <li class="py-1 leading-snug font-semibold">{service}</li>
+              Portfolio
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{projectData.title}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    </header>
+
+    <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
+      {
+        projectData.heroVideo ? (
+          <YouTubeEmbed
+            youtubeId={projectData.heroVideo}
+            title={`${projectData.title} featured video`}
+            poster={heroImage}
+            posterAlt={heroImageAlt}
+          />
+        ) : typeof heroImage === 'string' ? (
+          <Image
+            src={heroImage}
+            alt={heroImageAlt}
+            width={heroImageWidth}
+            height={heroImageHeight}
+            layout="full-width"
+            widths={[640, 960, 1280, 1600]}
+            sizes="(min-width: 1280px) 1216px, 100vw"
+            quality={82}
+            priority
+            class="bg-muted block h-auto w-full"
+          />
+        ) : (
+          <Image
+            src={heroImage}
+            alt={heroImageAlt}
+            width={heroImageWidth}
+            height={heroImageHeight}
+            layout="full-width"
+            widths={[640, 960, 1280, 1600]}
+            sizes="(min-width: 1280px) 1216px, 100vw"
+            quality={82}
+            priority
+            class="bg-muted block h-auto w-full"
+          />
+        )
+      }
+
+      <div class="mx-auto max-w-4xl py-10 sm:py-14">
+        <p class="text-primary text-xs font-bold tracking-wider uppercase">
+          {projectData.category}
+        </p>
+        <h1
+          class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl lg:text-6xl"
+        >
+          {projectData.title}
+        </h1>
+        <p
+          class="text-muted-foreground mt-6 max-w-3xl text-lg leading-8 sm:text-xl"
+        >
+          {projectData.summary}
+        </p>
+      </div>
+
+      {
+        hasBody && (
+          <section class="portfolio-prose mx-auto max-w-4xl py-8 sm:py-10">
+            <Content />
+          </section>
+        )
+      }
+
+      {
+        projectData.location && (
+          <PortfolioLocation
+            title={projectData.title}
+            {...projectData.location}
+          />
+        )
+      }
+
+      {
+        projectData.services.length > 0 && (
+          <section
+            class="mx-auto max-w-4xl py-8 sm:py-10"
+            aria-labelledby="services-title"
+          >
+            <h2 id="services-title" class="font-heading text-2xl font-bold">
+              Work
+            </h2>
+            <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+              {projectData.services.map((service) => (
+                <li class="py-1 leading-snug font-semibold">{service}</li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        hasDetails && (
+          <section
+            class="mx-auto max-w-4xl py-8 sm:py-10"
+            aria-labelledby="details-title"
+          >
+            <h2 id="details-title" class="font-heading text-2xl font-bold">
+              Details
+            </h2>
+            <dl class="mt-5 grid gap-6 sm:grid-cols-2">
+              {projectData.role && (
+                <div>
+                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                    Role
+                  </dt>
+                  <dd class="mt-1 font-semibold">{projectData.role}</dd>
+                </div>
+              )}
+              {projectData.collaborators.length > 0 && (
+                <div>
+                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                    Collaborators
+                  </dt>
+                  <dd class="mt-1 font-semibold">
+                    {projectData.collaborators.join(', ')}
+                  </dd>
+                </div>
+              )}
+              {projectData.duration && (
+                <div>
+                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                    Duration
+                  </dt>
+                  <dd class="mt-1 font-semibold">{projectData.duration}</dd>
+                </div>
+              )}
+              {projectData.tools.length > 0 && (
+                <div>
+                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                    Tools
+                  </dt>
+                  <dd class="mt-1 font-semibold">
+                    {projectData.tools.join(', ')}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </section>
+        )
+      }
+
+      {
+        comparisonVideos.length > 0 && (
+          <section
+            class="mx-auto max-w-4xl py-8 sm:py-10"
+            aria-labelledby="comparison-title"
+          >
+            <p class="text-primary text-xs font-bold tracking-wider uppercase">
+              Production comparison
+            </p>
+            <h2
+              id="comparison-title"
+              class="font-heading mt-2 text-2xl font-bold"
+            >
+              Before and after
+            </h2>
+            <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
+              These episodes show the change in recording, lighting, color, and
+              sound quality from before our partnership to the current
+              production workflow.
+            </p>
+
+            <div class="mt-7 grid gap-8 lg:grid-cols-2">
+              {comparisonVideos.map((video) => (
+                <article class="flex flex-col gap-4">
+                  <div>
+                    <p class="text-primary text-xs font-bold tracking-wider uppercase">
+                      {video.label}
+                    </p>
+                    <p class="text-muted-foreground mt-1 text-sm font-medium">
+                      {formatVideoDate(video.publishedAt)}
+                    </p>
+                  </div>
+                  <YouTubeEmbed
+                    youtubeId={video.youtubeId}
+                    title={`${video.label}: ${video.title}`}
+                  />
+                  <p class="text-muted-foreground leading-7">
+                    {video.description}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      {
+        milestoneVideos.length > 0 && (
+          <section
+            class="mx-auto max-w-4xl py-8 sm:py-10"
+            aria-labelledby="milestones-title"
+          >
+            <h2 id="milestones-title" class="font-heading text-2xl font-bold">
+              {isYaHalaProject
+                ? 'First collaborations'
+                : milestoneVideos.length > 1
+                  ? 'Featured videos'
+                  : 'Featured video'}
+            </h2>
+            <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
+              {isYaHalaProject
+                ? 'These October 2025 uploads mark the beginning of my production work with Ya Hala.'
+                : 'Watch the finished production directly from the client project.'}
+            </p>
+            {isYaHalaProject ? (
+              <ol class="mt-6 grid gap-6 sm:grid-cols-2">
+                {milestoneVideos.map((video) => (
+                  <li>
+                    <a
+                      href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+                    >
+                      <div class="bg-muted relative aspect-video overflow-hidden">
+                        <Image
+                          src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
+                          alt={`Video thumbnail for ${video.title}`}
+                          width={320}
+                          height={180}
+                          layout="constrained"
+                          widths={[320, 480, 640]}
+                          sizes="(min-width: 640px) 50vw, 100vw"
+                          loading="lazy"
+                          decoding="async"
+                          class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                        />
+                        <span class="bg-background/90 text-foreground absolute inset-0 m-auto inline-flex size-12 items-center justify-center rounded-full shadow-sm">
+                          <Play
+                            className="size-5 fill-current"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </div>
+                      <div class="py-4">
+                        <div class="flex items-start justify-between gap-4">
+                          <div>
+                            <p class="font-bold">{video.label}</p>
+                            <p class="text-muted-foreground mt-1 text-sm">
+                              {formatVideoDate(video.publishedAt)}
+                            </p>
+                          </div>
+                          <ArrowUpRight
+                            className="mt-1 size-4 shrink-0"
+                            aria-hidden="true"
+                          />
+                        </div>
+                        <p class="text-muted-foreground mt-3 text-sm leading-6">
+                          {video.description}
+                        </p>
+                      </div>
+                    </a>
+                  </li>
                 ))}
-              </ul>
-            </section>
-          )
-        }
-
-        {
-          hasDetails && (
-            <section
-              class="mx-auto max-w-4xl py-8 sm:py-10"
-              aria-labelledby="details-title"
-            >
-              <h2 id="details-title" class="font-heading text-2xl font-bold">
-                Details
-              </h2>
-              <dl class="mt-5 grid gap-6 sm:grid-cols-2">
-                {projectData.role && (
-                  <div>
-                    <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                      Role
-                    </dt>
-                    <dd class="mt-1 font-semibold">{projectData.role}</dd>
-                  </div>
-                )}
-                {projectData.collaborators.length > 0 && (
-                  <div>
-                    <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                      Collaborators
-                    </dt>
-                    <dd class="mt-1 font-semibold">
-                      {projectData.collaborators.join(', ')}
-                    </dd>
-                  </div>
-                )}
-                {projectData.duration && (
-                  <div>
-                    <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                      Duration
-                    </dt>
-                    <dd class="mt-1 font-semibold">{projectData.duration}</dd>
-                  </div>
-                )}
-                {projectData.tools.length > 0 && (
-                  <div>
-                    <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                      Tools
-                    </dt>
-                    <dd class="mt-1 font-semibold">
-                      {projectData.tools.join(', ')}
-                    </dd>
-                  </div>
-                )}
-              </dl>
-            </section>
-          )
-        }
-
-        {
-          comparisonVideos.length > 0 && (
-            <section
-              class="mx-auto max-w-4xl py-8 sm:py-10"
-              aria-labelledby="comparison-title"
-            >
-              <p class="text-primary text-xs font-bold tracking-wider uppercase">
-                Production comparison
-              </p>
-              <h2
-                id="comparison-title"
-                class="font-heading mt-2 text-2xl font-bold"
-              >
-                Before and after
-              </h2>
-              <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
-                These episodes show the change in recording, lighting, color,
-                and sound quality from before our partnership to the current
-                production workflow.
-              </p>
-
-              <div class="mt-7 grid gap-8 lg:grid-cols-2">
-                {comparisonVideos.map((video) => (
-                  <article class="flex flex-col gap-4">
-                    <div>
-                      <p class="text-primary text-xs font-bold tracking-wider uppercase">
-                        {video.label}
-                      </p>
-                      <p class="text-muted-foreground mt-1 text-sm font-medium">
-                        {formatVideoDate(video.publishedAt)}
-                      </p>
-                    </div>
+              </ol>
+            ) : (
+              <div class="mt-6 space-y-8">
+                {milestoneVideos.map((video) => (
+                  <article>
                     <YouTubeEmbed
                       youtubeId={video.youtubeId}
                       title={`${video.label}: ${video.title}`}
                     />
-                    <p class="text-muted-foreground leading-7">
-                      {video.description}
-                    </p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          )
-        }
-
-        {
-          milestoneVideos.length > 0 && (
-            <section
-              class="mx-auto max-w-4xl py-8 sm:py-10"
-              aria-labelledby="milestones-title"
-            >
-              <h2 id="milestones-title" class="font-heading text-2xl font-bold">
-                {isYaHalaProject
-                  ? 'First collaborations'
-                  : milestoneVideos.length > 1
-                    ? 'Featured videos'
-                    : 'Featured video'}
-              </h2>
-              <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
-                {isYaHalaProject
-                  ? 'These October 2025 uploads mark the beginning of my production work with Ya Hala.'
-                  : 'Watch the finished production directly from the client project.'}
-              </p>
-              {isYaHalaProject ? (
-                <ol class="mt-6 grid gap-6 sm:grid-cols-2">
-                  {milestoneVideos.map((video) => (
-                    <li>
+                    <div class="py-4">
+                      <p class="font-bold">{video.title}</p>
+                      <p class="text-muted-foreground mt-1 text-sm">
+                        {formatVideoDate(video.publishedAt)}
+                      </p>
+                      <p class="text-muted-foreground mt-3 leading-7">
+                        {video.description}
+                      </p>
                       <a
                         href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+                        class="text-primary mt-4 inline-flex font-bold underline underline-offset-4"
                       >
-                        <div class="bg-muted relative aspect-video overflow-hidden">
-                          <Image
-                            src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
-                            alt={`Video thumbnail for ${video.title}`}
-                            width={320}
-                            height={180}
-                            layout="constrained"
-                            widths={[320, 480, 640]}
-                            sizes="(min-width: 640px) 50vw, 100vw"
-                            loading="lazy"
-                            decoding="async"
-                            class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                          />
-                          <span class="bg-background/90 text-foreground absolute inset-0 m-auto inline-flex size-12 items-center justify-center rounded-full shadow-sm">
-                            <Play
-                              className="size-5 fill-current"
-                              aria-hidden="true"
-                            />
-                          </span>
-                        </div>
-                        <div class="py-4">
-                          <div class="flex items-start justify-between gap-4">
-                            <div>
-                              <p class="font-bold">{video.label}</p>
-                              <p class="text-muted-foreground mt-1 text-sm">
-                                {formatVideoDate(video.publishedAt)}
-                              </p>
-                            </div>
-                            <ArrowUpRight
-                              className="mt-1 size-4 shrink-0"
-                              aria-hidden="true"
-                            />
-                          </div>
-                          <p class="text-muted-foreground mt-3 text-sm leading-6">
-                            {video.description}
-                          </p>
-                        </div>
+                        Watch {video.title} on YouTube
                       </a>
-                    </li>
-                  ))}
-                </ol>
-              ) : (
-                <div class="mt-6 space-y-8">
-                  {milestoneVideos.map((video) => (
-                    <article>
-                      <YouTubeEmbed
-                        youtubeId={video.youtubeId}
-                        title={`${video.label}: ${video.title}`}
-                      />
-                      <div class="py-4">
-                        <p class="font-bold">{video.title}</p>
-                        <p class="text-muted-foreground mt-1 text-sm">
-                          {formatVideoDate(video.publishedAt)}
-                        </p>
-                        <p class="text-muted-foreground mt-3 leading-7">
-                          {video.description}
-                        </p>
-                        <a
-                          href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="text-primary mt-4 inline-flex font-bold underline underline-offset-4"
-                        >
-                          Watch {video.title} on YouTube
-                        </a>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </section>
-          )
-        }
-
-        {
-          projectData.upcomingVideo && (
-            <UpcomingVideo {...projectData.upcomingVideo} />
-          )
-        }
-
-        {
-          projectData.outcomes.length > 0 && (
-            <section
-              class="mx-auto max-w-4xl py-8 sm:py-10"
-              aria-labelledby="outcomes-title"
-            >
-              <h2 id="outcomes-title" class="font-heading text-2xl font-bold">
-                Outcomes
-              </h2>
-              <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
-                {projectData.outcomes.map((outcome) => (
-                  <li class="py-1 leading-snug font-semibold">{outcome}</li>
+                    </div>
+                  </article>
                 ))}
-              </ul>
-            </section>
-          )
-        }
+              </div>
+            )}
+          </section>
+        )
+      }
 
-        {
-          projectData.eventGallery && remoteGalleryImages.length > 0 ? (
-            <EventGallery
-              images={remoteGalleryImages}
-              heading={galleryHeading}
-              projectSlug={project.id}
-              projectTitle={projectData.title}
-              description={projectData.galleryDescription}
-              downloadAllUrl={projectData.downloadAllUrl}
-            />
-          ) : galleryImages.length > 0 ? (
-            <section
-              class="mx-auto max-w-4xl py-8 sm:py-10"
-              aria-labelledby="gallery-title"
-            >
-              <h2 id="gallery-title" class="font-heading text-2xl font-bold">
-                {galleryHeading}
-              </h2>
-              {projectData.galleryLayout === 'masonry' ? (
-                <div class="mt-6 columns-1 gap-4 sm:columns-2">
-                  {galleryImages.map((image) => (
-                    <figure class="mb-6 break-inside-avoid">
-                      <Image
-                        src={image.src}
-                        alt={image.alt}
-                        layout="full-width"
-                        widths={[480, 768, 1024, 1280, 1600]}
-                        sizes="(min-width: 640px) 50vw, 100vw"
-                        quality={80}
-                        loading="lazy"
-                        decoding="async"
-                        class="block h-auto w-full"
-                      />
-                      {image.caption && (
-                        <figcaption class="text-muted-foreground mt-2 text-sm">
-                          {image.caption}
-                        </figcaption>
-                      )}
-                    </figure>
-                  ))}
-                </div>
-              ) : project.id === 'bayaan-academy' ? (
-                <div class="mt-6 space-y-6">
-                  {bayaanGalleryGroups.map((group) =>
-                    group.type === 'landscape' ? (
-                      <figure>
-                        <Image
-                          src={group.image.src}
-                          alt={group.image.alt}
-                          layout="full-width"
-                          widths={[640, 960, 1280, 1600]}
-                          sizes="(min-width: 1280px) 896px, 100vw"
-                          quality={80}
-                          loading="lazy"
-                          class="block h-auto w-full"
-                        />
-                        {group.image.caption && (
-                          <figcaption class="text-muted-foreground mt-2 text-sm">
-                            {group.image.caption}
-                          </figcaption>
-                        )}
-                      </figure>
-                    ) : (
-                      <div class="columns-1 gap-4 sm:columns-2">
-                        {group.images.map((image) => (
-                          <figure class="mb-6 break-inside-avoid">
-                            <Image
-                              src={image.src}
-                              alt={image.alt}
-                              layout="full-width"
-                              widths={[480, 768, 1024]}
-                              sizes="(min-width: 640px) 50vw, 100vw"
-                              quality={80}
-                              loading="lazy"
-                              class="block h-auto w-full"
-                            />
-                            {image.caption && (
-                              <figcaption class="text-muted-foreground mt-2 text-sm">
-                                {image.caption}
-                              </figcaption>
-                            )}
-                          </figure>
-                        ))}
-                      </div>
-                    ),
+      {
+        projectData.upcomingVideo && (
+          <UpcomingVideo {...projectData.upcomingVideo} />
+        )
+      }
+
+      {
+        projectData.outcomes.length > 0 && (
+          <section
+            class="mx-auto max-w-4xl py-8 sm:py-10"
+            aria-labelledby="outcomes-title"
+          >
+            <h2 id="outcomes-title" class="font-heading text-2xl font-bold">
+              Outcomes
+            </h2>
+            <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+              {projectData.outcomes.map((outcome) => (
+                <li class="py-1 leading-snug font-semibold">{outcome}</li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        projectData.eventGallery && remoteGalleryImages.length > 0 ? (
+          <aside
+            class="mx-auto max-w-4xl py-8 sm:py-10"
+            aria-labelledby="gallery-cta-title"
+          >
+            <Separator className="mb-8 sm:mb-10" />
+            <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+              <div class="max-w-xl">
+                <h2
+                  id="gallery-cta-title"
+                  class="font-heading text-2xl font-bold"
+                >
+                  View the event gallery
+                </h2>
+                <p class="text-muted-foreground mt-3 leading-7">
+                  Browse all {remoteGalleryImages.length}{' '}
+                  {remoteGalleryImages.length === 1
+                    ? 'photograph'
+                    : 'photographs'}
+                  full screen, share individual shots, or download the full set.
+                </p>
+              </div>
+              <div class="flex flex-col gap-2 sm:shrink-0">
+                <a
+                  href={`/galleries/${project.id}/`}
+                  class={cn(
+                    buttonVariants({ size: 'lg' }),
+                    'w-full justify-center sm:w-auto',
                   )}
-                </div>
-              ) : project.id === 'arqam-academy' ? (
-                <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                  {galleryImages.map((image) => (
+                >
+                  Open gallery
+                  <ArrowRight data-icon="inline-end" aria-hidden="true" />
+                </a>
+                {projectData.downloadAllUrl && (
+                  <a
+                    href={projectData.downloadAllUrl}
+                    download
+                    class={cn(
+                      buttonVariants({ variant: 'outline', size: 'lg' }),
+                      'w-full justify-center sm:w-auto',
+                    )}
+                  >
+                    <Download data-icon="inline-start" aria-hidden="true" />
+                    Download all
+                  </a>
+                )}
+              </div>
+            </div>
+          </aside>
+        ) : galleryImages.length > 0 ? (
+          <section
+            class="mx-auto max-w-4xl py-8 sm:py-10"
+            aria-labelledby="gallery-title"
+          >
+            <h2 id="gallery-title" class="font-heading text-2xl font-bold">
+              {galleryHeading}
+            </h2>
+            {projectData.galleryLayout === 'masonry' ? (
+              <div class="mt-6 columns-1 gap-4 sm:columns-2">
+                {galleryImages.map((image) => (
+                  <figure class="mb-6 break-inside-avoid">
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      layout="full-width"
+                      widths={[480, 768, 1024, 1280, 1600]}
+                      sizes="(min-width: 640px) 50vw, 100vw"
+                      quality={80}
+                      loading="lazy"
+                      decoding="async"
+                      class="block h-auto w-full"
+                    />
+                    {image.caption && (
+                      <figcaption class="text-muted-foreground mt-2 text-sm">
+                        {image.caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                ))}
+              </div>
+            ) : project.id === 'bayaan-academy' ? (
+              <div class="mt-6 space-y-6">
+                {bayaanGalleryGroups.map((group) =>
+                  group.type === 'landscape' ? (
                     <figure>
                       <Image
-                        src={image.src}
-                        alt={image.alt}
-                        layout="full-width"
-                        widths={[480, 768, 1024]}
-                        sizes="(min-width: 640px) 50vw, 100vw"
-                        quality={80}
-                        loading="lazy"
-                        class="block h-auto w-full"
-                      />
-                      {image.caption && (
-                        <figcaption class="text-muted-foreground mt-2 text-sm">
-                          {image.caption}
-                        </figcaption>
-                      )}
-                    </figure>
-                  ))}
-                </div>
-              ) : (
-                <div class="mt-6 space-y-8">
-                  {galleryImages.map((image) => (
-                    <figure>
-                      <Image
-                        src={image.src}
-                        alt={image.alt}
+                        src={group.image.src}
+                        alt={group.image.alt}
                         layout="full-width"
                         widths={[640, 960, 1280, 1600]}
                         sizes="(min-width: 1280px) 896px, 100vw"
@@ -685,113 +611,179 @@ const galleryHeading =
                         loading="lazy"
                         class="block h-auto w-full"
                       />
-                      {image.caption && (
+                      {group.image.caption && (
                         <figcaption class="text-muted-foreground mt-2 text-sm">
-                          {image.caption}
+                          {group.image.caption}
                         </figcaption>
                       )}
                     </figure>
-                  ))}
-                </div>
-              )}
+                  ) : (
+                    <div class="columns-1 gap-4 sm:columns-2">
+                      {group.images.map((image) => (
+                        <figure class="mb-6 break-inside-avoid">
+                          <Image
+                            src={image.src}
+                            alt={image.alt}
+                            layout="full-width"
+                            widths={[480, 768, 1024]}
+                            sizes="(min-width: 640px) 50vw, 100vw"
+                            quality={80}
+                            loading="lazy"
+                            class="block h-auto w-full"
+                          />
+                          {image.caption && (
+                            <figcaption class="text-muted-foreground mt-2 text-sm">
+                              {image.caption}
+                            </figcaption>
+                          )}
+                        </figure>
+                      ))}
+                    </div>
+                  ),
+                )}
+              </div>
+            ) : project.id === 'arqam-academy' ? (
+              <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                {galleryImages.map((image) => (
+                  <figure>
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      layout="full-width"
+                      widths={[480, 768, 1024]}
+                      sizes="(min-width: 640px) 50vw, 100vw"
+                      quality={80}
+                      loading="lazy"
+                      class="block h-auto w-full"
+                    />
+                    {image.caption && (
+                      <figcaption class="text-muted-foreground mt-2 text-sm">
+                        {image.caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                ))}
+              </div>
+            ) : (
+              <div class="mt-6 space-y-8">
+                {galleryImages.map((image) => (
+                  <figure>
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      layout="full-width"
+                      widths={[640, 960, 1280, 1600]}
+                      sizes="(min-width: 1280px) 896px, 100vw"
+                      quality={80}
+                      loading="lazy"
+                      class="block h-auto w-full"
+                    />
+                    {image.caption && (
+                      <figcaption class="text-muted-foreground mt-2 text-sm">
+                        {image.caption}
+                      </figcaption>
+                    )}
+                  </figure>
+                ))}
+              </div>
+            )}
+          </section>
+        ) : null
+      }
+
+      {
+        projectData.links.length > 0 && (
+          <>
+            <Separator className="mx-auto max-w-4xl" />
+            <section
+              class="mx-auto max-w-4xl py-8 sm:py-10"
+              aria-labelledby="links-title"
+            >
+              <h2 id="links-title" class="font-heading text-2xl font-bold">
+                Project links
+              </h2>
+              <div class="mt-4 flex flex-col gap-1">
+                {projectData.links.map((link) => (
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class={cn(
+                      buttonVariants({
+                        variant: 'ghost',
+                        size: 'lg',
+                      }),
+                      'h-auto w-full justify-between px-3 py-3 text-left font-bold whitespace-normal',
+                    )}
+                  >
+                    <span>
+                      {link.label === 'Website'
+                        ? `${projectData.title} website`
+                        : link.label}
+                    </span>
+                    <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
+                  </a>
+                ))}
+              </div>
             </section>
-          ) : null
-        }
+          </>
+        )
+      }
 
-        {
-          projectData.links.length > 0 && (
-            <>
-              <Separator className="mx-auto max-w-4xl" />
-              <section
-                class="mx-auto max-w-4xl py-8 sm:py-10"
-                aria-labelledby="links-title"
-              >
-                <h2 id="links-title" class="font-heading text-2xl font-bold">
-                  Project links
-                </h2>
-                <div class="mt-4 flex flex-col gap-1">
-                  {projectData.links.map((link) => (
-                    <a
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class={cn(
-                        buttonVariants({
-                          variant: 'ghost',
-                          size: 'lg',
-                        }),
-                        'h-auto w-full justify-between px-3 py-3 text-left font-bold whitespace-normal',
-                      )}
-                    >
-                      <span>
-                        {link.label === 'Website'
-                          ? `${projectData.title} website`
-                          : link.label}
-                      </span>
-                      <ArrowUpRight data-icon="inline-end" aria-hidden="true" />
-                    </a>
-                  ))}
-                </div>
-              </section>
-            </>
-          )
-        }
-
-        {
-          (previousProject || nextProject) && (
-            <>
-              <Separator className="mx-auto max-w-4xl" />
-              <nav
-                class="mx-auto grid max-w-4xl gap-2 pt-6 sm:grid-cols-2 sm:pt-8"
-                aria-label="More portfolio projects"
-              >
-                {previousProject && (
-                  <a
-                    href={`/portfolio/${previousProject.id}/`}
-                    aria-label={`Previous project: ${previousProject.title}`}
-                    class={cn(
-                      buttonVariants({
-                        variant: 'ghost',
-                        size: 'lg',
-                      }),
-                      'h-auto w-full justify-start px-3 py-3 text-left whitespace-normal',
-                    )}
-                  >
-                    <ArrowLeft data-icon="inline-start" aria-hidden="true" />
-                    <span class="min-w-0">
-                      <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
-                        Previous project
-                      </small>
-                      <span class="font-bold">{previousProject.title}</span>
-                    </span>
-                  </a>
-                )}
-                {nextProject && (
-                  <a
-                    href={`/portfolio/${nextProject.id}/`}
-                    aria-label={`Next project: ${nextProject.title}`}
-                    class={cn(
-                      buttonVariants({
-                        variant: 'ghost',
-                        size: 'lg',
-                      }),
-                      'h-auto w-full justify-end px-3 py-3 text-right whitespace-normal sm:col-start-2',
-                    )}
-                  >
-                    <span class="min-w-0">
-                      <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
-                        Next project
-                      </small>
-                      <span class="font-bold">{nextProject.title}</span>
-                    </span>
-                    <ArrowRight data-icon="inline-end" aria-hidden="true" />
-                  </a>
-                )}
-              </nav>
-            </>
-          )
-        }
-      </article>
-    </main>
-  </body>
-</html>
+      {
+        (previousProject || nextProject) && (
+          <>
+            <Separator className="mx-auto max-w-4xl" />
+            <nav
+              class="mx-auto grid max-w-4xl gap-2 pt-6 sm:grid-cols-2 sm:pt-8"
+              aria-label="More portfolio projects"
+            >
+              {previousProject && (
+                <a
+                  href={`/portfolio/${previousProject.id}/`}
+                  aria-label={`Previous project: ${previousProject.title}`}
+                  class={cn(
+                    buttonVariants({
+                      variant: 'ghost',
+                      size: 'lg',
+                    }),
+                    'h-auto w-full justify-start px-3 py-3 text-left whitespace-normal',
+                  )}
+                >
+                  <ArrowLeft data-icon="inline-start" aria-hidden="true" />
+                  <span class="min-w-0">
+                    <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
+                      Previous project
+                    </small>
+                    <span class="font-bold">{previousProject.title}</span>
+                  </span>
+                </a>
+              )}
+              {nextProject && (
+                <a
+                  href={`/portfolio/${nextProject.id}/`}
+                  aria-label={`Next project: ${nextProject.title}`}
+                  class={cn(
+                    buttonVariants({
+                      variant: 'ghost',
+                      size: 'lg',
+                    }),
+                    'h-auto w-full justify-end px-3 py-3 text-right whitespace-normal sm:col-start-2',
+                  )}
+                >
+                  <span class="min-w-0">
+                    <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
+                      Next project
+                    </small>
+                    <span class="font-bold">{nextProject.title}</span>
+                  </span>
+                  <ArrowRight data-icon="inline-end" aria-hidden="true" />
+                </a>
+              )}
+            </nav>
+          </>
+        )
+      }
+    </article>
+  </main>
+</BaseLayout>

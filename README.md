@@ -701,8 +701,8 @@ When a push changes only excluded paths, Cloudflare should skip the build.
 
 Do not exclude `*.md`: Astro Content Collections can use Markdown files for
 real website content. Builds must continue to run for `src/*`, `public/*`,
-`scripts/*`, `material-theme/*`, dependency manifests, and Astro, TypeScript,
-or Wrangler configuration.
+`scripts/*`, dependency manifests, and Astro, TypeScript, or Wrangler
+configuration.
 
 Build watch paths are Cloudflare dashboard settings and are not stored in
 `wrangler.jsonc`. Recheck this list when repository tooling or directory roles

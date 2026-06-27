@@ -1,5 +1,12 @@
 import * as React from 'react'
-import { ChevronLeft, ChevronRight, Download, Share2, X } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Coffee,
+  Download,
+  Share2,
+  X,
+} from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -25,6 +32,7 @@ type EventLightboxProps = {
   projectTitle: string
   images: GalleryImage[]
   downloadAllUrl?: string
+  tipUrl?: string
   children: React.ReactNode
 }
 
@@ -46,6 +54,11 @@ async function downloadFile(url: string, filename: string) {
   }
 }
 
+async function downloadThenTip(url: string, filename: string, tipUrl: string) {
+  await downloadFile(url, filename)
+  window.location.assign(tipUrl)
+}
+
 export default function EventLightbox({
   galleryId,
   heading,
@@ -53,6 +66,7 @@ export default function EventLightbox({
   projectTitle,
   images,
   downloadAllUrl,
+  tipUrl = 'https://ko-fi.com/ayoubab1/10',
   children,
 }: EventLightboxProps) {
   const [open, setOpen] = React.useState(false)
@@ -60,6 +74,8 @@ export default function EventLightbox({
   const slidesRef = React.useRef<HTMLDivElement>(null)
   const lastFocusedRef = React.useRef<HTMLElement | null>(null)
   const wasOpenRef = React.useRef(false)
+  const touchStartX = React.useRef<number | null>(null)
+  const touchStartY = React.useRef<number | null>(null)
 
   const syncVisibleSlide = React.useCallback(
     (container: HTMLDivElement, index: number) => {
@@ -128,6 +144,28 @@ export default function EventLightbox({
     [getPhotoIndexFromUrl, updatePhotoUrl],
   )
 
+  const handleTouchStart = (event: React.TouchEvent) => {
+    touchStartX.current = event.touches[0].clientX
+    touchStartY.current = event.touches[0].clientY
+  }
+
+  const handleTouchEnd = (event: React.TouchEvent) => {
+    if (touchStartX.current == null || touchStartY.current == null) return
+
+    const deltaX = event.changedTouches[0].clientX - touchStartX.current
+    const deltaY = event.changedTouches[0].clientY - touchStartY.current
+    touchStartX.current = null
+    touchStartY.current = null
+
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY)) return
+
+    if (deltaX > 0) {
+      showSlide(currentIndex - 1)
+    } else {
+      showSlide(currentIndex + 1)
+    }
+  }
+
   React.useEffect(() => {
     if (slidesRef.current) {
       syncVisibleSlide(slidesRef.current, currentIndex)
@@ -161,13 +199,13 @@ export default function EventLightbox({
       const filename =
         download.dataset.filename || download.download || 'photograph.jpg'
       download.setAttribute('aria-busy', 'true')
-      await downloadFile(download.href, filename)
+      await downloadThenTip(download.href, filename, tipUrl)
       download.removeAttribute('aria-busy')
     }
 
     gallery.addEventListener('click', handleClick)
     return () => gallery.removeEventListener('click', handleClick)
-  }, [galleryId, showSlide, updatePhotoUrl])
+  }, [galleryId, showSlide, tipUrl, updatePhotoUrl])
 
   React.useEffect(() => {
     const syncFromUrl = () => {
@@ -199,7 +237,7 @@ export default function EventLightbox({
     if (!currentImage) return
 
     const url = new URL(
-      `/portfolio/${projectSlug}/photo/${currentIndex + 1}/`,
+      `/galleries/${projectSlug}/photo/${currentIndex + 1}/`,
       window.location.origin,
     )
     const title = `${projectTitle} — Photograph ${currentIndex + 1} of ${images.length}`
@@ -226,11 +264,14 @@ export default function EventLightbox({
   return (
     <>
       {downloadAllUrl && (
-        <Button asChild size="lg">
-          <a href={downloadAllUrl} download>
-            <Download data-icon="inline-start" aria-hidden="true" />
-            Download all
-          </a>
+        <Button
+          size="lg"
+          onClick={() =>
+            downloadThenTip(downloadAllUrl, `${projectSlug}.zip`, tipUrl)
+          }
+        >
+          <Download data-icon="inline-start" aria-hidden="true" />
+          Download all
         </Button>
       )}
 
@@ -249,8 +290,8 @@ export default function EventLightbox({
             {heading} photograph viewer
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Use the previous and next buttons or the left and right arrow keys
-            to browse the gallery.
+            Use the previous and next buttons, the left and right arrow keys, or
+            swipe to browse the gallery.
           </DialogDescription>
 
           <div className="flex h-full min-h-0 flex-1 flex-col">
@@ -269,10 +310,24 @@ export default function EventLightbox({
                     >
                       <Share2 aria-hidden="true" />
                     </Button>
+                    <Button variant="secondary" size="icon" asChild>
+                      <a
+                        href={tipUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Leave a tip on Ko-fi (opens in a new tab)"
+                      >
+                        <Coffee aria-hidden="true" />
+                      </a>
+                    </Button>
                     <Button
                       variant="secondary"
                       onClick={() =>
-                        downloadFile(currentImage.src, currentImage.filename)
+                        downloadThenTip(
+                          currentImage.src,
+                          currentImage.filename,
+                          tipUrl,
+                        )
                       }
                     >
                       <Download data-icon="inline-start" aria-hidden="true" />
@@ -292,7 +347,12 @@ export default function EventLightbox({
               </div>
             </div>
 
-            <div className="relative flex min-h-0 flex-1 items-center justify-center px-14 py-4 sm:px-20">
+            <div
+              className="relative flex min-h-0 flex-1 items-center justify-center px-14 py-4 sm:px-20"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              style={{ touchAction: 'pan-y' }}
+            >
               <Button
                 type="button"
                 variant="secondary"

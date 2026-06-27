@@ -76,3 +76,33 @@ generated sequential alt text with specific descriptions before publishing.
 - Verify an individual Download action saves a file instead of navigating away.
 - Verify the Download All ZIP opens from the gallery page.
 - Run `npm run verify` before deployment.
+
+## Prune an uploaded gallery
+
+Start with a clean Git worktree. Wrangler must be logged in, and the current
+branch must be ready to push to `origin`.
+
+Use filenames, current one-based photo positions, or position ranges:
+
+```powershell
+npm run gallery:prune -- muslim-business-chamber-2026 P1290863.jpg 12 20-24
+```
+
+Preview every action without changing local files, R2, or Git:
+
+```powershell
+npm run gallery:prune -- muslim-business-chamber-2026 12 20-24 --source "C:\event\exports" --dry-run
+```
+
+The first non-dry run saves the source folder in the ignored
+`.gallery-prune.local.json` file. Pass `--source` again to replace it. Pass
+`--yes` only in trusted automation; otherwise type the displayed confirmation.
+
+The command validates the local folder against the MDX manifest, builds and
+checks a replacement ZIP, moves rejected local files into a timestamped
+`.pruned/<gallery-slug>/` folder, updates and verifies R2, runs project checks,
+commits only the gallery MDX file, and pushes the current branch.
+
+If failure happens before R2 changes, local changes roll back. If failure
+happens during R2, local changes still roll back and the command prints the
+exact rerun command; rerunning safely converges the ZIP and image objects.
