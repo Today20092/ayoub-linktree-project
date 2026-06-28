@@ -4,6 +4,7 @@ import test from 'node:test'
 import {
   buildPublishedData,
   calibrateThreshold,
+  carryForwardVectorIds,
   cosineSimilarity,
 } from './face-index-core.mjs'
 
@@ -56,4 +57,17 @@ test('accepts the previous review file for one-time migration', () => {
   })
 
   assert.equal(vectors.length, 1)
+})
+
+test('retains old vector ids so event deletion remains complete', () => {
+  assert.deepEqual(
+    carryForwardVectorIds(
+      { vectorIds: ['current'] },
+      { vectorIds: ['previous'], staleVectorIds: ['older', 'previous'] },
+    ),
+    {
+      vectorIds: ['current'],
+      staleVectorIds: ['older', 'previous'],
+    },
+  )
 })

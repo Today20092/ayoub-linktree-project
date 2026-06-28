@@ -114,3 +114,15 @@ export function buildPublishedData(index) {
     vectors,
   }
 }
+
+export function carryForwardVectorIds(manifest, previousManifest) {
+  const currentIds = new Set(manifest.vectorIds)
+  const staleVectorIds = [
+    ...(previousManifest?.staleVectorIds ?? []),
+    ...(previousManifest?.vectorIds ?? []),
+  ].filter((id, index, ids) => !currentIds.has(id) && ids.indexOf(id) === index)
+
+  return staleVectorIds.length === 0
+    ? manifest
+    : { ...manifest, staleVectorIds }
+}

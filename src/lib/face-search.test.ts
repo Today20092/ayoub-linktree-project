@@ -2,7 +2,12 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import type { FaceManifest } from './face-manifests'
-import { parseFaceSearchRequest, photoMatches } from './face-search'
+import {
+  MAX_FACE_SEARCH_BODY_BYTES,
+  parseFaceSearchRequest,
+  photoMatches,
+  readFaceSearchBody,
+} from './face-search'
 
 const manifest: FaceManifest = {
   eventSlug: 'event',
@@ -70,5 +75,21 @@ test('deduplicates photos, applies threshold, and ranks by score', () => {
       { filename: 'one.jpg', score: 0.9 },
       { filename: 'two.jpg', score: 0.85 },
     ],
+  )
+})
+
+test('bounds the actual request body even without content-length', async () => {
+  const oversized = new Request('https://example.test', {
+    method: 'POST',
+    body: 'x'.repeat(MAX_FACE_SEARCH_BODY_BYTES + 1),
+  })
+  oversized.headers.delete('content-length')
+  assert.deepEqual(await readFaceSearchBody(oversized), { error: 'too-large' })
+
+  assert.deepEqual(
+    await readFaceSearchBody(
+      new Request('https://example.test', { method: 'POST', body: '{' }),
+    ),
+    { error: 'invalid-json' },
   )
 })

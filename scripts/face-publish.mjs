@@ -3,7 +3,10 @@ import { access, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { buildPublishedData } from './face-index-core.mjs'
+import {
+  buildPublishedData,
+  carryForwardVectorIds,
+} from './face-index-core.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
@@ -45,11 +48,19 @@ if (thresholdOption !== undefined) {
   faceIndex.threshold = threshold
 }
 
-const { manifest, vectors } = buildPublishedData(faceIndex)
+const published = buildPublishedData(faceIndex)
+const vectors = published.vectors
 const workDirectory = resolve(root, '.face-index', eventSlug)
-const vectorsPath = resolve(workDirectory, `${manifest.version}.ndjson`)
 const manifestDirectory = resolve(root, 'src/data/face-galleries')
 const manifestPath = resolve(manifestDirectory, `${eventSlug}.json`)
+let previousManifest
+try {
+  previousManifest = JSON.parse(await readFile(manifestPath, 'utf8'))
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error
+}
+const manifest = carryForwardVectorIds(published.manifest, previousManifest)
+const vectorsPath = resolve(workDirectory, `${manifest.version}.ndjson`)
 await mkdir(manifestDirectory, { recursive: true })
 await mkdir(workDirectory, { recursive: true })
 await writeFile(

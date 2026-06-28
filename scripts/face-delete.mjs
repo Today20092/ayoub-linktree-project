@@ -17,8 +17,11 @@ const manifestPath = resolve(
   `${eventSlug}.json`,
 )
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
+const vectorIds = [
+  ...new Set([...manifest.vectorIds, ...(manifest.staleVectorIds ?? [])]),
+]
 
-for (let index = 0; index < manifest.vectorIds.length; index += 100) {
+for (let index = 0; index < vectorIds.length; index += 100) {
   execFileSync(
     process.execPath,
     [
@@ -27,11 +30,11 @@ for (let index = 0; index < manifest.vectorIds.length; index += 100) {
       'delete-vectors',
       'face-search',
       '--ids',
-      ...manifest.vectorIds.slice(index, index + 100),
+      ...vectorIds.slice(index, index + 100),
     ],
     { cwd: root, stdio: 'inherit' },
   )
 }
 
 await rm(manifestPath)
-console.log(`Deleted ${manifest.vectorIds.length} vectors and ${manifestPath}`)
+console.log(`Deleted ${vectorIds.length} vectors and ${manifestPath}`)

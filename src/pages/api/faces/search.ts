@@ -6,6 +6,7 @@ import {
   MAX_FACE_SEARCH_BODY_BYTES,
   parseFaceSearchRequest,
   photoMatches,
+  readFaceSearchBody,
 } from '@/lib/face-search'
 
 export const prerender = false
@@ -34,14 +35,14 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'Too many searches. Try again in a minute.' }, 429)
   }
 
-  let body: unknown
-  try {
-    body = await request.json()
-  } catch {
-    return json({ error: 'Invalid JSON.' }, 400)
+  const parsedBody = await readFaceSearchBody(request)
+  if ('error' in parsedBody) {
+    return parsedBody.error === 'too-large'
+      ? json({ error: 'Request is too large.' }, 413)
+      : json({ error: 'Invalid JSON.' }, 400)
   }
 
-  const input = parseFaceSearchRequest(body, faceManifests)
+  const input = parseFaceSearchRequest(parsedBody.value, faceManifests)
   if (!input) {
     return json({ error: 'Invalid or unavailable face-search index.' }, 400)
   }

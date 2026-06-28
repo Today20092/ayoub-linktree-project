@@ -6,6 +6,7 @@ export type FaceManifest = {
   dimensions: 1024
   threshold: number
   vectorIds: string[]
+  staleVectorIds?: string[]
   faceCount: number
   photoCount: number
 }

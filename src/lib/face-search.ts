@@ -3,6 +3,19 @@ import type { FaceManifest } from './face-manifests'
 export const FACE_EMBEDDING_DIMENSIONS = 1024
 export const MAX_FACE_SEARCH_BODY_BYTES = 24_000
 
+export async function readFaceSearchBody(request: Request) {
+  const text = await request.text()
+  if (new TextEncoder().encode(text).byteLength > MAX_FACE_SEARCH_BODY_BYTES) {
+    return { error: 'too-large' as const }
+  }
+
+  try {
+    return { value: JSON.parse(text) as unknown }
+  } catch {
+    return { error: 'invalid-json' as const }
+  }
+}
+
 export function parseFaceSearchRequest(
   value: unknown,
   manifests: Record<string, FaceManifest>,
