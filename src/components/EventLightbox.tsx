@@ -54,7 +54,7 @@ function saveBlob(blob: Blob, filename: string) {
   const anchor = document.createElement('a')
   anchor.href = objectUrl
   anchor.download = filename
-  document.body.append(anchor)
+  document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
@@ -552,10 +552,10 @@ export default function EventLightbox({
                           label: currentImage.filename,
                         })
                       }
-                      >
-                        <Download data-icon="inline-start" aria-hidden="true" />
-                        Download photo
-                      </Button>
+                    >
+                      <Download data-icon="inline-start" aria-hidden="true" />
+                      Download photo
+                    </Button>
                     {selected.size > 0 && (
                       <Button
                         variant="secondary"
