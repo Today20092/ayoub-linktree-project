@@ -542,16 +542,6 @@ export default function EventLightbox({
                     >
                       <Share2 aria-hidden="true" />
                     </Button>
-                    <Button variant="secondary" size="icon" asChild>
-                      <a
-                        href={tipUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Leave a tip on Ko-fi (opens in a new tab)"
-                      >
-                        <Coffee aria-hidden="true" />
-                      </a>
-                    </Button>
                     <Button
                       variant="secondary"
                       onClick={() =>
@@ -562,10 +552,25 @@ export default function EventLightbox({
                           label: currentImage.filename,
                         })
                       }
-                    >
-                      <Download data-icon="inline-start" aria-hidden="true" />
-                      Download
-                    </Button>
+                      >
+                        <Download data-icon="inline-start" aria-hidden="true" />
+                        Download photo
+                      </Button>
+                    {selected.size > 0 && (
+                      <Button
+                        variant="secondary"
+                        onClick={() =>
+                          startDownload({
+                            kind: 'selection',
+                            images: selectedImages,
+                            filename: `${projectSlug}-selection.zip`,
+                          })
+                        }
+                      >
+                        <Download data-icon="inline-start" aria-hidden="true" />
+                        Download selected ({selected.size})
+                      </Button>
+                    )}
                   </>
                 )}
                 <DialogClose asChild>
