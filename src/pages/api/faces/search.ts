@@ -3,9 +3,9 @@ import { env } from 'cloudflare:workers'
 
 import { faceManifests } from '@/lib/face-manifests'
 import {
-  candidateClusters,
   MAX_FACE_SEARCH_BODY_BYTES,
   parseFaceSearchRequest,
+  photoMatches,
 } from '@/lib/face-search'
 
 export const prerender = false
@@ -45,12 +45,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   }
 
   const result = await env.VECTORIZE.query(input.embedding, {
-    topK: 12,
+    topK: 100,
     namespace: input.manifest.namespace,
     returnMetadata: 'all',
   })
 
   return json({
-    candidates: candidateClusters(result.matches, input.manifest.threshold),
+    matches: photoMatches(result.matches, input.manifest.threshold),
   })
 }

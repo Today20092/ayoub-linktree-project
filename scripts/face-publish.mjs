@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -12,28 +12,40 @@ const option = (name) => {
   return index >= 0 ? args[index + 1] : undefined
 }
 const eventSlug = option('--event')
-const reviewOption = option('--review')
-const publicBaseUrl =
-  option('--public-base-url') ??
-  `https://photos.ayoubabed.xyz/events/${eventSlug}/images`
+const indexOption = option('--index')
+const thresholdOption = option('--threshold')
 const upload = !args.includes('--no-upload')
 
 if (!eventSlug || !/^[a-z0-9-]+$/.test(eventSlug)) {
   console.error(
-    'Usage: npm run faces:publish -- --event <slug> [--review <review.json>] [--no-upload]',
+    'Usage: npm run faces:publish -- --event <slug> [--index <faces.json>] [--threshold <0-1>] [--no-upload]',
   )
   process.exit(1)
 }
 
-const reviewPath = resolve(
-  reviewOption ?? resolve(root, '.face-index', eventSlug, 'review.json'),
+let indexPath = resolve(
+  indexOption ?? resolve(root, '.face-index', eventSlug, 'faces.json'),
 )
-const review = JSON.parse(await readFile(reviewPath, 'utf8'))
-if (review.eventSlug !== eventSlug) {
-  throw new Error('Review event does not match --event')
+if (!indexOption) {
+  try {
+    await access(indexPath)
+  } catch {
+    indexPath = resolve(root, '.face-index', eventSlug, 'review.json')
+  }
+}
+const faceIndex = JSON.parse(await readFile(indexPath, 'utf8'))
+if (faceIndex.eventSlug !== eventSlug) {
+  throw new Error('Face index event does not match --event')
+}
+if (thresholdOption !== undefined) {
+  const threshold = Number(thresholdOption)
+  if (!Number.isFinite(threshold) || threshold < 0 || threshold > 1) {
+    throw new Error('--threshold must be a number from 0 to 1')
+  }
+  faceIndex.threshold = threshold
 }
 
-const { manifest, vectors } = buildPublishedData(review, publicBaseUrl)
+const { manifest, vectors } = buildPublishedData(faceIndex)
 const workDirectory = resolve(root, '.face-index', eventSlug)
 const vectorsPath = resolve(workDirectory, `${manifest.version}.ndjson`)
 const manifestDirectory = resolve(root, 'src/data/face-galleries')
@@ -47,8 +59,15 @@ await writeFile(
 
 if (upload) {
   execFileSync(
-    process.platform === 'win32' ? 'npx.cmd' : 'npx',
-    ['wrangler', 'vectorize', 'insert', 'face-search', '--file', vectorsPath],
+    process.execPath,
+    [
+      resolve(root, 'node_modules/wrangler/bin/wrangler.js'),
+      'vectorize',
+      'insert',
+      'face-search',
+      '--file',
+      vectorsPath,
+    ],
     { cwd: root, stdio: 'inherit' },
   )
 }

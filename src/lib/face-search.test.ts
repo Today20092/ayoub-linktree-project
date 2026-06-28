@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 
 import type { FaceManifest } from './face-manifests'
-import { candidateClusters, parseFaceSearchRequest } from './face-search'
+import { parseFaceSearchRequest, photoMatches } from './face-search'
 
 const manifest: FaceManifest = {
   eventSlug: 'event',
@@ -10,9 +10,10 @@ const manifest: FaceManifest = {
   namespace: 'event:version-1',
   model: '@vladmandic/human:faceres',
   dimensions: 1024,
-  threshold: 0.7,
+  threshold: 0.62,
   vectorIds: [],
-  clusters: [],
+  faceCount: 2,
+  photoCount: 2,
 }
 const manifests = { event: manifest }
 
@@ -54,23 +55,20 @@ test('accepts a finite 1024-value embedding', () => {
   assert.equal(result?.manifest, manifest)
 })
 
-test('deduplicates medoids, applies threshold, and limits candidates', () => {
+test('deduplicates photos, applies threshold, and ranks by score', () => {
   assert.deepEqual(
-    candidateClusters(
+    photoMatches(
       [
-        { score: 0.8, metadata: { clusterId: 'a' } },
-        { score: 0.9, metadata: { clusterId: 'a' } },
-        { score: 0.85, metadata: { clusterId: 'b' } },
-        { score: 0.69, metadata: { clusterId: 'c' } },
-        { score: 0.82, metadata: { clusterId: 'd' } },
-        { score: 0.81, metadata: { clusterId: 'e' } },
+        { score: 0.8, metadata: { filename: 'one.jpg' } },
+        { score: 0.9, metadata: { filename: 'one.jpg' } },
+        { score: 0.85, metadata: { filename: 'two.jpg' } },
+        { score: 0.61, metadata: { filename: 'three.jpg' } },
       ],
-      0.7,
+      0.62,
     ),
     [
-      { clusterId: 'a', score: 0.9 },
-      { clusterId: 'b', score: 0.85 },
-      { clusterId: 'd', score: 0.82 },
+      { filename: 'one.jpg', score: 0.9 },
+      { filename: 'two.jpg', score: 0.85 },
     ],
   )
 })

@@ -25,31 +25,30 @@ export function parseFaceSearchRequest(
   if (!manifest || manifest.version !== input.indexVersion) return null
 
   return {
-    eventSlug: input.eventSlug,
     embedding: input.embedding as number[],
     manifest,
   }
 }
 
-export function candidateClusters(
+export function photoMatches(
   matches: Array<{ score?: number; metadata?: Record<string, unknown> }>,
   threshold: number,
 ) {
   const scores = new Map<string, number>()
   for (const match of matches) {
-    const clusterId = match.metadata?.clusterId
+    const filename = match.metadata?.filename
     const score = match.score ?? -1
     if (
-      typeof clusterId === 'string' &&
+      typeof filename === 'string' &&
       score >= threshold &&
-      score > (scores.get(clusterId) ?? -1)
+      score > (scores.get(filename) ?? -1)
     ) {
-      scores.set(clusterId, score)
+      scores.set(filename, score)
     }
   }
 
   return [...scores]
-    .map(([clusterId, score]) => ({ clusterId, score }))
+    .map(([filename, score]) => ({ filename, score }))
     .sort((left, right) => right.score - left.score)
-    .slice(0, 3)
+    .slice(0, 50)
 }

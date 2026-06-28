@@ -6,7 +6,6 @@ import {
   Search,
   ShieldCheck,
   Upload,
-  Users,
 } from 'lucide-react'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -21,13 +20,11 @@ import {
 } from '@/components/ui/empty'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
-import type { FaceCluster } from '@/lib/face-manifests'
 
 type FaceFinderProps = {
   eventSlug: string
   indexVersion: string
   galleryId: string
-  clusters: FaceCluster[]
 }
 
 type DetectedFace = {
@@ -38,6 +35,11 @@ type DetectedFace = {
 type FaceSelection = {
   image: ImageBitmap
   faces: DetectedFace[]
+}
+
+type PhotoMatch = {
+  filename: string
+  score: number
 }
 
 function FacePreview({
@@ -84,10 +86,10 @@ export default function FaceFinder({
   eventSlug,
   indexVersion,
   galleryId,
-  clusters,
 }: FaceFinderProps) {
   const cameraInput = React.useRef<HTMLInputElement>(null)
   const uploadInput = React.useRef<HTMLInputElement>(null)
+  const originalFigures = React.useRef<HTMLElement[]>([])
   const human = React.useRef<InstanceType<
     (typeof import('@vladmandic/human'))['Human']
   > | null>(null)
@@ -97,43 +99,61 @@ export default function FaceFinder({
   >('idle')
   const [error, setError] = React.useState<string>()
   const [selection, setSelection] = React.useState<FaceSelection>()
-  const [candidates, setCandidates] = React.useState<
-    Array<{ clusterId: string; score: number }>
-  >([])
-  const [activeCluster, setActiveCluster] = React.useState<string>()
+  const [matches, setMatches] = React.useState<PhotoMatch[]>([])
 
-  const filterGallery = React.useCallback(
-    (clusterId?: string) => {
-      const cluster = clusters.find((item) => item.id === clusterId)
-      const filenames = cluster ? new Set(cluster.filenames) : null
-      document
-        .getElementById(galleryId)
-        ?.querySelectorAll<HTMLElement>('[data-gallery-filename]')
-        .forEach((item) => {
-          item.hidden =
-            filenames !== null &&
-            !filenames.has(item.dataset.galleryFilename ?? '')
-        })
-      setActiveCluster(clusterId)
-      if (cluster) {
-        document
-          .getElementById(galleryId)
-          ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const resetGallery = React.useCallback(() => {
+    const grid = document
+      .getElementById(galleryId)
+      ?.querySelector<HTMLElement>('[data-gallery-grid]')
+    if (!grid) return
+
+    originalFigures.current.forEach((figure) => {
+      figure.hidden = false
+      const badge = figure.querySelector<HTMLElement>('[data-face-rank]')
+      if (badge) badge.hidden = true
+      grid.appendChild(figure)
+    })
+    setMatches([])
+  }, [galleryId])
+
+  const showMatches = React.useCallback(
+    (nextMatches: PhotoMatch[]) => {
+      const gallery = document.getElementById(galleryId)
+      const grid = gallery?.querySelector<HTMLElement>('[data-gallery-grid]')
+      if (!gallery || !grid) return
+
+      const figures = [
+        ...gallery.querySelectorAll<HTMLElement>('[data-gallery-filename]'),
+      ]
+      if (originalFigures.current.length === 0) {
+        originalFigures.current = figures
       }
-    },
-    [clusters, galleryId],
-  )
-
-  React.useEffect(() => {
-    const handleFaceCard = (event: Event) => {
-      const target = (event.target as HTMLElement).closest<HTMLElement>(
-        '[data-face-cluster]',
+      const rank = new Map(
+        nextMatches.map((match, index) => [match.filename, index]),
       )
-      if (target?.dataset.faceCluster) filterGallery(target.dataset.faceCluster)
-    }
-    document.addEventListener('click', handleFaceCard)
-    return () => document.removeEventListener('click', handleFaceCard)
-  }, [filterGallery])
+
+      figures
+        .sort(
+          (left, right) =>
+            (rank.get(left.dataset.galleryFilename ?? '') ?? Infinity) -
+            (rank.get(right.dataset.galleryFilename ?? '') ?? Infinity),
+        )
+        .forEach((figure) => {
+          const matchIndex = rank.get(figure.dataset.galleryFilename ?? '')
+          const badge = figure.querySelector<HTMLElement>('[data-face-rank]')
+          figure.hidden = matchIndex === undefined
+          if (badge) {
+            badge.hidden = matchIndex === undefined
+            badge.textContent =
+              matchIndex === undefined ? '' : `Match ${matchIndex + 1}`
+          }
+          grid.appendChild(figure)
+        })
+
+      gallery.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    },
+    [galleryId],
+  )
 
   async function getHuman() {
     if (human.current) return human.current
@@ -166,8 +186,8 @@ export default function FaceFinder({
 
   async function analyze(file?: File) {
     if (!file || !consent) return
+    resetGallery()
     setError(undefined)
-    setCandidates([])
     setSelection(undefined)
 
     try {
@@ -220,13 +240,14 @@ export default function FaceFinder({
         body: JSON.stringify({ eventSlug, indexVersion, embedding }),
       })
       const result = (await response.json()) as {
-        candidates?: Array<{ clusterId: string; score: number }>
+        matches?: PhotoMatch[]
         error?: string
       }
       if (!response.ok) throw new Error(result.error)
-      const nextCandidates = result.candidates ?? []
-      setCandidates(nextCandidates)
-      setStatus(nextCandidates.length === 0 ? 'no-match' : 'idle')
+      const nextMatches = result.matches ?? []
+      setMatches(nextMatches)
+      if (nextMatches.length > 0) showMatches(nextMatches)
+      setStatus(nextMatches.length === 0 ? 'no-match' : 'idle')
     } catch (searchError) {
       setStatus('idle')
       setError(
@@ -249,8 +270,8 @@ export default function FaceFinder({
           </h2>
         </div>
         <p className="text-muted-foreground max-w-2xl text-sm leading-6">
-          Choose a face below, or use a selfie to find the closest matches. Your
-          selfie stays on this device and is not saved.
+          Take or upload a selfie. The closest gallery photos appear below with
+          the strongest matches first.
         </p>
       </div>
 
@@ -261,8 +282,9 @@ export default function FaceFinder({
           onCheckedChange={(checked) => setConsent(checked === true)}
         />
         <FieldLabel htmlFor="face-search-consent">
-          <ShieldCheck aria-hidden="true" />I consent to this event using an
-          anonymous face descriptor to search its retained gallery index.
+          <ShieldCheck aria-hidden="true" />I consent to local face analysis and
+          sending a temporary numeric descriptor to search this event. My selfie
+          and descriptor are not saved.
         </FieldLabel>
       </Field>
 
@@ -288,8 +310,8 @@ export default function FaceFinder({
           <Upload data-icon="inline-start" />
           Upload a photo
         </Button>
-        {activeCluster && (
-          <Button type="button" variant="ghost" onClick={() => filterGallery()}>
+        {matches.length > 0 && (
+          <Button type="button" variant="ghost" onClick={resetGallery}>
             <RotateCcw data-icon="inline-start" />
             Show all photos
           </Button>
@@ -302,14 +324,20 @@ export default function FaceFinder({
         accept="image/*"
         capture="user"
         className="sr-only"
-        onChange={(event) => void analyze(event.target.files?.[0])}
+        onChange={(event) => {
+          void analyze(event.target.files?.[0])
+          event.currentTarget.value = ''
+        }}
       />
       <input
         ref={uploadInput}
         type="file"
         accept="image/*"
         className="sr-only"
-        onChange={(event) => void analyze(event.target.files?.[0])}
+        onChange={(event) => {
+          void analyze(event.target.files?.[0])
+          event.currentTarget.value = ''
+        }}
       />
 
       {selection && (
@@ -336,27 +364,17 @@ export default function FaceFinder({
         </div>
       )}
 
-      {candidates.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <p className="text-sm font-medium">Select your closest match</p>
-          <div className="flex flex-wrap gap-2">
-            {candidates.map(({ clusterId }, index) => {
-              const cluster = clusters.find((item) => item.id === clusterId)
-              return (
-                <Button
-                  key={clusterId}
-                  type="button"
-                  variant={index === 0 ? 'default' : 'outline'}
-                  onClick={() => filterGallery(clusterId)}
-                >
-                  <Users data-icon="inline-start" />
-                  Match {index + 1}
-                  {cluster ? ` · ${cluster.filenames.length} photos` : ''}
-                </Button>
-              )
-            })}
-          </div>
-        </div>
+      {matches.length > 0 && (
+        <Alert>
+          <Search aria-hidden="true" />
+          <AlertTitle>
+            Found {matches.length}{' '}
+            {matches.length === 1 ? 'possible photo' : 'possible photos'}
+          </AlertTitle>
+          <AlertDescription>
+            Results are possible matches, not confirmed identities.
+          </AlertDescription>
+        </Alert>
       )}
 
       {status === 'no-match' && (
@@ -365,7 +383,7 @@ export default function FaceFinder({
             <EmptyMedia variant="icon">
               <Search aria-hidden="true" />
             </EmptyMedia>
-            <EmptyTitle>No confident match found</EmptyTitle>
+            <EmptyTitle>No likely photos found</EmptyTitle>
             <EmptyDescription>
               Try another well-lit photo with your face looking toward the
               camera.

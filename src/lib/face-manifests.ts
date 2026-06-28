@@ -1,20 +1,3 @@
-export type FaceBox = {
-  x: number
-  y: number
-  width: number
-  height: number
-}
-
-export type FaceCluster = {
-  id: string
-  representative: {
-    src: string
-    filename: string
-    bbox: FaceBox
-  }
-  filenames: string[]
-}
-
 export type FaceManifest = {
   eventSlug: string
   version: string
@@ -23,7 +6,8 @@ export type FaceManifest = {
   dimensions: 1024
   threshold: number
   vectorIds: string[]
-  clusters: FaceCluster[]
+  faceCount: number
+  photoCount: number
 }
 
 const modules = import.meta.glob<{ default: FaceManifest }>(

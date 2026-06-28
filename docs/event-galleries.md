@@ -109,9 +109,10 @@ exact rerun command; rerunning safely converges the ZIP and image objects.
 
 ## Face finder pilot
 
-Face indexing runs locally. Cloudflare stores anonymous cluster vectors, while
-the reviewed cluster-to-filename map stays in the site’s static data. Selfies
-are analyzed in the attendee’s browser and are never uploaded.
+Face indexing runs locally. Cloudflare stores one anonymous vector for each
+detected event face. An attendee’s selfie is analyzed in their browser, then
+only its temporary numeric descriptor is sent to Vectorize. Neither the selfie
+nor its search descriptor is retained.
 
 Create the Vectorize index once:
 
@@ -125,14 +126,8 @@ Index an exported event folder:
 npm run faces:index -- --event muslim-business-chamber-2026 --photos "C:\event\exports"
 ```
 
-The command opens a review site at `http://127.0.0.1:4174`. Review every
-cluster before publishing:
-
-- Choose the representative by clicking a face.
-- Hold Shift while clicking a face to remove an incorrect detection.
-- Merge duplicate clusters with the cluster selector.
-- Hide anyone who should not appear in the public face wall.
-- Select **Save review** when finished.
+The command writes `.face-index/{event-slug}/faces.json`. It does not group,
+identify, name, crop, or require manual review of attendees.
 
 For balanced threshold calibration, pass a JSON file containing labeled face
 pairs:
@@ -148,7 +143,7 @@ pairs:
 npm run faces:index -- --event muslim-business-chamber-2026 --photos "C:\event\exports" --labels "C:\event\face-pairs.json"
 ```
 
-Publish the approved review:
+Publish every detected face:
 
 ```powershell
 npm run faces:publish -- --event muslim-business-chamber-2026
@@ -159,6 +154,10 @@ Vectorize. Commit and deploy the generated
 `src/data/face-galleries/{event-slug}.json`; the previous versioned namespace
 continues serving until the new deployment is live.
 
+The attendee uploads or takes a selfie, selects their face if several are
+detected, and receives matching gallery photographs ordered by strongest
+similarity. Results are possible matches rather than confirmed identities.
+
 Delete an event’s vectors and manifest:
 
 ```powershell
@@ -166,7 +165,6 @@ npm run faces:delete -- --event muslim-business-chamber-2026
 ```
 
 `faceSearch` defaults to `false` in portfolio frontmatter. Enable it only for
-events whose participants and organizer have approved face search. The public
-face wall and retained anonymous vectors are biometric processing; confirm the
-model-weight license and applicable consent requirements before commercial
-use.
+events whose participants and organizer have approved face search. Retained
+anonymous event vectors are biometric processing; confirm the model-weight
+license and applicable consent requirements before commercial use.

@@ -85,10 +85,6 @@ const ogImage =
 const eventDate = data.eventDate
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
 const faceManifest = data.faceSearch ? faceManifests[project.id] : undefined
-const faceClusters =
-  faceManifest?.clusters.filter((cluster) =>
-    images.some((image) => image.filename === cluster.representative.filename),
-  ) ?? []
 
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', {
@@ -207,74 +203,13 @@ const formatDate = (date: Date) =>
     </header>
 
     {
-      faceManifest && faceClusters.length > 0 && (
-        <>
-          <FaceFinder
-            client:load
-            eventSlug={project.id}
-            indexVersion={faceManifest.version}
-            galleryId={galleryId}
-            clusters={faceClusters}
-          />
-          <section class="mt-8" aria-labelledby="face-wall-heading">
-            <div class="flex flex-col gap-1">
-              <h2
-                id="face-wall-heading"
-                class="font-heading text-xl font-bold tracking-tight"
-              >
-                Browse by face
-              </h2>
-              <p class="text-muted-foreground text-sm">
-                Select an approved face to show that person’s photographs.
-              </p>
-            </div>
-            <div class="mt-4 flex gap-3 overflow-x-auto pb-3">
-              {faceClusters.map((cluster) => {
-                const image = images.find(
-                  (candidate) =>
-                    candidate.filename === cluster.representative.filename,
-                )
-                if (!image) return null
-                const { bbox } = cluster.representative
-                const scale = Math.min(
-                  5,
-                  Math.max(1.5, 0.72 / Math.max(bbox.width, bbox.height)),
-                )
-                const originX = (bbox.x + bbox.width / 2) * 100
-                const originY = (bbox.y + bbox.height / 2) * 100
-
-                return (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    data-face-cluster={cluster.id}
-                    aria-label={`Show ${cluster.filenames.length} photographs for this face`}
-                    className="h-auto shrink-0 flex-col gap-2 p-2"
-                  >
-                    <span class="bg-muted block size-24 overflow-hidden rounded-xl">
-                      <Image
-                        src={image.src}
-                        alt=""
-                        width={image.width}
-                        height={image.height}
-                        widths={[192]}
-                        sizes="96px"
-                        loading="lazy"
-                        decoding="async"
-                        class="size-full object-cover"
-                        style={`transform: scale(${scale}); transform-origin: ${originX}% ${originY}%`}
-                      />
-                    </span>
-                    <span class="text-muted-foreground text-xs">
-                      {cluster.filenames.length}{' '}
-                      {cluster.filenames.length === 1 ? 'photo' : 'photos'}
-                    </span>
-                  </Button>
-                )
-              })}
-            </div>
-          </section>
-        </>
+      faceManifest && (
+        <FaceFinder
+          client:load
+          eventSlug={project.id}
+          indexVersion={faceManifest.version}
+          galleryId={galleryId}
+        />
       )
     }
 
@@ -283,13 +218,21 @@ const formatDate = (date: Date) =>
       class="mt-10"
       aria-label={`${data.title} photographs`}
     >
-      <div class="columns-1 gap-1 sm:columns-2 lg:columns-3">
+      <div class="columns-1 gap-1 sm:columns-2 lg:columns-3" data-gallery-grid>
         {
           images.map((image, index) => (
             <figure
               class="relative mb-1 break-inside-avoid"
               data-gallery-filename={image.filename}
             >
+              <Badge
+                variant="secondary"
+                data-face-rank
+                hidden
+                className="absolute top-2 left-2"
+              >
+                Match
+              </Badge>
               <a
                 href={image.src}
                 data-gallery-open={index}

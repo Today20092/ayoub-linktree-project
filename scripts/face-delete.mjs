@@ -20,9 +20,9 @@ const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
 
 for (let index = 0; index < manifest.vectorIds.length; index += 100) {
   execFileSync(
-    process.platform === 'win32' ? 'npx.cmd' : 'npx',
+    process.execPath,
     [
-      'wrangler',
+      resolve(root, 'node_modules/wrangler/bin/wrangler.js'),
       'vectorize',
       'delete-vectors',
       'face-search',

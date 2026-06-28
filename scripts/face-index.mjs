@@ -5,12 +5,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import sharp from 'sharp'
 
-import {
-  calibrateThreshold,
-  clusterDetections,
-  DEFAULT_THRESHOLD,
-} from './face-index-core.mjs'
-import { createFaceReviewPage } from './face-review-page.mjs'
+import { calibrateThreshold, DEFAULT_THRESHOLD } from './face-index-core.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
@@ -21,7 +16,6 @@ const option = (name) => {
 const eventSlug = option('--event')
 const photosDirectory = option('--photos')
 const labelsPath = option('--labels')
-const startReviewServer = !args.includes('--no-review-server')
 
 if (!eventSlug || !photosDirectory || !/^[a-z0-9-]+$/.test(eventSlug)) {
   console.error(
@@ -32,9 +26,8 @@ if (!eventSlug || !photosDirectory || !/^[a-z0-9-]+$/.test(eventSlug)) {
 
 const sourceDirectory = resolve(photosDirectory)
 const workspace = resolve(root, '.face-index', eventSlug)
-const cropsDirectory = resolve(workspace, 'crops')
-const reviewPath = resolve(workspace, 'review.json')
-await mkdir(cropsDirectory, { recursive: true })
+const indexPath = resolve(workspace, 'faces.json')
+await mkdir(workspace, { recursive: true })
 const modelDirectory = resolve(root, 'node_modules/@vladmandic/human/models')
 const modelFiles = new Set([
   'blazeface.json',
@@ -137,38 +130,12 @@ for (const [photoIndex, filename] of filenames.entries()) {
 
   for (const [faceIndex, face] of result.face.entries()) {
     if (!face.embedding || face.embedding.length !== 1024) continue
-    const [x, y, width, height] = face.box
-    const padding = Math.round(Math.max(width, height) * 0.25)
-    const left = Math.max(0, Math.round(x - padding))
-    const top = Math.max(0, Math.round(y - padding))
-    const cropWidth = Math.min(
-      info.width - left,
-      Math.round(width + padding * 2),
-    )
-    const cropHeight = Math.min(
-      info.height - top,
-      Math.round(height + padding * 2),
-    )
     const id = `${basename(filename, extname(filename))}-${faceIndex + 1}`
-    const cropFilename = `${id}.webp`
-
-    await sharp(resized)
-      .extract({ left, top, width: cropWidth, height: cropHeight })
-      .resize(240, 240, { fit: 'cover' })
-      .webp({ quality: 82 })
-      .toFile(resolve(cropsDirectory, cropFilename))
 
     detections.push({
       id,
       filename,
       embedding: [...face.embedding],
-      bbox: {
-        x: face.boxRaw[0],
-        y: face.boxRaw[1],
-        width: face.boxRaw[2],
-        height: face.boxRaw[3],
-      },
-      cropUrl: `/crops/${cropFilename}`,
     })
   }
 
@@ -211,62 +178,13 @@ if (labelsPath) {
   )
 }
 
-const review = {
+const index = {
   eventSlug,
   sourceDirectory,
   threshold,
-  clusters: clusterDetections(detections, threshold),
+  detections,
 }
-await writeFile(reviewPath, `${JSON.stringify(review, null, 2)}\n`)
+await writeFile(indexPath, `${JSON.stringify(index, null, 2)}\n`)
 
-if (!startReviewServer) {
-  modelServer.close()
-  console.log(
-    `Indexed ${detections.length} faces into ${review.clusters.length} clusters at ${reviewPath}`,
-  )
-  process.exit(0)
-}
-
-const html = createFaceReviewPage()
-
-const server = createServer(async (request, response) => {
-  try {
-    if (request.url === '/') {
-      response.setHeader('content-type', 'text/html; charset=utf-8')
-      response.end(html)
-      return
-    }
-    if (request.url === '/review.json' && request.method === 'GET') {
-      response.setHeader('content-type', 'application/json')
-      response.end(await readFile(reviewPath))
-      return
-    }
-    if (request.url === '/review.json' && request.method === 'POST') {
-      const chunks = []
-      for await (const chunk of request) chunks.push(chunk)
-      const next = JSON.parse(Buffer.concat(chunks).toString('utf8'))
-      await writeFile(reviewPath, `${JSON.stringify(next, null, 2)}\n`)
-      response.end('ok')
-      return
-    }
-    if (request.url?.startsWith('/crops/')) {
-      response.setHeader('content-type', 'image/webp')
-      response.end(
-        await readFile(resolve(cropsDirectory, basename(request.url))),
-      )
-      return
-    }
-    response.statusCode = 404
-    response.end('Not found')
-  } catch (error) {
-    response.statusCode = 500
-    response.end(error instanceof Error ? error.message : 'Error')
-  }
-})
-
-server.listen(4174, '127.0.0.1', () => {
-  console.log(
-    `Review ${review.clusters.length} clusters at http://127.0.0.1:4174`,
-  )
-  console.log('Shift-click “Use / remove” to remove an incorrect detection.')
-})
+modelServer.close()
+console.log(`Indexed ${detections.length} faces at ${indexPath}`)
