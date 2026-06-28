@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ayoub-linktree-project",
+  "account_id": "de011be818652cd288a0b1d934502de3",
   "compatibility_date": "2026-06-20",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@astrojs/cloudflare/entrypoints/server",
@@ -11,6 +12,7 @@
     {
       "binding": "VECTORIZE",
       "index_name": "face-search",
+      "remote": true,
     },
   ],
   "ratelimits": [

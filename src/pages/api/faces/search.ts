@@ -19,12 +19,14 @@ const json = (body: unknown, status = 200) =>
     },
   })
 
-export const POST: APIRoute = async ({ request, clientAddress }) => {
+export const POST: APIRoute = async ({ request }) => {
   const contentLength = Number(request.headers.get('content-length') ?? 0)
   if (contentLength > MAX_FACE_SEARCH_BODY_BYTES) {
     return json({ error: 'Request is too large.' }, 413)
   }
 
+  const clientAddress =
+    request.headers.get('cf-connecting-ip') ?? 'local-development'
   const rateLimit = await env.FACE_SEARCH_RATE_LIMITER.limit({
     key: clientAddress,
   })
@@ -45,7 +47,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   }
 
   const result = await env.VECTORIZE.query(input.embedding, {
-    topK: 100,
+    topK: 50,
     namespace: input.manifest.namespace,
     returnMetadata: 'all',
   })
