@@ -4,9 +4,11 @@ import {
   ChevronRight,
   Coffee,
   Download,
+  Heart,
   Share2,
   X,
 } from 'lucide-react'
+import { downloadZip } from 'client-zip'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -15,8 +17,13 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
 import { Toaster } from '@/components/ui/sonner'
 
 type GalleryImage = {
@@ -36,11 +43,14 @@ type EventLightboxProps = {
   children: React.ReactNode
 }
 
-async function downloadFile(url: string, filename: string) {
-  const response = await fetch(url, { mode: 'cors' })
-  if (!response.ok) throw new Error(`Download failed: ${response.status}`)
+type DownloadRequest =
+  | { kind: 'file'; url: string; filename: string; label: string }
+  | { kind: 'selection'; images: GalleryImage[]; filename: string }
 
-  const objectUrl = URL.createObjectURL(await response.blob())
+type DownloadStatus = 'idle' | 'preparing' | 'complete' | 'error'
+
+function saveBlob(blob: Blob, filename: string) {
+  const objectUrl = URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = objectUrl
   anchor.download = filename
@@ -50,13 +60,39 @@ async function downloadFile(url: string, filename: string) {
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
 }
 
-async function downloadThenTip(url: string, filename: string, tipUrl: string) {
-  try {
-    await downloadFile(url, filename)
-    window.location.assign(tipUrl)
-  } catch {
-    toast.error('Unable to download the file')
+async function downloadFile(
+  url: string,
+  onProgress: (progress: number) => void,
+) {
+  const response = await fetch(url, { mode: 'cors' })
+  if (!response.ok) throw new Error(`Download failed: ${response.status}`)
+
+  const total = Number(response.headers.get('content-length'))
+  if (!response.body || !total) return response.blob()
+
+  const reader = response.body.getReader()
+  const chunks: ArrayBuffer[] = []
+  let received = 0
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    chunks.push(value.slice().buffer as ArrayBuffer)
+    received += value.length
+    onProgress(Math.min(100, Math.round((received / total) * 100)))
   }
+
+  return new Blob(chunks, {
+    type: response.headers.get('content-type') ?? 'application/octet-stream',
+  })
+}
+
+function buildTipUrl(baseUrl: string, amount: number) {
+  const url = new URL(baseUrl)
+  url.pathname = /\/\d+\/?$/.test(url.pathname)
+    ? url.pathname.replace(/\/\d+\/?$/, `/${amount}`)
+    : `${url.pathname.replace(/\/$/, '')}/${amount}`
+  return url.toString()
 }
 
 export default function EventLightbox({
@@ -71,11 +107,78 @@ export default function EventLightbox({
 }: EventLightboxProps) {
   const [open, setOpen] = React.useState(false)
   const [currentIndex, setCurrentIndex] = React.useState(0)
+  const [selected, setSelected] = React.useState<Set<string>>(new Set())
+  const [selectionLoaded, setSelectionLoaded] = React.useState(false)
+  const [downloadDialogOpen, setDownloadDialogOpen] = React.useState(false)
+  const [downloadStatus, setDownloadStatus] =
+    React.useState<DownloadStatus>('idle')
+  const [downloadProgress, setDownloadProgress] = React.useState(0)
+  const [downloadLabel, setDownloadLabel] = React.useState('')
+  const [downloadError, setDownloadError] = React.useState('')
+  const [pendingDownload, setPendingDownload] =
+    React.useState<DownloadRequest | null>(null)
+  const [customTip, setCustomTip] = React.useState('')
+  const [customTipError, setCustomTipError] = React.useState('')
   const slidesRef = React.useRef<HTMLDivElement>(null)
   const lastFocusedRef = React.useRef<HTMLElement | null>(null)
   const wasOpenRef = React.useRef(false)
   const touchStartX = React.useRef<number | null>(null)
   const touchStartY = React.useRef<number | null>(null)
+  const selectionStorageKey = `event-gallery:${projectSlug}:favorites`
+
+  React.useEffect(() => {
+    const validFilenames = new Set(images.map((image) => image.filename))
+
+    try {
+      const saved = JSON.parse(
+        window.localStorage.getItem(selectionStorageKey) ?? '[]',
+      )
+      if (Array.isArray(saved)) {
+        setSelected(
+          new Set(
+            saved.filter(
+              (filename): filename is string =>
+                typeof filename === 'string' && validFilenames.has(filename),
+            ),
+          ),
+        )
+      }
+    } catch {
+      window.localStorage.removeItem(selectionStorageKey)
+    }
+
+    setSelectionLoaded(true)
+  }, [images, selectionStorageKey])
+
+  React.useEffect(() => {
+    if (!selectionLoaded) return
+    window.localStorage.setItem(
+      selectionStorageKey,
+      JSON.stringify([...selected]),
+    )
+  }, [selected, selectionLoaded, selectionStorageKey])
+
+  React.useEffect(() => {
+    const gallery = document.getElementById(galleryId)
+    if (!gallery) return
+
+    gallery
+      .querySelectorAll<HTMLElement>('[data-gallery-favorite]')
+      .forEach((button) => {
+        const isSelected = selected.has(button.dataset.filename ?? '')
+        button.dataset.selected = String(isSelected)
+        button.setAttribute('aria-pressed', String(isSelected))
+      })
+  }, [galleryId, selected])
+
+  const toggleFavorite = React.useCallback((filename: string) => {
+    setSelected((current) => {
+      const next = new Set(current)
+      if (next.has(filename)) next.delete(filename)
+      else next.add(filename)
+      return next
+    })
+  }, [])
 
   const syncVisibleSlide = React.useCallback(
     (container: HTMLDivElement, index: number) => {
@@ -178,6 +281,14 @@ export default function EventLightbox({
 
     const handleClick = async (event: MouseEvent) => {
       const target = event.target as Element
+      const favorite = target.closest<HTMLElement>('[data-gallery-favorite]')
+
+      if (favorite) {
+        event.preventDefault()
+        toggleFavorite(favorite.dataset.filename ?? '')
+        return
+      }
+
       const opener = target.closest<HTMLAnchorElement>('[data-gallery-open]')
 
       if (opener) {
@@ -199,13 +310,18 @@ export default function EventLightbox({
       const filename =
         download.dataset.filename || download.download || 'photograph.jpg'
       download.setAttribute('aria-busy', 'true')
-      await downloadThenTip(download.href, filename, tipUrl)
+      await startDownload({
+        kind: 'file',
+        url: download.href,
+        filename,
+        label: filename,
+      })
       download.removeAttribute('aria-busy')
     }
 
     gallery.addEventListener('click', handleClick)
     return () => gallery.removeEventListener('click', handleClick)
-  }, [galleryId, showSlide, tipUrl, updatePhotoUrl])
+  }, [galleryId, showSlide, startDownload, toggleFavorite, updatePhotoUrl])
 
   React.useEffect(() => {
     const syncFromUrl = () => {
@@ -232,6 +348,77 @@ export default function EventLightbox({
   }, [open])
 
   const currentImage = images[currentIndex]
+  const currentImageSelected = currentImage
+    ? selected.has(currentImage.filename)
+    : false
+  const selectedImages = images.filter((image) => selected.has(image.filename))
+
+  async function createSelectionZip(request: DownloadRequest) {
+    if (request.kind !== 'selection') return
+    const selectionImages = request.images
+
+    async function* files() {
+      for (const [index, image] of selectionImages.entries()) {
+        setDownloadLabel(
+          `Preparing photo ${index + 1} of ${selectionImages.length}`,
+        )
+        setDownloadProgress(Math.round((index / selectionImages.length) * 100))
+        const response = await fetch(image.src, { mode: 'cors' })
+        if (!response.ok) {
+          throw new Error(`Unable to download ${image.filename}`)
+        }
+        yield { input: response, name: image.filename }
+      }
+    }
+
+    const blob = await downloadZip(files()).blob()
+    setDownloadProgress(100)
+    saveBlob(blob, request.filename)
+  }
+
+  async function startDownload(request: DownloadRequest) {
+    setPendingDownload(request)
+    setDownloadDialogOpen(true)
+    setDownloadStatus('preparing')
+    setDownloadProgress(0)
+    setDownloadError('')
+    setDownloadLabel(
+      request.kind === 'selection'
+        ? `Preparing ${request.images.length} selected photos`
+        : request.label,
+    )
+    setOpen(false)
+
+    try {
+      if (request.kind === 'selection') {
+        await createSelectionZip(request)
+      } else {
+        const blob = await downloadFile(request.url, setDownloadProgress)
+        saveBlob(blob, request.filename)
+      }
+      setDownloadProgress(100)
+      setDownloadStatus('complete')
+    } catch (error) {
+      setDownloadError(
+        error instanceof Error ? error.message : 'Unable to prepare download',
+      )
+      setDownloadStatus('error')
+    }
+  }
+
+  const openTip = (amount: number) => {
+    window.open(buildTipUrl(tipUrl, amount), '_blank', 'noopener,noreferrer')
+  }
+
+  const submitCustomTip = (event: React.SyntheticEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!/^[1-9]\d*$/.test(customTip)) {
+      setCustomTipError('Enter a whole-dollar amount of at least $1.')
+      return
+    }
+    setCustomTipError('')
+    openTip(Number(customTip))
+  }
 
   const shareCurrentPhoto = async () => {
     if (!currentImage) return
@@ -263,11 +450,40 @@ export default function EventLightbox({
 
   return (
     <>
+      {selected.size > 0 && (
+        <>
+          <Button
+            size="lg"
+            onClick={() =>
+              startDownload({
+                kind: 'selection',
+                images: selectedImages,
+                filename: `${projectSlug}-selection.zip`,
+              })
+            }
+          >
+            <Download data-icon="inline-start" aria-hidden="true" />
+            Download selected ({selected.size})
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => setSelected(new Set())}
+          >
+            Clear selection
+          </Button>
+        </>
+      )}
       {downloadAllUrl && (
         <Button
           size="lg"
           onClick={() =>
-            downloadThenTip(downloadAllUrl, `${projectSlug}.zip`, tipUrl)
+            startDownload({
+              kind: 'file',
+              url: downloadAllUrl,
+              filename: `${projectSlug}.zip`,
+              label: `Downloading all ${images.length} photos`,
+            })
           }
         >
           <Download data-icon="inline-start" aria-hidden="true" />
@@ -303,6 +519,22 @@ export default function EventLightbox({
                 {currentImage && (
                   <>
                     <Button
+                      variant={currentImageSelected ? 'default' : 'secondary'}
+                      size="icon"
+                      onClick={() => toggleFavorite(currentImage.filename)}
+                      aria-label={
+                        currentImageSelected
+                          ? `Remove photograph ${currentIndex + 1} from favorites`
+                          : `Add photograph ${currentIndex + 1} to favorites`
+                      }
+                      aria-pressed={currentImageSelected}
+                    >
+                      <Heart
+                        className={currentImageSelected ? 'fill-current' : ''}
+                        aria-hidden="true"
+                      />
+                    </Button>
+                    <Button
                       variant="secondary"
                       size="icon"
                       onClick={shareCurrentPhoto}
@@ -323,11 +555,12 @@ export default function EventLightbox({
                     <Button
                       variant="secondary"
                       onClick={() =>
-                        downloadThenTip(
-                          currentImage.src,
-                          currentImage.filename,
-                          tipUrl,
-                        )
+                        startDownload({
+                          kind: 'file',
+                          url: currentImage.src,
+                          filename: currentImage.filename,
+                          label: currentImage.filename,
+                        })
                       }
                     >
                       <Download data-icon="inline-start" aria-hidden="true" />
@@ -383,6 +616,122 @@ export default function EventLightbox({
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={downloadDialogOpen}
+        onOpenChange={(nextOpen) => {
+          if (downloadStatus !== 'preparing') setDownloadDialogOpen(nextOpen)
+        }}
+      >
+        <DialogContent
+          showCloseButton={downloadStatus !== 'preparing'}
+          onEscapeKeyDown={(event) => {
+            if (downloadStatus === 'preparing') event.preventDefault()
+          }}
+          onPointerDownOutside={(event) => {
+            if (downloadStatus === 'preparing') event.preventDefault()
+          }}
+        >
+          {downloadStatus === 'preparing' && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Your download is being prepared</DialogTitle>
+                <DialogDescription aria-live="polite">
+                  {downloadLabel}
+                </DialogDescription>
+              </DialogHeader>
+              <Progress
+                value={downloadProgress}
+                aria-label={`Download ${downloadProgress}% complete`}
+              />
+              <p className="text-muted-foreground text-center text-sm">
+                {downloadProgress}% complete
+              </p>
+            </>
+          )}
+
+          {downloadStatus === 'complete' && (
+            <>
+              <DialogHeader className="pr-8">
+                <DialogTitle>Thank you for viewing the photos</DialogTitle>
+                <DialogDescription>
+                  Your download is starting. If you enjoyed the gallery, please
+                  consider leaving a tip on Ko-fi.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-3 gap-2">
+                {[5, 10, 15].map((amount) => (
+                  <Button
+                    key={amount}
+                    type="button"
+                    variant="outline"
+                    onClick={() => openTip(amount)}
+                  >
+                    ${amount}
+                  </Button>
+                ))}
+              </div>
+              <form noValidate onSubmit={submitCustomTip}>
+                <Field data-invalid={Boolean(customTipError)}>
+                  <FieldLabel htmlFor="custom-tip">
+                    Custom tip amount
+                  </FieldLabel>
+                  <div className="flex gap-2">
+                    <Input
+                      id="custom-tip"
+                      type="number"
+                      min="1"
+                      step="1"
+                      inputMode="numeric"
+                      value={customTip}
+                      onChange={(event) => setCustomTip(event.target.value)}
+                      placeholder="Amount in dollars"
+                      aria-invalid={Boolean(customTipError)}
+                    />
+                    <Button type="submit">
+                      <Coffee data-icon="inline-start" aria-hidden="true" />
+                      Tip
+                    </Button>
+                  </div>
+                  <FieldError>{customTipError}</FieldError>
+                </Field>
+              </form>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setDownloadDialogOpen(false)}
+                >
+                  No thanks
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+
+          {downloadStatus === 'error' && (
+            <>
+              <DialogHeader className="pr-8">
+                <DialogTitle>Download failed</DialogTitle>
+                <DialogDescription>{downloadError}</DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setDownloadDialogOpen(false)}
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() =>
+                    pendingDownload && startDownload(pendingDownload)
+                  }
+                >
+                  Try again
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </>

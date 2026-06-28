@@ -2,7 +2,7 @@
 import '../../../styles.css'
 
 import { Image } from 'astro:assets'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Heart } from 'lucide-react'
 import { getCollection, type CollectionEntry } from 'astro:content'
 
 import EventLightbox from '../../../components/EventLightbox'
@@ -15,6 +15,7 @@ import {
   BreadcrumbSeparator,
 } from '../../../components/ui/breadcrumb'
 import { Badge } from '../../../components/ui/badge'
+import { Button } from '../../../components/ui/button'
 import { eventGalleries } from '../../../data/event-galleries'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { siteConfig } from '../../../lib/site-config'
@@ -206,25 +207,40 @@ const formatDate = (date: Date) =>
       <div class="columns-1 gap-1 sm:columns-2 lg:columns-3">
         {
           images.map((image, index) => (
-            <a
-              href={image.src}
-              data-gallery-open={index}
-              aria-label={`Open photograph ${index + 1}: ${image.alt}`}
-              class="group bg-muted focus-visible:ring-ring mb-1 block break-inside-avoid overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                width={image.width}
-                height={image.height}
-                layout="full-width"
-                widths={[480, 720, 960, 1280]}
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                loading="lazy"
-                decoding="async"
-                class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
-              />
-            </a>
+            <figure class="relative mb-1 break-inside-avoid">
+              <a
+                href={image.src}
+                data-gallery-open={index}
+                aria-label={`Open photograph ${index + 1}: ${image.alt}`}
+                class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  width={image.width}
+                  height={image.height}
+                  layout="full-width"
+                  widths={[480, 720, 960, 1280]}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  loading="lazy"
+                  decoding="async"
+                  class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                />
+              </a>
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                data-gallery-favorite
+                data-filename={image.filename}
+                data-selected="false"
+                aria-label={`Add photograph ${index + 1} to favorites`}
+                aria-pressed="false"
+                className="absolute top-2 right-2 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
+              >
+                <Heart aria-hidden="true" />
+              </Button>
+            </figure>
           ))
         }
       </div>
