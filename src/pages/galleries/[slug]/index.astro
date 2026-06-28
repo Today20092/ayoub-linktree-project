@@ -205,7 +205,7 @@ const formatDate = (date: Date) =>
     {
       faceManifest && (
         <FaceFinder
-          client:load
+          client:only="react"
           eventSlug={project.id}
           indexVersion={faceManifest.version}
           galleryId={galleryId}

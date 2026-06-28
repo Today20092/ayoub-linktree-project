@@ -1,6 +1,5 @@
 import { defineConfig } from 'astro/config'
 import tailwindcss from '@tailwindcss/vite'
-import icon from 'astro-icon'
 import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
@@ -12,7 +11,6 @@ export default defineConfig({
   site: 'https://ayoubabed.xyz',
 
   integrations: [
-    icon(),
     mdx(),
     react(),
     sitemap({
