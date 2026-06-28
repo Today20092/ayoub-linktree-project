@@ -37,26 +37,26 @@ type EventLightboxProps = {
 }
 
 async function downloadFile(url: string, filename: string) {
-  try {
-    const response = await fetch(url, { mode: 'cors' })
-    if (!response.ok) throw new Error(`Download failed: ${response.status}`)
+  const response = await fetch(url, { mode: 'cors' })
+  if (!response.ok) throw new Error(`Download failed: ${response.status}`)
 
-    const objectUrl = URL.createObjectURL(await response.blob())
-    const anchor = document.createElement('a')
-    anchor.href = objectUrl
-    anchor.download = filename
-    document.body.append(anchor)
-    anchor.click()
-    anchor.remove()
-    URL.revokeObjectURL(objectUrl)
-  } catch {
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
+  const objectUrl = URL.createObjectURL(await response.blob())
+  const anchor = document.createElement('a')
+  anchor.href = objectUrl
+  anchor.download = filename
+  document.body.append(anchor)
+  anchor.click()
+  anchor.remove()
+  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
 }
 
 async function downloadThenTip(url: string, filename: string, tipUrl: string) {
-  await downloadFile(url, filename)
-  window.location.assign(tipUrl)
+  try {
+    await downloadFile(url, filename)
+    window.location.assign(tipUrl)
+  } catch {
+    toast.error('Unable to download the file')
+  }
 }
 
 export default function EventLightbox({
