@@ -161,6 +161,7 @@ export default function FaceFinder({
     const module = await import('@vladmandic/human')
     const instance = new module.Human({
       backend: 'webgl',
+      warmup: 'none',
       modelBasePath: '/face-models/',
       cacheSensitivity: 0,
       face: {
@@ -179,7 +180,6 @@ export default function FaceFinder({
       gesture: { enabled: false },
     })
     await instance.load()
-    await instance.warmup()
     human.current = instance
     return instance
   }
