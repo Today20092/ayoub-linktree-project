@@ -6,6 +6,7 @@ import { ArrowRight, Heart } from 'lucide-react'
 import { getCollection, type CollectionEntry } from 'astro:content'
 
 import EventLightbox from '../../../components/EventLightbox'
+import FaceFinder from '../../../components/FaceFinder'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,6 +19,7 @@ import { Badge } from '../../../components/ui/badge'
 import { Button } from '../../../components/ui/button'
 import { eventGalleries } from '../../../data/event-galleries'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { faceManifests } from '../../../lib/face-manifests'
 import { siteConfig } from '../../../lib/site-config'
 
 type RemoteGalleryImage = {
@@ -82,6 +84,7 @@ const ogImage =
     : data.featuredImage.src)
 const eventDate = data.eventDate
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
+const faceManifest = data.faceSearch ? faceManifests[project.id] : undefined
 
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', {
@@ -199,15 +202,37 @@ const formatDate = (date: Date) =>
       </div>
     </header>
 
+    {
+      faceManifest && (
+        <FaceFinder
+          client:load
+          eventSlug={project.id}
+          indexVersion={faceManifest.version}
+          galleryId={galleryId}
+        />
+      )
+    }
+
     <section
       id={galleryId}
       class="mt-10"
       aria-label={`${data.title} photographs`}
     >
-      <div class="columns-1 gap-1 sm:columns-2 lg:columns-3">
+      <div class="columns-1 gap-1 sm:columns-2 lg:columns-3" data-gallery-grid>
         {
           images.map((image, index) => (
-            <figure class="relative mb-1 break-inside-avoid">
+            <figure
+              class="relative mb-1 break-inside-avoid"
+              data-gallery-filename={image.filename}
+            >
+              <Badge
+                variant="secondary"
+                data-face-rank
+                hidden
+                className="absolute top-2 left-2"
+              >
+                Match
+              </Badge>
               <a
                 href={image.src}
                 data-gallery-open={index}

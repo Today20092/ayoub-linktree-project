@@ -54,7 +54,7 @@ function saveBlob(blob: Blob, filename: string) {
   const anchor = document.createElement('a')
   anchor.href = objectUrl
   anchor.download = filename
-  document.body.append(anchor)
+  document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
@@ -542,16 +542,6 @@ export default function EventLightbox({
                     >
                       <Share2 aria-hidden="true" />
                     </Button>
-                    <Button variant="secondary" size="icon" asChild>
-                      <a
-                        href={tipUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="Leave a tip on Ko-fi (opens in a new tab)"
-                      >
-                        <Coffee aria-hidden="true" />
-                      </a>
-                    </Button>
                     <Button
                       variant="secondary"
                       onClick={() =>
@@ -564,8 +554,23 @@ export default function EventLightbox({
                       }
                     >
                       <Download data-icon="inline-start" aria-hidden="true" />
-                      Download
+                      Download photo
                     </Button>
+                    {selected.size > 0 && (
+                      <Button
+                        variant="secondary"
+                        onClick={() =>
+                          startDownload({
+                            kind: 'selection',
+                            images: selectedImages,
+                            filename: `${projectSlug}-selection.zip`,
+                          })
+                        }
+                      >
+                        <Download data-icon="inline-start" aria-hidden="true" />
+                        Download selected ({selected.size})
+                      </Button>
+                    )}
                   </>
                 )}
                 <DialogClose asChild>

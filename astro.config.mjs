@@ -5,9 +5,12 @@ import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
 import sitemap from '@astrojs/sitemap'
 
+import cloudflare from '@astrojs/cloudflare'
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://ayoubabed.xyz',
+
   integrations: [
     icon(),
     mdx(),
@@ -18,6 +21,7 @@ export default defineConfig({
         !page.includes('/photo/'),
     }),
   ],
+
   image: {
     remotePatterns: [
       {
@@ -35,7 +39,10 @@ export default defineConfig({
       },
     ],
   },
+
   vite: {
     plugins: [tailwindcss()],
   },
+
+  adapter: cloudflare(),
 })

@@ -3,6 +3,9 @@ dist/
 
 # generated types
 .astro/
+.wrangler/
+public/face-models/
+.face-index/
 
 # dependencies
 node_modules/
