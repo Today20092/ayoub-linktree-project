@@ -544,6 +544,8 @@ export default function EventLightbox({
                     </Button>
                     <Button
                       variant="secondary"
+                      className="size-9 px-0 sm:h-9 sm:w-auto sm:px-4"
+                      aria-label={`Download photograph ${currentIndex + 1}`}
                       onClick={() =>
                         startDownload({
                           kind: 'file',
@@ -554,11 +556,13 @@ export default function EventLightbox({
                       }
                     >
                       <Download data-icon="inline-start" aria-hidden="true" />
-                      Download photo
+                      <span className="hidden sm:inline">Download photo</span>
                     </Button>
                     {selected.size > 0 && (
                       <Button
                         variant="secondary"
+                        className="size-9 px-0 sm:h-9 sm:w-auto sm:px-4"
+                        aria-label={`Download ${selected.size} selected photographs`}
                         onClick={() =>
                           startDownload({
                             kind: 'selection',
@@ -568,7 +572,9 @@ export default function EventLightbox({
                         }
                       >
                         <Download data-icon="inline-start" aria-hidden="true" />
-                        Download selected ({selected.size})
+                        <span className="hidden sm:inline">
+                          Download selected ({selected.size})
+                        </span>
                       </Button>
                     )}
                   </>
