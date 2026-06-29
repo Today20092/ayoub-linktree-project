@@ -41,10 +41,18 @@ export async function getStaticPaths() {
     (entry) => entry.data.eventGallery,
   )
 
-  return projects.map((project) => ({
-    params: { slug: project.id },
-    props: { project },
-  }))
+  return projects.map((project) => {
+    if (!faceManifests[project.id]) {
+      throw new Error(
+        `Event gallery "${project.id}" needs a published face-search index.`,
+      )
+    }
+
+    return {
+      params: { slug: project.id },
+      props: { project },
+    }
+  })
 }
 
 const { project } = Astro.props as Props
@@ -84,7 +92,7 @@ const ogImage =
     : data.featuredImage.src)
 const eventDate = data.eventDate
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
-const faceManifest = data.faceSearch ? faceManifests[project.id] : undefined
+const faceManifest = faceManifests[project.id]
 
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', {

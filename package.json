@@ -16,7 +16,7 @@
     "faces:index": "node scripts/face-index.mjs",
     "faces:publish": "node scripts/face-publish.mjs",
     "faces:delete": "node scripts/face-delete.mjs",
-    "test:faces": "node --test scripts/face-index-core.test.mjs && tsx --test src/lib/face-search.test.ts",
+    "test:faces": "node --test scripts/face-index-core.test.mjs && tsx --test src/lib/face-search.test.ts src/lib/face-client.test.ts",
     "prebuild": "node scripts/copy-face-models.mjs",
     "build": "astro build",
     "preview": "astro preview",

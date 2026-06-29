@@ -21,6 +21,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
@@ -534,49 +541,45 @@ export default function EventLightbox({
                         aria-hidden="true"
                       />
                     </Button>
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      onClick={shareCurrentPhoto}
-                      aria-label={`Share photograph ${currentIndex + 1}`}
-                    >
-                      <Share2 aria-hidden="true" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      className="size-9 px-0 sm:h-9 sm:w-auto sm:px-4"
-                      aria-label={`Download photograph ${currentIndex + 1}`}
-                      onClick={() =>
-                        startDownload({
-                          kind: 'file',
-                          url: currentImage.src,
-                          filename: currentImage.filename,
-                          label: currentImage.filename,
-                        })
-                      }
-                    >
-                      <Download data-icon="inline-start" aria-hidden="true" />
-                      <span className="hidden sm:inline">Download photo</span>
-                    </Button>
-                    {selected.size > 0 && (
-                      <Button
-                        variant="secondary"
-                        className="size-9 px-0 sm:h-9 sm:w-auto sm:px-4"
-                        aria-label={`Download ${selected.size} selected photographs`}
-                        onClick={() =>
-                          startDownload({
-                            kind: 'selection',
-                            images: selectedImages,
-                            filename: `${projectSlug}-selection.zip`,
-                          })
-                        }
-                      >
-                        <Download data-icon="inline-start" aria-hidden="true" />
-                        <span className="hidden sm:inline">
-                          Download selected ({selected.size})
-                        </span>
-                      </Button>
-                    )}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="secondary">Actions</Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem onSelect={shareCurrentPhoto}>
+                            <Share2 aria-hidden="true" />
+                            Share current photo
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={() =>
+                              startDownload({
+                                kind: 'file',
+                                url: currentImage.src,
+                                filename: currentImage.filename,
+                                label: currentImage.filename,
+                              })
+                            }
+                          >
+                            <Download aria-hidden="true" />
+                            Download current photo
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            disabled={selected.size === 0}
+                            onSelect={() =>
+                              startDownload({
+                                kind: 'selection',
+                                images: selectedImages,
+                                filename: `${projectSlug}-selection.zip`,
+                              })
+                            }
+                          >
+                            <Download aria-hidden="true" />
+                            Download favorites ({selected.size})
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </>
                 )}
                 <DialogClose asChild>

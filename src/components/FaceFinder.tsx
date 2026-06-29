@@ -20,6 +20,12 @@ import {
 } from '@/components/ui/empty'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
+import {
+  decodeFaceImage,
+  firstSuccessful,
+  releaseFaceImage,
+  type FaceImage,
+} from '@/lib/face-client'
 
 type FaceFinderProps = {
   eventSlug: string
@@ -33,7 +39,7 @@ type DetectedFace = {
 }
 
 type FaceSelection = {
-  image: ImageBitmap
+  image: FaceImage
   faces: DetectedFace[]
 }
 
@@ -46,7 +52,7 @@ function FacePreview({
   image,
   face,
 }: {
-  image: ImageBitmap
+  image: FaceImage
   face: DetectedFace
 }) {
   const ref = React.useRef<HTMLCanvasElement>(null)
@@ -93,6 +99,7 @@ export default function FaceFinder({
   const human = React.useRef<InstanceType<
     (typeof import('@vladmandic/human'))['Human']
   > | null>(null)
+  const failedBackends = React.useRef(new Set<string>())
   const [consent, setConsent] = React.useState(false)
   const [status, setStatus] = React.useState<
     'idle' | 'loading-model' | 'analyzing' | 'searching' | 'no-match'
@@ -159,44 +166,69 @@ export default function FaceFinder({
     if (human.current) return human.current
     setStatus('loading-model')
     const module = await import('@vladmandic/human')
-    const instance = new module.Human({
-      backend: 'webgl',
-      warmup: 'none',
-      modelBasePath: '/face-models/',
-      cacheSensitivity: 0,
-      face: {
-        enabled: true,
-        detector: { enabled: true, maxDetected: 10, rotation: true },
-        mesh: { enabled: true },
-        description: { enabled: true },
-        emotion: { enabled: false },
-        iris: { enabled: false },
-        antispoof: { enabled: false },
-        liveness: { enabled: false },
-      },
-      body: { enabled: false },
-      hand: { enabled: false },
-      object: { enabled: false },
-      gesture: { enabled: false },
-    })
-    await instance.load()
+    const instance = await firstSuccessful(
+      (['webgl', 'wasm', 'cpu'] as const)
+        .filter((backend) => !failedBackends.current.has(backend))
+        .map((backend) => async () => {
+          const candidate = new module.Human({
+            backend,
+            wasmPath: '/face-models/',
+            modelBasePath: '/face-models/',
+            cacheSensitivity: 0,
+            face: {
+              enabled: true,
+              detector: { enabled: true, maxDetected: 10, rotation: true },
+              mesh: { enabled: true },
+              description: { enabled: true },
+              emotion: { enabled: false },
+              iris: { enabled: false },
+              antispoof: { enabled: false },
+              liveness: { enabled: false },
+            },
+            body: { enabled: false },
+            hand: { enabled: false },
+            object: { enabled: false },
+            gesture: { enabled: false },
+          })
+          try {
+            await candidate.load()
+            await candidate.warmup()
+            return candidate
+          } catch (error) {
+            failedBackends.current.add(backend)
+          throw error
+        }
+        }),
+    )
     human.current = instance
     return instance
+  }
+
+  async function detectFaces(image: FaceImage) {
+    const instance = await getHuman()
+    try {
+      return await instance.detect(image)
+    } catch {
+      failedBackends.current.add(instance.tf.getBackend())
+      human.current = null
+      return (await getHuman()).detect(image)
+    }
   }
 
   async function analyze(file?: File) {
     if (!file || !consent) return
     resetGallery()
     setError(undefined)
-    setSelection(undefined)
+    setSelection((current) => {
+      if (current) releaseFaceImage(current.image)
+      return undefined
+    })
+    let image: FaceImage | undefined
 
     try {
-      const instance = await getHuman()
       setStatus('analyzing')
-      const image = await createImageBitmap(file, {
-        imageOrientation: 'from-image',
-      })
-      const result = await instance.detect(image)
+      image = await decodeFaceImage(file)
+      const result = await detectFaces(image)
       const faces = result.face
         .filter((face) => face.embedding?.length === 1024)
         .map((face) => ({
@@ -205,29 +237,33 @@ export default function FaceFinder({
         }))
 
       if (faces.length === 0) {
-        image.close()
+        releaseFaceImage(image)
         setStatus('idle')
         setError('No clear face was found. Try a brighter, front-facing photo.')
         return
       }
       if (faces.length === 1) {
         await searchForFace(faces[0].embedding)
-        image.close()
+        releaseFaceImage(image)
         return
       }
       setSelection({ image, faces })
       setStatus('idle')
-    } catch {
+    } catch (analysisError) {
+      if (image) releaseFaceImage(image)
       setStatus('idle')
       setError(
-        'Face analysis could not start on this device. Try another browser.',
+        analysisError instanceof DOMException &&
+          ['EncodingError', 'NotSupportedError'].includes(analysisError.name)
+          ? 'This photo format could not be opened. Try a JPEG, PNG, or WebP photo.'
+          : 'Face analysis could not start. Check your connection and try the photo again.',
       )
     }
   }
 
   async function searchForFace(embedding: number[]) {
     setSelection((current) => {
-      current?.image.close()
+      if (current) releaseFaceImage(current.image)
       return undefined
     })
     setStatus('searching')
@@ -275,16 +311,24 @@ export default function FaceFinder({
         </p>
       </div>
 
-      <Field orientation="horizontal">
+      <Field
+        orientation="horizontal"
+        className="min-h-12 cursor-pointer items-start rounded-xl py-2"
+      >
         <Checkbox
           id="face-search-consent"
+          className="mt-0.5 size-6"
           checked={consent}
           onCheckedChange={(checked) => setConsent(checked === true)}
         />
-        <FieldLabel htmlFor="face-search-consent">
-          <ShieldCheck aria-hidden="true" />I consent to local face analysis and
-          sending a temporary numeric descriptor to search this event. My selfie
-          and descriptor are not saved.
+        <FieldLabel
+          htmlFor="face-search-consent"
+          className="cursor-pointer items-start text-sm leading-6"
+        >
+          <ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0" />I
+          consent to local face analysis and sending a temporary numeric
+          descriptor to search this event. My selfie and descriptor are not
+          saved.
         </FieldLabel>
       </Field>
 
