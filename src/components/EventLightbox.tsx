@@ -504,6 +504,7 @@ export default function EventLightbox({
         <DialogContent
           showCloseButton={false}
           className="flex h-dvh max-h-none w-screen max-w-none flex-col gap-0 rounded-none bg-black p-0 text-white shadow-none ring-0 sm:max-w-none"
+          onInteractOutside={(event) => event.preventDefault()}
           onKeyDown={(event) => {
             if (event.key === 'ArrowLeft') showSlide(currentIndex - 1)
             if (event.key === 'ArrowRight') showSlide(currentIndex + 1)
@@ -541,7 +542,7 @@ export default function EventLightbox({
                         aria-hidden="true"
                       />
                     </Button>
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button variant="secondary">Actions</Button>
                       </DropdownMenuTrigger>
