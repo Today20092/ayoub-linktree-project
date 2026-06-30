@@ -36,7 +36,6 @@ const primaryLinks = actionLinks.filter((link) => link.group === 'primary')
 const supportLinks = actionLinks.filter((link) => link.group === 'support')
 const sameAsUrls = socialLinks.map((link) => link.url)
 const portfolioProjects = (await getCollection('portfolio'))
-  .filter((entry) => !entry.data.eventGallery)
   .sort(sortPortfolioProjects)
   .map((entry) => {
     const thumbnailAsset = entry.data.thumbnail ?? entry.data.featuredImage
