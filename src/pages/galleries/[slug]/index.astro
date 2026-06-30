@@ -6,6 +6,7 @@ import { ArrowRight, Heart } from 'lucide-react'
 import { getCollection, type CollectionEntry } from 'astro:content'
 
 import EventLightbox from '../../../components/EventLightbox'
+import EventComingSoon from '../../../components/EventComingSoon.astro'
 import FaceFinder from '../../../components/FaceFinder'
 import {
   Breadcrumb,
@@ -42,7 +43,7 @@ export async function getStaticPaths() {
   )
 
   return projects.map((project) => {
-    if (!faceManifests[project.id]) {
+    if (project.data.gallery.length > 0 && !faceManifests[project.id]) {
       throw new Error(
         `Event gallery "${project.id}" needs a published face-search index.`,
       )
@@ -93,6 +94,18 @@ const ogImage =
 const eventDate = data.eventDate
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
 const faceManifest = faceManifests[project.id]
+const flyer =
+  typeof data.featuredImage === 'object' &&
+  data.featuredImage !== null &&
+  !('filename' in data.featuredImage)
+    ? (data.featuredImage as ImageMetadata)
+    : undefined
+const remoteFeaturedImage =
+  typeof data.featuredImage === 'object' &&
+  data.featuredImage !== null &&
+  'filename' in data.featuredImage
+    ? data.featuredImage
+    : undefined
 
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', {
@@ -151,10 +164,16 @@ const formatDate = (date: Date) =>
           )
         }
         <Badge variant="outline">{data.category}</Badge>
-        <span class="text-muted-foreground text-xs font-semibold">
-          {images.length}
-          {images.length === 1 ? ' photograph' : ' photographs'}
-        </span>
+        {
+          images.length > 0 ? (
+            <span class="text-muted-foreground text-xs font-semibold">
+              {images.length}
+              {images.length === 1 ? ' photograph' : ' photographs'}
+            </span>
+          ) : (
+            <Badge variant="outline">Coming soon</Badge>
+          )
+        }
       </div>
       <h1
         class="font-heading mt-3 text-3xl leading-none font-extrabold tracking-tight sm:text-4xl lg:text-5xl"
@@ -164,51 +183,84 @@ const formatDate = (date: Date) =>
       <p class="text-muted-foreground mt-4 max-w-2xl text-base leading-7">
         {summary}
       </p>
-      <div class="mt-6 flex flex-wrap items-center gap-3">
-        <EventLightbox
-          client:load
-          galleryId={galleryId}
-          heading={data.title}
-          projectSlug={project.id}
-          projectTitle={data.title}
-          downloadAllUrl={data.downloadAllUrl}
-          tipUrl={tipUrl}
-          images={images.map(({ src, filename, alt }) => ({
-            src,
-            filename,
-            alt,
-          }))}
-        >
-          {
-            images.map((image, index) => (
-              <figure
-                class="m-0 flex h-full w-full flex-col items-center justify-center"
-                data-gallery-slide={index}
-                hidden={index !== 0}
-              >
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  width={image.width}
-                  height={image.height}
-                  layout="constrained"
-                  widths={[960, 1440, 1920, 2400]}
-                  sizes="100vw"
-                  loading="lazy"
-                  decoding="async"
-                  class="max-h-[calc(100dvh-9rem)] w-auto max-w-full object-contain"
-                />
-                {(image.caption || image.filename) && (
-                  <figcaption class="mt-3 max-w-3xl text-center text-sm text-white/75">
-                    {image.caption ?? image.filename}
-                  </figcaption>
-                )}
-              </figure>
-            ))
-          }
-        </EventLightbox>
-      </div>
+      {
+        images.length > 0 && (
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <EventLightbox
+              client:load
+              galleryId={galleryId}
+              heading={data.title}
+              projectSlug={project.id}
+              projectTitle={data.title}
+              downloadAllUrl={data.downloadAllUrl}
+              tipUrl={tipUrl}
+              images={images.map(({ src, filename, alt }) => ({
+                src,
+                filename,
+                alt,
+              }))}
+            >
+              {images.map((image, index) => (
+                <figure
+                  class="m-0 flex h-full w-full flex-col items-center justify-center"
+                  data-gallery-slide={index}
+                  hidden={index !== 0}
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
+                    layout="constrained"
+                    widths={[960, 1440, 1920, 2400]}
+                    sizes="100vw"
+                    loading="lazy"
+                    decoding="async"
+                    class="max-h-[calc(100dvh-9rem)] w-auto max-w-full object-contain"
+                  />
+                  {(image.caption || image.filename) && (
+                    <figcaption class="mt-3 max-w-3xl text-center text-sm text-white/75">
+                      {image.caption ?? image.filename}
+                    </figcaption>
+                  )}
+                </figure>
+              ))}
+            </EventLightbox>
+          </div>
+        )
+      }
     </header>
+
+    {
+      images.length > 0 && (
+        <figure class="mx-auto mt-8 max-w-4xl overflow-hidden rounded-2xl">
+          {remoteFeaturedImage ? (
+            <Image
+              src={remoteFeaturedImage.src}
+              alt={remoteFeaturedImage.alt}
+              width={remoteFeaturedImage.width}
+              height={remoteFeaturedImage.height}
+              layout="constrained"
+              widths={[720, 1080, 1440, 1920]}
+              sizes="(min-width: 1024px) 56rem, 100vw"
+              quality={85}
+              class="bg-muted block aspect-[3/2] size-full object-cover"
+            />
+          ) : (
+            flyer && (
+              <Image
+                src={flyer}
+                alt={data.imageAlt}
+                widths={[720, 1080, 1440, 1920]}
+                sizes="(min-width: 1024px) 56rem, 100vw"
+                quality={85}
+                class="bg-muted block aspect-[3/2] size-full object-cover"
+              />
+            )
+          )}
+        </figure>
+      )
+    }
 
     {
       faceManifest && (
@@ -221,63 +273,77 @@ const formatDate = (date: Date) =>
       )
     }
 
-    <section
-      id={galleryId}
-      class="mt-10"
-      aria-label={`${data.title} photographs`}
-    >
-      <div class="columns-1 gap-1 sm:columns-2 lg:columns-3" data-gallery-grid>
-        {
-          images.map((image, index) => (
-            <figure
-              class="relative mb-1 break-inside-avoid"
-              data-gallery-filename={image.filename}
-            >
-              <Badge
-                variant="secondary"
-                data-face-rank
-                hidden
-                className="absolute top-2 left-2"
+    {
+      images.length === 0 && flyer ? (
+        <EventComingSoon
+          flyer={flyer}
+          flyerAlt={data.imageAlt}
+          date={eventDate ? formatDate(eventDate) : 'Date coming soon'}
+          time={data.eventTime}
+          venue={data.eventVenue}
+          upcomingVideo={data.upcomingVideo}
+        />
+      ) : (
+        <section
+          id={galleryId}
+          class="mt-10"
+          aria-label={`${data.title} photographs`}
+        >
+          <div
+            class="columns-1 gap-1 sm:columns-2 lg:columns-3"
+            data-gallery-grid
+          >
+            {images.map((image, index) => (
+              <figure
+                class="relative mb-1 break-inside-avoid"
+                data-gallery-filename={image.filename}
               >
-                Match
-              </Badge>
-              <a
-                href={image.src}
-                data-gallery-open={index}
-                aria-label={`Open photograph ${index + 1}: ${image.alt}`}
-                class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-              >
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  width={image.width}
-                  height={image.height}
-                  layout="full-width"
-                  widths={[480, 720, 960, 1280]}
-                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                  loading="lazy"
-                  decoding="async"
-                  class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
-                />
-              </a>
-              <Button
-                type="button"
-                variant="secondary"
-                size="icon"
-                data-gallery-favorite
-                data-filename={image.filename}
-                data-selected="false"
-                aria-label={`Add photograph ${index + 1} to favorites`}
-                aria-pressed="false"
-                className="absolute top-2 right-2 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
-              >
-                <Heart aria-hidden="true" />
-              </Button>
-            </figure>
-          ))
-        }
-      </div>
-    </section>
+                <Badge
+                  variant="secondary"
+                  data-face-rank
+                  hidden
+                  className="absolute top-2 left-2"
+                >
+                  Match
+                </Badge>
+                <a
+                  href={image.src}
+                  data-gallery-open={index}
+                  aria-label={`Open photograph ${index + 1}: ${image.alt}`}
+                  class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
+                    layout="full-width"
+                    widths={[480, 720, 960, 1280]}
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    loading="lazy"
+                    decoding="async"
+                    class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                  />
+                </a>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  data-gallery-favorite
+                  data-filename={image.filename}
+                  data-selected="false"
+                  aria-label={`Add photograph ${index + 1} to favorites`}
+                  aria-pressed="false"
+                  className="absolute top-2 right-2 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
+                >
+                  <Heart aria-hidden="true" />
+                </Button>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )
+    }
 
     <footer class="border-border mt-12 border-t pt-6">
       <a

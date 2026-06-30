@@ -167,6 +167,9 @@ const ogImage =
                   </h2>
                   <div class="text-muted-foreground mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
                     <Badge variant="secondary">{gallery.category}</Badge>
+                    {gallery.photoCount === 0 && (
+                      <Badge variant="outline">Coming soon</Badge>
+                    )}
                     {gallery.photoCount > 0 && (
                       <span class="font-semibold">
                         {gallery.photoCount}{' '}
