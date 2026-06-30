@@ -298,6 +298,11 @@ function page(token) {
       previewPrevious.disabled = index === 0
       previewNext.disabled = index === previewPhotos.length - 1
     }
+    function setPreviewSelected(checked) {
+      previewSelect.checked = checked
+      gridInputAt(previewIndex).checked = checked
+      update()
+    }
     function render() {
       const gallery = galleries.find(item => item.slug === gallerySelect.value)
       if (preview.open) preview.close()
@@ -364,11 +369,9 @@ function page(token) {
     document.querySelector('#close-preview').addEventListener('click', () => preview.close())
     previewPrevious.addEventListener('click', () => showPreview(previewIndex - 1))
     previewNext.addEventListener('click', () => showPreview(previewIndex + 1))
-    previewSelect.addEventListener('change', () => {
-      const input = gridInputAt(previewIndex)
-      input.checked = previewSelect.checked
-      update()
-    })
+    previewSelect.addEventListener('change', () =>
+      setPreviewSelected(previewSelect.checked),
+    )
     document.addEventListener('keydown', event => {
       if (!preview.open) return
       if (event.key === 'ArrowLeft') {
@@ -377,6 +380,9 @@ function page(token) {
       } else if (event.key === 'ArrowRight') {
         event.preventDefault()
         showPreview(previewIndex + 1)
+      } else if (event.code === 'Space') {
+        event.preventDefault()
+        setPreviewSelected(!previewSelect.checked)
       }
     })
     preview.addEventListener('click', event => {
