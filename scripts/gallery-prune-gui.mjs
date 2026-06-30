@@ -106,14 +106,17 @@ export function createOperationLock() {
   }
 }
 
-async function savedSources() {
+async function readLocalConfig() {
   try {
-    const config = JSON.parse(await readFile(CONFIG_PATH, 'utf8'))
-    return config.sources ?? {}
+    return JSON.parse(await readFile(CONFIG_PATH, 'utf8'))
   } catch (error) {
-    if (error.code === 'ENOENT') return {}
+    if (error.code === 'ENOENT') return { sources: {}, selections: {} }
     throw error
   }
+}
+
+async function writeLocalConfig(config) {
+  await writeFile(CONFIG_PATH, `${JSON.stringify(config, null, 2)}\n`)
 }
 
 function chooseFolder() {
@@ -272,14 +275,38 @@ function page(token) {
     const previewNext = document.querySelector('#preview-next')
     let galleries = []
     let sources = {}
+    let savedSelections = {}
     let source = ''
     let running = false
     let worktreeClean = false
     let previewPhotos = []
     let previewIndex = -1
+    let selectionSave = Promise.resolve()
 
     const selected = () => [...photos.querySelectorAll('input:checked')].map(input => input.value)
     const gridInputAt = index => photos.querySelectorAll('.photo input')[index]
+    function persistSelection() {
+      const slug = gallerySelect.value
+      const filenames = selected()
+      savedSelections[slug] = filenames
+      selectionSave = selectionSave
+        .then(() =>
+          fetch('/api/selections', {
+            method:'POST',
+            headers,
+            body:JSON.stringify({ slug, filenames }),
+          }),
+        )
+        .then(async response => {
+          if (!response.ok) {
+            const data = await response.json()
+            status.textContent = 'Could not save selection: ' + data.error
+          }
+        })
+        .catch(error => {
+          status.textContent = 'Could not save selection: ' + error.message
+        })
+    }
     function update() {
       const count = selected().length
       document.querySelector('#count').textContent = count + (count === 1 ? ' photo selected' : ' photos selected')
@@ -302,6 +329,7 @@ function page(token) {
       previewSelect.checked = checked
       gridInputAt(previewIndex).checked = checked
       update()
+      persistSelection()
     }
     function render() {
       const gallery = galleries.find(item => item.slug === gallerySelect.value)
@@ -317,10 +345,12 @@ function page(token) {
         figure.className = 'photo'
         const input = document.createElement('input')
         input.type = 'checkbox'; input.value = photo.filename
+        input.checked = (savedSelections[gallery.slug] || []).includes(photo.filename)
         input.setAttribute('aria-label', 'Select ' + photo.filename + ' for pruning')
         input.addEventListener('change', () => {
           if (previewIndex === index) previewSelect.checked = input.checked
           update()
+          persistSelection()
         })
         const open = document.createElement('button')
         open.type = 'button'
@@ -348,6 +378,7 @@ function page(token) {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error)
       galleries = data.galleries; sources = data.sources
+      savedSelections = data.selections
       worktreeClean = data.worktreeClean
       status.textContent = worktreeClean
         ? 'Ready.'
@@ -391,7 +422,7 @@ function page(token) {
     document.querySelector('#clear').addEventListener('click', () => {
       photos.querySelectorAll('input').forEach(input => input.checked = false)
       if (preview.open) previewSelect.checked = false
-      confirmation.value = ''; update()
+      confirmation.value = ''; update(); persistSelection()
     })
     document.querySelector('#choose').addEventListener('click', async () => {
       status.textContent = 'Opening the Windows folder picker...'
@@ -476,14 +507,43 @@ export function createApp({
       }
 
       if (request.method === 'GET' && url.pathname === '/api/galleries') {
+        const config =
+          root === ROOT
+            ? await readLocalConfig()
+            : { sources: {}, selections: {} }
         return json(response, 200, {
           galleries: await discoverGalleries(portfolio),
-          sources: root === ROOT ? await savedSources() : {},
+          sources: config.sources ?? {},
+          selections: config.selections ?? {},
           worktreeClean:
             root === ROOT
               ? !(await capture('git', ['status', '--porcelain']))
               : true,
         })
+      }
+
+      if (request.method === 'POST' && url.pathname === '/api/selections') {
+        const body = await readJson(request)
+        const galleries = await discoverGalleries(portfolio)
+        const gallery = galleries.find((item) => item.slug === body.slug)
+        if (!gallery) {
+          return json(response, 400, { error: 'Choose a valid gallery.' })
+        }
+        if (!Array.isArray(body.filenames)) {
+          return json(response, 400, { error: 'Invalid photo selection.' })
+        }
+        const available = new Set(gallery.photos.map((photo) => photo.filename))
+        if (body.filenames.some((filename) => !available.has(filename))) {
+          return json(response, 400, {
+            error: 'The photo selection is no longer valid.',
+          })
+        }
+        const config = await readLocalConfig()
+        config.selections ??= {}
+        if (body.filenames.length) config.selections[body.slug] = body.filenames
+        else delete config.selections[body.slug]
+        await writeLocalConfig(config)
+        return json(response, 200, { saved: body.filenames.length })
       }
 
       if (request.method === 'POST' && url.pathname === '/api/folder') {

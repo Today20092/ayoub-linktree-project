@@ -100,6 +100,14 @@ async function readConfig() {
   return JSON.parse(await readFile(CONFIG_PATH, 'utf8'))
 }
 
+async function savePendingSelection(slug, selectors) {
+  const config = await readConfig()
+  config.selections ??= {}
+  if (selectors.length) config.selections[slug] = selectors
+  else delete config.selections[slug]
+  await writeFile(CONFIG_PATH, `${JSON.stringify(config, null, 2)}\n`)
+}
+
 async function getSourceFolder({ slug, source, dryRun }) {
   const config = await readConfig()
   if (source) {
@@ -139,6 +147,11 @@ async function assertCleanWorktree() {
 function assertMatchingInventory(gallery, localFilenames, alreadyMissing) {
   const expected = new Set(gallery.map((photo) => photo.filename))
   const actual = new Set(localFilenames)
+  if (actual.size === 0) {
+    throw new Error(
+      'The selected folder contains no photos. Choose the complete local gallery export so the download ZIP can be rebuilt safely.',
+    )
+  }
   const missing = [...expected].filter((filename) => !actual.has(filename))
   const extra = [...actual].filter((filename) => !expected.has(filename))
   const absentAgain = alreadyMissing.filter((filename) => actual.has(filename))
@@ -191,6 +204,7 @@ async function confirmPlan(plan) {
 
 async function main() {
   const options = parseArguments(process.argv.slice(2))
+  await savePendingSelection(options.slug, options.selectors)
   await assertCleanWorktree()
 
   const mdxPath = join(
@@ -376,6 +390,7 @@ async function main() {
     ])
     commitCreated = true
     await run('git', ['push', 'origin', branch])
+    await savePendingSelection(options.slug, [])
     console.log(
       `\nPruned ${resolution.selected.length} photos and pushed ${branch}.`,
     )
