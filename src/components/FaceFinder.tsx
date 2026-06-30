@@ -22,10 +22,16 @@ import { Field, FieldLabel } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import {
   decodeFaceImage,
+  FaceTimeoutError,
   firstSuccessful,
   releaseFaceImage,
+  withTimeout,
   type FaceImage,
 } from '@/lib/face-client'
+
+const MODEL_TIMEOUT = 30_000
+const ANALYSIS_TIMEOUT = 30_000
+const SEARCH_TIMEOUT = 15_000
 
 type FaceFinderProps = {
   eventSlug: string
@@ -47,6 +53,8 @@ type PhotoMatch = {
   filename: string
   score: number
 }
+
+type HumanInstance = InstanceType<(typeof import('@vladmandic/human'))['Human']>
 
 function FacePreview({
   image,
@@ -96,10 +104,10 @@ export default function FaceFinder({
   const cameraInput = React.useRef<HTMLInputElement>(null)
   const uploadInput = React.useRef<HTMLInputElement>(null)
   const originalFigures = React.useRef<HTMLElement[]>([])
-  const human = React.useRef<InstanceType<
-    (typeof import('@vladmandic/human'))['Human']
-  > | null>(null)
+  const human = React.useRef<HumanInstance | null>(null)
+  const humanLoad = React.useRef<Promise<HumanInstance> | null>(null)
   const failedBackends = React.useRef(new Set<string>())
+  const attempt = React.useRef(0)
   const [consent, setConsent] = React.useState(false)
   const [status, setStatus] = React.useState<
     'idle' | 'loading-model' | 'analyzing' | 'searching' | 'no-match'
@@ -164,59 +172,108 @@ export default function FaceFinder({
 
   async function getHuman() {
     if (human.current) return human.current
+    if (humanLoad.current) return humanLoad.current
+
     setStatus('loading-model')
-    const module = await import('@vladmandic/human')
-    const instance = await firstSuccessful(
-      (['webgl', 'wasm', 'cpu'] as const)
-        .filter((backend) => !failedBackends.current.has(backend))
-        .map((backend) => async () => {
-          const candidate = new module.Human({
-            backend,
-            wasmPath: '/face-models/',
-            modelBasePath: '/face-models/',
-            cacheSensitivity: 0,
-            face: {
-              enabled: true,
-              detector: { enabled: true, maxDetected: 10, rotation: true },
-              mesh: { enabled: true },
-              description: { enabled: true },
-              emotion: { enabled: false },
-              iris: { enabled: false },
-              antispoof: { enabled: false },
-              liveness: { enabled: false },
-            },
-            body: { enabled: false },
-            hand: { enabled: false },
-            object: { enabled: false },
-            gesture: { enabled: false },
-          })
-          try {
-            await candidate.load()
-            await candidate.warmup()
-            return candidate
-          } catch (error) {
-            failedBackends.current.add(backend)
-          throw error
-        }
-        }),
-    )
-    human.current = instance
-    return instance
+    humanLoad.current = (async () => {
+      const module = await import('@vladmandic/human')
+      const instance = await firstSuccessful(
+        (['webgl', 'wasm'] as const)
+          .filter((backend) => !failedBackends.current.has(backend))
+          .map((backend) => async () => {
+            const candidate = new module.Human({
+              backend,
+              warmup: 'none',
+              wasmPath: '/face-models/',
+              modelBasePath: '/face-models/',
+              cacheSensitivity: 0,
+              face: {
+                enabled: true,
+                detector: { enabled: true, maxDetected: 10, rotation: true },
+                mesh: { enabled: true },
+                description: { enabled: true },
+                emotion: { enabled: false },
+                iris: { enabled: false },
+                antispoof: { enabled: false },
+                liveness: { enabled: false },
+              },
+              body: { enabled: false },
+              hand: { enabled: false },
+              object: { enabled: false },
+              gesture: { enabled: false },
+            })
+
+            try {
+              await withTimeout(
+                candidate.load(),
+                MODEL_TIMEOUT,
+                'Face recognition took too long to prepare.',
+              )
+              return candidate
+            } catch (error) {
+              failedBackends.current.add(backend)
+              throw error
+            }
+          }),
+      )
+      human.current = instance
+      return instance
+    })()
+
+    try {
+      return await humanLoad.current
+    } finally {
+      humanLoad.current = null
+    }
+  }
+
+  async function prepareModel() {
+    const currentAttempt = ++attempt.current
+    setError(undefined)
+    if (!human.current && failedBackends.current.size === 2) {
+      failedBackends.current.clear()
+    }
+
+    try {
+      await getHuman()
+      if (attempt.current === currentAttempt) setStatus('idle')
+    } catch (modelError) {
+      if (attempt.current !== currentAttempt) return
+      setStatus('idle')
+      setError(
+        modelError instanceof FaceTimeoutError
+          ? `${modelError.message} Try again or use another browser.`
+          : 'Face recognition could not start on this device. Try again or use another browser.',
+      )
+    }
   }
 
   async function detectFaces(image: FaceImage) {
     const instance = await getHuman()
     try {
-      return await instance.detect(image)
+      return await withTimeout(
+        instance.detect(image),
+        ANALYSIS_TIMEOUT,
+        'Face analysis took too long.',
+      )
     } catch {
       failedBackends.current.add(instance.tf.getBackend())
       human.current = null
-      return (await getHuman()).detect(image)
+      const fallback = await getHuman()
+      return withTimeout(
+        fallback.detect(image),
+        ANALYSIS_TIMEOUT,
+        'Face analysis took too long.',
+      )
     }
   }
 
   async function analyze(file?: File) {
     if (!file || !consent) return
+    const currentAttempt = ++attempt.current
+    if (!human.current && failedBackends.current.size === 2) {
+      failedBackends.current.clear()
+    }
     resetGallery()
     setError(undefined)
     setSelection((current) => {
@@ -227,8 +284,20 @@ export default function FaceFinder({
 
     try {
       setStatus('analyzing')
-      image = await decodeFaceImage(file)
+      image = await withTimeout(
+        decodeFaceImage(file),
+        ANALYSIS_TIMEOUT,
+        'Opening this photo took too long.',
+      )
+      if (attempt.current !== currentAttempt) {
+        releaseFaceImage(image)
+        return
+      }
       const result = await detectFaces(image)
+      if (attempt.current !== currentAttempt) {
+        releaseFaceImage(image)
+        return
+      }
       const faces = result.face
         .filter((face) => face.embedding?.length === 1024)
         .map((face) => ({
@@ -243,7 +312,7 @@ export default function FaceFinder({
         return
       }
       if (faces.length === 1) {
-        await searchForFace(faces[0].embedding)
+        await searchForFace(faces[0].embedding, currentAttempt)
         releaseFaceImage(image)
         return
       }
@@ -251,17 +320,25 @@ export default function FaceFinder({
       setStatus('idle')
     } catch (analysisError) {
       if (image) releaseFaceImage(image)
+      if (attempt.current !== currentAttempt) return
       setStatus('idle')
       setError(
-        analysisError instanceof DOMException &&
-          ['EncodingError', 'NotSupportedError'].includes(analysisError.name)
-          ? 'This photo format could not be opened. Try a JPEG, PNG, or WebP photo.'
-          : 'Face analysis could not start. Check your connection and try the photo again.',
+        analysisError instanceof FaceTimeoutError
+          ? `${analysisError.message} Try again with a smaller photo.`
+          : analysisError instanceof DOMException &&
+              ['EncodingError', 'NotSupportedError'].includes(
+                analysisError.name,
+              )
+            ? 'This photo format could not be opened. Try a JPEG, PNG, or WebP photo.'
+            : 'Face analysis could not start. Check your connection and try the photo again.',
       )
     }
   }
 
-  async function searchForFace(embedding: number[]) {
+  async function searchForFace(
+    embedding: number[],
+    currentAttempt = ++attempt.current,
+  ) {
     setSelection((current) => {
       if (current) releaseFaceImage(current.image)
       return undefined
@@ -269,32 +346,47 @@ export default function FaceFinder({
     setStatus('searching')
     setError(undefined)
 
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), SEARCH_TIMEOUT)
+
     try {
       const response = await fetch('/api/faces/search', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ eventSlug, indexVersion, embedding }),
+        signal: controller.signal,
       })
       const result = (await response.json()) as {
         matches?: PhotoMatch[]
         error?: string
       }
+      if (attempt.current !== currentAttempt) return
       if (!response.ok) throw new Error(result.error)
       const nextMatches = result.matches ?? []
       setMatches(nextMatches)
       if (nextMatches.length > 0) showMatches(nextMatches)
       setStatus(nextMatches.length === 0 ? 'no-match' : 'idle')
     } catch (searchError) {
+      if (attempt.current !== currentAttempt) return
       setStatus('idle')
       setError(
-        searchError instanceof Error && searchError.message
-          ? searchError.message
-          : 'Search is temporarily unavailable.',
+        controller.signal.aborted
+          ? 'Gallery search took too long. Check your connection and try again.'
+          : searchError instanceof Error && searchError.message
+            ? searchError.message
+            : 'Search is temporarily unavailable.',
       )
+    } finally {
+      clearTimeout(timeout)
     }
   }
 
   const busy = ['loading-model', 'analyzing', 'searching'].includes(status)
+  const statusMessage = {
+    'loading-model': 'Preparing face recognition',
+    analyzing: 'Analyzing your photo',
+    searching: 'Searching the gallery',
+  }[status]
 
   return (
     <section className="border-border mt-10 flex flex-col gap-5 border-y py-8">
@@ -319,7 +411,17 @@ export default function FaceFinder({
           id="face-search-consent"
           className="mt-0.5 size-6"
           checked={consent}
-          onCheckedChange={(checked) => setConsent(checked === true)}
+          onCheckedChange={(checked) => {
+            const nextConsent = checked === true
+            setConsent(nextConsent)
+            if (nextConsent) {
+              void prepareModel()
+            } else {
+              attempt.current += 1
+              setStatus('idle')
+              setError(undefined)
+            }
+          }}
         />
         <FieldLabel
           htmlFor="face-search-consent"
@@ -338,11 +440,7 @@ export default function FaceFinder({
           disabled={!consent || busy}
           onClick={() => cameraInput.current?.click()}
         >
-          {busy ? (
-            <Spinner data-icon="inline-start" />
-          ) : (
-            <Camera data-icon="inline-start" />
-          )}
+          <Camera data-icon="inline-start" />
           Take a selfie
         </Button>
         <Button
@@ -361,6 +459,16 @@ export default function FaceFinder({
           </Button>
         )}
       </div>
+
+      {statusMessage && (
+        <Alert role="status" aria-live="polite">
+          <Spinner />
+          <AlertTitle>{statusMessage}</AlertTitle>
+          <AlertDescription>
+            Keep this page open. This can take a moment on the first photo.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <input
         ref={cameraInput}

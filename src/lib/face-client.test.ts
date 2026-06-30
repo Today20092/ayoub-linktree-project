@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { decodeFaceImage, firstSuccessful } from './face-client'
+import {
+  decodeFaceImage,
+  FaceTimeoutError,
+  firstSuccessful,
+  withTimeout,
+} from './face-client'
 
 test('tries analysis backends in order until one works', async () => {
   const attempted: string[] = []
@@ -22,6 +27,15 @@ test('tries analysis backends in order until one works', async () => {
 
   assert.equal(result, 'wasm')
   assert.deepEqual(attempted, ['webgl', 'wasm'])
+})
+
+test('times out a stalled face operation', async () => {
+  await assert.rejects(
+    withTimeout(new Promise(() => {}), 1, 'Face analysis took too long.'),
+    (error) =>
+      error instanceof FaceTimeoutError &&
+      error.message === 'Face analysis took too long.',
+  )
 })
 
 test('falls back to browser image decoding', async () => {

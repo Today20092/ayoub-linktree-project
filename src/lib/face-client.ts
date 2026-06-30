@@ -1,5 +1,34 @@
 export type FaceImage = ImageBitmap | HTMLImageElement
 
+export class FaceTimeoutError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'FaceTimeoutError'
+  }
+}
+
+export async function withTimeout<T>(
+  promise: Promise<T>,
+  milliseconds: number,
+  message: string,
+): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timeout = setTimeout(
+          () => reject(new FaceTimeoutError(message)),
+          milliseconds,
+        )
+      }),
+    ])
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
 export function releaseFaceImage(image: FaceImage) {
   if ('close' in image) image.close()
 }
