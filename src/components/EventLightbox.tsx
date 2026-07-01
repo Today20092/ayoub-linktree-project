@@ -51,7 +51,7 @@ type EventLightboxProps = {
 }
 
 type DownloadRequest =
-  | { kind: 'file'; url: string; filename: string; label: string }
+  | { kind: 'file'; url: string; filename: string }
   | { kind: 'selection'; images: GalleryImage[]; filename: string }
 
 type DownloadStatus = 'idle' | 'preparing' | 'complete' | 'error'
@@ -67,31 +67,17 @@ function saveBlob(blob: Blob, filename: string) {
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000)
 }
 
-async function downloadFile(
-  url: string,
-  onProgress: (progress: number) => void,
-) {
-  const response = await fetch(url, { mode: 'cors' })
-  if (!response.ok) throw new Error(`Download failed: ${response.status}`)
+function downloadUrl(url: string, filename: string) {
+  return `/api/download?${new URLSearchParams({ url, filename })}`
+}
 
-  const total = Number(response.headers.get('content-length'))
-  if (!response.body || !total) return response.blob()
-
-  const reader = response.body.getReader()
-  const chunks: ArrayBuffer[] = []
-  let received = 0
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    chunks.push(value.slice().buffer as ArrayBuffer)
-    received += value.length
-    onProgress(Math.min(100, Math.round((received / total) * 100)))
-  }
-
-  return new Blob(chunks, {
-    type: response.headers.get('content-type') ?? 'application/octet-stream',
-  })
+function sameOriginDownload(url: string, filename: string) {
+  const anchor = document.createElement('a')
+  anchor.href = downloadUrl(url, filename)
+  anchor.download = filename
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
 }
 
 function buildTipUrl(baseUrl: string, amount: number) {
@@ -321,7 +307,6 @@ export default function EventLightbox({
         kind: 'file',
         url: download.href,
         filename,
-        label: filename,
       })
       download.removeAttribute('aria-busy')
     }
@@ -384,25 +369,21 @@ export default function EventLightbox({
   }
 
   async function startDownload(request: DownloadRequest) {
+    if (request.kind === 'file') {
+      sameOriginDownload(request.url, request.filename)
+      return
+    }
+
     setPendingDownload(request)
     setDownloadDialogOpen(true)
     setDownloadStatus('preparing')
     setDownloadProgress(0)
     setDownloadError('')
-    setDownloadLabel(
-      request.kind === 'selection'
-        ? `Preparing ${request.images.length} selected photos`
-        : request.label,
-    )
+    setDownloadLabel(`Preparing ${request.images.length} selected photos`)
     setOpen(false)
 
     try {
-      if (request.kind === 'selection') {
-        await createSelectionZip(request)
-      } else {
-        const blob = await downloadFile(request.url, setDownloadProgress)
-        saveBlob(blob, request.filename)
-      }
+      await createSelectionZip(request)
       setDownloadProgress(100)
       setDownloadStatus('complete')
     } catch (error) {
@@ -489,7 +470,6 @@ export default function EventLightbox({
               kind: 'file',
               url: downloadAllUrl,
               filename: `${projectSlug}.zip`,
-              label: `Downloading all ${images.length} photos`,
             })
           }
         >
@@ -553,17 +533,19 @@ export default function EventLightbox({
                             Share current photo
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onSelect={() =>
-                              startDownload({
-                                kind: 'file',
-                                url: currentImage.src,
-                                filename: currentImage.filename,
-                                label: currentImage.filename,
-                              })
-                            }
+                            asChild
+                            onSelect={() => setOpen(false)}
                           >
-                            <Download aria-hidden="true" />
-                            Download current photo
+                            <a
+                              href={downloadUrl(
+                                currentImage.src,
+                                currentImage.filename,
+                              )}
+                              download={currentImage.filename}
+                            >
+                              <Download aria-hidden="true" />
+                              Download current photo
+                            </a>
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             disabled={selected.size === 0}
