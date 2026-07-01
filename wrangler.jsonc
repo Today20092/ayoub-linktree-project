@@ -4,9 +4,37 @@
   "account_id": "de011be818652cd288a0b1d934502de3",
   "compatibility_date": "2026-06-20",
   "compatibility_flags": ["nodejs_compat"],
+  "preview_urls": true,
   "main": "@astrojs/cloudflare/entrypoints/server",
   "assets": {
     "directory": "./dist",
+  },
+  "vars": {
+    "GALLERY_ADMIN_EMAIL": "ayoub.abedrabbo@gmail.com",
+    "GALLERY_ACCESS_TEAM_DOMAIN": "https://ayoub-abedrabbo.cloudflareaccess.com",
+  },
+  "d1_databases": [
+    {
+      "binding": "GALLERY_DB",
+      "database_name": "ayoub-gallery-data",
+      "database_id": "30b7489f-2cf5-441a-9c62-a479df0822fe",
+      "preview_database_id": "78b0eec4-1c28-497b-b6dd-699aedd8a8fc",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "GALLERY_PUBLIC",
+      "bucket_name": "alphabravomedia-galleries",
+      "preview_bucket_name": "alphabravomedia-galleries-preview",
+    },
+    {
+      "binding": "GALLERY_PENDING",
+      "bucket_name": "alphabravomedia-gallery-uploads",
+      "preview_bucket_name": "alphabravomedia-gallery-uploads-preview",
+    },
+  ],
+  "images": {
+    "binding": "IMAGES",
   },
   "vectorize": [
     {
@@ -24,5 +52,152 @@
         "period": 60,
       },
     },
+    {
+      "name": "GALLERY_PASSWORD_RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": {
+        "limit": 5,
+        "period": 60,
+      },
+    },
+    {
+      "name": "GALLERY_UPLOAD_RATE_LIMITER",
+      "namespace_id": "1003",
+      "simple": {
+        "limit": 20,
+        "period": 60,
+      },
+    },
   ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "head_sampling_rate": 1,
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.01,
+    },
+  },
+  "previews": {
+    "vars": {
+      "GALLERY_ADMIN_EMAIL": "ayoub.abedrabbo@gmail.com",
+      "GALLERY_ACCESS_TEAM_DOMAIN": "https://ayoub-abedrabbo.cloudflareaccess.com",
+    },
+    "d1_databases": [
+      {
+        "binding": "GALLERY_DB",
+        "database_name": "ayoub-gallery-data-preview",
+        "database_id": "78b0eec4-1c28-497b-b6dd-699aedd8a8fc",
+      },
+    ],
+    "r2_buckets": [
+      {
+        "binding": "GALLERY_PUBLIC",
+        "bucket_name": "alphabravomedia-galleries-preview",
+      },
+      {
+        "binding": "GALLERY_PENDING",
+        "bucket_name": "alphabravomedia-gallery-uploads-preview",
+      },
+    ],
+    "images": {
+      "binding": "IMAGES",
+    },
+    "vectorize": [
+      {
+        "binding": "VECTORIZE",
+        "index_name": "face-search",
+        "remote": true,
+      },
+    ],
+    "ratelimits": [
+      {
+        "name": "FACE_SEARCH_RATE_LIMITER",
+        "namespace_id": "1001",
+        "simple": {
+          "limit": 10,
+          "period": 60,
+        },
+      },
+      {
+        "name": "GALLERY_PASSWORD_RATE_LIMITER",
+        "namespace_id": "1002",
+        "simple": {
+          "limit": 5,
+          "period": 60,
+        },
+      },
+      {
+        "name": "GALLERY_UPLOAD_RATE_LIMITER",
+        "namespace_id": "1003",
+        "simple": {
+          "limit": 20,
+          "period": 60,
+        },
+      },
+    ],
+  },
+  "env": {
+    "preview": {
+      "name": "ayoub-linktree-project-preview",
+      "vars": {
+        "GALLERY_ADMIN_EMAIL": "ayoub.abedrabbo@gmail.com",
+        "GALLERY_ACCESS_TEAM_DOMAIN": "https://ayoub-abedrabbo.cloudflareaccess.com",
+      },
+      "d1_databases": [
+        {
+          "binding": "GALLERY_DB",
+          "database_name": "ayoub-gallery-data-preview",
+          "database_id": "78b0eec4-1c28-497b-b6dd-699aedd8a8fc",
+        },
+      ],
+      "r2_buckets": [
+        {
+          "binding": "GALLERY_PUBLIC",
+          "bucket_name": "alphabravomedia-galleries-preview",
+        },
+        {
+          "binding": "GALLERY_PENDING",
+          "bucket_name": "alphabravomedia-gallery-uploads-preview",
+        },
+      ],
+      "images": {
+        "binding": "IMAGES",
+      },
+      "vectorize": [
+        {
+          "binding": "VECTORIZE",
+          "index_name": "face-search",
+          "remote": true,
+        },
+      ],
+      "ratelimits": [
+        {
+          "name": "FACE_SEARCH_RATE_LIMITER",
+          "namespace_id": "1001",
+          "simple": {
+            "limit": 10,
+            "period": 60,
+          },
+        },
+        {
+          "name": "GALLERY_PASSWORD_RATE_LIMITER",
+          "namespace_id": "1002",
+          "simple": {
+            "limit": 5,
+            "period": 60,
+          },
+        },
+        {
+          "name": "GALLERY_UPLOAD_RATE_LIMITER",
+          "namespace_id": "1003",
+          "simple": {
+            "limit": 20,
+            "period": 60,
+          },
+        },
+      ],
+    },
+  },
 }

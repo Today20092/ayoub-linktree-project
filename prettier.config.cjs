@@ -6,6 +6,7 @@ module.exports = {
   printWidth: 80,
   singleQuote: true,
   semi: false,
+  endOfLine: 'auto',
   htmlWhitespaceSensitivity: 'ignore',
 
   // Let the plugin select the right parser; no manual parser override needed

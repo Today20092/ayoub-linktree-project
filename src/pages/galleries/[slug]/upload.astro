@@ -1,0 +1,79 @@
+---
+import '../../../styles.css'
+
+import { getEntry } from 'astro:content'
+import { env } from 'cloudflare:workers'
+import { ArrowLeft } from 'lucide-react'
+
+import GuestUpload from '../../../components/GuestUpload'
+import { Button } from '../../../components/ui/button'
+import { getGallerySettings } from '../../../lib/gallery-data'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+
+export const prerender = false
+
+const eventSlug = Astro.params.slug
+const event = eventSlug ? await getEntry('portfolio', eventSlug) : undefined
+if (!event?.data.eventGallery || !eventSlug) {
+  return new Response(null, { status: 404 })
+}
+
+const settings = await getGallerySettings(env.GALLERY_DB, eventSlug)
+const canonicalUrl = new URL(
+  `/galleries/${eventSlug}/upload/`,
+  Astro.site,
+).toString()
+const title = `Share photos from ${event.data.title}`
+const description = `Submit guest photos from ${event.data.title} for review and inclusion in the event gallery.`
+const ogImage =
+  typeof event.data.featuredImage === 'string'
+    ? event.data.featuredImage
+    : event.data.featuredImage.src
+
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  ogImageAlt={event.data.imageAlt}
+  activeNav="galleries"
+>
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-2xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14"
+  >
+    <Button variant="ghost" size="sm" asChild>
+      <a href={`/galleries/${eventSlug}/`}>
+        <ArrowLeft data-icon="inline-start" aria-hidden="true" />
+        Back to gallery
+      </a>
+    </Button>
+
+    <header class="mt-8">
+      <p class="text-primary text-sm font-bold tracking-wide uppercase">
+        Guest photos
+      </p>
+      <h1
+        class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
+      >
+        Share what you captured
+      </h1>
+      <p class="text-muted-foreground mt-5 max-w-xl text-lg leading-8">
+        Add your photos from {event.data.title}. Every submission is reviewed
+        before it appears in the public gallery.
+      </p>
+    </header>
+
+    <div class="mt-8">
+      <GuestUpload
+        client:load
+        eventSlug={eventSlug}
+        eventTitle={event.data.title}
+        enabled={Boolean(settings?.uploads_enabled)}
+      />
+    </div>
+  </main>
+</BaseLayout>

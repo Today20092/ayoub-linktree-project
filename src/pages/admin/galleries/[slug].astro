@@ -1,0 +1,121 @@
+---
+import '../../../styles.css'
+
+import { getEntry } from 'astro:content'
+import { env } from 'cloudflare:workers'
+import { ArrowLeft, ExternalLink } from 'lucide-react'
+
+import AdminGallery from '../../../components/AdminGallery'
+import { Button } from '../../../components/ui/button'
+import { eventGalleries } from '../../../data/event-galleries'
+import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
+import {
+  getGallerySettings,
+  getHiddenFilenames,
+  listGuestPhotos,
+} from '../../../lib/gallery-data'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+
+export const prerender = false
+
+if (
+  !(await galleryAdminAuthorized(
+    Astro.request,
+    env.GALLERY_ADMIN_EMAIL,
+    env.GALLERY_ACCESS_TEAM_DOMAIN,
+    env.GALLERY_ACCESS_AUDS,
+  ))
+) {
+  return new Response('Forbidden', { status: 403 })
+}
+
+const eventSlug = Astro.params.slug
+const event = eventSlug ? await getEntry('portfolio', eventSlug) : undefined
+if (!event?.data.eventGallery || !eventSlug) {
+  return new Response(null, { status: 404 })
+}
+
+const [settings, guests, hiddenFilenames] = await Promise.all([
+  getGallerySettings(env.GALLERY_DB, eventSlug),
+  listGuestPhotos(env.GALLERY_DB, eventSlug),
+  getHiddenFilenames(env.GALLERY_DB, eventSlug),
+])
+const inlineImages = event.data.gallery.filter(
+  (
+    image,
+  ): image is Extract<
+    (typeof event.data.gallery)[number],
+    { filename: string }
+  > => 'filename' in image,
+)
+const professionalImages =
+  inlineImages.length > 0 ? inlineImages : (eventGalleries[eventSlug] ?? [])
+const professional = professionalImages.map((image) => ({
+  src: image.src,
+  alt: image.alt,
+  filename: image.filename,
+  hidden: hiddenFilenames.has(image.filename),
+}))
+const ogImage =
+  typeof event.data.featuredImage === 'string'
+    ? event.data.featuredImage
+    : event.data.featuredImage.src
+
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+---
+
+<BaseLayout
+  title={`Manage ${event.data.title}`}
+  description={`Review guest uploads and curate ${event.data.title}.`}
+  canonicalUrl={new URL(
+    `/admin/galleries/${eventSlug}/`,
+    Astro.site,
+  ).toString()}
+  ogImage={ogImage}
+  ogImageAlt={event.data.imageAlt}
+>
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-10 sm:px-6 lg:px-8"
+  >
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <Button variant="ghost" size="sm" asChild>
+        <a href="/admin/galleries/">
+          <ArrowLeft data-icon="inline-start" aria-hidden="true" />
+          All galleries
+        </a>
+      </Button>
+      <Button variant="outline" size="sm" asChild>
+        <a href={`/galleries/${eventSlug}/`} target="_blank">
+          View public gallery
+          <ExternalLink data-icon="inline-end" aria-hidden="true" />
+        </a>
+      </Button>
+    </div>
+
+    <header class="mt-8 max-w-3xl">
+      <p class="text-primary text-sm font-bold tracking-wide uppercase">
+        Gallery administration
+      </p>
+      <h1
+        class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
+      >
+        {event.data.title}
+      </h1>
+      <p class="text-muted-foreground mt-4 text-lg leading-8">
+        Review guest submissions, control upload access, and hide professional
+        photos from the live gallery.
+      </p>
+    </header>
+
+    <div class="mt-10">
+      <AdminGallery
+        client:load
+        eventSlug={eventSlug}
+        settings={settings}
+        guests={guests}
+        professional={professional}
+      />
+    </div>
+  </main>
+</BaseLayout>

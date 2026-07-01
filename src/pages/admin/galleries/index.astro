@@ -1,0 +1,148 @@
+---
+import '../../../styles.css'
+
+import type { ImageMetadata } from 'astro'
+import { Image } from 'astro:assets'
+import { getCollection } from 'astro:content'
+import { env } from 'cloudflare:workers'
+import { ChevronRight, Images } from 'lucide-react'
+
+import { Badge } from '../../../components/ui/badge'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card'
+import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
+import { getGallerySettings, listGuestPhotos } from '../../../lib/gallery-data'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+
+export const prerender = false
+
+if (
+  !(await galleryAdminAuthorized(
+    Astro.request,
+    env.GALLERY_ADMIN_EMAIL,
+    env.GALLERY_ACCESS_TEAM_DOMAIN,
+    env.GALLERY_ACCESS_AUDS,
+  ))
+) {
+  return new Response('Forbidden', { status: 403 })
+}
+
+const events = (await getCollection('portfolio')).filter(
+  ({ data }) => data.eventGallery,
+)
+const galleries = await Promise.all(
+  events.map(async (event) => {
+    const [settings, guests] = await Promise.all([
+      getGallerySettings(env.GALLERY_DB, event.id),
+      listGuestPhotos(env.GALLERY_DB, event.id),
+    ])
+    const cover = event.data.thumbnail ?? event.data.featuredImage
+    return {
+      event,
+      settings,
+      pending: guests.filter(({ status }) => status === 'pending').length,
+      published: guests.filter(({ status }) => status === 'published').length,
+      cover,
+    }
+  }),
+)
+const firstCover = galleries[0]?.cover
+const ogImage =
+  typeof firstCover === 'string'
+    ? firstCover
+    : (firstCover?.src ?? '/og-ayoub-digital-media.jpg')
+
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+---
+
+<BaseLayout
+  title="Gallery administration"
+  description="Manage event gallery uploads and culling."
+  canonicalUrl={new URL('/admin/galleries/', Astro.site).toString()}
+  ogImage={ogImage}
+  ogImageAlt="Gallery administration"
+>
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-10 sm:px-6 lg:px-8"
+  >
+    <header class="max-w-2xl">
+      <p class="text-primary text-sm font-bold tracking-wide uppercase">
+        Admin
+      </p>
+      <h1
+        class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
+      >
+        Event galleries
+      </h1>
+      <p class="text-muted-foreground mt-5 text-lg leading-8">
+        Review guest submissions, open or close uploads, and curate published
+        galleries.
+      </p>
+    </header>
+
+    <section
+      class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
+      aria-label="Manage event galleries"
+    >
+      {
+        galleries.map(({ event, settings, pending, published, cover }) => (
+          <Card className="transition-colors hover:bg-muted/30">
+            <a
+              href={`/admin/galleries/${event.id}/`}
+              class="focus-visible:ring-ring rounded-xl focus-visible:ring-2 focus-visible:outline-none"
+            >
+              {typeof cover === 'object' && 'filename' in cover ? (
+                <Image
+                  src={cover.src}
+                  alt={cover.alt}
+                  width={cover.width}
+                  height={cover.height}
+                  layout="full-width"
+                  widths={[480, 720]}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  class="aspect-[4/3] w-full object-cover"
+                />
+              ) : typeof cover === 'object' ? (
+                <Image
+                  src={cover as ImageMetadata}
+                  alt={event.data.imageAlt}
+                  widths={[480, 720]}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  class="aspect-[4/3] w-full object-cover"
+                />
+              ) : null}
+              <CardHeader>
+                <div class="flex items-start justify-between gap-3">
+                  <CardTitle>{event.data.title}</CardTitle>
+                  <ChevronRight
+                    className="text-muted-foreground size-5 shrink-0"
+                    aria-hidden="true"
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                <Badge
+                  variant={settings?.uploads_enabled ? 'default' : 'outline'}
+                >
+                  Uploads {settings?.uploads_enabled ? 'open' : 'closed'}
+                </Badge>
+                {pending > 0 && (
+                  <Badge variant="destructive">{pending} pending</Badge>
+                )}
+                <Badge variant="secondary">
+                  <Images aria-hidden="true" />
+                  {published} guest
+                </Badge>
+              </CardContent>
+            </a>
+          </Card>
+        ))
+      }
+    </section>
+  </main>
+</BaseLayout>
