@@ -5,12 +5,18 @@ import siteYaml from '../data/site.yaml?raw'
 export type SiteInfo = {
   pageTitle: string
   pageDescription: string
+  shareTitle: string
+  shareDescription: string
+  shareText: string
   siteName: string
   profileName: string
   twitterHandle: string
-  heroImageAlt: string
   profileImage: string
   ogImage: string
+  ogImageAlt: string
+  ogImageWidth: number
+  ogImageHeight: number
+  ogImageType: string
 }
 
 export type SiteFeatures = {

@@ -1,12 +1,18 @@
 site:
-  pageTitle: Ayoub Abedrabbo | Tampa Photographer & Videographer
-  pageDescription: 'Tampa photographer and videographer covering Muslim-community weddings, events, and portraits. Teaches editing and videography on AlphaBravoMedia, and shares books and reflections on his personal channel.'
+  pageTitle: Ayoub Abedrabbo | Digital Media Specialist
+  pageDescription: 'Tampa digital media specialist helping local businesses and communities with video, photography, and marketing. Teaches video production and marketing on AlphaBravoMedia and creates educational content on his personal channel.'
+  shareTitle: Ayoub Abedrabbo | Digital Media Specialist
+  shareDescription: 'Video, photography, marketing, education, and digital media support for Tampa businesses and communities.'
+  shareText: 'Check out Ayoub Abedrabbo, a digital media specialist helping businesses and creators with video, photography, marketing, and education.'
   siteName: Ayoub Abedrabbo
   profileName: Ayoub
   twitterHandle: '@ayoubabedrabbo'
-  heroImageAlt: Portrait of Ayoub Abedrabbo
   profileImage: AyoubBayaan.jpg
-  ogImage: AyoubContactCardImage.jpg
+  ogImage: og-ayoub-digital-media.jpg
+  ogImageAlt: Ayoub Abedrabbo, Digital Media Specialist for video, photography, marketing, and education
+  ogImageWidth: 1200
+  ogImageHeight: 630
+  ogImageType: image/jpeg
 
 features:
   showTampaWork: false
@@ -95,7 +101,7 @@ socialLinks:
 
 actionLinks:
   - id: contact
-    label: '1. Download my contact card'
+    label: '1. Save Ayoub to contacts'
     url: https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf
     icon: lucide:id-card
     group: primary
@@ -108,8 +114,8 @@ actionLinks:
     textColor: 'var(--primary-foreground)'
     pulse: true
   - id: sms
-    label: '2. Send me a text'
-    url: 'sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you.'
+    label: '2. Text me your name'
+    url: 'sms:+18134240606?body=Hi%20Ayoub%2C%20this%20is%20'
     icon: lucide:message-square-text
     group: primary
     color: 'var(--color-brand-600)'

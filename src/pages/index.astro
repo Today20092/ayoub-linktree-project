@@ -12,19 +12,25 @@ import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 const {
   pageTitle,
   pageDescription,
+  shareTitle,
+  shareDescription,
+  shareText,
   siteName,
   profileName,
   twitterHandle,
-  heroImageAlt,
   profileImage,
   ogImage,
+  ogImageAlt,
+  ogImageWidth,
+  ogImageHeight,
+  ogImageType,
 } = siteConfig.site
 const { socialLinks, actionLinks, youtubeChannels } = siteConfig
 const baseUrl = getBaseUrl(import.meta.env.BASE_URL)
 const currentYear = new Date().getFullYear()
 const canonicalUrl = new URL(baseUrl, Astro.site).toString()
 const sitemapUrl = new URL(`${baseUrl}sitemap-index.xml`, Astro.site).toString()
-const heroImageUrl = new URL(
+const ogImageUrl = new URL(
   resolveSiteAsset(baseUrl, ogImage),
   Astro.site,
 ).toString()
@@ -82,7 +88,7 @@ const structuredData = {
   url: canonicalUrl,
   name: pageTitle,
   description: pageDescription,
-  image: heroImageUrl,
+  image: ogImageUrl,
   inLanguage: 'en',
   isPartOf: {
     '@type': 'WebSite',
@@ -108,8 +114,13 @@ const structuredData = {
   title={pageTitle}
   description={pageDescription}
   canonicalUrl={canonicalUrl}
-  ogImage={heroImageUrl}
-  ogImageAlt={heroImageAlt}
+  ogTitle={shareTitle}
+  ogDescription={shareDescription}
+  ogImage={ogImageUrl}
+  ogImageAlt={ogImageAlt}
+  ogImageWidth={ogImageWidth}
+  ogImageHeight={ogImageHeight}
+  ogImageType={ogImageType}
   ogType="website"
   twitterHandle={twitterHandle}
   sitemapUrl={sitemapUrl}
@@ -118,6 +129,9 @@ const structuredData = {
 >
   <PortfolioIndex
     pageDescription={pageDescription}
+    shareTitle={shareTitle}
+    shareText={shareText}
+    shareUrl={canonicalUrl}
     currentYear={currentYear}
     primaryLinks={primaryLinks}
     socialLinks={socialLinks}
