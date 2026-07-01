@@ -4,3 +4,8 @@ dist
 .agents
 material-theme
 src/data/latest-youtube-videos.json
+.codex-remote-attachments/
+worker-configuration.d.ts
+
+# prettier-plugin-astro 0.14.1 is non-idempotent on this component.
+src/components/PortfolioLocation.astro

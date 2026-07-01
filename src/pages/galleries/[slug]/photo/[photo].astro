@@ -1,54 +1,57 @@
 ---
-import { getCollection, type CollectionEntry } from 'astro:content'
+import { getEntry } from 'astro:content'
+import { env } from 'cloudflare:workers'
 
+import { eventGalleries } from '../../../../data/event-galleries'
 import {
-  eventGalleries,
-  type RemoteEventGalleryImage,
-} from '../../../../data/event-galleries'
+  getHiddenFilenames,
+  listPublishedGuestPhotos,
+  publicGuestPhoto,
+} from '../../../../lib/gallery-data'
 
-type SharePageProps = {
-  project: CollectionEntry<'portfolio'>
-  image: RemoteEventGalleryImage
-  photoNumber: number
-  photoCount: number
+export const prerender = false
+
+type ShareImage = {
+  src: string
+  width: number
+  height: number
+  alt: string
 }
 
-export async function getStaticPaths() {
-  const projects = await getCollection('portfolio')
-
-  return projects.flatMap((project) => {
-    if (!project.data.eventGallery) return []
-
-    const inlineImages = project.data.gallery.filter(
-      (
-        image,
-      ): image is Extract<
-        (typeof project.data.gallery)[number],
-        { filename: string }
-      > => 'filename' in image,
-    )
-    const images =
-      inlineImages.length > 0
-        ? inlineImages
-        : (eventGalleries[project.id] ?? [])
-
-    return images.map((image, index) => ({
-      params: {
-        slug: project.id,
-        photo: String(index + 1),
-      },
-      props: {
-        project,
-        image,
-        photoNumber: index + 1,
-        photoCount: images.length,
-      },
-    }))
-  })
+const eventSlug = Astro.params.slug
+const photoNumber = Number(Astro.params.photo)
+const project = eventSlug ? await getEntry('portfolio', eventSlug) : undefined
+if (
+  !project?.data.eventGallery ||
+  !eventSlug ||
+  !Number.isSafeInteger(photoNumber) ||
+  photoNumber < 1
+) {
+  return new Response(null, { status: 404 })
 }
 
-const { project, image, photoNumber, photoCount } =
-  Astro.props as SharePageProps
+const inlineImages = project.data.gallery.filter(
+  (
+    image,
+  ): image is Extract<
+    (typeof project.data.gallery)[number],
+    { filename: string }
+  > => 'filename' in image,
+)
+const professionalImages =
+  inlineImages.length > 0 ? inlineImages : (eventGalleries[project.id] ?? [])
+const [hiddenFilenames, guestRows] = await Promise.all([
+  getHiddenFilenames(env.GALLERY_DB, eventSlug),
+  listPublishedGuestPhotos(env.GALLERY_DB, eventSlug),
+])
+const images: ShareImage[] = [
+  ...professionalImages.filter((image) => !hiddenFilenames.has(image.filename)),
+  ...guestRows.map(publicGuestPhoto),
+]
+const image = images[photoNumber - 1]
+if (!image) return new Response(null, { status: 404 })
+const photoCount = images.length
+
 const shareUrl = new URL(
   `/galleries/${project.id}/photo/${photoNumber}/`,
   Astro.site,

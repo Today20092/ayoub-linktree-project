@@ -4,6 +4,7 @@ import '../styles.css'
 import type { ImageMetadata } from 'astro'
 import { Image } from 'astro:assets'
 import { getCollection } from 'astro:content'
+import { env } from 'cloudflare:workers'
 import { Calendar, Images } from 'lucide-react'
 
 import { Badge } from '../components/ui/badge'
@@ -15,7 +16,14 @@ import {
   EmptyTitle,
 } from '../components/ui/empty'
 import { eventGalleries } from '../data/event-galleries'
+import {
+  getHiddenFilenames,
+  listPublishedGuestPhotos,
+  publicGuestPhoto,
+} from '../lib/gallery-data'
 import BaseLayout from '../layouts/BaseLayout.astro'
+
+export const prerender = false
 
 const canonicalUrl = new URL('/galleries/', Astro.site).toString()
 
@@ -28,51 +36,74 @@ const formatDate = (date: Date) =>
   }).format(date)
 
 const collections = await getCollection('portfolio')
-const galleries = collections
-  .filter((entry) => entry.data.eventGallery)
-  .map((entry) => {
-    const coverAsset = entry.data.thumbnail ?? entry.data.featuredImage
-    const isRemote =
-      typeof coverAsset === 'object' &&
-      coverAsset !== null &&
-      'filename' in coverAsset
-    const inlineRemoteCount = entry.data.gallery.filter(
-      (image) => 'filename' in image,
-    ).length
-    const fallbackCount = eventGalleries[entry.id]?.length ?? 0
-    const photoCount = inlineRemoteCount > 0 ? inlineRemoteCount : fallbackCount
-    return {
-      id: entry.id,
-      title: entry.data.title,
-      category: entry.data.category,
-      eventDate: entry.data.eventDate,
-      photoCount,
-      isRemote,
-      cover: isRemote
-        ? (coverAsset as { src: string }).src
-        : (coverAsset as ImageMetadata),
-      coverAlt: isRemote
-        ? (coverAsset as { alt: string }).alt
-        : entry.data.imageAlt,
-      coverWidth: isRemote
-        ? (coverAsset as { width: number }).width
-        : entry.data.imageWidth,
-      coverHeight: isRemote
-        ? (coverAsset as { height: number }).height
-        : entry.data.imageHeight,
-    }
-  })
-  .sort((a, b) => {
-    const aTime = a.eventDate?.getTime() ?? 0
-    const bTime = b.eventDate?.getTime() ?? 0
-    if (bTime !== aTime) return bTime - aTime
-    return 0
-  })
+const galleries = await Promise.all(
+  collections
+    .filter((entry) => entry.data.eventGallery)
+    .map(async (entry) => {
+      const [hiddenFilenames, guestPhotos] = await Promise.all([
+        getHiddenFilenames(env.GALLERY_DB, entry.id),
+        listPublishedGuestPhotos(env.GALLERY_DB, entry.id),
+      ])
+      const inlineRemoteImages = entry.data.gallery.filter(
+        (image) => 'filename' in image,
+      )
+      const professionalImages =
+        inlineRemoteImages.length > 0
+          ? inlineRemoteImages
+          : (eventGalleries[entry.id] ?? [])
+      const visibleProfessional = professionalImages.filter(
+        (image) => !hiddenFilenames.has(image.filename),
+      )
+      const requestedCover = entry.data.thumbnail ?? entry.data.featuredImage
+      const requestedCoverIsHidden =
+        typeof requestedCover === 'object' &&
+        requestedCover !== null &&
+        'filename' in requestedCover &&
+        hiddenFilenames.has(requestedCover.filename)
+      const coverAsset = requestedCoverIsHidden
+        ? (visibleProfessional[0] ??
+          (guestPhotos[0] ? publicGuestPhoto(guestPhotos[0]) : undefined))
+        : requestedCover
+      const isRemote =
+        typeof coverAsset === 'object' &&
+        coverAsset !== null &&
+        'filename' in coverAsset
+      const photoCount = visibleProfessional.length + guestPhotos.length
+      return {
+        id: entry.id,
+        title: entry.data.title,
+        category: entry.data.category,
+        eventDate: entry.data.eventDate,
+        photoCount,
+        isRemote,
+        cover: isRemote
+          ? (coverAsset as { src: string }).src
+          : (coverAsset as ImageMetadata | undefined),
+        coverAlt: isRemote
+          ? (coverAsset as { alt: string }).alt
+          : coverAsset
+            ? entry.data.imageAlt
+            : 'No published photographs',
+        coverWidth: isRemote
+          ? (coverAsset as { width: number }).width
+          : entry.data.imageWidth,
+        coverHeight: isRemote
+          ? (coverAsset as { height: number }).height
+          : entry.data.imageHeight,
+      }
+    }),
+)
+const sortedGalleries = galleries.sort((a, b) => {
+  const aTime = a.eventDate?.getTime() ?? 0
+  const bTime = b.eventDate?.getTime() ?? 0
+  if (bTime !== aTime) return bTime - aTime
+  return 0
+})
 
 const title = 'Event Galleries — Ayoub Abedrabbo'
 const description =
   'Browse every event and wedding photography gallery by date. Find your gallery, view photographs full screen, and download copies.'
-const firstCover = galleries[0]?.cover
+const firstCover = sortedGalleries[0]?.cover
 const ogImage =
   typeof firstCover === 'string' ? firstCover : (firstCover?.src ?? '/og.jpg')
 ---
@@ -103,7 +134,7 @@ const ogImage =
     </header>
 
     {
-      galleries.length === 0 ? (
+      sortedGalleries.length === 0 ? (
         <div class="mt-16">
           <Empty>
             <EmptyHeader>
@@ -122,14 +153,18 @@ const ogImage =
           class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 xl:grid-cols-3"
           aria-label="Event galleries"
         >
-          {galleries.map((gallery, index) => (
+          {sortedGalleries.map((gallery, index) => (
             <article>
               <a
                 href={`/galleries/${gallery.id}/`}
                 class="group focus-visible:ring-ring block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none"
               >
                 <div class="bg-muted relative aspect-[4/3] overflow-hidden rounded-xl">
-                  {gallery.isRemote ? (
+                  {!gallery.cover ? (
+                    <div class="text-muted-foreground flex size-full items-center justify-center">
+                      <Images className="size-10" aria-hidden="true" />
+                    </div>
+                  ) : gallery.isRemote ? (
                     <Image
                       src={gallery.cover as string}
                       alt={gallery.coverAlt}

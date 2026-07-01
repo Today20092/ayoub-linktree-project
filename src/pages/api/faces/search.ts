@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro'
 import { env } from 'cloudflare:workers'
 
 import { faceManifests } from '@/lib/face-manifests'
+import { getHiddenFilenames } from '@/lib/gallery-data'
 import {
   MAX_FACE_SEARCH_BODY_BYTES,
   parseFaceSearchRequest,
@@ -52,8 +53,14 @@ export const POST: APIRoute = async ({ request }) => {
     namespace: input.manifest.namespace,
     returnMetadata: 'all',
   })
+  const hiddenFilenames = await getHiddenFilenames(
+    env.GALLERY_DB,
+    input.manifest.eventSlug,
+  )
 
   return json({
-    matches: photoMatches(result.matches, input.manifest.threshold),
+    matches: photoMatches(result.matches, input.manifest.threshold).filter(
+      ({ filename }) => !hiddenFilenames.has(filename),
+    ),
   })
 }
