@@ -2,6 +2,7 @@
 import { getEntry } from 'astro:content'
 import { env } from 'cloudflare:workers'
 
+import CloudflareWebAnalytics from '../../../../components/CloudflareWebAnalytics.astro'
 import { eventGalleries } from '../../../../data/event-galleries'
 import {
   getHiddenFilenames,
@@ -90,6 +91,7 @@ const description = `${image.alt}. View this photograph from ${project.data.titl
     <meta name="twitter:image:alt" content={image.alt} />
     <link rel="canonical" href={shareUrl} />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <CloudflareWebAnalytics />
     <script is:inline define:vars={{ destinationPath }}>
       window.location.replace(destinationPath)
     </script>

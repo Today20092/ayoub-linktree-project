@@ -1,0 +1,16 @@
+---
+const token =
+  import.meta.env.PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN ??
+  '128cac0318f948219e6b6f71273996b9'
+---
+
+{
+  token && (
+    <script
+      is:inline
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={JSON.stringify({ token })}
+    />
+  )
+}

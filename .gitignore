@@ -27,3 +27,6 @@ pnpm-debug.log*
 
 #claude
 CLAUDE.MD
+
+# Codex attachments
+.codex-remote-attachments/
