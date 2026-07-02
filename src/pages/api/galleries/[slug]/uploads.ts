@@ -4,14 +4,19 @@ import { env } from 'cloudflare:workers'
 
 import { gallerySessionCookie, verifyGallerySession } from '@/lib/gallery-auth'
 import {
+  adminPhotoKey,
+  getEventGallery,
+  getGalleryInvite,
   getGallerySettings,
+  insertGalleryPhoto,
   insertPendingGuestPhoto,
+  markGalleryInviteUsed,
   pendingGuestKey,
 } from '@/lib/gallery-data'
 import {
   acceptedGalleryImage,
-  fittedGalleryDimensions,
   MAX_GALLERY_UPLOAD_BYTES,
+  optimizedGalleryImage,
   safeGalleryFilename,
 } from '@/lib/gallery-upload'
 
@@ -27,29 +32,46 @@ export const POST: APIRoute = async ({ params, request }) => {
   const eventSlug = params.slug
   if (!eventSlug) return json({ error: 'Gallery not found.' }, 404)
 
-  const event = await getEntry('portfolio', eventSlug)
-  if (!event?.data.eventGallery) {
+  const staticEvent = await getEntry('portfolio', eventSlug)
+  const dynamicEvent = staticEvent?.data.eventGallery
+    ? undefined
+    : await getEventGallery(env.GALLERY_DB, eventSlug)
+  if (!staticEvent?.data.eventGallery && !dynamicEvent) {
     return json({ error: 'Gallery not found.' }, 404)
   }
-
-  const settings = await getGallerySettings(env.GALLERY_DB, eventSlug)
-  if (!settings?.uploads_enabled) {
-    return json({ error: 'Uploads are not open for this gallery.' }, 403)
+  const eventTitle =
+    staticEvent?.data.title ?? dynamicEvent?.title ?? 'the event'
+  const inviteToken = new URL(request.url).searchParams.get('invite')?.trim()
+  const invite = inviteToken
+    ? await getGalleryInvite(env.GALLERY_DB, inviteToken)
+    : null
+  if (inviteToken && invite?.event_slug !== eventSlug) {
+    return json({ error: 'This upload link is not valid.' }, 403)
   }
 
-  const token = gallerySessionCookie(request)
-  if (
-    !token ||
-    !env.GALLERY_SESSION_SECRET ||
-    !(await verifyGallerySession(token, eventSlug, env.GALLERY_SESSION_SECRET))
-  ) {
-    return json({ error: 'Enter the event upload password again.' }, 401)
+  const sessionToken = gallerySessionCookie(request)
+  if (!invite) {
+    const settings = await getGallerySettings(env.GALLERY_DB, eventSlug)
+    if (!settings?.uploads_enabled) {
+      return json({ error: 'Uploads are not open for this gallery.' }, 403)
+    }
+    if (
+      !sessionToken ||
+      !env.GALLERY_SESSION_SECRET ||
+      !(await verifyGallerySession(
+        sessionToken,
+        eventSlug,
+        env.GALLERY_SESSION_SECRET,
+      ))
+    ) {
+      return json({ error: 'Enter the event upload password again.' }, 401)
+    }
   }
 
   const clientAddress =
     request.headers.get('cf-connecting-ip') ?? 'local-development'
   const rateLimit = await env.GALLERY_UPLOAD_RATE_LIMITER.limit({
-    key: `${clientAddress}:${eventSlug}:${token.slice(-16)}`,
+    key: `${clientAddress}:${eventSlug}:${(inviteToken || sessionToken || '').slice(-16)}`,
   })
   if (!rateLimit.success) {
     return json({ error: 'Too many uploads. Try again in a minute.' }, 429)
@@ -77,38 +99,46 @@ export const POST: APIRoute = async ({ params, request }) => {
   }
 
   try {
-    const info = await env.IMAGES.info(file.stream())
-    if (!('width' in info) || !('height' in info)) {
-      return json({ error: 'This image format is not supported.' }, 415)
-    }
-
-    const dimensions = fittedGalleryDimensions(info.width, info.height)
-    const transformed = await env.IMAGES.input(file.stream())
-      .transform({ width: 2400, height: 2400, fit: 'scale-down' })
-      .output({ format: 'image/jpeg', quality: 84 })
-    const optimizedImage = await transformed.response().arrayBuffer()
-
+    const optimized = await optimizedGalleryImage(file, env.IMAGES)
     const id = crypto.randomUUID()
-    const objectKey = pendingGuestKey(eventSlug, id)
-    await env.GALLERY_PENDING.put(objectKey, optimizedImage, {
+    const objectKey = invite
+      ? adminPhotoKey(eventSlug, id)
+      : pendingGuestKey(eventSlug, id)
+    const bucket = invite ? env.GALLERY_PUBLIC : env.GALLERY_PENDING
+    await bucket.put(objectKey, optimized.buffer, {
       httpMetadata: {
         contentType: 'image/jpeg',
-        cacheControl: 'private, no-store',
+        cacheControl: invite ? 'public, max-age=300' : 'private, no-store',
       },
     })
 
     try {
-      await insertPendingGuestPhoto(env.GALLERY_DB, {
-        id,
-        event_slug: eventSlug,
-        object_key: objectKey,
-        original_filename: safeGalleryFilename(file.name),
-        width: dimensions.width,
-        height: dimensions.height,
-        alt: `Guest photo from ${event.data.title}`,
-      })
+      if (invite) {
+        await insertGalleryPhoto(env.GALLERY_DB, {
+          id,
+          event_slug: eventSlug,
+          object_key: objectKey,
+          original_filename: safeGalleryFilename(file.name),
+          width: optimized.width,
+          height: optimized.height,
+          alt: `Photo from ${eventTitle} by ${invite.guest_name}`,
+          uploader_name: invite.guest_name,
+          source: 'guest',
+        })
+        await markGalleryInviteUsed(env.GALLERY_DB, invite.token)
+      } else {
+        await insertPendingGuestPhoto(env.GALLERY_DB, {
+          id,
+          event_slug: eventSlug,
+          object_key: objectKey,
+          original_filename: safeGalleryFilename(file.name),
+          width: optimized.width,
+          height: optimized.height,
+          alt: `Guest photo from ${eventTitle}`,
+        })
+      }
     } catch (error) {
-      await env.GALLERY_PENDING.delete(objectKey)
+      await bucket.delete(objectKey)
       throw error
     }
 
@@ -119,7 +149,7 @@ export const POST: APIRoute = async ({ params, request }) => {
         photoId: id,
       }),
     )
-    return json({ id, status: 'pending' }, 201)
+    return json({ id, status: invite ? 'published' : 'pending' }, 201)
   } catch (error) {
     console.error(
       JSON.stringify({

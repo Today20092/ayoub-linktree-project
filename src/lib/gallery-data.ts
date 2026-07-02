@@ -32,12 +32,75 @@ export type PendingGuestPhoto = Pick<
   | 'alt'
 >
 
+export type EventGallery = {
+  event_slug: string
+  title: string
+  event_date: string | null
+  event_time: string | null
+  event_venue: string | null
+  summary: string
+  category: string
+  flyer_object_key: string | null
+  flyer_width: number | null
+  flyer_height: number | null
+  flyer_alt: string | null
+  coming_soon: number
+  created_at: number
+  updated_at: number
+}
+
+export type GalleryPhoto = {
+  id: string
+  event_slug: string
+  object_key: string
+  original_filename: string
+  width: number
+  height: number
+  alt: string
+  uploader_name: string | null
+  source: 'admin' | 'guest'
+  created_at: number
+}
+
+export type GalleryInvite = {
+  token: string
+  event_slug: string
+  guest_name: string
+  created_at: number
+  last_used_at: number | null
+}
+
+export type SaveEventGalleryInput = {
+  event_slug: string
+  title: string
+  event_date?: string | null
+  event_time?: string | null
+  event_venue?: string | null
+  summary: string
+  category?: string
+  coming_soon: boolean
+  flyer?: {
+    object_key: string
+    width: number
+    height: number
+    alt: string
+  }
+}
+
 export function pendingGuestKey(eventSlug: string, id: string) {
   return `pending/${eventSlug}/${id}.jpg`
 }
 
 export function publishedGuestKey(eventSlug: string, id: string) {
   return `events/${eventSlug}/guest/${id}.jpg`
+}
+
+export function adminPhotoKey(eventSlug: string, id: string) {
+  return `events/${eventSlug}/photos/${id}.jpg`
+}
+
+export function flyerKey(eventSlug: string) {
+  return `events/${eventSlug}/flyer.jpg`
 }
 
 export function publicGuestPhoto(photo: GuestPhoto) {
@@ -51,6 +114,36 @@ export function publicGuestPhoto(photo: GuestPhoto) {
   }
 }
 
+export function publicGalleryPhoto(photo: GalleryPhoto) {
+  return {
+    id: photo.id,
+    src: `${GALLERY_PUBLIC_ORIGIN}/${photo.object_key}`,
+    width: photo.width,
+    height: photo.height,
+    alt: photo.alt,
+    filename: `${photo.id}.jpg`,
+    uploaderName: photo.uploader_name,
+    source: photo.source,
+  }
+}
+
+export function publicEventFlyer(gallery: EventGallery) {
+  if (
+    !gallery.flyer_object_key ||
+    !gallery.flyer_width ||
+    !gallery.flyer_height
+  ) {
+    return
+  }
+  return {
+    src: `${GALLERY_PUBLIC_ORIGIN}/${gallery.flyer_object_key}`,
+    width: gallery.flyer_width,
+    height: gallery.flyer_height,
+    alt: gallery.flyer_alt || `${gallery.title} flyer`,
+    filename: gallery.flyer_object_key.split('/').at(-1) || 'flyer.jpg',
+  }
+}
+
 export async function getGallerySettings(
   database: D1Database,
   eventSlug: string,
@@ -59,6 +152,65 @@ export async function getGallerySettings(
     .prepare('SELECT * FROM gallery_settings WHERE event_slug = ?')
     .bind(eventSlug)
     .first<GallerySettings>()
+}
+
+export async function getEventGallery(database: D1Database, eventSlug: string) {
+  return database
+    .prepare('SELECT * FROM event_galleries WHERE event_slug = ?')
+    .bind(eventSlug)
+    .first<EventGallery>()
+}
+
+export async function listEventGalleries(database: D1Database) {
+  const result = await database
+    .prepare(
+      `SELECT * FROM event_galleries
+       ORDER BY COALESCE(event_date, ''), created_at DESC`,
+    )
+    .all<EventGallery>()
+  return result.results
+}
+
+export async function saveEventGallery(
+  database: D1Database,
+  gallery: SaveEventGalleryInput,
+) {
+  await database
+    .prepare(
+      `INSERT INTO event_galleries
+       (event_slug, title, event_date, event_time, event_venue, summary,
+        category, flyer_object_key, flyer_width, flyer_height, flyer_alt,
+        coming_soon, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch())
+       ON CONFLICT(event_slug) DO UPDATE SET
+         title = excluded.title,
+         event_date = excluded.event_date,
+         event_time = excluded.event_time,
+         event_venue = excluded.event_venue,
+         summary = excluded.summary,
+         category = excluded.category,
+         flyer_object_key = COALESCE(excluded.flyer_object_key, flyer_object_key),
+         flyer_width = COALESCE(excluded.flyer_width, flyer_width),
+         flyer_height = COALESCE(excluded.flyer_height, flyer_height),
+         flyer_alt = COALESCE(excluded.flyer_alt, flyer_alt),
+         coming_soon = excluded.coming_soon,
+         updated_at = unixepoch()`,
+    )
+    .bind(
+      gallery.event_slug,
+      gallery.title,
+      gallery.event_date || null,
+      gallery.event_time || null,
+      gallery.event_venue || null,
+      gallery.summary,
+      gallery.category || 'Event Photography',
+      gallery.flyer?.object_key ?? null,
+      gallery.flyer?.width ?? null,
+      gallery.flyer?.height ?? null,
+      gallery.flyer?.alt ?? null,
+      gallery.coming_soon ? 1 : 0,
+    )
+    .run()
 }
 
 export async function getHiddenFilenames(
@@ -97,6 +249,93 @@ export async function listGuestPhotos(database: D1Database, eventSlug: string) {
     .bind(eventSlug)
     .all<GuestPhoto>()
   return result.results
+}
+
+export async function listGalleryPhotos(
+  database: D1Database,
+  eventSlug: string,
+) {
+  const result = await database
+    .prepare(
+      `SELECT * FROM gallery_photos
+       WHERE event_slug = ?
+       ORDER BY created_at`,
+    )
+    .bind(eventSlug)
+    .all<GalleryPhoto>()
+  return result.results
+}
+
+export async function insertGalleryPhoto(
+  database: D1Database,
+  photo: Omit<GalleryPhoto, 'created_at'>,
+) {
+  await database
+    .prepare(
+      `INSERT INTO gallery_photos
+       (id, event_slug, object_key, original_filename, width, height, alt,
+        uploader_name, source)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .bind(
+      photo.id,
+      photo.event_slug,
+      photo.object_key,
+      photo.original_filename,
+      photo.width,
+      photo.height,
+      photo.alt,
+      photo.uploader_name,
+      photo.source,
+    )
+    .run()
+}
+
+export async function createGalleryInvite(
+  database: D1Database,
+  invite: Pick<GalleryInvite, 'token' | 'event_slug' | 'guest_name'>,
+) {
+  await database
+    .prepare(
+      `INSERT INTO gallery_invites (token, event_slug, guest_name)
+       VALUES (?, ?, ?)`,
+    )
+    .bind(invite.token, invite.event_slug, invite.guest_name)
+    .run()
+}
+
+export async function listGalleryInvites(
+  database: D1Database,
+  eventSlug: string,
+) {
+  const result = await database
+    .prepare(
+      `SELECT * FROM gallery_invites
+       WHERE event_slug = ?
+       ORDER BY created_at DESC`,
+    )
+    .bind(eventSlug)
+    .all<GalleryInvite>()
+  return result.results
+}
+
+export async function getGalleryInvite(database: D1Database, token: string) {
+  return database
+    .prepare('SELECT * FROM gallery_invites WHERE token = ?')
+    .bind(token)
+    .first<GalleryInvite>()
+}
+
+export async function markGalleryInviteUsed(
+  database: D1Database,
+  token: string,
+) {
+  await database
+    .prepare(
+      'UPDATE gallery_invites SET last_used_at = unixepoch() WHERE token = ?',
+    )
+    .bind(token)
+    .run()
 }
 
 export async function getGuestPhoto(database: D1Database, photoId: string) {

@@ -23,9 +23,13 @@ import { eventGalleries } from '../../../data/event-galleries'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { faceManifests } from '../../../lib/face-manifests'
 import {
+  getEventGallery,
   getGallerySettings,
   getHiddenFilenames,
+  listGalleryPhotos,
   listPublishedGuestPhotos,
+  publicEventFlyer,
+  publicGalleryPhoto,
   publicGuestPhoto,
 } from '../../../lib/gallery-data'
 import { siteConfig } from '../../../lib/site-config'
@@ -43,64 +47,108 @@ type RemoteGalleryImage = {
 }
 
 const eventSlug = Astro.params.slug
-const project = eventSlug ? await getEntry('portfolio', eventSlug) : undefined
-if (!project?.data.eventGallery || !eventSlug) {
+const staticProject = eventSlug
+  ? await getEntry('portfolio', eventSlug)
+  : undefined
+const project = staticProject?.data.eventGallery ? staticProject : undefined
+const dynamicEvent =
+  eventSlug && !project
+    ? await getEventGallery(env.GALLERY_DB, eventSlug)
+    : undefined
+if ((!project && !dynamicEvent) || !eventSlug) {
   return new Response(null, { status: 404 })
 }
-const data = project.data
-const [hiddenFilenames, publishedGuests, gallerySettings] = await Promise.all([
-  getHiddenFilenames(env.GALLERY_DB, project.id),
-  listPublishedGuestPhotos(env.GALLERY_DB, project.id),
-  getGallerySettings(env.GALLERY_DB, project.id),
-])
+const data = project?.data
+const [hiddenFilenames, publishedGuests, gallerySettings, uploadedPhotos] =
+  await Promise.all([
+    getHiddenFilenames(env.GALLERY_DB, eventSlug),
+    listPublishedGuestPhotos(env.GALLERY_DB, eventSlug),
+    getGallerySettings(env.GALLERY_DB, eventSlug),
+    listGalleryPhotos(env.GALLERY_DB, eventSlug),
+  ])
 
-const inlineImages = data.gallery.filter(
-  (
-    image,
-  ): image is Extract<(typeof data.gallery)[number], { filename: string }> =>
-    'filename' in image,
-)
-const fallbackImages = eventGalleries[project.id] ?? []
+const inlineImages = data
+  ? data.gallery.filter(
+      (
+        image,
+      ): image is Extract<
+        (typeof data.gallery)[number],
+        { filename: string }
+      > => 'filename' in image,
+    )
+  : []
+const fallbackImages = eventGalleries[eventSlug] ?? []
 const rawImages: RemoteGalleryImage[] =
   inlineImages.length > 0
     ? (inlineImages as unknown as RemoteGalleryImage[])
     : fallbackImages
 
-const images = rawImages
-  .filter((image) => !hiddenFilenames.has(image.filename))
-  .map((image) => ({
-    src: image.src,
-    width: image.width,
-    height: image.height,
-    alt: image.alt,
-    filename: image.filename,
-    caption: image.caption,
-    featured: image.featured,
-  }))
-const guestImages = publishedGuests.map(publicGuestPhoto)
+const dynamicComingSoon = Boolean(dynamicEvent?.coming_soon)
+const uploadedImages = dynamicComingSoon
+  ? []
+  : uploadedPhotos.map(publicGalleryPhoto)
+const adminUploadedImages = uploadedImages.filter(
+  (image) => image.source === 'admin',
+)
+const images = [
+  ...rawImages
+    .filter((image) => !hiddenFilenames.has(image.filename))
+    .map((image) => ({
+      src: image.src,
+      width: image.width,
+      height: image.height,
+      alt: image.alt,
+      filename: image.filename,
+      caption: image.caption,
+      featured: image.featured,
+    })),
+  ...adminUploadedImages,
+]
+const guestImages = dynamicComingSoon
+  ? []
+  : [
+      ...publishedGuests.map(publicGuestPhoto),
+      ...uploadedImages.filter((image) => image.source === 'guest'),
+    ]
 const allImages = [...images, ...guestImages]
 const totalPhotoCount = allImages.length
 
-const galleryId = `gallery-${project.id}`
-const galleryUrl = new URL(`/galleries/${project.id}/`, Astro.site).toString()
-const portfolioUrl = `/portfolio/${project.id}/`
-const summary = data.galleryDescription ?? data.summary
-const title = `${data.title} — Event Gallery`
+const galleryId = `gallery-${eventSlug}`
+const galleryUrl = new URL(`/galleries/${eventSlug}/`, Astro.site).toString()
+const portfolioUrl = project ? `/portfolio/${project.id}/` : '/galleries/'
+const galleryTitle = data?.title ?? dynamicEvent?.title ?? 'Event Gallery'
+const galleryCategory =
+  data?.category ?? dynamicEvent?.category ?? 'Event Photography'
+const galleryImageAlt = data?.imageAlt ?? `${galleryTitle} event gallery`
+const summary =
+  data?.galleryDescription ?? data?.summary ?? dynamicEvent?.summary ?? ''
+const title = `${galleryTitle} - Event Gallery`
 const ogImage =
   allImages[0]?.src ??
-  (typeof data.featuredImage === 'string'
-    ? data.featuredImage
-    : data.featuredImage.src)
-const eventDate = data.eventDate
+  (dynamicEvent ? publicEventFlyer(dynamicEvent)?.src : undefined) ??
+  (data
+    ? typeof data.featuredImage === 'string'
+      ? data.featuredImage
+      : data.featuredImage.src
+    : '/og.jpg')
+const eventDate =
+  data?.eventDate ??
+  (dynamicEvent?.event_date
+    ? new Date(`${dynamicEvent.event_date}T00:00:00Z`)
+    : undefined)
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
-const faceManifest = faceManifests[project.id]
+const faceManifest = faceManifests[eventSlug]
 const flyer =
+  data &&
   typeof data.featuredImage === 'object' &&
   data.featuredImage !== null &&
   !('filename' in data.featuredImage)
     ? (data.featuredImage as ImageMetadata)
-    : undefined
+    : dynamicEvent
+      ? publicEventFlyer(dynamicEvent)
+      : undefined
 const remoteFeaturedImage =
+  data &&
   typeof data.featuredImage === 'object' &&
   data.featuredImage !== null &&
   'filename' in data.featuredImage &&
@@ -123,7 +171,7 @@ const formatDate = (date: Date) =>
   description={summary}
   canonicalUrl={galleryUrl}
   ogImage={ogImage}
-  ogImageAlt={data.imageAlt}
+  ogImageAlt={galleryImageAlt}
   ogType="article"
   robots="index,follow,max-image-preview:large"
   activeNav="galleries"
@@ -153,7 +201,7 @@ const formatDate = (date: Date) =>
         </BreadcrumbItem>
         <BreadcrumbSeparator />
         <BreadcrumbItem>
-          <BreadcrumbPage>{data.title}</BreadcrumbPage>
+          <BreadcrumbPage>{galleryTitle}</BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>
@@ -165,7 +213,7 @@ const formatDate = (date: Date) =>
             <Badge variant="secondary">{formatDate(eventDate)}</Badge>
           )
         }
-        <Badge variant="outline">{data.category}</Badge>
+        <Badge variant="outline">{galleryCategory}</Badge>
         {
           totalPhotoCount > 0 ? (
             <span class="text-muted-foreground text-xs font-semibold">
@@ -180,7 +228,7 @@ const formatDate = (date: Date) =>
       <h1
         class="font-heading mt-3 text-3xl leading-none font-extrabold tracking-tight sm:text-4xl lg:text-5xl"
       >
-        {data.title}
+        {galleryTitle}
       </h1>
       <p class="text-muted-foreground mt-4 max-w-2xl text-base leading-7">
         {summary}
@@ -192,10 +240,10 @@ const formatDate = (date: Date) =>
               <EventLightbox
                 client:load
                 galleryId={galleryId}
-                heading={data.title}
-                projectSlug={project.id}
-                projectTitle={data.title}
-                downloadAllUrl={data.downloadAllUrl}
+                heading={galleryTitle}
+                projectSlug={eventSlug}
+                projectTitle={galleryTitle}
+                downloadAllUrl={data?.downloadAllUrl}
                 tipUrl={tipUrl}
                 images={allImages.map(({ src, filename, alt }) => ({
                   src,
@@ -232,7 +280,7 @@ const formatDate = (date: Date) =>
             )}
             {gallerySettings?.uploads_enabled ? (
               <Button variant="outline" size="lg" asChild>
-                <a href={`/galleries/${project.id}/upload/`}>
+                <a href={`/galleries/${eventSlug}/upload/`}>
                   <ImageUp data-icon="inline-start" aria-hidden="true" />
                   Share your photos
                 </a>
@@ -261,8 +309,8 @@ const formatDate = (date: Date) =>
           ) : (
             flyer && (
               <Image
-                src={flyer}
-                alt={data.imageAlt}
+                src={flyer as ImageMetadata}
+                alt={galleryImageAlt}
                 widths={[720, 1080, 1440, 1920]}
                 sizes="(min-width: 1024px) 56rem, 100vw"
                 quality={85}
@@ -278,7 +326,7 @@ const formatDate = (date: Date) =>
       faceManifest && (
         <FaceFinder
           client:only="react"
-          eventSlug={project.id}
+          eventSlug={eventSlug}
           indexVersion={faceManifest.version}
           galleryId={galleryId}
         />
@@ -289,17 +337,17 @@ const formatDate = (date: Date) =>
       totalPhotoCount === 0 && flyer ? (
         <EventComingSoon
           flyer={flyer}
-          flyerAlt={data.imageAlt}
+          flyerAlt={galleryImageAlt}
           date={eventDate ? formatDate(eventDate) : 'Date coming soon'}
-          time={data.eventTime}
-          venue={data.eventVenue}
-          upcomingVideo={data.upcomingVideo}
+          time={data?.eventTime ?? dynamicEvent?.event_time ?? undefined}
+          venue={data?.eventVenue ?? dynamicEvent?.event_venue ?? undefined}
+          upcomingVideo={data?.upcomingVideo}
         />
       ) : (
         <section
           id={galleryId}
           class="mt-10"
-          aria-label={`${data.title} photographs`}
+          aria-label={`${galleryTitle} photographs`}
         >
           {images.length > 0 && (
             <div

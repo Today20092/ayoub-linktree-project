@@ -10,9 +10,13 @@ import { Button } from '../../../components/ui/button'
 import { eventGalleries } from '../../../data/event-galleries'
 import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
 import {
+  getEventGallery,
   getGallerySettings,
   getHiddenFilenames,
+  listGalleryInvites,
+  listGalleryPhotos,
   listGuestPhotos,
+  publicEventFlyer,
 } from '../../../lib/gallery-data'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 
@@ -30,24 +34,36 @@ if (
 }
 
 const eventSlug = Astro.params.slug
-const event = eventSlug ? await getEntry('portfolio', eventSlug) : undefined
-if (!event?.data.eventGallery || !eventSlug) {
+const staticEvent = eventSlug
+  ? await getEntry('portfolio', eventSlug)
+  : undefined
+const event = staticEvent?.data.eventGallery ? staticEvent : undefined
+const dynamicEvent =
+  eventSlug && !event
+    ? await getEventGallery(env.GALLERY_DB, eventSlug)
+    : undefined
+if ((!event && !dynamicEvent) || !eventSlug) {
   return new Response(null, { status: 404 })
 }
 
-const [settings, guests, hiddenFilenames] = await Promise.all([
-  getGallerySettings(env.GALLERY_DB, eventSlug),
-  listGuestPhotos(env.GALLERY_DB, eventSlug),
-  getHiddenFilenames(env.GALLERY_DB, eventSlug),
-])
-const inlineImages = event.data.gallery.filter(
-  (
-    image,
-  ): image is Extract<
-    (typeof event.data.gallery)[number],
-    { filename: string }
-  > => 'filename' in image,
-)
+const [settings, guests, hiddenFilenames, uploadedPhotos, invites] =
+  await Promise.all([
+    getGallerySettings(env.GALLERY_DB, eventSlug),
+    listGuestPhotos(env.GALLERY_DB, eventSlug),
+    getHiddenFilenames(env.GALLERY_DB, eventSlug),
+    listGalleryPhotos(env.GALLERY_DB, eventSlug),
+    listGalleryInvites(env.GALLERY_DB, eventSlug),
+  ])
+const inlineImages = event
+  ? event.data.gallery.filter(
+      (
+        image,
+      ): image is Extract<
+        (typeof event.data.gallery)[number],
+        { filename: string }
+      > => 'filename' in image,
+    )
+  : []
 const professionalImages =
   inlineImages.length > 0 ? inlineImages : (eventGalleries[eventSlug] ?? [])
 const professional = professionalImages.map((image) => ({
@@ -57,22 +73,43 @@ const professional = professionalImages.map((image) => ({
   hidden: hiddenFilenames.has(image.filename),
 }))
 const ogImage =
-  typeof event.data.featuredImage === 'string'
-    ? event.data.featuredImage
-    : event.data.featuredImage.src
+  (dynamicEvent ? publicEventFlyer(dynamicEvent)?.src : undefined) ??
+  (event
+    ? typeof event.data.featuredImage === 'string'
+      ? event.data.featuredImage
+      : event.data.featuredImage.src
+    : '/og.jpg')
+const eventTitle = event?.data.title ?? dynamicEvent?.title ?? 'Event gallery'
+const eventMeta = {
+  title: eventTitle,
+  summary:
+    event?.data.galleryDescription ??
+    event?.data.summary ??
+    dynamicEvent?.summary ??
+    '',
+  category:
+    event?.data.category ?? dynamicEvent?.category ?? 'Event Photography',
+  eventDate:
+    event?.data.eventDate?.toISOString().slice(0, 10) ??
+    dynamicEvent?.event_date ??
+    '',
+  eventTime: event?.data.eventTime ?? dynamicEvent?.event_time ?? '',
+  eventVenue: event?.data.eventVenue ?? dynamicEvent?.event_venue ?? '',
+  comingSoon: dynamicEvent ? Boolean(dynamicEvent.coming_soon) : false,
+}
 
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
 ---
 
 <BaseLayout
-  title={`Manage ${event.data.title}`}
-  description={`Review guest uploads and curate ${event.data.title}.`}
+  title={`Manage ${eventTitle}`}
+  description={`Review guest uploads and curate ${eventTitle}.`}
   canonicalUrl={new URL(
     `/admin/galleries/${eventSlug}/`,
     Astro.site,
   ).toString()}
   ogImage={ogImage}
-  ogImageAlt={event.data.imageAlt}
+  ogImageAlt={eventTitle}
 >
   <main
     id="main-content"
@@ -100,7 +137,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
       <h1
         class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
       >
-        {event.data.title}
+        {eventTitle}
       </h1>
       <p class="text-muted-foreground mt-4 text-lg leading-8">
         Review guest submissions, control upload access, and hide professional
@@ -110,10 +147,13 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
 
     <div class="mt-10">
       <AdminGallery
-        client:load
+        client:only="react"
         eventSlug={eventSlug}
+        eventMeta={eventMeta}
         settings={settings}
         guests={guests}
+        uploadedPhotos={uploadedPhotos}
+        invites={invites}
         professional={professional}
       />
     </div>

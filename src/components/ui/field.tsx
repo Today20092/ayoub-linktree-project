@@ -51,6 +51,39 @@ function FieldLabel({
   )
 }
 
+function FieldDescription({ className, ...props }: React.ComponentProps<'p'>) {
+  return (
+    <p
+      data-slot="field-description"
+      className={cn(
+        'text-muted-foreground flex items-center gap-1.5 text-sm',
+        className,
+      )}
+      {...props}
+    />
+  )
+}
+
+function FieldContent({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="field-content"
+      className={cn('flex flex-1 flex-col gap-1.5', className)}
+      {...props}
+    />
+  )
+}
+
+function FieldGroup({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="field-group"
+      className={cn('flex flex-col gap-4', className)}
+      {...props}
+    />
+  )
+}
+
 function FieldError({
   className,
   children,
@@ -110,4 +143,12 @@ function FieldSeparator({
   )
 }
 
-export { Field, FieldError, FieldLabel, FieldSeparator }
+export {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+}

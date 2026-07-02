@@ -18,7 +18,11 @@ import {
 import { eventGalleries } from '../data/event-galleries'
 import {
   getHiddenFilenames,
+  listEventGalleries,
+  listGalleryPhotos,
   listPublishedGuestPhotos,
+  publicEventFlyer,
+  publicGalleryPhoto,
   publicGuestPhoto,
 } from '../lib/gallery-data'
 import BaseLayout from '../layouts/BaseLayout.astro'
@@ -36,13 +40,14 @@ const formatDate = (date: Date) =>
   }).format(date)
 
 const collections = await getCollection('portfolio')
-const galleries = await Promise.all(
+const staticGalleries = await Promise.all(
   collections
     .filter((entry) => entry.data.eventGallery)
     .map(async (entry) => {
-      const [hiddenFilenames, guestPhotos] = await Promise.all([
+      const [hiddenFilenames, guestPhotos, uploadedPhotos] = await Promise.all([
         getHiddenFilenames(env.GALLERY_DB, entry.id),
         listPublishedGuestPhotos(env.GALLERY_DB, entry.id),
+        listGalleryPhotos(env.GALLERY_DB, entry.id),
       ])
       const inlineRemoteImages = entry.data.gallery.filter(
         (image) => 'filename' in image,
@@ -62,13 +67,17 @@ const galleries = await Promise.all(
         hiddenFilenames.has(requestedCover.filename)
       const coverAsset = requestedCoverIsHidden
         ? (visibleProfessional[0] ??
+          (uploadedPhotos[0]
+            ? publicGalleryPhoto(uploadedPhotos[0])
+            : undefined) ??
           (guestPhotos[0] ? publicGuestPhoto(guestPhotos[0]) : undefined))
         : requestedCover
       const isRemote =
         typeof coverAsset === 'object' &&
         coverAsset !== null &&
         'filename' in coverAsset
-      const photoCount = visibleProfessional.length + guestPhotos.length
+      const photoCount =
+        visibleProfessional.length + guestPhotos.length + uploadedPhotos.length
       return {
         id: entry.id,
         title: entry.data.title,
@@ -93,12 +102,44 @@ const galleries = await Promise.all(
       }
     }),
 )
-const sortedGalleries = galleries.sort((a, b) => {
-  const aTime = a.eventDate?.getTime() ?? 0
-  const bTime = b.eventDate?.getTime() ?? 0
-  if (bTime !== aTime) return bTime - aTime
-  return 0
-})
+const dynamicEvents = await listEventGalleries(env.GALLERY_DB)
+const dynamicGalleries = await Promise.all(
+  dynamicEvents
+    .filter(
+      (event) => !collections.some((entry) => entry.id === event.event_slug),
+    )
+    .map(async (event) => {
+      const photos = await listGalleryPhotos(env.GALLERY_DB, event.event_slug)
+      const coverAsset =
+        publicEventFlyer(event) ??
+        (!event.coming_soon && photos[0]
+          ? publicGalleryPhoto(photos[0])
+          : undefined)
+      const photoCount = event.coming_soon ? 0 : photos.length
+      return {
+        id: event.event_slug,
+        title: event.title,
+        category: event.category,
+        eventDate: event.event_date
+          ? new Date(`${event.event_date}T00:00:00Z`)
+          : undefined,
+        photoCount,
+        isRemote: Boolean(coverAsset),
+        cover: coverAsset?.src,
+        coverAlt: coverAsset?.alt ?? `${event.title} flyer`,
+        coverWidth: coverAsset?.width ?? 1200,
+        coverHeight: coverAsset?.height ?? 800,
+      }
+    }),
+)
+const sortedGalleries = [...staticGalleries, ...dynamicGalleries].sort(
+  (a, b) => {
+    const aTime = a.eventDate?.getTime() ?? 0
+    const bTime = b.eventDate?.getTime() ?? 0
+    if (bTime !== aTime) return bTime - aTime
+    return 0
+  },
+)
 
 const title = 'Event Galleries — Ayoub Abedrabbo'
 const description =
