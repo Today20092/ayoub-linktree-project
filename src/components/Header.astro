@@ -1,6 +1,6 @@
 ---
 type Props = {
-  activeNav?: 'home' | 'galleries' | 'contact'
+  activeNav?: 'home' | 'services' | 'galleries' | 'contact'
 }
 
 const { activeNav } = Astro.props as Props
@@ -8,9 +8,10 @@ const { activeNav } = Astro.props as Props
 const navItems: Array<{
   href: string
   label: string
-  key: 'home' | 'galleries' | 'contact'
+  key: 'home' | 'services' | 'galleries' | 'contact'
 }> = [
   { href: '/', label: 'Home', key: 'home' },
+  { href: '/services', label: 'Services', key: 'services' },
   { href: '/galleries', label: 'Galleries', key: 'galleries' },
   { href: '/#contact', label: 'Contact', key: 'contact' },
 ]
@@ -26,7 +27,8 @@ const navItems: Array<{
       href="/"
       class="text-foreground hover:text-primary focus-visible:ring-ring font-heading inline-flex min-h-11 items-center rounded-sm px-1 text-sm font-extrabold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
     >
-      Ayoub Abedrabbo
+      <span class="sm:hidden">Ayoub</span>
+      <span class="hidden sm:inline">Ayoub Abedrabbo</span>
     </a>
     <nav aria-label="Primary">
       <ul class="flex items-center gap-1 sm:gap-2">
@@ -39,7 +41,7 @@ const navItems: Array<{
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
                   class:list={[
-                    'focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-2.5 text-xs font-bold tracking-wide no-underline transition-[color,background-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] sm:px-3 sm:text-sm',
+                    'focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-2 text-xs font-bold tracking-wide no-underline transition-[color,background-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] sm:px-3 sm:text-sm',
                     isActive
                       ? 'text-foreground'
                       : 'text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground',

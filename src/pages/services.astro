@@ -1,0 +1,400 @@
+---
+import '../styles.css'
+
+import type { CollectionEntry } from 'astro:content'
+import type { ImageMetadata } from 'astro'
+import { Image } from 'astro:assets'
+import { getCollection } from 'astro:content'
+
+import { buttonVariants } from '@/components/ui/button'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { cn } from '@/lib/utils'
+import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
+
+type PortfolioEntry = CollectionEntry<'portfolio'>
+
+type ProofProject = {
+  slug: string
+  title: string
+  category: string
+  thumbnail: ImageMetadata | string
+  imageAlt: string
+  imageWidth: number
+  imageHeight: number
+}
+
+type Service = {
+  title: string
+  description: string
+  projectIds: string[]
+}
+
+type ServiceWithProjects = Service & {
+  projects: ProofProject[]
+}
+
+const servicePageTitle = 'Photography and Video Services | Ayoub Abedrabbo'
+const servicePageDescription =
+  'Photography, video, portraits, podcast production, and community storytelling services in Tampa, backed by real portfolio examples.'
+
+const { siteName, profileName, twitterHandle, ogImage, ogImageAlt } =
+  siteConfig.site
+const baseUrl = getBaseUrl(import.meta.env.BASE_URL)
+const canonicalUrl = new URL(`${baseUrl}services`, Astro.site).toString()
+const sitemapUrl = new URL(`${baseUrl}sitemap-index.xml`, Astro.site).toString()
+const ogImageUrl = new URL(
+  resolveSiteAsset(baseUrl, ogImage),
+  Astro.site,
+).toString()
+
+const portfolioEntries = await getCollection('portfolio')
+const entriesById = new Map(portfolioEntries.map((entry) => [entry.id, entry]))
+
+const toProofProject = (entry: PortfolioEntry): ProofProject => {
+  const thumbnailAsset = entry.data.thumbnail ?? entry.data.featuredImage
+  const thumbnail =
+    typeof thumbnailAsset === 'object' &&
+    thumbnailAsset !== null &&
+    'filename' in thumbnailAsset
+      ? thumbnailAsset.src
+      : (thumbnailAsset as ImageMetadata | string)
+  const thumbnailAlt =
+    typeof thumbnailAsset === 'object' &&
+    thumbnailAsset !== null &&
+    'alt' in thumbnailAsset
+      ? thumbnailAsset.alt
+      : entry.data.imageAlt
+  const thumbnailWidth =
+    typeof thumbnailAsset === 'object' &&
+    thumbnailAsset !== null &&
+    'width' in thumbnailAsset
+      ? thumbnailAsset.width
+      : entry.data.imageWidth
+  const thumbnailHeight =
+    typeof thumbnailAsset === 'object' &&
+    thumbnailAsset !== null &&
+    'height' in thumbnailAsset
+      ? thumbnailAsset.height
+      : entry.data.imageHeight
+
+  return {
+    slug: entry.id,
+    title: entry.data.title,
+    category: entry.data.category,
+    thumbnail,
+    imageAlt: thumbnailAlt,
+    imageWidth: thumbnailWidth,
+    imageHeight: thumbnailHeight,
+  }
+}
+
+const serviceDefinitions: Service[] = [
+  {
+    title: 'Event photography and video',
+    description:
+      'Coverage for workshops, community gatherings, weddings, and local events that need both polished images and usable video.',
+    projectIds: [
+      'muslim-business-chamber-2026',
+      'temple-terrace-community-open-house',
+      'sanad-silwadi-wedding',
+    ],
+  },
+  {
+    title: 'Portraits and headshots',
+    description:
+      'Natural portraits for professionals, teams, community leaders, and people who need to look like themselves.',
+    projectIds: ['portraits', 'arqam-academy', 'bayaan-academy'],
+  },
+  {
+    title: 'Podcast production',
+    description:
+      'Recording, audio setup, lighting, editing, and YouTube-ready delivery for recurring shows and interview formats.',
+    projectIds: ['rizqmd-jd-podcast', 'konan-bbq-podcast', 'lavena-health'],
+  },
+  {
+    title: 'Business and brand videos',
+    description:
+      'Talking-head videos, educational pieces, and client-facing content that businesses can publish or send directly.',
+    projectIds: ['omar-erchid-law-firm', 'lavena-health', 'ya-hala'],
+  },
+  {
+    title: 'School and community storytelling',
+    description:
+      'Documentary-style films and photo stories for schools, nonprofits, fundraisers, and community organizations.',
+    projectIds: [
+      'aya-academy',
+      'maan-academy',
+      'temple-terrace-community-open-house',
+    ],
+  },
+]
+
+const services: ServiceWithProjects[] = serviceDefinitions.map((service) => ({
+  ...service,
+  projects: service.projectIds
+    .map((id) => entriesById.get(id))
+    .filter((entry): entry is PortfolioEntry => Boolean(entry))
+    .map(toProofProject),
+}))
+
+const featuredProjects = services
+  .map((service) => service.projects[0])
+  .filter((project): project is ProofProject => Boolean(project))
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  '@id': `${canonicalUrl}#services`,
+  name: servicePageTitle,
+  description: servicePageDescription,
+  provider: {
+    '@type': 'Person',
+    name: profileName,
+    url: new URL(baseUrl, Astro.site).toString(),
+  },
+  areaServed: {
+    '@type': 'Place',
+    name: 'Tampa Bay',
+  },
+  serviceType: services.map((service) => service.title),
+  isPartOf: {
+    '@type': 'WebSite',
+    '@id': `${new URL(baseUrl, Astro.site).toString()}#website`,
+    url: new URL(baseUrl, Astro.site).toString(),
+    name: siteName,
+  },
+}
+---
+
+<BaseLayout
+  title={servicePageTitle}
+  description={servicePageDescription}
+  canonicalUrl={canonicalUrl}
+  ogTitle={servicePageTitle}
+  ogDescription={servicePageDescription}
+  ogImage={ogImageUrl}
+  ogImageAlt={ogImageAlt}
+  ogType="website"
+  twitterHandle={twitterHandle}
+  sitemapUrl={sitemapUrl}
+  structuredData={structuredData}
+  activeNav="services"
+>
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-screen-xl px-4 sm:px-6 lg:px-8"
+  >
+    <section
+      class="grid gap-10 pt-12 pb-14 md:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] md:items-end lg:pt-16 lg:pb-20"
+    >
+      <div class="max-w-3xl">
+        <p
+          class="text-muted-foreground mb-4 text-xs font-semibold tracking-wider uppercase"
+        >
+          Services
+        </p>
+        <h1
+          class="font-heading text-foreground text-4xl leading-[1.02] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl"
+        >
+          Photo and video work people can recognize.
+        </h1>
+        <p
+          class="text-muted-foreground mt-6 max-w-2xl text-base leading-7 sm:text-lg"
+        >
+          I help Tampa businesses, schools, events, and community leaders create
+          images and videos that feel local, useful, and real.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="/#contact" class={buttonVariants({ size: 'lg' })}>Contact</a>
+          <a
+            href="#services-list"
+            class={buttonVariants({ variant: 'outline', size: 'lg' })}
+          >
+            View services
+          </a>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 sm:gap-4">
+        {
+          featuredProjects.slice(0, 4).map((project, index) => (
+            <a
+              href={`/portfolio/${project.slug}/`}
+              class={cn(
+                'group bg-muted focus-visible:ring-ring block overflow-hidden rounded-sm focus-visible:ring-2 focus-visible:outline-none',
+                index === 0 ? 'col-span-2' : '',
+              )}
+            >
+              {typeof project.thumbnail === 'string' ? (
+                <Image
+                  src={project.thumbnail}
+                  alt={project.imageAlt}
+                  width={project.imageWidth}
+                  height={project.imageHeight}
+                  layout="constrained"
+                  widths={[360, 540, 720, 960]}
+                  sizes={
+                    index === 0
+                      ? '(min-width: 768px) 45vw, 100vw'
+                      : '(min-width: 768px) 22vw, 50vw'
+                  }
+                  quality={80}
+                  priority={index === 0}
+                  class={cn(
+                    'block w-full object-cover transition-opacity duration-200 group-hover:opacity-90',
+                    index === 0 ? 'aspect-[16/9]' : 'aspect-square',
+                  )}
+                />
+              ) : (
+                <Image
+                  src={project.thumbnail}
+                  alt={project.imageAlt}
+                  width={project.imageWidth}
+                  height={project.imageHeight}
+                  layout="constrained"
+                  widths={[360, 540, 720, 960]}
+                  sizes={
+                    index === 0
+                      ? '(min-width: 768px) 45vw, 100vw'
+                      : '(min-width: 768px) 22vw, 50vw'
+                  }
+                  quality={80}
+                  priority={index === 0}
+                  class={cn(
+                    'block w-full object-cover transition-opacity duration-200 group-hover:opacity-90',
+                    index === 0 ? 'aspect-[16/9]' : 'aspect-square',
+                  )}
+                />
+              )}
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
+    <section
+      id="services-list"
+      class="border-border scroll-mt-20 border-t py-12 lg:py-16"
+    >
+      <div class="max-w-2xl">
+        <h2
+          class="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl"
+        >
+          Services backed by finished work.
+        </h2>
+        <p class="text-muted-foreground mt-4 text-base leading-7">
+          Each service below links to real projects, so you can see the kind of
+          people, places, and channels the work is built for.
+        </p>
+      </div>
+
+      <div class="mt-10 grid gap-8">
+        {
+          services.map((service, serviceIndex) => (
+            <article class="border-border grid gap-6 border-t pt-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-10">
+              <div class="md:sticky md:top-20 md:self-start">
+                <p class="text-muted-foreground text-sm font-bold">
+                  {String(serviceIndex + 1).padStart(2, '0')}
+                </p>
+                <h3 class="font-heading mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
+                  {service.title}
+                </h3>
+                <p class="text-muted-foreground mt-4 text-base leading-7">
+                  {service.description}
+                </p>
+                <a
+                  href="/#contact"
+                  class={cn(
+                    buttonVariants({ variant: 'outline', size: 'lg' }),
+                    'mt-6',
+                  )}
+                >
+                  Contact
+                </a>
+              </div>
+
+              <div class="grid gap-4 sm:grid-cols-2">
+                {service.projects.map((project, projectIndex) => (
+                  <a
+                    href={`/portfolio/${project.slug}/`}
+                    class={cn(
+                      'group border-border bg-card text-card-foreground focus-visible:ring-ring overflow-hidden rounded-sm border no-underline transition-[border-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.99]',
+                      projectIndex === 0 ? 'sm:col-span-2' : '',
+                    )}
+                  >
+                    {typeof project.thumbnail === 'string' ? (
+                      <Image
+                        src={project.thumbnail}
+                        alt={project.imageAlt}
+                        width={project.imageWidth}
+                        height={project.imageHeight}
+                        layout="constrained"
+                        widths={[360, 540, 720, 960]}
+                        sizes={
+                          projectIndex === 0
+                            ? '(min-width: 1024px) 54vw, 100vw'
+                            : '(min-width: 640px) 44vw, 100vw'
+                        }
+                        quality={80}
+                        class={cn(
+                          'bg-muted block w-full object-cover transition-opacity duration-200 group-hover:opacity-90',
+                          projectIndex === 0 ? 'aspect-[16/9]' : 'aspect-[4/3]',
+                        )}
+                      />
+                    ) : (
+                      <Image
+                        src={project.thumbnail}
+                        alt={project.imageAlt}
+                        width={project.imageWidth}
+                        height={project.imageHeight}
+                        layout="constrained"
+                        widths={[360, 540, 720, 960]}
+                        sizes={
+                          projectIndex === 0
+                            ? '(min-width: 1024px) 54vw, 100vw'
+                            : '(min-width: 640px) 44vw, 100vw'
+                        }
+                        quality={80}
+                        class={cn(
+                          'bg-muted block w-full object-cover transition-opacity duration-200 group-hover:opacity-90',
+                          projectIndex === 0 ? 'aspect-[16/9]' : 'aspect-[4/3]',
+                        )}
+                      />
+                    )}
+                    <span class="block p-4">
+                      <strong class="text-foreground block text-base leading-snug font-extrabold">
+                        {project.title}
+                      </strong>
+                      <small class="text-muted-foreground mt-1 block text-xs font-medium tracking-wider uppercase">
+                        {project.category}
+                      </small>
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="border-border border-t py-12 lg:py-16">
+      <div
+        class="bg-muted/45 grid gap-6 rounded-sm p-6 sm:p-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+      >
+        <div>
+          <h2
+            class="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl"
+          >
+            Not sure what to book?
+          </h2>
+          <p class="text-muted-foreground mt-3 max-w-2xl text-base leading-7">
+            Send the event, project, or channel you are planning. I can help
+            shape the right mix of photo, video, and audio coverage.
+          </p>
+        </div>
+        <a href="/#contact" class={buttonVariants({ size: 'lg' })}>Contact</a>
+      </div>
+    </section>
+  </main>
+</BaseLayout>
