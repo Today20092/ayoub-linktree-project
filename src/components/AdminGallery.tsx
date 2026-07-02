@@ -630,8 +630,9 @@ export default function AdminGallery({
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="event-title">Name</Label>
-                <Input
+                <Textarea
                   id="event-title"
+                  rows={2}
                   value={meta.title}
                   onChange={(event) =>
                     setMeta((current) => ({
