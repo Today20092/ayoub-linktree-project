@@ -14,6 +14,7 @@ import {
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import {
   Card,
   CardContent,
@@ -217,6 +218,20 @@ function formatTime(value: string) {
 function timeRange(start: string, end: string) {
   if (start && end) return `${formatTime(start)} to ${formatTime(end)}`
   return formatTime(start || end)
+}
+
+function parseDate(value: string) {
+  const [year, month, day] = value.split('-').map(Number)
+  if (!year || !month || !day) return undefined
+  return new Date(year, month - 1, day)
+}
+
+function isoDate(date: Date | undefined) {
+  if (!date) return ''
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 function parseTimeRange(value: string) {
@@ -656,18 +671,23 @@ export default function AdminGallery({
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="event-date">Date</Label>
-                <Input
-                  id="event-date"
-                  type="date"
-                  value={meta.eventDate}
-                  onChange={(event) =>
-                    setMeta((current) => ({
-                      ...current,
-                      eventDate: event.target.value,
-                    }))
-                  }
-                />
+                <Label>Date</Label>
+                <div className="border-border w-fit max-w-full overflow-x-auto rounded-2xl border">
+                  <Calendar
+                    mode="single"
+                    selected={parseDate(meta.eventDate)}
+                    onSelect={(date) =>
+                      setMeta((current) => ({
+                        ...current,
+                        eventDate: isoDate(date),
+                      }))
+                    }
+                    captionLayout="dropdown"
+                  />
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  {meta.eventDate || 'No date selected'}
+                </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
