@@ -107,11 +107,23 @@ export default function AdminGallery({
   const [message, setMessage] = React.useState('')
   const [error, setError] = React.useState('')
   const [reviewKey, setReviewKey] = React.useState<string | null>(null)
+  const [hiddenFilenames, setHiddenFilenames] = React.useState(
+    () =>
+      new Set(
+        professional
+          .filter(({ hidden }) => hidden)
+          .map(({ filename }) => filename),
+      ),
+  )
 
   const pendingGuests = guests.filter(({ status }) => status === 'pending')
   const publishedGuests = guests.filter(({ status }) => status === 'published')
-  const visibleProfessional = professional.filter(({ hidden }) => !hidden)
-  const hiddenProfessional = professional.filter(({ hidden }) => hidden)
+  const visibleProfessional = professional.filter(
+    ({ filename }) => !hiddenFilenames.has(filename),
+  )
+  const hiddenProfessional = professional.filter(({ filename }) =>
+    hiddenFilenames.has(filename),
+  )
   const reviewPhotos = React.useMemo<ReviewPhoto[]>(
     () => [
       ...pendingGuests.map((photo) => ({
@@ -222,6 +234,27 @@ export default function AdminGallery({
     }
   }
 
+  async function runInPlace(
+    actions: Action[],
+    success: string,
+    afterSuccess: () => void,
+  ) {
+    if (!actions.length) return
+    setPending(true)
+    setError('')
+    setMessage('')
+    try {
+      for (const action of actions) await send(action)
+      setSelected(new Set())
+      setMessage(success)
+      afterSuccess()
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Action failed.')
+    } finally {
+      setPending(false)
+    }
+  }
+
   function confirmAndRun(actions: Action[], prompt: string, success: string) {
     if (actions.length && window.confirm(prompt)) {
       void run(actions, success)
@@ -241,6 +274,12 @@ export default function AdminGallery({
       reviewPhotos[(start + offset + reviewPhotos.length) % reviewPhotos.length]
         .key,
     )
+  }
+
+  function adjacentReviewKey() {
+    if (reviewPhotos.length < 2) return null
+    const start = reviewIndex >= 0 ? reviewIndex : 0
+    return reviewPhotos[(start + 1) % reviewPhotos.length].key
   }
 
   return (
@@ -594,19 +633,24 @@ export default function AdminGallery({
                   <Button
                     variant="outline"
                     disabled={pending}
-                    onClick={() =>
-                      void run(
-                        [
-                          {
-                            action: 'hideProfessional',
-                            filename: reviewPhoto.key.slice(
-                              'professional:'.length,
-                            ),
-                          },
-                        ],
-                        'Professional photo hidden.',
+                    onClick={() => {
+                      const filename = reviewPhoto.key.slice(
+                        'professional:'.length,
                       )
-                    }
+                      const nextKey = adjacentReviewKey()
+                      void runInPlace(
+                        [{ action: 'hideProfessional', filename }],
+                        'Professional photo hidden.',
+                        () => {
+                          setHiddenFilenames((current) => {
+                            const next = new Set(current)
+                            next.add(filename)
+                            return next
+                          })
+                          setReviewKey(nextKey)
+                        },
+                      )
+                    }}
                   >
                     Hide
                   </Button>
@@ -615,17 +659,22 @@ export default function AdminGallery({
                   <Button
                     variant="outline"
                     disabled={pending}
-                    onClick={() =>
-                      void run(
-                        [
-                          {
-                            action: 'restoreProfessional',
-                            filename: reviewPhoto.key.slice('hidden:'.length),
-                          },
-                        ],
+                    onClick={() => {
+                      const filename = reviewPhoto.key.slice('hidden:'.length)
+                      const nextKey = adjacentReviewKey()
+                      void runInPlace(
+                        [{ action: 'restoreProfessional', filename }],
                         'Professional photo restored.',
+                        () => {
+                          setHiddenFilenames((current) => {
+                            const next = new Set(current)
+                            next.delete(filename)
+                            return next
+                          })
+                          setReviewKey(nextKey)
+                        },
                       )
-                    }
+                    }}
                   >
                     Restore
                   </Button>
