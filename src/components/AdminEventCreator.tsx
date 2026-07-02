@@ -27,6 +27,20 @@ function isoDate(date: Date | undefined) {
   return date?.toISOString().slice(0, 10) ?? ''
 }
 
+function formatTime(value: string) {
+  if (!value) return ''
+  const [hour = '0', minute = '00'] = value.split(':')
+  const parsedHour = Number(hour)
+  const period = parsedHour >= 12 ? 'PM' : 'AM'
+  const displayHour = parsedHour % 12 || 12
+  return `${displayHour}:${minute} ${period}`
+}
+
+function timeRange(start: string, end: string) {
+  if (start && end) return `${formatTime(start)} to ${formatTime(end)}`
+  return formatTime(start || end)
+}
+
 async function responseError(response: Response) {
   try {
     const body: unknown = await response.json()
@@ -46,6 +60,8 @@ async function responseError(response: Response) {
 
 export default function AdminEventCreator() {
   const [date, setDate] = React.useState<Date>()
+  const [startTime, setStartTime] = React.useState('')
+  const [endTime, setEndTime] = React.useState('')
   const [visibilityStatus, setVisibilityStatus] =
     React.useState<GalleryStatus>('coming_soon')
   const [pending, setPending] = React.useState(false)
@@ -60,6 +76,7 @@ export default function AdminEventCreator() {
     const form = event.currentTarget
     const formData = new FormData(form)
     formData.set('eventDate', isoDate(date))
+    formData.set('eventTime', timeRange(startTime, endTime))
     formData.set('visibilityStatus', visibilityStatus)
     formData.set(
       'comingSoon',
@@ -135,12 +152,31 @@ export default function AdminEventCreator() {
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
-                <FieldLabel htmlFor="event-time">Time</FieldLabel>
-                <Input id="event-time" name="eventTime" maxLength={80} />
+                <FieldLabel htmlFor="event-start-time">Start time</FieldLabel>
+                <Input
+                  id="event-start-time"
+                  type="time"
+                  value={startTime}
+                  onChange={(event) => setStartTime(event.target.value)}
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="event-end-time">End time</FieldLabel>
+                <Input
+                  id="event-end-time"
+                  type="time"
+                  value={endTime}
+                  onChange={(event) => setEndTime(event.target.value)}
+                />
               </Field>
               <Field>
                 <FieldLabel htmlFor="event-venue">Venue</FieldLabel>
-                <Input id="event-venue" name="eventVenue" maxLength={120} />
+                <Input
+                  id="event-venue"
+                  name="eventVenue"
+                  maxLength={120}
+                  autoComplete="street-address"
+                />
               </Field>
             </div>
             <Field>
