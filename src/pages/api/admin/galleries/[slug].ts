@@ -21,6 +21,8 @@ import {
   listGalleryPhotos,
   listGuestPhotos,
   listHiddenPhotos,
+  publicEventCover,
+  publicEventFlyer,
   publishGuestPhoto,
   publishedGuestKey,
   restoreProfessionalPhoto,
@@ -49,6 +51,36 @@ async function eventGallery(eventSlug: string | undefined) {
   return dynamicEvent
     ? { id: dynamicEvent.event_slug, dynamicEvent }
     : undefined
+}
+
+function eventSnapshot(event: Awaited<ReturnType<typeof eventGallery>>) {
+  if (!event) return
+  return {
+    title: event.dynamicEvent?.title ?? event.staticEvent?.data.title ?? '',
+    summary:
+      event.dynamicEvent?.summary ??
+      event.staticEvent?.data.galleryDescription ??
+      event.staticEvent?.data.summary ??
+      '',
+    category:
+      event.dynamicEvent?.category ??
+      event.staticEvent?.data.category ??
+      'Event Photography',
+    eventDate:
+      event.dynamicEvent?.event_date ??
+      event.staticEvent?.data.eventDate?.toISOString().slice(0, 10) ??
+      null,
+    eventTime:
+      event.dynamicEvent?.event_time ??
+      event.staticEvent?.data.eventTime ??
+      null,
+    eventVenue:
+      event.dynamicEvent?.event_venue ??
+      event.staticEvent?.data.eventVenue ??
+      null,
+    comingSoon: Boolean(event.dynamicEvent?.coming_soon),
+    status: event.dynamicEvent?.status ?? 'published',
+  }
 }
 
 export const GET: APIRoute = async ({ params, request }) => {
@@ -160,6 +192,56 @@ export const POST: APIRoute = async ({ params, request }) => {
       return json({ ok: true, id }, 201)
     }
 
+    if (action === 'updateFlyer') {
+      const file = formData.get('flyer')
+      if (!(file instanceof File) || !acceptedGalleryImage(file)) {
+        return json(
+          { error: 'Choose a JPEG, PNG, WebP, or HEIC image under 20 MB.' },
+          415,
+        )
+      }
+      const details = eventSnapshot(event)
+      if (!details.title || !details.summary) {
+        return json(
+          { error: 'Save event details before replacing the flyer.' },
+          409,
+        )
+      }
+      const optimized = await optimizedGalleryImage(file, env.IMAGES)
+      const objectKey = `events/${event.id}/flyer-${crypto.randomUUID()}.jpg`
+      await env.GALLERY_PUBLIC.put(objectKey, optimized.buffer, {
+        httpMetadata: {
+          contentType: 'image/jpeg',
+          cacheControl: 'public, max-age=300',
+        },
+      })
+      const flyer = {
+        object_key: objectKey,
+        width: optimized.width,
+        height: optimized.height,
+        alt: `${details.title} flyer`,
+      }
+      await saveEventGallery(env.GALLERY_DB, {
+        event_slug: event.id,
+        title: details.title,
+        summary: details.summary,
+        category: details.category,
+        event_date: details.eventDate,
+        event_time: details.eventTime,
+        event_venue: details.eventVenue,
+        coming_soon: details.comingSoon,
+        status: details.status,
+        flyer,
+        cover: {
+          src: `https://photos.ayoubabed.xyz/${objectKey}`,
+          width: optimized.width,
+          height: optimized.height,
+          alt: flyer.alt,
+        },
+      })
+      return json({ ok: true, flyer }, 201)
+    }
+
     return json({ error: 'Invalid action.' }, 400)
   }
 
@@ -183,7 +265,8 @@ export const POST: APIRoute = async ({ params, request }) => {
   if (
     !action &&
     input.action !== 'updateEvent' &&
-    input.action !== 'createInvite'
+    input.action !== 'createInvite' &&
+    input.action !== 'setCover'
   ) {
     return json({ error: 'Invalid action.' }, 400)
   }
@@ -241,6 +324,68 @@ export const POST: APIRoute = async ({ params, request }) => {
         request.url,
       ).toString(),
     })
+  }
+
+  if (input.action === 'setCover') {
+    const src = typeof input.src === 'string' ? input.src.trim() : ''
+    const alt = typeof input.alt === 'string' ? input.alt.trim() : ''
+    const width = typeof input.width === 'number' ? input.width : 0
+    const height = typeof input.height === 'number' ? input.height : 0
+    if (!src || !alt || width <= 0 || height <= 0) {
+      return json({ error: 'Cover photo is invalid.' }, 400)
+    }
+
+    const [photos, guests] = await Promise.all([
+      listGalleryPhotos(env.GALLERY_DB, event.id),
+      listGuestPhotos(env.GALLERY_DB, event.id),
+    ])
+    const staticImages =
+      event.staticEvent?.data.gallery.filter(
+        (
+          image,
+        ): image is Extract<
+          (typeof event.staticEvent.data.gallery)[number],
+          { filename: string }
+        > => 'filename' in image,
+      ) ?? []
+    const flyer = event.dynamicEvent
+      ? publicEventFlyer(event.dynamicEvent)
+      : undefined
+    const currentCover = event.dynamicEvent
+      ? publicEventCover(event.dynamicEvent)
+      : undefined
+    const allowed = new Set([
+      ...photos.map(
+        (photo) => `https://photos.ayoubabed.xyz/${photo.object_key}`,
+      ),
+      ...guests
+        .filter(({ status }) => status === 'published')
+        .map((photo) => `https://photos.ayoubabed.xyz/${photo.object_key}`),
+      ...staticImages.map(({ src }) => src),
+      ...(flyer ? [flyer.src] : []),
+      ...(currentCover ? [currentCover.src] : []),
+    ])
+    if (!allowed.has(src))
+      return json({ error: 'Cover photo is not available.' }, 404)
+
+    const details = eventSnapshot(event)
+    if (!details.title || !details.summary) {
+      return json({ error: 'Save event details before setting a cover.' }, 409)
+    }
+    const cover = { src, width, height, alt: alt.slice(0, 240) }
+    await saveEventGallery(env.GALLERY_DB, {
+      event_slug: event.id,
+      title: details.title,
+      summary: details.summary,
+      category: details.category,
+      event_date: details.eventDate,
+      event_time: details.eventTime,
+      event_venue: details.eventVenue,
+      coming_soon: details.comingSoon,
+      status: details.status,
+      cover,
+    })
+    return json({ ok: true })
   }
 
   if (action?.action === 'settings') {

@@ -16,6 +16,7 @@ import {
   listGalleryInvites,
   listGalleryPhotos,
   listGuestPhotos,
+  publicEventCover,
   publicEventFlyer,
 } from '../../../lib/gallery-data'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
@@ -69,6 +70,8 @@ const professional = professionalImages.map((image) => ({
   src: image.src,
   alt: image.alt,
   filename: image.filename,
+  width: image.width,
+  height: image.height,
   hidden: hiddenFilenames.has(image.filename),
 }))
 const ogImage =
@@ -96,6 +99,7 @@ const eventMeta = {
   eventVenue: dynamicEvent?.event_venue ?? event?.data.eventVenue ?? '',
   comingSoon: dynamicEvent ? Boolean(dynamicEvent.coming_soon) : false,
   visibilityStatus: dynamicEvent?.status ?? 'published',
+  coverSrc: dynamicEvent ? publicEventCover(dynamicEvent)?.src : undefined,
 }
 
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')

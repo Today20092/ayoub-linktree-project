@@ -7,6 +7,7 @@ import {
   Link,
   Loader2,
   RotateCcw,
+  Star,
   Trash2,
   X,
 } from 'lucide-react'
@@ -35,6 +36,8 @@ type ProfessionalPhoto = {
   src: string
   alt: string
   filename: string
+  width: number
+  height: number
   hidden: boolean
 }
 
@@ -49,6 +52,7 @@ type AdminGalleryProps = {
     eventVenue: string
     comingSoon: boolean
     visibilityStatus: GalleryStatus
+    coverSrc?: string
   }
   settings: GallerySettings | null
   guests: GuestPhoto[]
@@ -82,21 +86,32 @@ type Action =
       action: 'hideProfessional' | 'restoreProfessional'
       filename: string
     }
+  | {
+      action: 'setCover'
+      src: string
+      width: number
+      height: number
+      alt: string
+    }
 
 function PhotoTile({
   src,
   alt,
   label,
+  cover,
   selected,
   onSelect,
   onOpen,
+  onSetCover,
 }: {
   src: string
   alt: string
   label: string
+  cover?: boolean
   selected: boolean
   onSelect: () => void
   onOpen: () => void
+  onSetCover?: () => void
 }) {
   return (
     <article className="border-border bg-card group relative overflow-hidden rounded-xl border">
@@ -114,6 +129,19 @@ function PhotoTile({
       >
         {label}
       </button>
+      {onSetCover && (
+        <button
+          type="button"
+          className="bg-background/90 hover:text-primary absolute top-3 right-3 inline-flex size-9 items-center justify-center rounded-full shadow-sm"
+          onClick={onSetCover}
+          aria-label={cover ? `${label} is the cover` : `Set ${label} as cover`}
+        >
+          <Star
+            className={cover ? 'fill-primary text-primary size-4' : 'size-4'}
+            aria-hidden="true"
+          />
+        </button>
+      )}
       <input
         type="checkbox"
         className="accent-primary absolute top-3 left-3 size-5"
@@ -147,6 +175,34 @@ async function responseError(response: Response) {
     // Status fallback covers non-JSON responses.
   }
   return `Request failed with status ${response.status}.`
+}
+
+function uploadForm(
+  url: string,
+  formData: FormData,
+  onProgress: (progress: number) => void,
+) {
+  return new Promise<Response>((resolve, reject) => {
+    const request = new XMLHttpRequest()
+    request.open('POST', url)
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        onProgress(Math.round((event.loaded / event.total) * 100))
+      }
+    }
+    request.onload = () =>
+      resolve(
+        new Response(request.responseText || null, {
+          status: request.status,
+          statusText: request.statusText,
+          headers: {
+            'content-type': request.getResponseHeader('content-type') ?? '',
+          },
+        }),
+      )
+    request.onerror = () => reject(new Error('Upload failed.'))
+    request.send(formData)
+  })
 }
 
 function formatTime(value: string) {
@@ -198,6 +254,9 @@ export default function AdminGallery({
   const [inviteList, setInviteList] = React.useState(invites)
   const [origin, setOrigin] = React.useState('')
   const [uploadFiles, setUploadFiles] = React.useState<File[]>([])
+  const [flyerFile, setFlyerFile] = React.useState<File | null>(null)
+  const [uploadProgress, setUploadProgress] = React.useState('')
+  const [coverSrc, setCoverSrc] = React.useState(eventMeta.coverSrc ?? '')
   const [pending, setPending] = React.useState(false)
   const [message, setMessage] = React.useState('')
   const [error, setError] = React.useState('')
@@ -395,10 +454,13 @@ export default function AdminGallery({
         const formData = new FormData()
         formData.set('action', 'uploadAdminPhoto')
         formData.set('photo', file)
-        const response = await fetch(`/api/admin/galleries/${eventSlug}`, {
-          method: 'POST',
-          body: formData,
-        })
+        setUploadProgress(`Uploading ${file.name}`)
+        const response = await uploadForm(
+          `/api/admin/galleries/${eventSlug}`,
+          formData,
+          (progress) =>
+            setUploadProgress(`Uploading ${file.name}: ${progress}%`),
+        )
         if (!response.ok) throw new Error(await responseError(response))
       }
       setMessage('Photos uploaded.')
@@ -407,6 +469,33 @@ export default function AdminGallery({
       setError(cause instanceof Error ? cause.message : 'Upload failed.')
     } finally {
       setPending(false)
+      setUploadProgress('')
+    }
+  }
+
+  async function updateFlyer(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!flyerFile) return
+    setPending(true)
+    setError('')
+    setMessage('')
+    try {
+      const formData = new FormData()
+      formData.set('action', 'updateFlyer')
+      formData.set('flyer', flyerFile)
+      const response = await uploadForm(
+        `/api/admin/galleries/${eventSlug}`,
+        formData,
+        (progress) => setUploadProgress(`Uploading flyer: ${progress}%`),
+      )
+      if (!response.ok) throw new Error(await responseError(response))
+      setMessage('Flyer updated.')
+      window.location.reload()
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Flyer update failed.')
+    } finally {
+      setPending(false)
+      setUploadProgress('')
     }
   }
 
@@ -468,6 +557,36 @@ export default function AdminGallery({
     return reviewPhotos[(start + 1) % reviewPhotos.length].key
   }
 
+  function coverAction(image: {
+    src: string
+    width: number
+    height: number
+    alt: string
+  }): Action {
+    return {
+      action: 'setCover',
+      src: image.src,
+      width: image.width,
+      height: image.height,
+      alt: image.alt,
+    }
+  }
+
+  async function setCover(image: {
+    src: string
+    width: number
+    height: number
+    alt: string
+  }) {
+    await runInPlace([coverAction(image)], 'Cover photo updated.', () =>
+      setCoverSrc(image.src),
+    )
+  }
+
+  const publicGalleryUrl = origin
+    ? `${origin}/galleries/${eventSlug}/`
+    : `/galleries/${eventSlug}/`
+
   return (
     <div className="space-y-8">
       {(message || error) && (
@@ -476,6 +595,11 @@ export default function AdminGallery({
           role="status"
         >
           {error || message}
+        </p>
+      )}
+      {uploadProgress && (
+        <p className="text-muted-foreground text-sm" role="status">
+          {uploadProgress}
         </p>
       )}
 
@@ -632,6 +756,54 @@ export default function AdminGallery({
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Gallery links</CardTitle>
+            <CardDescription>
+              Copy the public gallery link for sharing.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3">
+            <code className="bg-muted truncate rounded-md px-3 py-2 text-sm">
+              {publicGalleryUrl}
+            </code>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                void navigator.clipboard.writeText(publicGalleryUrl)
+              }
+            >
+              <Copy data-icon="inline-start" aria-hidden="true" />
+              Copy public link
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Flyer or cover photo</CardTitle>
+            <CardDescription>
+              Replace the flyer and use it as the gallery cover.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form className="grid gap-4" onSubmit={updateFlyer}>
+              <Input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+                onChange={(event) =>
+                  setFlyerFile(event.target.files?.[0] ?? null)
+                }
+              />
+              <Button type="submit" disabled={pending || !flyerFile}>
+                <ImagePlus data-icon="inline-start" aria-hidden="true" />
+                Replace flyer
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Upload photographer photos</CardTitle>
@@ -870,6 +1042,17 @@ export default function AdminGallery({
               selected={selected.has(`published:${photo.id}`)}
               onSelect={() => toggle(`published:${photo.id}`)}
               onOpen={() => setReviewKey(`published:${photo.id}`)}
+              cover={
+                `https://photos.ayoubabed.xyz/${photo.object_key}` === coverSrc
+              }
+              onSetCover={() =>
+                void setCover({
+                  src: `https://photos.ayoubabed.xyz/${photo.object_key}`,
+                  width: photo.width,
+                  height: photo.height,
+                  alt: photo.alt,
+                })
+              }
             />
           ))}
         </div>
@@ -903,6 +1086,17 @@ export default function AdminGallery({
               selected={selected.has(`uploaded:${photo.id}`)}
               onSelect={() => toggle(`uploaded:${photo.id}`)}
               onOpen={() => setReviewKey(`uploaded:${photo.id}`)}
+              cover={
+                `https://photos.ayoubabed.xyz/${photo.object_key}` === coverSrc
+              }
+              onSetCover={() =>
+                void setCover({
+                  src: `https://photos.ayoubabed.xyz/${photo.object_key}`,
+                  width: photo.width,
+                  height: photo.height,
+                  alt: photo.alt,
+                })
+              }
             />
           ))}
         </div>
@@ -954,6 +1148,15 @@ export default function AdminGallery({
               selected={selected.has(`professional:${photo.filename}`)}
               onSelect={() => toggle(`professional:${photo.filename}`)}
               onOpen={() => setReviewKey(`professional:${photo.filename}`)}
+              cover={photo.src === coverSrc}
+              onSetCover={() =>
+                void setCover({
+                  src: photo.src,
+                  width: photo.width,
+                  height: photo.height,
+                  alt: photo.alt,
+                })
+              }
             />
           ))}
         </div>

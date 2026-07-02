@@ -44,6 +44,10 @@ export type EventGallery = {
   flyer_width: number | null
   flyer_height: number | null
   flyer_alt: string | null
+  cover_src: string | null
+  cover_width: number | null
+  cover_height: number | null
+  cover_alt: string | null
   coming_soon: number
   status: GalleryStatus
   created_at: number
@@ -91,6 +95,12 @@ export type SaveEventGalleryInput = {
   status?: GalleryStatus
   flyer?: {
     object_key: string
+    width: number
+    height: number
+    alt: string
+  }
+  cover?: {
+    src: string
     width: number
     height: number
     alt: string
@@ -154,6 +164,19 @@ export function publicEventFlyer(gallery: EventGallery) {
   }
 }
 
+export function publicEventCover(gallery: EventGallery) {
+  if (!gallery.cover_src || !gallery.cover_width || !gallery.cover_height) {
+    return
+  }
+  return {
+    src: gallery.cover_src,
+    width: gallery.cover_width,
+    height: gallery.cover_height,
+    alt: gallery.cover_alt || `${gallery.title} cover photo`,
+    filename: gallery.cover_src.split('/').at(-1) || 'cover.jpg',
+  }
+}
+
 export async function getGallerySettings(
   database: D1Database,
   eventSlug: string,
@@ -203,8 +226,9 @@ export async function saveEventGallery(
       `INSERT INTO event_galleries
        (event_slug, title, event_date, event_time, event_venue, summary,
         category, flyer_object_key, flyer_width, flyer_height, flyer_alt,
+        cover_src, cover_width, cover_height, cover_alt,
         coming_soon, status, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch())
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch())
        ON CONFLICT(event_slug) DO UPDATE SET
          title = excluded.title,
          event_date = excluded.event_date,
@@ -216,6 +240,10 @@ export async function saveEventGallery(
          flyer_width = COALESCE(excluded.flyer_width, flyer_width),
          flyer_height = COALESCE(excluded.flyer_height, flyer_height),
          flyer_alt = COALESCE(excluded.flyer_alt, flyer_alt),
+         cover_src = COALESCE(excluded.cover_src, cover_src),
+         cover_width = COALESCE(excluded.cover_width, cover_width),
+         cover_height = COALESCE(excluded.cover_height, cover_height),
+         cover_alt = COALESCE(excluded.cover_alt, cover_alt),
          coming_soon = excluded.coming_soon,
          status = excluded.status,
          updated_at = unixepoch()`,
@@ -232,6 +260,10 @@ export async function saveEventGallery(
       gallery.flyer?.width ?? null,
       gallery.flyer?.height ?? null,
       gallery.flyer?.alt ?? null,
+      gallery.cover?.src ?? null,
+      gallery.cover?.width ?? null,
+      gallery.cover?.height ?? null,
+      gallery.cover?.alt ?? null,
       status === 'coming_soon' ? 1 : 0,
       status,
     )

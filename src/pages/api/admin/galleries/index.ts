@@ -86,6 +86,14 @@ export const POST: APIRoute = async ({ request }) => {
       galleryStatus(text(formData, 'visibilityStatus')) ??
       (text(formData, 'comingSoon') === 'false' ? 'published' : 'coming_soon'),
     flyer: savedFlyer,
+    cover: savedFlyer
+      ? {
+          src: `https://photos.ayoubabed.xyz/${savedFlyer.object_key}`,
+          width: savedFlyer.width,
+          height: savedFlyer.height,
+          alt: savedFlyer.alt,
+        }
+      : undefined,
   })
 
   return json({ ok: true, eventSlug }, 201)
