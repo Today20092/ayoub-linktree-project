@@ -78,22 +78,22 @@ const ogImage =
       ? event.data.featuredImage
       : event.data.featuredImage.src
     : '/og.jpg')
-const eventTitle = event?.data.title ?? dynamicEvent?.title ?? 'Event gallery'
+const eventTitle = dynamicEvent?.title ?? event?.data.title ?? 'Event gallery'
 const eventMeta = {
   title: eventTitle,
   summary:
+    dynamicEvent?.summary ??
     event?.data.galleryDescription ??
     event?.data.summary ??
-    dynamicEvent?.summary ??
     '',
   category:
-    event?.data.category ?? dynamicEvent?.category ?? 'Event Photography',
+    dynamicEvent?.category ?? event?.data.category ?? 'Event Photography',
   eventDate:
-    event?.data.eventDate?.toISOString().slice(0, 10) ??
     dynamicEvent?.event_date ??
+    event?.data.eventDate?.toISOString().slice(0, 10) ??
     '',
-  eventTime: event?.data.eventTime ?? dynamicEvent?.event_time ?? '',
-  eventVenue: event?.data.eventVenue ?? dynamicEvent?.event_venue ?? '',
+  eventTime: dynamicEvent?.event_time ?? event?.data.eventTime ?? '',
+  eventVenue: dynamicEvent?.event_venue ?? event?.data.eventVenue ?? '',
   comingSoon: dynamicEvent ? Boolean(dynamicEvent.coming_soon) : false,
   visibilityStatus: dynamicEvent?.status ?? 'published',
 }

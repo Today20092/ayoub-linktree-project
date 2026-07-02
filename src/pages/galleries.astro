@@ -88,9 +88,11 @@ const staticGalleries = await Promise.all(
           uploadedPhotos.length
       return {
         id: entry.id,
-        title: entry.data.title,
-        category: entry.data.category,
-        eventDate: entry.data.eventDate,
+        title: statusOverride?.title ?? entry.data.title,
+        category: statusOverride?.category ?? entry.data.category,
+        eventDate: statusOverride?.event_date
+          ? new Date(`${statusOverride.event_date}T00:00:00Z`)
+          : entry.data.eventDate,
         photoCount,
         isRemote,
         cover: isRemote

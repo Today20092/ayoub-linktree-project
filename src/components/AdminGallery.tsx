@@ -149,6 +149,33 @@ async function responseError(response: Response) {
   return `Request failed with status ${response.status}.`
 }
 
+function formatTime(value: string) {
+  if (!value) return ''
+  const [hour = '0', minute = '00'] = value.split(':')
+  const parsedHour = Number(hour)
+  const period = parsedHour >= 12 ? 'PM' : 'AM'
+  const displayHour = parsedHour % 12 || 12
+  return `${displayHour}:${minute} ${period}`
+}
+
+function timeRange(start: string, end: string) {
+  if (start && end) return `${formatTime(start)} to ${formatTime(end)}`
+  return formatTime(start || end)
+}
+
+function parseTimeRange(value: string) {
+  return [...value.matchAll(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/gi)]
+    .slice(0, 2)
+    .map((match) => {
+      let hour = Number(match[1])
+      const minute = match[2] ?? '00'
+      const period = match[3]?.toLowerCase()
+      if (period === 'pm' && hour < 12) hour += 12
+      if (period === 'am' && hour === 12) hour = 0
+      return `${String(hour).padStart(2, '0')}:${minute}`
+    })
+}
+
 export default function AdminGallery({
   eventSlug,
   eventMeta,
@@ -164,6 +191,9 @@ export default function AdminGallery({
   )
   const [password, setPassword] = React.useState('')
   const [meta, setMeta] = React.useState(eventMeta)
+  const [[startTime, endTime], setTimes] = React.useState(() =>
+    parseTimeRange(eventMeta.eventTime),
+  )
   const [guestName, setGuestName] = React.useState('')
   const [inviteList, setInviteList] = React.useState(invites)
   const [origin, setOrigin] = React.useState('')
@@ -343,7 +373,8 @@ export default function AdminGallery({
           summary: meta.summary,
           category: meta.category,
           eventDate: meta.eventDate,
-          eventTime: meta.eventTime,
+          eventTime:
+            timeRange(startTime ?? '', endTime ?? '') || meta.eventTime,
           eventVenue: meta.eventVenue,
           comingSoon: meta.visibilityStatus === 'coming_soon',
           visibilityStatus: meta.visibilityStatus,
@@ -499,7 +530,7 @@ export default function AdminGallery({
                 }
               />
             </div>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="event-date">Date</Label>
                 <Input
@@ -514,32 +545,54 @@ export default function AdminGallery({
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="event-time">Time</Label>
-                <Input
-                  id="event-time"
-                  value={meta.eventTime}
-                  onChange={(event) =>
-                    setMeta((current) => ({
-                      ...current,
-                      eventTime: event.target.value,
-                    }))
-                  }
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="event-start-time">Start time</Label>
+                  <Input
+                    id="event-start-time"
+                    type="time"
+                    value={startTime ?? ''}
+                    onChange={(event) => {
+                      const next = event.target.value
+                      setTimes([next, endTime])
+                      setMeta((current) => ({
+                        ...current,
+                        eventTime: timeRange(next, endTime ?? ''),
+                      }))
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="event-end-time">End time</Label>
+                  <Input
+                    id="event-end-time"
+                    type="time"
+                    value={endTime ?? ''}
+                    onChange={(event) => {
+                      const next = event.target.value
+                      setTimes([startTime, next])
+                      setMeta((current) => ({
+                        ...current,
+                        eventTime: timeRange(startTime ?? '', next),
+                      }))
+                    }}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="event-venue">Venue</Label>
-                <Input
-                  id="event-venue"
-                  value={meta.eventVenue}
-                  onChange={(event) =>
-                    setMeta((current) => ({
-                      ...current,
-                      eventVenue: event.target.value,
-                    }))
-                  }
-                />
-              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="event-venue">Venue</Label>
+              <Input
+                id="event-venue"
+                value={meta.eventVenue}
+                autoComplete="street-address"
+                onChange={(event) =>
+                  setMeta((current) => ({
+                    ...current,
+                    eventVenue: event.target.value,
+                  }))
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="event-status">Public status</Label>
