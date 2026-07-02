@@ -8,7 +8,6 @@ import { getCollection } from 'astro:content'
 
 import { buttonVariants } from '@/components/ui/button'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { cn } from '@/lib/utils'
 import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
 type PortfolioEntry = CollectionEntry<'portfolio'>
@@ -17,6 +16,7 @@ type ProofProject = {
   slug: string
   title: string
   category: string
+  summary: string
   thumbnail: ImageMetadata | string
   imageAlt: string
   imageWidth: number
@@ -25,7 +25,9 @@ type ProofProject = {
 
 type Service = {
   title: string
-  description: string
+  summary: string
+  bestFor: string
+  includes: string[]
   projectIds: string[]
 }
 
@@ -35,7 +37,7 @@ type ServiceWithProjects = Service & {
 
 const servicePageTitle = 'Photography and Video Services | Ayoub Abedrabbo'
 const servicePageDescription =
-  'Photography, video, portraits, podcast production, and community storytelling services in Tampa, backed by real portfolio examples.'
+  'Photography, video production, podcast production, and media planning services in Tampa for businesses, schools, events, and community organizations.'
 
 const { siteName, profileName, twitterHandle, ogImage, ogImageAlt } =
   siteConfig.site
@@ -81,6 +83,7 @@ const toProofProject = (entry: PortfolioEntry): ProofProject => {
     slug: entry.id,
     title: entry.data.title,
     category: entry.data.category,
+    summary: entry.data.summary,
     thumbnail,
     imageAlt: thumbnailAlt,
     imageWidth: thumbnailWidth,
@@ -90,42 +93,47 @@ const toProofProject = (entry: PortfolioEntry): ProofProject => {
 
 const serviceDefinitions: Service[] = [
   {
-    title: 'Event photography and video',
-    description:
-      'Coverage for workshops, community gatherings, weddings, and local events that need both polished images and usable video.',
+    title: 'Photography',
+    summary:
+      'Event coverage, portraits, headshots, and galleries for people and organizations that need clean, useful images.',
+    bestFor:
+      'Workshops, weddings, community events, schools, professional teams, and local leaders.',
+    includes: [
+      'Event photography',
+      'Portraits and headshots',
+      'Client galleries and downloads',
+    ],
     projectIds: [
       'muslim-business-chamber-2026',
-      'temple-terrace-community-open-house',
+      'portraits',
       'sanad-silwadi-wedding',
     ],
   },
   {
-    title: 'Portraits and headshots',
-    description:
-      'Natural portraits for professionals, teams, community leaders, and people who need to look like themselves.',
-    projectIds: ['portraits', 'arqam-academy', 'bayaan-academy'],
-  },
-  {
-    title: 'Podcast production',
-    description:
-      'Recording, audio setup, lighting, editing, and YouTube-ready delivery for recurring shows and interview formats.',
-    projectIds: ['rizqmd-jd-podcast', 'konan-bbq-podcast', 'lavena-health'],
-  },
-  {
-    title: 'Business and brand videos',
-    description:
-      'Talking-head videos, educational pieces, and client-facing content that businesses can publish or send directly.',
-    projectIds: ['omar-erchid-law-firm', 'lavena-health', 'ya-hala'],
-  },
-  {
-    title: 'School and community storytelling',
-    description:
-      'Documentary-style films and photo stories for schools, nonprofits, fundraisers, and community organizations.',
-    projectIds: [
-      'aya-academy',
-      'maan-academy',
-      'temple-terrace-community-open-house',
+    title: 'Video production',
+    summary:
+      'Business videos, event films, school stories, and social-ready pieces shaped around the message first.',
+    bestFor:
+      'Businesses, schools, nonprofits, fundraisers, and people explaining what they do.',
+    includes: [
+      'Talking-head videos',
+      'Event and documentary films',
+      'Editing, color, and delivery',
     ],
+    projectIds: ['omar-erchid-law-firm', 'aya-academy', 'maan-academy'],
+  },
+  {
+    title: 'Podcast and media production',
+    summary:
+      'Recording, audio, lighting, editing, and channel planning for recurring shows and media projects.',
+    bestFor:
+      'Podcasts, interviews, YouTube channels, expert conversations, and brand media.',
+    includes: [
+      'Podcast recording setup',
+      'Audio and lighting support',
+      'Publishing-ready edits',
+    ],
+    projectIds: ['rizqmd-jd-podcast', 'konan-bbq-podcast', 'lavena-health'],
   },
 ]
 
@@ -136,10 +144,6 @@ const services: ServiceWithProjects[] = serviceDefinitions.map((service) => ({
     .filter((entry): entry is PortfolioEntry => Boolean(entry))
     .map(toProofProject),
 }))
-
-const featuredProjects = services
-  .map((service) => service.projects[0])
-  .filter((project): project is ProofProject => Boolean(project))
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -184,201 +188,211 @@ const structuredData = {
     id="main-content"
     class="mx-auto w-full max-w-screen-xl px-4 sm:px-6 lg:px-8"
   >
-    <section
-      class="grid gap-10 pt-12 pb-14 md:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)] md:items-end lg:pt-16 lg:pb-20"
-    >
-      <div class="max-w-3xl">
-        <p
-          class="text-muted-foreground mb-4 text-xs font-semibold tracking-wider uppercase"
-        >
-          Services
-        </p>
-        <h1
-          class="font-heading text-foreground text-4xl leading-[1.02] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl"
-        >
-          Photo and video work people can recognize.
-        </h1>
-        <p
-          class="text-muted-foreground mt-6 max-w-2xl text-base leading-7 sm:text-lg"
-        >
-          I help Tampa businesses, schools, events, and community leaders create
-          images and videos that feel local, useful, and real.
-        </p>
-        <div class="mt-8 flex flex-wrap gap-3">
-          <a href="/#contact" class={buttonVariants({ size: 'lg' })}>Contact</a>
-          <a
-            href="#services-list"
-            class={buttonVariants({ variant: 'outline', size: 'lg' })}
+    <section class="pt-10 pb-10 lg:pt-16 lg:pb-14">
+      <div
+        class="grid gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-end"
+      >
+        <div>
+          <p
+            class="text-muted-foreground mb-4 text-xs font-semibold tracking-wider uppercase"
           >
-            View services
-          </a>
+            Services
+          </p>
+          <h1
+            class="font-heading text-foreground max-w-3xl text-4xl leading-[1.02] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl"
+          >
+            Photography, video, and media production.
+          </h1>
+        </div>
+        <div class="max-w-2xl lg:pb-1">
+          <p class="text-muted-foreground text-base leading-7 sm:text-lg">
+            I help Tampa businesses, schools, events, and community leaders
+            clarify their message, plan the right media, and produce the photos,
+            videos, podcasts, or channel content that supports it.
+          </p>
+          <div class="mt-6 flex flex-wrap gap-3">
+            <a href="/#contact" class={buttonVariants({ size: 'lg' })}>
+              Contact
+            </a>
+            <a
+              href="#proof"
+              class={buttonVariants({ variant: 'outline', size: 'lg' })}
+            >
+              View work
+            </a>
+          </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 sm:gap-4">
+      <div
+        class="border-border mt-10 grid overflow-hidden rounded-sm border md:grid-cols-3"
+      >
         {
-          featuredProjects.slice(0, 4).map((project, index) => (
+          services.map((service) => (
             <a
-              href={`/portfolio/${project.slug}/`}
-              class={cn(
-                'group bg-muted focus-visible:ring-ring block overflow-hidden rounded-sm focus-visible:ring-2 focus-visible:outline-none',
-                index === 0 ? 'col-span-2' : '',
-              )}
+              href={`#${service.title.toLowerCase().replaceAll(' ', '-')}`}
+              class="group border-border bg-card text-card-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring block border-b p-5 no-underline transition-[background-color,color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.99] md:border-r md:border-b-0 md:last:border-r-0"
             >
-              {typeof project.thumbnail === 'string' ? (
-                <Image
-                  src={project.thumbnail}
-                  alt={project.imageAlt}
-                  width={project.imageWidth}
-                  height={project.imageHeight}
-                  layout="constrained"
-                  widths={[360, 540, 720, 960]}
-                  sizes={
-                    index === 0
-                      ? '(min-width: 768px) 45vw, 100vw'
-                      : '(min-width: 768px) 22vw, 50vw'
-                  }
-                  quality={80}
-                  priority={index === 0}
-                  class={cn(
-                    'block w-full object-cover transition-opacity duration-200 group-hover:opacity-90',
-                    index === 0 ? 'aspect-[16/9]' : 'aspect-square',
-                  )}
-                />
-              ) : (
-                <Image
-                  src={project.thumbnail}
-                  alt={project.imageAlt}
-                  width={project.imageWidth}
-                  height={project.imageHeight}
-                  layout="constrained"
-                  widths={[360, 540, 720, 960]}
-                  sizes={
-                    index === 0
-                      ? '(min-width: 768px) 45vw, 100vw'
-                      : '(min-width: 768px) 22vw, 50vw'
-                  }
-                  quality={80}
-                  priority={index === 0}
-                  class={cn(
-                    'block w-full object-cover transition-opacity duration-200 group-hover:opacity-90',
-                    index === 0 ? 'aspect-[16/9]' : 'aspect-square',
-                  )}
-                />
-              )}
+              <h2 class="text-xl leading-tight font-extrabold">
+                {service.title}
+              </h2>
+              <p class="text-muted-foreground group-hover:text-accent-foreground/80 mt-3 text-sm leading-6">
+                {service.summary}
+              </p>
             </a>
           ))
         }
       </div>
     </section>
 
+    <section class="border-border border-t py-10 lg:py-14">
+      <div class="grid gap-6 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
+        <h2
+          class="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl"
+        >
+          Media planning is part of the service.
+        </h2>
+        <p class="text-muted-foreground max-w-3xl text-base leading-7">
+          Before filming or photographing, I work to understand the business,
+          brand, audience, goal, and message. That planning shapes what we
+          shoot, how we set it up, and what the final media needs to do.
+        </p>
+      </div>
+    </section>
+
     <section
-      id="services-list"
-      class="border-border scroll-mt-20 border-t py-12 lg:py-16"
+      id="proof"
+      class="border-border scroll-mt-20 border-t py-10 lg:py-14"
     >
       <div class="max-w-2xl">
         <h2
           class="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl"
         >
-          Services backed by finished work.
+          What I do, with examples.
         </h2>
         <p class="text-muted-foreground mt-4 text-base leading-7">
-          Each service below links to real projects, so you can see the kind of
-          people, places, and channels the work is built for.
+          The page starts with the services. The examples below show who I have
+          worked with and what the work looked like.
         </p>
       </div>
 
-      <div class="mt-10 grid gap-8">
+      <div class="mt-8 grid gap-6">
         {
-          services.map((service, serviceIndex) => (
-            <article class="border-border grid gap-6 border-t pt-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-10">
-              <div class="md:sticky md:top-20 md:self-start">
-                <p class="text-muted-foreground text-sm font-bold">
-                  {String(serviceIndex + 1).padStart(2, '0')}
-                </p>
-                <h3 class="font-heading mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
-                  {service.title}
-                </h3>
-                <p class="text-muted-foreground mt-4 text-base leading-7">
-                  {service.description}
-                </p>
-                <a
-                  href="/#contact"
-                  class={cn(
-                    buttonVariants({ variant: 'outline', size: 'lg' }),
-                    'mt-6',
-                  )}
-                >
-                  Contact
-                </a>
-              </div>
+          services.map((service) => {
+            const featuredProject = service.projects[0]
 
-              <div class="grid gap-4 sm:grid-cols-2">
-                {service.projects.map((project, projectIndex) => (
-                  <a
-                    href={`/portfolio/${project.slug}/`}
-                    class={cn(
-                      'group border-border bg-card text-card-foreground focus-visible:ring-ring overflow-hidden rounded-sm border no-underline transition-[border-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.99]',
-                      projectIndex === 0 ? 'sm:col-span-2' : '',
-                    )}
-                  >
-                    {typeof project.thumbnail === 'string' ? (
-                      <Image
-                        src={project.thumbnail}
-                        alt={project.imageAlt}
-                        width={project.imageWidth}
-                        height={project.imageHeight}
-                        layout="constrained"
-                        widths={[360, 540, 720, 960]}
-                        sizes={
-                          projectIndex === 0
-                            ? '(min-width: 1024px) 54vw, 100vw'
-                            : '(min-width: 640px) 44vw, 100vw'
-                        }
-                        quality={80}
-                        class={cn(
-                          'bg-muted block w-full object-cover transition-opacity duration-200 group-hover:opacity-90',
-                          projectIndex === 0 ? 'aspect-[16/9]' : 'aspect-[4/3]',
+            return (
+              <article
+                id={service.title.toLowerCase().replaceAll(' ', '-')}
+                class="border-border scroll-mt-20 rounded-sm border p-4 sm:p-5"
+              >
+                <div class="grid gap-5 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]">
+                  <div>
+                    <h3 class="font-heading text-2xl font-extrabold tracking-tight">
+                      {service.title}
+                    </h3>
+                    <p class="text-muted-foreground mt-3 text-sm leading-6">
+                      {service.bestFor}
+                    </p>
+                    <ul class="mt-5 grid gap-2 text-sm font-bold sm:grid-cols-3 lg:grid-cols-1">
+                      {service.includes.map((item) => (
+                        <li class="bg-muted/60 rounded-sm px-3 py-2">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div class="grid gap-4 md:grid-cols-[9rem_minmax(0,1fr)] md:items-start">
+                    {featuredProject && (
+                      <a
+                        href={`/portfolio/${featuredProject.slug}/`}
+                        class="group bg-muted focus-visible:ring-ring block overflow-hidden rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+                      >
+                        {typeof featuredProject.thumbnail === 'string' ? (
+                          <Image
+                            src={featuredProject.thumbnail}
+                            alt={featuredProject.imageAlt}
+                            width={featuredProject.imageWidth}
+                            height={featuredProject.imageHeight}
+                            layout="constrained"
+                            widths={[180, 260, 360]}
+                            sizes="(min-width: 768px) 9rem, 100vw"
+                            quality={75}
+                            class="aspect-[4/3] w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
+                          />
+                        ) : (
+                          <Image
+                            src={featuredProject.thumbnail}
+                            alt={featuredProject.imageAlt}
+                            width={featuredProject.imageWidth}
+                            height={featuredProject.imageHeight}
+                            layout="constrained"
+                            widths={[180, 260, 360]}
+                            sizes="(min-width: 768px) 9rem, 100vw"
+                            quality={75}
+                            class="aspect-[4/3] w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
+                          />
                         )}
-                      />
-                    ) : (
-                      <Image
-                        src={project.thumbnail}
-                        alt={project.imageAlt}
-                        width={project.imageWidth}
-                        height={project.imageHeight}
-                        layout="constrained"
-                        widths={[360, 540, 720, 960]}
-                        sizes={
-                          projectIndex === 0
-                            ? '(min-width: 1024px) 54vw, 100vw'
-                            : '(min-width: 640px) 44vw, 100vw'
-                        }
-                        quality={80}
-                        class={cn(
-                          'bg-muted block w-full object-cover transition-opacity duration-200 group-hover:opacity-90',
-                          projectIndex === 0 ? 'aspect-[16/9]' : 'aspect-[4/3]',
-                        )}
-                      />
+                      </a>
                     )}
-                    <span class="block p-4">
-                      <strong class="text-foreground block text-base leading-snug font-extrabold">
-                        {project.title}
-                      </strong>
-                      <small class="text-muted-foreground mt-1 block text-xs font-medium tracking-wider uppercase">
-                        {project.category}
-                      </small>
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </article>
-          ))
+
+                    <div class="grid gap-3">
+                      {service.projects.map((project) => (
+                        <a
+                          href={`/portfolio/${project.slug}/`}
+                          class="group border-border hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring block rounded-sm border p-3 no-underline transition-[background-color,color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.99]"
+                        >
+                          <strong class="text-foreground group-hover:text-accent-foreground block text-base leading-snug font-extrabold">
+                            {project.title}
+                          </strong>
+                          <span class="text-muted-foreground group-hover:text-accent-foreground/80 mt-1 block text-sm leading-5">
+                            {project.summary}
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            )
+          })
         }
       </div>
     </section>
 
-    <section class="border-border border-t py-12 lg:py-16">
+    <section class="border-border border-t py-10 lg:py-14">
+      <div class="max-w-2xl">
+        <h2
+          class="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl"
+        >
+          How I shape the work.
+        </h2>
+      </div>
+      <div class="mt-8 grid gap-4 md:grid-cols-3">
+        <div class="border-border rounded-sm border p-5">
+          <h3 class="text-lg font-extrabold">Understand the goal</h3>
+          <p class="text-muted-foreground mt-3 text-sm leading-6">
+            We clarify the business, audience, offer, and message before
+            deciding what media to make.
+          </p>
+        </div>
+        <div class="border-border rounded-sm border p-5">
+          <h3 class="text-lg font-extrabold">Plan the media</h3>
+          <p class="text-muted-foreground mt-3 text-sm leading-6">
+            I recommend what to capture, how to set it up, and where the final
+            content should be used.
+          </p>
+        </div>
+        <div class="border-border rounded-sm border p-5">
+          <h3 class="text-lg font-extrabold">Produce and deliver</h3>
+          <p class="text-muted-foreground mt-3 text-sm leading-6">
+            I handle the shoot, recording, edit, audio, color, and files needed
+            for publishing or sharing.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="border-border border-t py-10 lg:py-14">
       <div
         class="bg-muted/45 grid gap-6 rounded-sm p-6 sm:p-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
       >
@@ -386,11 +400,12 @@ const structuredData = {
           <h2
             class="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl"
           >
-            Not sure what to book?
+            Not sure what you need?
           </h2>
           <p class="text-muted-foreground mt-3 max-w-2xl text-base leading-7">
-            Send the event, project, or channel you are planning. I can help
-            shape the right mix of photo, video, and audio coverage.
+            Send the event, project, business, or channel you are working on. I
+            can help decide whether photography, video, podcast production, or a
+            mixed media plan makes the most sense.
           </p>
         </div>
         <a href="/#contact" class={buttonVariants({ size: 'lg' })}>Contact</a>
