@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 
 import GuestUpload from '../../../components/GuestUpload'
 import { Button } from '../../../components/ui/button'
-import { getGallerySettings } from '../../../lib/gallery-data'
+import { getEventGallery, getGallerySettings } from '../../../lib/gallery-data'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 
 export const prerender = false
@@ -18,7 +18,13 @@ if (!event?.data.eventGallery || !eventSlug) {
   return new Response(null, { status: 404 })
 }
 
-const settings = await getGallerySettings(env.GALLERY_DB, eventSlug)
+const [settings, statusOverride] = await Promise.all([
+  getGallerySettings(env.GALLERY_DB, eventSlug),
+  getEventGallery(env.GALLERY_DB, eventSlug),
+])
+if (statusOverride?.status === 'hidden') {
+  return new Response(null, { status: 404 })
+}
 const canonicalUrl = new URL(
   `/galleries/${eventSlug}/upload/`,
   Astro.site,

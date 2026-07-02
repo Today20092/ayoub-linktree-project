@@ -39,6 +39,9 @@ export const POST: APIRoute = async ({ params, request }) => {
   if (!staticEvent?.data.eventGallery && !dynamicEvent) {
     return json({ error: 'Gallery not found.' }, 404)
   }
+  if (dynamicEvent?.status === 'hidden') {
+    return json({ error: 'Gallery not found.' }, 404)
+  }
   const eventTitle =
     staticEvent?.data.title ?? dynamicEvent?.title ?? 'the event'
   const inviteToken = new URL(request.url).searchParams.get('invite')?.trim()

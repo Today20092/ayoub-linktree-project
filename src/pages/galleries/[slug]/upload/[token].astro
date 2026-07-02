@@ -33,6 +33,9 @@ const validStaticEvent = staticEvent?.data.eventGallery
 if ((!validStaticEvent && !dynamicEvent) || invite?.event_slug !== eventSlug) {
   return new Response(null, { status: 404 })
 }
+if (dynamicEvent?.status === 'hidden') {
+  return new Response(null, { status: 404 })
+}
 
 const eventTitle =
   validStaticEvent?.data.title ?? dynamicEvent?.title ?? 'Event'

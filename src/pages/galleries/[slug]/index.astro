@@ -51,11 +51,13 @@ const staticProject = eventSlug
   ? await getEntry('portfolio', eventSlug)
   : undefined
 const project = staticProject?.data.eventGallery ? staticProject : undefined
-const dynamicEvent =
-  eventSlug && !project
-    ? await getEventGallery(env.GALLERY_DB, eventSlug)
-    : undefined
+const dynamicEvent = eventSlug
+  ? await getEventGallery(env.GALLERY_DB, eventSlug)
+  : undefined
 if ((!project && !dynamicEvent) || !eventSlug) {
+  return new Response(null, { status: 404 })
+}
+if (dynamicEvent?.status === 'hidden') {
   return new Response(null, { status: 404 })
 }
 const data = project?.data
@@ -83,7 +85,8 @@ const rawImages: RemoteGalleryImage[] =
     ? (inlineImages as unknown as RemoteGalleryImage[])
     : fallbackImages
 
-const dynamicComingSoon = Boolean(dynamicEvent?.coming_soon)
+const dynamicComingSoon =
+  dynamicEvent?.status === 'coming_soon' || Boolean(dynamicEvent?.coming_soon)
 const uploadedImages = dynamicComingSoon
   ? []
   : uploadedPhotos.map(publicGalleryPhoto)

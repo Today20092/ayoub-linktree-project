@@ -14,6 +14,7 @@ import {
   getEventGallery,
   getGallerySettings,
   getGuestPhoto,
+  galleryStatus,
   hideProfessionalPhoto,
   insertGalleryPhoto,
   listGalleryInvites,
@@ -215,6 +216,9 @@ export const POST: APIRoute = async ({ params, request }) => {
           ? input.category.trim()
           : 'Event Photography',
       coming_soon: Boolean(input.comingSoon),
+      status:
+        galleryStatus(input.visibilityStatus) ??
+        (input.comingSoon ? 'coming_soon' : 'published'),
     })
     return json({ ok: true })
   }

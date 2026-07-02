@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro'
 import { env } from 'cloudflare:workers'
 
 import { galleryAdminAuthorized } from '@/lib/gallery-admin'
-import { flyerKey, saveEventGallery } from '@/lib/gallery-data'
+import { flyerKey, galleryStatus, saveEventGallery } from '@/lib/gallery-data'
 import {
   acceptedGalleryImage,
   gallerySlug,
@@ -82,6 +82,9 @@ export const POST: APIRoute = async ({ request }) => {
     summary,
     category: text(formData, 'category') || 'Event Photography',
     coming_soon: text(formData, 'comingSoon') !== 'false',
+    status:
+      galleryStatus(text(formData, 'visibilityStatus')) ??
+      (text(formData, 'comingSoon') === 'false' ? 'published' : 'coming_soon'),
     flyer: savedFlyer,
   })
 

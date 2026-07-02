@@ -17,8 +17,9 @@ import {
 } from '../components/ui/empty'
 import { eventGalleries } from '../data/event-galleries'
 import {
+  getEventGallery,
   getHiddenFilenames,
-  listEventGalleries,
+  listPublicEventGalleries,
   listGalleryPhotos,
   listPublishedGuestPhotos,
   publicEventFlyer,
@@ -44,11 +45,14 @@ const staticGalleries = await Promise.all(
   collections
     .filter((entry) => entry.data.eventGallery)
     .map(async (entry) => {
-      const [hiddenFilenames, guestPhotos, uploadedPhotos] = await Promise.all([
-        getHiddenFilenames(env.GALLERY_DB, entry.id),
-        listPublishedGuestPhotos(env.GALLERY_DB, entry.id),
-        listGalleryPhotos(env.GALLERY_DB, entry.id),
-      ])
+      const [hiddenFilenames, guestPhotos, uploadedPhotos, statusOverride] =
+        await Promise.all([
+          getHiddenFilenames(env.GALLERY_DB, entry.id),
+          listPublishedGuestPhotos(env.GALLERY_DB, entry.id),
+          listGalleryPhotos(env.GALLERY_DB, entry.id),
+          getEventGallery(env.GALLERY_DB, entry.id),
+        ])
+      if (statusOverride?.status === 'hidden') return
       const inlineRemoteImages = entry.data.gallery.filter(
         (image) => 'filename' in image,
       )
@@ -76,8 +80,12 @@ const staticGalleries = await Promise.all(
         typeof coverAsset === 'object' &&
         coverAsset !== null &&
         'filename' in coverAsset
-      const photoCount =
-        visibleProfessional.length + guestPhotos.length + uploadedPhotos.length
+      const comingSoon = statusOverride?.status === 'coming_soon'
+      const photoCount = comingSoon
+        ? 0
+        : visibleProfessional.length +
+          guestPhotos.length +
+          uploadedPhotos.length
       return {
         id: entry.id,
         title: entry.data.title,
@@ -102,7 +110,7 @@ const staticGalleries = await Promise.all(
       }
     }),
 )
-const dynamicEvents = await listEventGalleries(env.GALLERY_DB)
+const dynamicEvents = await listPublicEventGalleries(env.GALLERY_DB)
 const dynamicGalleries = await Promise.all(
   dynamicEvents
     .filter(
@@ -112,10 +120,10 @@ const dynamicGalleries = await Promise.all(
       const photos = await listGalleryPhotos(env.GALLERY_DB, event.event_slug)
       const coverAsset =
         publicEventFlyer(event) ??
-        (!event.coming_soon && photos[0]
+        (event.status === 'published' && photos[0]
           ? publicGalleryPhoto(photos[0])
           : undefined)
-      const photoCount = event.coming_soon ? 0 : photos.length
+      const photoCount = event.status === 'coming_soon' ? 0 : photos.length
       return {
         id: event.event_slug,
         title: event.title,
@@ -132,14 +140,15 @@ const dynamicGalleries = await Promise.all(
       }
     }),
 )
-const sortedGalleries = [...staticGalleries, ...dynamicGalleries].sort(
-  (a, b) => {
-    const aTime = a.eventDate?.getTime() ?? 0
-    const bTime = b.eventDate?.getTime() ?? 0
-    if (bTime !== aTime) return bTime - aTime
-    return 0
-  },
-)
+const sortedGalleries = [
+  ...staticGalleries.filter((gallery) => gallery),
+  ...dynamicGalleries,
+].sort((a, b) => {
+  const aTime = a.eventDate?.getTime() ?? 0
+  const bTime = b.eventDate?.getTime() ?? 0
+  if (bTime !== aTime) return bTime - aTime
+  return 0
+})
 
 const title = 'Event Galleries — Ayoub Abedrabbo'
 const description =

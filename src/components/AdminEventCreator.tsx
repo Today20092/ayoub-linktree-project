@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import type { GalleryStatus } from '@/lib/gallery-data'
 
 function isoDate(date: Date | undefined) {
   return date?.toISOString().slice(0, 10) ?? ''
@@ -45,7 +46,8 @@ async function responseError(response: Response) {
 
 export default function AdminEventCreator() {
   const [date, setDate] = React.useState<Date>()
-  const [comingSoon, setComingSoon] = React.useState(true)
+  const [visibilityStatus, setVisibilityStatus] =
+    React.useState<GalleryStatus>('coming_soon')
   const [pending, setPending] = React.useState(false)
   const [message, setMessage] = React.useState('')
   const [error, setError] = React.useState('')
@@ -58,7 +60,11 @@ export default function AdminEventCreator() {
     const form = event.currentTarget
     const formData = new FormData(form)
     formData.set('eventDate', isoDate(date))
-    formData.set('comingSoon', comingSoon ? 'true' : 'false')
+    formData.set('visibilityStatus', visibilityStatus)
+    formData.set(
+      'comingSoon',
+      visibilityStatus === 'coming_soon' ? 'true' : 'false',
+    )
 
     try {
       const response = await fetch('/api/admin/galleries', {
@@ -154,8 +160,10 @@ export default function AdminEventCreator() {
             <Field orientation="horizontal">
               <Checkbox
                 id="event-coming-soon"
-                checked={comingSoon}
-                onCheckedChange={(value) => setComingSoon(Boolean(value))}
+                checked={visibilityStatus === 'coming_soon'}
+                onCheckedChange={(value) =>
+                  setVisibilityStatus(value ? 'coming_soon' : 'published')
+                }
               />
               <FieldContent>
                 <FieldLabel htmlFor="event-coming-soon">Coming soon</FieldLabel>
@@ -163,6 +171,25 @@ export default function AdminEventCreator() {
                   Hide public photos until the gallery is ready.
                 </FieldDescription>
               </FieldContent>
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="event-status">Public status</FieldLabel>
+              <select
+                id="event-status"
+                name="visibilityStatus"
+                className="border-input bg-background ring-offset-background focus-visible:ring-ring h-10 rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                value={visibilityStatus}
+                onChange={(event) =>
+                  setVisibilityStatus(event.target.value as GalleryStatus)
+                }
+              >
+                <option value="published">Published</option>
+                <option value="coming_soon">Coming soon</option>
+                <option value="hidden">Hidden</option>
+              </select>
+              <FieldDescription>
+                Hidden galleries are only visible in admin.
+              </FieldDescription>
             </Field>
           </FieldGroup>
 
