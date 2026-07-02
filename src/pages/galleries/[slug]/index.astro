@@ -28,6 +28,7 @@ import {
   getHiddenFilenames,
   listGalleryPhotos,
   listPublishedGuestPhotos,
+  publicEventCover,
   publicEventFlyer,
   publicGalleryPhoto,
   publicGuestPhoto,
@@ -127,6 +128,7 @@ const summary =
   dynamicEvent?.summary ?? data?.galleryDescription ?? data?.summary ?? ''
 const title = `${galleryTitle} - Event Gallery`
 const ogImage =
+  (dynamicEvent ? publicEventCover(dynamicEvent)?.src : undefined) ??
   allImages[0]?.src ??
   (dynamicEvent ? publicEventFlyer(dynamicEvent)?.src : undefined) ??
   (data
@@ -156,7 +158,10 @@ const remoteFeaturedImage =
   !hiddenFilenames.has(data.featuredImage.filename)
     ? data.featuredImage
     : undefined
-const galleryHeroImage = remoteFeaturedImage ?? images[0]
+const galleryHeroImage =
+  (dynamicEvent ? publicEventCover(dynamicEvent) : undefined) ??
+  remoteFeaturedImage ??
+  images[0]
 
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', {

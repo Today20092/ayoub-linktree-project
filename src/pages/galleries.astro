@@ -22,6 +22,7 @@ import {
   listPublicEventGalleries,
   listGalleryPhotos,
   listPublishedGuestPhotos,
+  publicEventCover,
   publicEventFlyer,
   publicGalleryPhoto,
   publicGuestPhoto,
@@ -63,7 +64,10 @@ const staticGalleries = await Promise.all(
       const visibleProfessional = professionalImages.filter(
         (image) => !hiddenFilenames.has(image.filename),
       )
-      const requestedCover = entry.data.thumbnail ?? entry.data.featuredImage
+      const requestedCover =
+        (statusOverride ? publicEventCover(statusOverride) : undefined) ??
+        entry.data.thumbnail ??
+        entry.data.featuredImage
       const requestedCoverIsHidden =
         typeof requestedCover === 'object' &&
         requestedCover !== null &&
@@ -121,6 +125,7 @@ const dynamicGalleries = await Promise.all(
     .map(async (event) => {
       const photos = await listGalleryPhotos(env.GALLERY_DB, event.event_slug)
       const coverAsset =
+        publicEventCover(event) ??
         publicEventFlyer(event) ??
         (event.status === 'published' && photos[0]
           ? publicGalleryPhoto(photos[0])
