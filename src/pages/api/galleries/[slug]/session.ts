@@ -8,7 +8,7 @@ import {
   validGalleryPassword,
   verifyGalleryPassword,
 } from '@/lib/gallery-auth'
-import { getGallerySettings } from '@/lib/gallery-data'
+import { getEventGallery, getGallerySettings } from '@/lib/gallery-data'
 
 export const prerender = false
 
@@ -27,6 +27,10 @@ export const POST: APIRoute = async ({ params, request }) => {
 
   const event = await getEntry('portfolio', eventSlug)
   if (!event?.data.eventGallery) {
+    return json({ error: 'Gallery not found.' }, 404)
+  }
+  const statusOverride = await getEventGallery(env.GALLERY_DB, eventSlug)
+  if (statusOverride?.status === 'hidden') {
     return json({ error: 'Gallery not found.' }, 404)
   }
 

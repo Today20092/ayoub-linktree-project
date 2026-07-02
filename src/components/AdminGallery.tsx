@@ -27,6 +27,7 @@ import type {
   GalleryInvite,
   GalleryPhoto,
   GallerySettings,
+  GalleryStatus,
   GuestPhoto,
 } from '@/lib/gallery-data'
 
@@ -47,6 +48,7 @@ type AdminGalleryProps = {
     eventTime: string
     eventVenue: string
     comingSoon: boolean
+    visibilityStatus: GalleryStatus
   }
   settings: GallerySettings | null
   guests: GuestPhoto[]
@@ -65,6 +67,7 @@ type Action =
       eventTime: string
       eventVenue: string
       comingSoon: boolean
+      visibilityStatus: GalleryStatus
     }
   | {
       action: 'settings'
@@ -342,7 +345,8 @@ export default function AdminGallery({
           eventDate: meta.eventDate,
           eventTime: meta.eventTime,
           eventVenue: meta.eventVenue,
-          comingSoon: meta.comingSoon,
+          comingSoon: meta.visibilityStatus === 'coming_soon',
+          visibilityStatus: meta.visibilityStatus,
         },
       ],
       'Event details saved.',
@@ -537,20 +541,29 @@ export default function AdminGallery({
                 />
               </div>
             </div>
-            <label className="flex items-center gap-2 text-sm font-medium">
-              <input
-                type="checkbox"
-                className="accent-primary size-4"
-                checked={meta.comingSoon}
+            <div className="space-y-2">
+              <Label htmlFor="event-status">Public status</Label>
+              <select
+                id="event-status"
+                className="border-input bg-background ring-offset-background focus-visible:ring-ring h-10 rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                value={meta.visibilityStatus}
                 onChange={(event) =>
                   setMeta((current) => ({
                     ...current,
-                    comingSoon: event.target.checked,
+                    visibilityStatus: event.target.value as GalleryStatus,
+                    comingSoon: event.target.value === 'coming_soon',
                   }))
                 }
-              />
-              Keep public photos hidden as coming soon
-            </label>
+              >
+                <option value="published">Published</option>
+                <option value="coming_soon">Coming soon</option>
+                <option value="hidden">Hidden</option>
+              </select>
+              <p className="text-muted-foreground text-sm">
+                Published shows photos, coming soon hides photos, hidden removes
+                the gallery from public pages.
+              </p>
+            </div>
             <Button type="submit" disabled={pending}>
               {pending && (
                 <Loader2

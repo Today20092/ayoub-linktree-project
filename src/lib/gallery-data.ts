@@ -45,8 +45,17 @@ export type EventGallery = {
   flyer_height: number | null
   flyer_alt: string | null
   coming_soon: number
+  status: GalleryStatus
   created_at: number
   updated_at: number
+}
+
+export type GalleryStatus = 'published' | 'coming_soon' | 'hidden'
+
+export function galleryStatus(value: unknown): GalleryStatus | undefined {
+  return value === 'published' || value === 'coming_soon' || value === 'hidden'
+    ? value
+    : undefined
 }
 
 export type GalleryPhoto = {
@@ -79,6 +88,7 @@ export type SaveEventGalleryInput = {
   summary: string
   category?: string
   coming_soon: boolean
+  status?: GalleryStatus
   flyer?: {
     object_key: string
     width: number
@@ -171,17 +181,30 @@ export async function listEventGalleries(database: D1Database) {
   return result.results
 }
 
+export async function listPublicEventGalleries(database: D1Database) {
+  const result = await database
+    .prepare(
+      `SELECT * FROM event_galleries
+       WHERE status != 'hidden'
+       ORDER BY COALESCE(event_date, ''), created_at DESC`,
+    )
+    .all<EventGallery>()
+  return result.results
+}
+
 export async function saveEventGallery(
   database: D1Database,
   gallery: SaveEventGalleryInput,
 ) {
+  const status =
+    gallery.status ?? (gallery.coming_soon ? 'coming_soon' : 'published')
   await database
     .prepare(
       `INSERT INTO event_galleries
        (event_slug, title, event_date, event_time, event_venue, summary,
         category, flyer_object_key, flyer_width, flyer_height, flyer_alt,
-        coming_soon, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch())
+        coming_soon, status, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, unixepoch())
        ON CONFLICT(event_slug) DO UPDATE SET
          title = excluded.title,
          event_date = excluded.event_date,
@@ -194,6 +217,7 @@ export async function saveEventGallery(
          flyer_height = COALESCE(excluded.flyer_height, flyer_height),
          flyer_alt = COALESCE(excluded.flyer_alt, flyer_alt),
          coming_soon = excluded.coming_soon,
+         status = excluded.status,
          updated_at = unixepoch()`,
     )
     .bind(
@@ -208,7 +232,8 @@ export async function saveEventGallery(
       gallery.flyer?.width ?? null,
       gallery.flyer?.height ?? null,
       gallery.flyer?.alt ?? null,
-      gallery.coming_soon ? 1 : 0,
+      status === 'coming_soon' ? 1 : 0,
+      status,
     )
     .run()
 }

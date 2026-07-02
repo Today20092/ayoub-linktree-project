@@ -38,10 +38,9 @@ const staticEvent = eventSlug
   ? await getEntry('portfolio', eventSlug)
   : undefined
 const event = staticEvent?.data.eventGallery ? staticEvent : undefined
-const dynamicEvent =
-  eventSlug && !event
-    ? await getEventGallery(env.GALLERY_DB, eventSlug)
-    : undefined
+const dynamicEvent = eventSlug
+  ? await getEventGallery(env.GALLERY_DB, eventSlug)
+  : undefined
 if ((!event && !dynamicEvent) || !eventSlug) {
   return new Response(null, { status: 404 })
 }
@@ -96,6 +95,7 @@ const eventMeta = {
   eventTime: event?.data.eventTime ?? dynamicEvent?.event_time ?? '',
   eventVenue: event?.data.eventVenue ?? dynamicEvent?.event_venue ?? '',
   comingSoon: dynamicEvent ? Boolean(dynamicEvent.coming_soon) : false,
+  visibilityStatus: dynamicEvent?.status ?? 'published',
 }
 
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')

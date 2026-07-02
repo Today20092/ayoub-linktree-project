@@ -17,6 +17,7 @@ import {
 } from '../../../components/ui/card'
 import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
 import {
+  getEventGallery,
   getGallerySettings,
   listEventGalleries,
   listGalleryPhotos,
@@ -43,9 +44,10 @@ const events = (await getCollection('portfolio')).filter(
 )
 const staticGalleries = await Promise.all(
   events.map(async (event) => {
-    const [settings, guests] = await Promise.all([
+    const [settings, guests, dynamicEvent] = await Promise.all([
       getGallerySettings(env.GALLERY_DB, event.id),
       listGuestPhotos(env.GALLERY_DB, event.id),
+      getEventGallery(env.GALLERY_DB, event.id),
     ])
     const cover = event.data.thumbnail ?? event.data.featuredImage
     return {
@@ -58,7 +60,7 @@ const staticGalleries = await Promise.all(
       category: event.data.category,
       title: event.data.title,
       eventDate: event.data.eventDate,
-      comingSoon: false,
+      visibilityStatus: dynamicEvent?.status ?? 'published',
     }
   }),
 )
@@ -86,7 +88,7 @@ const dynamicGalleries = await Promise.all(
         eventDate: event.event_date
           ? new Date(`${event.event_date}T00:00:00Z`)
           : undefined,
-        comingSoon: Boolean(event.coming_soon),
+        visibilityStatus: event.status,
       }
     }),
 )
@@ -145,7 +147,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
             coverAlt,
             title,
             category,
-            comingSoon,
+            visibilityStatus,
           }) => (
             <Card className="transition-colors hover:bg-muted/30">
               <a
@@ -190,7 +192,12 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
                   {pending > 0 && (
                     <Badge variant="destructive">{pending} pending</Badge>
                   )}
-                  {comingSoon && <Badge variant="outline">Coming soon</Badge>}
+                  {visibilityStatus === 'coming_soon' && (
+                    <Badge variant="outline">Coming soon</Badge>
+                  )}
+                  {visibilityStatus === 'hidden' && (
+                    <Badge variant="destructive">Hidden</Badge>
+                  )}
                   <Badge variant="outline">{category}</Badge>
                   <Badge variant="secondary">
                     <Images aria-hidden="true" />
