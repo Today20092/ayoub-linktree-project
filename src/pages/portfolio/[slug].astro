@@ -184,7 +184,7 @@ const galleryHeading =
     id="main-content"
     class="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
   >
-    <header class="mx-auto max-w-4xl">
+    <header class="mx-auto max-w-4xl" data-reveal="fade">
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -204,44 +204,46 @@ const galleryHeading =
     </header>
 
     <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
-      {
-        projectData.heroVideo ? (
-          <YouTubeEmbed
-            youtubeId={projectData.heroVideo}
-            title={`${projectData.title} featured video`}
-            poster={heroImage}
-            posterAlt={heroImageAlt}
-          />
-        ) : typeof heroImage === 'string' ? (
-          <Image
-            src={heroImage}
-            alt={heroImageAlt}
-            width={heroImageWidth}
-            height={heroImageHeight}
-            layout="full-width"
-            widths={[640, 960, 1280, 1600]}
-            sizes="(min-width: 1280px) 1216px, 100vw"
-            quality={82}
-            priority
-            class="bg-muted block h-auto w-full"
-          />
-        ) : (
-          <Image
-            src={heroImage}
-            alt={heroImageAlt}
-            width={heroImageWidth}
-            height={heroImageHeight}
-            layout="full-width"
-            widths={[640, 960, 1280, 1600]}
-            sizes="(min-width: 1280px) 1216px, 100vw"
-            quality={82}
-            priority
-            class="bg-muted block h-auto w-full"
-          />
-        )
-      }
+      <div data-reveal="up">
+        {
+          projectData.heroVideo ? (
+            <YouTubeEmbed
+              youtubeId={projectData.heroVideo}
+              title={`${projectData.title} featured video`}
+              poster={heroImage}
+              posterAlt={heroImageAlt}
+            />
+          ) : typeof heroImage === 'string' ? (
+            <Image
+              src={heroImage}
+              alt={heroImageAlt}
+              width={heroImageWidth}
+              height={heroImageHeight}
+              layout="full-width"
+              widths={[640, 960, 1280, 1600]}
+              sizes="(min-width: 1280px) 1216px, 100vw"
+              quality={82}
+              priority
+              class="bg-muted block h-auto w-full"
+            />
+          ) : (
+            <Image
+              src={heroImage}
+              alt={heroImageAlt}
+              width={heroImageWidth}
+              height={heroImageHeight}
+              layout="full-width"
+              widths={[640, 960, 1280, 1600]}
+              sizes="(min-width: 1280px) 1216px, 100vw"
+              quality={82}
+              priority
+              class="bg-muted block h-auto w-full"
+            />
+          )
+        }
+      </div>
 
-      <div class="mx-auto max-w-4xl py-10 sm:py-14">
+      <div class="mx-auto max-w-4xl py-10 sm:py-14" data-reveal="up">
         <p class="text-primary text-xs font-bold tracking-wider uppercase">
           {projectData.category}
         </p>
@@ -259,7 +261,10 @@ const galleryHeading =
 
       {
         hasBody && (
-          <section class="portfolio-prose mx-auto max-w-4xl py-8 sm:py-10">
+          <section
+            class="portfolio-prose mx-auto max-w-4xl py-8 sm:py-10"
+            data-reveal="up"
+          >
             <Content />
           </section>
         )
@@ -279,6 +284,7 @@ const galleryHeading =
           <section
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="services-title"
+            data-reveal="up"
           >
             <h2 id="services-title" class="font-heading text-2xl font-bold">
               Work
@@ -297,6 +303,7 @@ const galleryHeading =
           <section
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="details-title"
+            data-reveal="up"
           >
             <h2 id="details-title" class="font-heading text-2xl font-bold">
               Details
@@ -348,6 +355,7 @@ const galleryHeading =
           <section
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="comparison-title"
+            data-reveal="up"
           >
             <p class="text-primary text-xs font-bold tracking-wider uppercase">
               Production comparison
@@ -365,8 +373,12 @@ const galleryHeading =
             </p>
 
             <div class="mt-7 grid gap-8 lg:grid-cols-2">
-              {comparisonVideos.map((video) => (
-                <article class="flex flex-col gap-4">
+              {comparisonVideos.map((video, index) => (
+                <article
+                  class="flex flex-col gap-4"
+                  data-reveal="up"
+                  style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+                >
                   <div>
                     <p class="text-primary text-xs font-bold tracking-wider uppercase">
                       {video.label}
@@ -394,6 +406,7 @@ const galleryHeading =
           <section
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="milestones-title"
+            data-reveal="up"
           >
             <h2 id="milestones-title" class="font-heading text-2xl font-bold">
               {isYaHalaProject
@@ -409,8 +422,11 @@ const galleryHeading =
             </p>
             {isYaHalaProject ? (
               <ol class="mt-6 grid gap-6 sm:grid-cols-2">
-                {milestoneVideos.map((video) => (
-                  <li>
+                {milestoneVideos.map((video, index) => (
+                  <li
+                    data-reveal="up"
+                    style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+                  >
                     <a
                       href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
                       target="_blank"
@@ -460,8 +476,11 @@ const galleryHeading =
               </ol>
             ) : (
               <div class="mt-6 space-y-8">
-                {milestoneVideos.map((video) => (
-                  <article>
+                {milestoneVideos.map((video, index) => (
+                  <article
+                    data-reveal="up"
+                    style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+                  >
                     <YouTubeEmbed
                       youtubeId={video.youtubeId}
                       title={`${video.label}: ${video.title}`}
@@ -502,6 +521,7 @@ const galleryHeading =
           <section
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="outcomes-title"
+            data-reveal="up"
           >
             <h2 id="outcomes-title" class="font-heading text-2xl font-bold">
               Outcomes
@@ -520,6 +540,7 @@ const galleryHeading =
           <aside
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="gallery-cta-title"
+            data-reveal="up"
           >
             <Separator className="mb-8 sm:mb-10" />
             <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -569,14 +590,23 @@ const galleryHeading =
           <section
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="gallery-title"
+            data-reveal="up"
           >
             <h2 id="gallery-title" class="font-heading text-2xl font-bold">
               {galleryHeading}
             </h2>
             {projectData.galleryLayout === 'masonry' ? (
               <div class="mt-6 columns-1 gap-4 sm:columns-2">
-                {galleryImages.map((image) => (
-                  <figure class="mb-6 break-inside-avoid">
+                {galleryImages.map((image, index) => (
+                  <figure
+                    class="mb-6 break-inside-avoid"
+                    data-reveal={index < 12 ? 'up' : undefined}
+                    style={
+                      index < 12
+                        ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
+                        : undefined
+                    }
+                  >
                     <Image
                       src={image.src}
                       alt={image.alt}
@@ -600,7 +630,7 @@ const galleryHeading =
               <div class="mt-6 space-y-6">
                 {bayaanGalleryGroups.map((group) =>
                   group.type === 'landscape' ? (
-                    <figure>
+                    <figure data-reveal="up">
                       <Image
                         src={group.image.src}
                         alt={group.image.alt}
@@ -619,8 +649,16 @@ const galleryHeading =
                     </figure>
                   ) : (
                     <div class="columns-1 gap-4 sm:columns-2">
-                      {group.images.map((image) => (
-                        <figure class="mb-6 break-inside-avoid">
+                      {group.images.map((image, index) => (
+                        <figure
+                          class="mb-6 break-inside-avoid"
+                          data-reveal={index < 12 ? 'up' : undefined}
+                          style={
+                            index < 12
+                              ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
+                              : undefined
+                          }
+                        >
                           <Image
                             src={image.src}
                             alt={image.alt}
@@ -644,8 +682,15 @@ const galleryHeading =
               </div>
             ) : project.id === 'arqam-academy' ? (
               <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                {galleryImages.map((image) => (
-                  <figure>
+                {galleryImages.map((image, index) => (
+                  <figure
+                    data-reveal={index < 12 ? 'up' : undefined}
+                    style={
+                      index < 12
+                        ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
+                        : undefined
+                    }
+                  >
                     <Image
                       src={image.src}
                       alt={image.alt}
@@ -666,8 +711,15 @@ const galleryHeading =
               </div>
             ) : (
               <div class="mt-6 space-y-8">
-                {galleryImages.map((image) => (
-                  <figure>
+                {galleryImages.map((image, index) => (
+                  <figure
+                    data-reveal={index < 12 ? 'up' : undefined}
+                    style={
+                      index < 12
+                        ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
+                        : undefined
+                    }
+                  >
                     <Image
                       src={image.src}
                       alt={image.alt}
@@ -698,6 +750,7 @@ const galleryHeading =
             <section
               class="mx-auto max-w-4xl py-8 sm:py-10"
               aria-labelledby="links-title"
+              data-reveal="up"
             >
               <h2 id="links-title" class="font-heading text-2xl font-bold">
                 Project links
@@ -737,6 +790,7 @@ const galleryHeading =
             <nav
               class="mx-auto grid max-w-4xl gap-2 pt-6 sm:grid-cols-2 sm:pt-8"
               aria-label="More portfolio projects"
+              data-reveal="fade"
             >
               {previousProject && (
                 <a

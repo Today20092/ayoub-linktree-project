@@ -178,7 +178,7 @@ const ogImage =
     id="main-content"
     class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-16"
   >
-    <header class="max-w-2xl">
+    <header class="max-w-2xl" data-reveal="fade">
       <h1
         class="font-heading text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
       >
@@ -192,7 +192,7 @@ const ogImage =
 
     {
       sortedGalleries.length === 0 ? (
-        <div class="mt-16">
+        <div class="mt-16" data-reveal="up">
           <Empty>
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -209,9 +209,13 @@ const ogImage =
         <section
           class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 xl:grid-cols-3"
           aria-label="Event galleries"
+          data-reveal="fade"
         >
           {sortedGalleries.map((gallery, index) => (
-            <article>
+            <article
+              data-reveal="up"
+              style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}
+            >
               <a
                 href={`/galleries/${gallery.id}/`}
                 class="group focus-visible:ring-ring block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none"

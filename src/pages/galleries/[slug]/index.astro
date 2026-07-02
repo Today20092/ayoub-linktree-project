@@ -186,33 +186,35 @@ const formatDate = (date: Date) =>
     id="main-content"
     class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
   >
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink
-            href="/"
-            className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
-          >
-            Home
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbLink
-            href="/galleries"
-            className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
-          >
-            Galleries
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbPage>{galleryTitle}</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
+    <div data-reveal="fade">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              href="/"
+              className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+            >
+              Home
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              href="/galleries"
+              className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+            >
+              Galleries
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{galleryTitle}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    </div>
 
-    <header class="mx-auto max-w-4xl pt-6 sm:pt-8">
+    <header class="mx-auto max-w-4xl pt-6 sm:pt-8" data-reveal="up">
       <div class="flex flex-wrap items-center gap-2">
         {
           eventDate && (
@@ -299,7 +301,10 @@ const formatDate = (date: Date) =>
 
     {
       images.length > 0 && (
-        <figure class="mx-auto mt-8 max-w-4xl overflow-hidden rounded-2xl">
+        <figure
+          class="mx-auto mt-8 max-w-4xl overflow-hidden rounded-2xl"
+          data-reveal="up"
+        >
           {galleryHeroImage ? (
             <Image
               src={galleryHeroImage.src}
@@ -410,7 +415,11 @@ const formatDate = (date: Date) =>
             </div>
           )}
           {guestImages.length > 0 && (
-            <section class="mt-14" aria-labelledby="guest-photos-heading">
+            <section
+              class="mt-14"
+              aria-labelledby="guest-photos-heading"
+              data-reveal="up"
+            >
               <div class="mb-6 max-w-2xl">
                 <Badge variant="secondary">Community gallery</Badge>
                 <h2
@@ -474,7 +483,7 @@ const formatDate = (date: Date) =>
       )
     }
 
-    <footer class="border-border mt-12 border-t pt-6">
+    <footer class="border-border mt-12 border-t pt-6" data-reveal="fade">
       <a
         href={portfolioUrl}
         class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"

@@ -109,6 +109,7 @@ const {
 
         applyTheme()
         systemQuery.addEventListener('change', applyTheme)
+        document.documentElement.dataset.revealReady = 'true'
       })()
     </script>
 
@@ -133,5 +134,35 @@ const {
     </a>
     <Header activeNav={activeNav} />
     <slot />
+    <script>
+      const revealItems = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-reveal]'),
+      )
+      const reducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      )
+      const showRevealItem = (item: HTMLElement) => {
+        item.dataset.revealVisible = 'true'
+      }
+
+      if (revealItems.length > 0) {
+        if (reducedMotion.matches || !('IntersectionObserver' in window)) {
+          revealItems.forEach(showRevealItem)
+        } else {
+          const revealObserver = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (!entry.isIntersecting) return
+                showRevealItem(entry.target as HTMLElement)
+                revealObserver.unobserve(entry.target)
+              })
+            },
+            { rootMargin: '0px 0px -8%', threshold: 0.12 },
+          )
+
+          revealItems.forEach((item) => revealObserver.observe(item))
+        }
+      }
+    </script>
   </body>
 </html>

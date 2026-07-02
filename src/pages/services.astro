@@ -188,7 +188,7 @@ const structuredData = {
     id="main-content"
     class="mx-auto w-full max-w-screen-xl px-4 sm:px-6 lg:px-8"
   >
-    <section class="pt-10 pb-10 lg:pt-16 lg:pb-14">
+    <section class="pt-10 pb-10 lg:pt-16 lg:pb-14" data-reveal="fade">
       <div
         class="grid gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-end"
       >
@@ -226,12 +226,16 @@ const structuredData = {
 
       <div
         class="border-border mt-10 grid overflow-hidden rounded-sm border md:grid-cols-3"
+        data-reveal="up"
+        style="--reveal-delay: 140ms"
       >
         {
-          services.map((service) => (
+          services.map((service, index) => (
             <a
               href={`#${service.title.toLowerCase().replaceAll(' ', '-')}`}
               class="group border-border bg-card text-card-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring block border-b p-5 no-underline transition-[background-color,color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.99] md:border-r md:border-b-0 md:last:border-r-0"
+              data-reveal="up"
+              style={`--reveal-delay: ${index * 70}ms`}
             >
               <h2 class="text-xl leading-tight font-extrabold">
                 {service.title}
@@ -245,7 +249,7 @@ const structuredData = {
       </div>
     </section>
 
-    <section class="border-border border-t py-10 lg:py-14">
+    <section class="border-border border-t py-10 lg:py-14" data-reveal="up">
       <div class="grid gap-6 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
         <h2
           class="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl"
@@ -263,6 +267,7 @@ const structuredData = {
     <section
       id="proof"
       class="border-border scroll-mt-20 border-t py-10 lg:py-14"
+      data-reveal="fade"
     >
       <div class="max-w-2xl">
         <h2
@@ -278,13 +283,15 @@ const structuredData = {
 
       <div class="mt-8 grid gap-6">
         {
-          services.map((service) => {
+          services.map((service, index) => {
             const featuredProject = service.projects[0]
 
             return (
               <article
                 id={service.title.toLowerCase().replaceAll(' ', '-')}
                 class="border-border scroll-mt-20 rounded-sm border p-4 sm:p-5"
+                data-reveal="up"
+                style={`--reveal-delay: ${Math.min(index, 3) * 70}ms`}
               >
                 <div class="grid gap-5 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]">
                   <div>
@@ -359,7 +366,7 @@ const structuredData = {
       </div>
     </section>
 
-    <section class="border-border border-t py-10 lg:py-14">
+    <section class="border-border border-t py-10 lg:py-14" data-reveal="up">
       <div class="max-w-2xl">
         <h2
           class="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl"
@@ -368,21 +375,33 @@ const structuredData = {
         </h2>
       </div>
       <div class="mt-8 grid gap-4 md:grid-cols-3">
-        <div class="border-border rounded-sm border p-5">
+        <div
+          class="border-border rounded-sm border p-5"
+          data-reveal="up"
+          style="--reveal-delay: 0ms"
+        >
           <h3 class="text-lg font-extrabold">Understand the goal</h3>
           <p class="text-muted-foreground mt-3 text-sm leading-6">
             We clarify the business, audience, offer, and message before
             deciding what media to make.
           </p>
         </div>
-        <div class="border-border rounded-sm border p-5">
+        <div
+          class="border-border rounded-sm border p-5"
+          data-reveal="up"
+          style="--reveal-delay: 70ms"
+        >
           <h3 class="text-lg font-extrabold">Plan the media</h3>
           <p class="text-muted-foreground mt-3 text-sm leading-6">
             I recommend what to capture, how to set it up, and where the final
             content should be used.
           </p>
         </div>
-        <div class="border-border rounded-sm border p-5">
+        <div
+          class="border-border rounded-sm border p-5"
+          data-reveal="up"
+          style="--reveal-delay: 140ms"
+        >
           <h3 class="text-lg font-extrabold">Produce and deliver</h3>
           <p class="text-muted-foreground mt-3 text-sm leading-6">
             I handle the shoot, recording, edit, audio, color, and files needed
@@ -392,7 +411,7 @@ const structuredData = {
       </div>
     </section>
 
-    <section class="border-border border-t py-10 lg:py-14">
+    <section class="border-border border-t py-10 lg:py-14" data-reveal="up">
       <div
         class="bg-muted/45 grid gap-6 rounded-sm p-6 sm:p-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
       >

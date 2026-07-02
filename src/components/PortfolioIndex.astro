@@ -72,6 +72,7 @@ const simpleIconBody = (name?: string) =>
     >
       <div
         class="col-span-2 flex min-w-0 items-start justify-between gap-3 lg:col-span-3 lg:row-start-1"
+        data-reveal="fade"
       >
         <div class="min-w-0">
           <h1 class="font-heading text-foreground text-base font-extrabold">
@@ -107,7 +108,11 @@ const simpleIconBody = (name?: string) =>
         </div>
       </div>
 
-      <div class="col-span-2 lg:col-span-5 lg:row-start-1">
+      <div
+        class="col-span-2 lg:col-span-5 lg:row-start-1"
+        data-reveal="up"
+        style="--reveal-delay: 70ms"
+      >
         <p
           class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
         >
@@ -124,6 +129,8 @@ const simpleIconBody = (name?: string) =>
         id="contact"
         class="col-span-2 scroll-mt-20 lg:col-span-4 lg:row-start-1"
         aria-label="Contact links"
+        data-reveal="up"
+        style="--reveal-delay: 140ms"
       >
         <p
           class="text-muted-foreground text-xs font-semibold tracking-wider uppercase"
@@ -171,6 +178,8 @@ const simpleIconBody = (name?: string) =>
       <nav
         class="col-span-2 lg:col-span-3 lg:col-start-4 lg:row-start-2"
         aria-label="YouTube channels"
+        data-reveal="up"
+        style="--reveal-delay: 210ms"
       >
         <p
           class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
@@ -206,6 +215,8 @@ const simpleIconBody = (name?: string) =>
       <nav
         class="col-span-2 lg:col-span-6 lg:col-start-7 lg:row-start-2"
         aria-label="Social links"
+        data-reveal="up"
+        style="--reveal-delay: 280ms"
       >
         <p
           class="text-muted-foreground mb-2 text-xs font-semibold tracking-wider uppercase"
@@ -242,12 +253,16 @@ const simpleIconBody = (name?: string) =>
     </div>
   </header>
 
-  <section id="portfolio" class="scroll-mt-6 pt-10 lg:pt-16">
+  <section id="portfolio" class="scroll-mt-6 pt-10 lg:pt-16" data-reveal="fade">
     <h2 class="sr-only">Portfolio</h2>
     <div class="columns-1 gap-4 space-y-8 md:columns-2 lg:gap-6 xl:columns-3">
       {
         projects.map((project, index) => (
-          <article class="break-inside-avoid">
+          <article
+            class="break-inside-avoid"
+            data-reveal="up"
+            style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}
+          >
             <a
               href={`/portfolio/${project.slug}/`}
               class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none"
@@ -263,7 +278,7 @@ const simpleIconBody = (name?: string) =>
                   sizes="(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"
                   quality={80}
                   priority={index === 0}
-                  class="bg-muted block h-auto w-full transition-opacity duration-200 group-hover:opacity-90"
+                  class="bg-muted block h-auto w-full transition-[opacity,transform] duration-300 ease-out group-hover:scale-[1.015] group-hover:opacity-90"
                 />
               ) : (
                 <Image
@@ -276,7 +291,7 @@ const simpleIconBody = (name?: string) =>
                   sizes="(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"
                   quality={80}
                   priority={index === 0}
-                  class="bg-muted block h-auto w-full transition-opacity duration-200 group-hover:opacity-90"
+                  class="bg-muted block h-auto w-full transition-[opacity,transform] duration-300 ease-out group-hover:scale-[1.015] group-hover:opacity-90"
                 />
               )}
               <span class="mt-3 block">
@@ -296,6 +311,7 @@ const simpleIconBody = (name?: string) =>
 
   <footer
     class="border-border text-muted-foreground mt-16 flex flex-col gap-8 border-t py-8 text-sm sm:flex-row sm:items-end sm:justify-between lg:mt-24"
+    data-reveal="fade"
   >
     <div>
       <p class="mb-3 text-xs font-semibold tracking-wider uppercase">Support</p>
