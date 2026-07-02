@@ -63,25 +63,27 @@ function Calendar({
           defaultClassNames.button_next,
         ),
         month_caption: cn(
-          'flex min-h-(--cell-size) w-full items-center justify-center px-(--cell-size)',
+          'flex h-(--cell-size) w-full items-center justify-center px-(--cell-size)',
           defaultClassNames.month_caption,
         ),
-        caption_label: cn(
-          'text-sm font-medium',
-          defaultClassNames.caption_label,
-        ),
         dropdowns: cn(
-          'flex min-w-0 flex-wrap items-center justify-center gap-x-1 gap-y-0.5',
+          'flex h-(--cell-size) w-full items-center justify-center gap-1.5 text-sm font-medium',
           defaultClassNames.dropdowns,
         ),
-        dropdown_root: cn('relative min-w-0', defaultClassNames.dropdown_root),
+        dropdown_root: cn(
+          'relative rounded-(--cell-radius)',
+          defaultClassNames.dropdown_root,
+        ),
         dropdown: cn(
-          'bg-background text-foreground h-8 max-w-24 rounded-md border border-transparent px-2 text-sm font-medium outline-none',
+          'absolute inset-0 bg-popover opacity-0',
           defaultClassNames.dropdown,
         ),
-        chevron: cn(
-          'text-muted-foreground pointer-events-none absolute top-1/2 right-1 size-3 -translate-y-1/2',
-          defaultClassNames.chevron,
+        caption_label: cn(
+          'font-medium select-none',
+          captionLayout === 'label'
+            ? 'text-sm'
+            : 'flex items-center gap-1 rounded-(--cell-radius) text-sm [&>svg]:size-3.5 [&>svg]:text-muted-foreground',
+          defaultClassNames.caption_label,
         ),
         month_grid: cn('w-full border-collapse', defaultClassNames.month_grid),
         weekdays: cn('flex', defaultClassNames.weekdays),
