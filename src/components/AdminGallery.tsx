@@ -49,22 +49,31 @@ function PhotoTile({
   label,
   selected,
   onSelect,
+  onOpen,
 }: {
   src: string
   alt: string
   label: string
   selected: boolean
   onSelect: () => void
+  onOpen: () => void
 }) {
   return (
-    <label className="border-border bg-card group relative block cursor-pointer overflow-hidden rounded-xl border">
-      <span
-        className="bg-muted block aspect-[4/3] bg-cover bg-center"
+    <article className="border-border bg-card group relative overflow-hidden rounded-xl border">
+      <button
+        type="button"
+        className="bg-muted block aspect-[4/3] w-full bg-cover bg-center text-left"
         style={{ backgroundImage: `url("${src}")` }}
-        role="img"
-        aria-label={alt}
+        onClick={onOpen}
+        aria-label={`Open ${alt || label} full screen`}
       />
-      <span className="block truncate p-3 text-xs font-medium">{label}</span>
+      <button
+        type="button"
+        className="hover:text-primary block w-full truncate p-3 text-left text-xs font-medium"
+        onClick={onOpen}
+      >
+        {label}
+      </button>
       <input
         type="checkbox"
         className="accent-primary absolute top-3 left-3 size-5"
@@ -72,8 +81,15 @@ function PhotoTile({
         onChange={onSelect}
         aria-label={`Select ${label}`}
       />
-    </label>
+    </article>
   )
+}
+
+type ReviewPhoto = {
+  key: string
+  src: string
+  alt: string
+  label: string
 }
 
 export default function AdminGallery({
@@ -90,11 +106,76 @@ export default function AdminGallery({
   const [pending, setPending] = React.useState(false)
   const [message, setMessage] = React.useState('')
   const [error, setError] = React.useState('')
+  const [reviewKey, setReviewKey] = React.useState<string | null>(null)
 
   const pendingGuests = guests.filter(({ status }) => status === 'pending')
   const publishedGuests = guests.filter(({ status }) => status === 'published')
   const visibleProfessional = professional.filter(({ hidden }) => !hidden)
   const hiddenProfessional = professional.filter(({ hidden }) => hidden)
+  const reviewPhotos = React.useMemo<ReviewPhoto[]>(
+    () => [
+      ...pendingGuests.map((photo) => ({
+        key: `pending:${photo.id}`,
+        src: `/api/admin/galleries/${eventSlug}?photo=${photo.id}`,
+        alt: photo.alt,
+        label: photo.original_filename,
+      })),
+      ...publishedGuests.map((photo) => ({
+        key: `published:${photo.id}`,
+        src: `/api/admin/galleries/${eventSlug}?photo=${photo.id}`,
+        alt: photo.alt,
+        label: photo.original_filename,
+      })),
+      ...visibleProfessional.map((photo) => ({
+        key: `professional:${photo.filename}`,
+        src: photo.src,
+        alt: photo.alt,
+        label: photo.filename,
+      })),
+      ...hiddenProfessional.map((photo) => ({
+        key: `hidden:${photo.filename}`,
+        src: photo.src,
+        alt: photo.alt,
+        label: photo.filename,
+      })),
+    ],
+    [
+      eventSlug,
+      hiddenProfessional,
+      pendingGuests,
+      publishedGuests,
+      visibleProfessional,
+    ],
+  )
+  const reviewIndex = reviewPhotos.findIndex((photo) => photo.key === reviewKey)
+  const reviewPhoto = reviewIndex >= 0 ? reviewPhotos[reviewIndex] : null
+
+  React.useEffect(() => {
+    if (!reviewPhoto) return
+
+    function move(offset: number) {
+      setReviewKey((currentKey) => {
+        const currentIndex = reviewPhotos.findIndex(
+          (photo) => photo.key === currentKey,
+        )
+        const start = currentIndex >= 0 ? currentIndex : 0
+        return (
+          reviewPhotos[
+            (start + offset + reviewPhotos.length) % reviewPhotos.length
+          ]?.key ?? currentKey
+        )
+      })
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setReviewKey(null)
+      if (event.key === 'ArrowLeft') move(-1)
+      if (event.key === 'ArrowRight') move(1)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [reviewPhoto, reviewPhotos])
 
   function toggle(key: string) {
     setSelected((current) => {
@@ -151,6 +232,15 @@ export default function AdminGallery({
     return [...selected]
       .filter((key) => key.startsWith(`${prefix}:`))
       .map((key) => build(key.slice(prefix.length + 1)))
+  }
+
+  function moveReview(offset: number) {
+    if (!reviewPhotos.length) return
+    const start = reviewIndex >= 0 ? reviewIndex : 0
+    setReviewKey(
+      reviewPhotos[(start + offset + reviewPhotos.length) % reviewPhotos.length]
+        .key,
+    )
   }
 
   return (
@@ -281,6 +371,7 @@ export default function AdminGallery({
               label={photo.original_filename}
               selected={selected.has(`pending:${photo.id}`)}
               onSelect={() => toggle(`pending:${photo.id}`)}
+              onOpen={() => setReviewKey(`pending:${photo.id}`)}
             />
           ))}
         </div>
@@ -326,6 +417,7 @@ export default function AdminGallery({
               label={photo.original_filename}
               selected={selected.has(`published:${photo.id}`)}
               onSelect={() => toggle(`published:${photo.id}`)}
+              onOpen={() => setReviewKey(`published:${photo.id}`)}
             />
           ))}
         </div>
@@ -371,6 +463,7 @@ export default function AdminGallery({
               label={photo.filename}
               selected={selected.has(`professional:${photo.filename}`)}
               onSelect={() => toggle(`professional:${photo.filename}`)}
+              onOpen={() => setReviewKey(`professional:${photo.filename}`)}
             />
           ))}
         </div>
@@ -411,10 +504,164 @@ export default function AdminGallery({
                 label={photo.filename}
                 selected={selected.has(`hidden:${photo.filename}`)}
                 onSelect={() => toggle(`hidden:${photo.filename}`)}
+                onOpen={() => setReviewKey(`hidden:${photo.filename}`)}
               />
             ))}
           </div>
         </section>
+      )}
+
+      {reviewPhoto && (
+        <div
+          className="fixed inset-0 z-50 bg-black/95 p-4 text-white sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Review ${reviewPhoto.label}`}
+        >
+          <div className="mx-auto flex h-full max-w-screen-2xl flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold">{reviewPhoto.label}</p>
+                <p className="text-xs text-white/60">
+                  Use ← / → to move, Esc to close.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" asChild>
+                  <a href={reviewPhoto.src} target="_blank" rel="noreferrer">
+                    Open image in new tab
+                  </a>
+                </Button>
+                {reviewPhoto.key.startsWith('pending:') && (
+                  <>
+                    <Button
+                      disabled={pending}
+                      onClick={() =>
+                        void run(
+                          [
+                            {
+                              action: 'approveGuest',
+                              photoId: reviewPhoto.key.slice('pending:'.length),
+                            },
+                          ],
+                          'Guest photo published.',
+                        )
+                      }
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      disabled={pending}
+                      onClick={() =>
+                        confirmAndRun(
+                          [
+                            {
+                              action: 'rejectGuest',
+                              photoId: reviewPhoto.key.slice('pending:'.length),
+                            },
+                          ],
+                          'Permanently reject and delete this guest photo?',
+                          'Guest photo rejected.',
+                        )
+                      }
+                    >
+                      Reject
+                    </Button>
+                  </>
+                )}
+                {reviewPhoto.key.startsWith('published:') && (
+                  <Button
+                    variant="destructive"
+                    disabled={pending}
+                    onClick={() =>
+                      confirmAndRun(
+                        [
+                          {
+                            action: 'removeGuest',
+                            photoId: reviewPhoto.key.slice('published:'.length),
+                          },
+                        ],
+                        'Permanently remove this published guest photo?',
+                        'Guest photo removed.',
+                      )
+                    }
+                  >
+                    Remove
+                  </Button>
+                )}
+                {reviewPhoto.key.startsWith('professional:') && (
+                  <Button
+                    variant="outline"
+                    disabled={pending}
+                    onClick={() =>
+                      void run(
+                        [
+                          {
+                            action: 'hideProfessional',
+                            filename: reviewPhoto.key.slice(
+                              'professional:'.length,
+                            ),
+                          },
+                        ],
+                        'Professional photo hidden.',
+                      )
+                    }
+                  >
+                    Hide
+                  </Button>
+                )}
+                {reviewPhoto.key.startsWith('hidden:') && (
+                  <Button
+                    variant="outline"
+                    disabled={pending}
+                    onClick={() =>
+                      void run(
+                        [
+                          {
+                            action: 'restoreProfessional',
+                            filename: reviewPhoto.key.slice('hidden:'.length),
+                          },
+                        ],
+                        'Professional photo restored.',
+                      )
+                    }
+                  >
+                    Restore
+                  </Button>
+                )}
+                <Button variant="outline" onClick={() => setReviewKey(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid min-h-0 flex-1 grid-cols-[auto_1fr_auto] items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => moveReview(-1)}
+                aria-label="Previous photo"
+              >
+                ←
+              </Button>
+              <span
+                className="block h-full min-h-[60vh] rounded-lg bg-contain bg-center bg-no-repeat"
+                style={{ backgroundImage: `url("${reviewPhoto.src}")` }}
+                role="img"
+                aria-label={reviewPhoto.alt}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => moveReview(1)}
+                aria-label="Next photo"
+              >
+                →
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
