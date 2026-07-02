@@ -32,6 +32,8 @@ type GuestUploadProps = {
   eventSlug: string
   eventTitle: string
   enabled: boolean
+  inviteToken?: string
+  guestName?: string
 }
 
 async function responseError(response: Response) {
@@ -55,9 +57,11 @@ export default function GuestUpload({
   eventSlug,
   eventTitle,
   enabled,
+  inviteToken,
+  guestName,
 }: GuestUploadProps) {
   const [password, setPassword] = React.useState('')
-  const [unlocked, setUnlocked] = React.useState(false)
+  const [unlocked, setUnlocked] = React.useState(Boolean(inviteToken))
   const [accessPending, setAccessPending] = React.useState(false)
   const [accessError, setAccessError] = React.useState('')
   const [items, setItems] = React.useState<UploadItem[]>([])
@@ -127,7 +131,10 @@ export default function GuestUpload({
       const formData = new FormData()
       formData.set('photo', item.file)
       try {
-        const response = await fetch(`/api/galleries/${eventSlug}/uploads`, {
+        const uploadUrl = inviteToken
+          ? `/api/galleries/${eventSlug}/uploads?invite=${encodeURIComponent(inviteToken)}`
+          : `/api/galleries/${eventSlug}/uploads`
+        const response = await fetch(uploadUrl, {
           method: 'POST',
           body: formData,
         })
@@ -164,7 +171,7 @@ export default function GuestUpload({
     )
   }
 
-  if (!unlocked) {
+  if (!inviteToken && !unlocked) {
     return (
       <Card>
         <CardHeader>
@@ -216,6 +223,7 @@ export default function GuestUpload({
           <CardDescription>
             Choose up to 20 photos at a time. JPEG, PNG, WebP, and HEIC files up
             to 20 MB are accepted and resized for the web.
+            {guestName ? ` Uploading as ${guestName}.` : ''}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -226,7 +234,9 @@ export default function GuestUpload({
             <Upload className="size-7" aria-hidden="true" />
             <span className="font-semibold">Choose photos</span>
             <span className="text-muted-foreground text-xs">
-              Photos are reviewed before appearing in {eventTitle}
+              {inviteToken
+                ? `Photos publish to ${eventTitle} after upload`
+                : `Photos are reviewed before appearing in ${eventTitle}`}
             </span>
           </Label>
           <Input

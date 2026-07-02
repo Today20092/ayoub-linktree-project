@@ -8,17 +8,29 @@ import {
 } from '@/lib/gallery-admin'
 import { hashGalleryPassword, validGalleryPassword } from '@/lib/gallery-auth'
 import {
+  adminPhotoKey,
+  createGalleryInvite,
   deleteGuestPhoto,
+  getEventGallery,
   getGallerySettings,
   getGuestPhoto,
   hideProfessionalPhoto,
+  insertGalleryPhoto,
+  listGalleryInvites,
+  listGalleryPhotos,
   listGuestPhotos,
   listHiddenPhotos,
   publishGuestPhoto,
   publishedGuestKey,
   restoreProfessionalPhoto,
+  saveEventGallery,
   saveGallerySettings,
 } from '@/lib/gallery-data'
+import {
+  acceptedGalleryImage,
+  optimizedGalleryImage,
+  safeGalleryFilename,
+} from '@/lib/gallery-upload'
 
 export const prerender = false
 
@@ -31,7 +43,11 @@ const json = (body: unknown, status = 200) =>
 async function eventGallery(eventSlug: string | undefined) {
   if (!eventSlug) return
   const event = await getEntry('portfolio', eventSlug)
-  return event?.data.eventGallery ? event : undefined
+  if (event?.data.eventGallery) return { id: event.id, staticEvent: event }
+  const dynamicEvent = await getEventGallery(env.GALLERY_DB, eventSlug)
+  return dynamicEvent
+    ? { id: dynamicEvent.event_slug, dynamicEvent }
+    : undefined
 }
 
 export const GET: APIRoute = async ({ params, request }) => {
@@ -72,7 +88,11 @@ export const GET: APIRoute = async ({ params, request }) => {
     listGuestPhotos(env.GALLERY_DB, event.id),
     listHiddenPhotos(env.GALLERY_DB, event.id),
   ])
-  return json({ settings, guests, hidden })
+  const [photos, invites] = await Promise.all([
+    listGalleryPhotos(env.GALLERY_DB, event.id),
+    listGalleryInvites(env.GALLERY_DB, event.id),
+  ])
+  return json({ settings, guests, hidden, photos, invites })
 }
 
 export const POST: APIRoute = async ({ params, request }) => {
@@ -89,6 +109,59 @@ export const POST: APIRoute = async ({ params, request }) => {
   const event = await eventGallery(params.slug)
   if (!event) return json({ error: 'Gallery not found.' }, 404)
 
+  const contentType = request.headers.get('content-type') ?? ''
+  if (contentType.includes('multipart/form-data')) {
+    let formData: FormData
+    try {
+      formData = await request.formData()
+    } catch {
+      return json({ error: 'Invalid form submission.' }, 400)
+    }
+    const action = formData.get('action')
+
+    if (action === 'uploadAdminPhoto') {
+      const file = formData.get('photo')
+      if (!(file instanceof File) || !acceptedGalleryImage(file)) {
+        return json(
+          { error: 'Choose a JPEG, PNG, WebP, or HEIC photo under 20 MB.' },
+          415,
+        )
+      }
+      const optimized = await optimizedGalleryImage(file, env.IMAGES)
+      const id = crypto.randomUUID()
+      const objectKey = adminPhotoKey(event.id, id)
+      await env.GALLERY_PUBLIC.put(objectKey, optimized.buffer, {
+        httpMetadata: {
+          contentType: 'image/jpeg',
+          cacheControl: 'public, max-age=300',
+        },
+      })
+      try {
+        await insertGalleryPhoto(env.GALLERY_DB, {
+          id,
+          event_slug: event.id,
+          object_key: objectKey,
+          original_filename: safeGalleryFilename(file.name),
+          width: optimized.width,
+          height: optimized.height,
+          alt:
+            (typeof formData.get('alt') === 'string'
+              ? formData.get('alt')?.toString().trim().slice(0, 240)
+              : '') ||
+            `Photo from ${event.dynamicEvent?.title ?? event.staticEvent?.data.title}`,
+          uploader_name: null,
+          source: 'admin',
+        })
+      } catch (error) {
+        await env.GALLERY_PUBLIC.delete(objectKey)
+        throw error
+      }
+      return json({ ok: true, id }, 201)
+    }
+
+    return json({ error: 'Invalid action.' }, 400)
+  }
+
   const contentLength = Number(request.headers.get('content-length') ?? 0)
   if (contentLength > 4096) {
     return json({ error: 'Request is too large.' }, 413)
@@ -104,9 +177,69 @@ export const POST: APIRoute = async ({ params, request }) => {
     return json({ error: 'Invalid JSON.' }, 400)
   }
   const action = parseGalleryAdminAction(value)
-  if (!action) return json({ error: 'Invalid action.' }, 400)
+  const input =
+    value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
+  if (
+    !action &&
+    input.action !== 'updateEvent' &&
+    input.action !== 'createInvite'
+  ) {
+    return json({ error: 'Invalid action.' }, 400)
+  }
 
-  if (action.action === 'settings') {
+  if (input.action === 'updateEvent') {
+    const title = typeof input.title === 'string' ? input.title.trim() : ''
+    const summary =
+      typeof input.summary === 'string' ? input.summary.trim() : ''
+    if (!title || !summary) {
+      return json({ error: 'Name and about information are required.' }, 400)
+    }
+    await saveEventGallery(env.GALLERY_DB, {
+      event_slug: event.id,
+      title,
+      event_date:
+        typeof input.eventDate === 'string' && input.eventDate
+          ? input.eventDate
+          : null,
+      event_time:
+        typeof input.eventTime === 'string' && input.eventTime
+          ? input.eventTime
+          : null,
+      event_venue:
+        typeof input.eventVenue === 'string' && input.eventVenue
+          ? input.eventVenue
+          : null,
+      summary,
+      category:
+        typeof input.category === 'string' && input.category.trim()
+          ? input.category.trim()
+          : 'Event Photography',
+      coming_soon: Boolean(input.comingSoon),
+    })
+    return json({ ok: true })
+  }
+
+  if (input.action === 'createInvite') {
+    const guestName =
+      typeof input.guestName === 'string' ? input.guestName.trim() : ''
+    if (!guestName) return json({ error: 'Guest name is required.' }, 400)
+    const token = crypto.randomUUID()
+    await createGalleryInvite(env.GALLERY_DB, {
+      token,
+      event_slug: event.id,
+      guest_name: guestName.slice(0, 120),
+    })
+    return json({
+      ok: true,
+      token,
+      url: new URL(
+        `/galleries/${event.id}/upload/${token}/`,
+        request.url,
+      ).toString(),
+    })
+  }
+
+  if (action?.action === 'settings') {
     const existing = await getGallerySettings(env.GALLERY_DB, event.id)
     const newPassword = action.password?.trim()
     if (newPassword && !validGalleryPassword(newPassword)) {
@@ -130,6 +263,8 @@ export const POST: APIRoute = async ({ params, request }) => {
     )
     return json({ ok: true })
   }
+
+  if (!action) return json({ error: 'Invalid action.' }, 400)
 
   if (
     action.action === 'approveGuest' ||
@@ -186,11 +321,15 @@ export const POST: APIRoute = async ({ params, request }) => {
     return json({ error: 'Invalid action.' }, 400)
   }
 
-  const inlineImages = event.data.gallery.filter(
+  if (!event.staticEvent) {
+    return json({ error: 'Professional photo not found.' }, 404)
+  }
+
+  const inlineImages = event.staticEvent.data.gallery.filter(
     (
       image,
     ): image is Extract<
-      (typeof event.data.gallery)[number],
+      (typeof event.staticEvent.data.gallery)[number],
       { filename: string }
     > => 'filename' in image,
   )

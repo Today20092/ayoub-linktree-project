@@ -69,7 +69,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
 
     <div class="mt-8">
       <GuestUpload
-        client:load
+        client:only="react"
         eventSlug={eventSlug}
         eventTitle={event.data.title}
         enabled={Boolean(settings?.uploads_enabled)}
