@@ -1,6 +1,7 @@
 export const MAX_GALLERY_UPLOAD_BYTES = 20 * 1024 * 1024
 export const GALLERY_IMAGE_MAX_EDGE = 2400
-export const GALLERY_IMAGE_QUALITY = 84
+// Cloudflare Images emits progressive JPEG for this size range; 90 keeps web photos crisp without storing print-size originals.
+export const GALLERY_IMAGE_QUALITY = 90
 
 const GALLERY_IMAGE_TYPES = new Set([
   'image/jpeg',
