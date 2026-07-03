@@ -29,22 +29,27 @@ npx prettier --write .
 
 ## Deployment Workflow
 
-- `master` is production. Feature work must happen on a branch and be reviewed before merging.
-- GitHub is the source of truth. Do not deploy uncommitted local code to production.
-- Production URL: `ayoubabed.xyz`.
-- The site is deployed as a Cloudflare Worker using Astro's Cloudflare adapter.
-- Production deploy is explicit only: `npm run deploy:prod`.
-- Default deploy is safe preview: `npm run deploy` runs `npm run deploy:preview`.
-- Preview deploys use `npm run deploy:preview`, which rewrites Astro's generated Worker config to the separate preview Worker before deploying.
+- GitHub source of truth. Local uncommitted code never go production.
+- `master` = production branch. Feature work stay on feature branch until review/merge.
+- Site runs as Cloudflare Worker through Astro Cloudflare adapter.
+- Production Worker: `ayoub-linktree-project`. Production URL: `https://ayoubabed.xyz`.
+- Production deploy only from clean `master`: `npm run deploy:prod`.
+- `npm run deploy:prod` runs `npm run verify`, then `wrangler deploy`.
+- Default deploy is preview safe: `npm run deploy` = `npm run deploy:preview`.
+- Preview Worker: `ayoub-linktree-project-preview`.
 - Preview URL: `https://ayoub-linktree-project-preview.ayoub-abedrabbo.workers.dev`.
-- Branch/version preview uploads are available with `npm run deploy:branch-preview`, but do not use them for admin/upload testing unless bindings are confirmed isolated.
-- Preview bindings use separate D1/R2 resources and must be verified in `scripts/deploy-preview-worker.mjs` before admin/upload testing.
-- Do not run `wrangler deploy` directly unless the user explicitly asks for a direct production deploy.
-- Normal AI workflow:
-  1. create or continue a feature branch,
-  2. implement changes,
+- `npm run deploy:preview` runs `npm run verify`, builds, rewrites generated `dist/server/wrangler.json` into `dist/server/wrangler.preview.json`, then deploys preview Worker.
+- Preview D1: `ayoub-gallery-data-preview`.
+- Preview R2: `alphabravomedia-galleries-preview` and `alphabravomedia-gallery-uploads-preview`.
+- Admin/upload testing must use preview only after D1/R2 names above verified in `scripts/deploy-preview-worker.mjs`.
+- `npm run deploy:branch-preview` uploads Worker version with preview alias `dev`. Use for branch smoke test only, not admin/upload testing unless bindings checked isolated.
+- Do not run `wrangler deploy` direct unless user explicitly asks direct production deploy.
+- Normal AI flow:
+  1. create or continue feature branch,
+  2. implement change,
   3. run `npm run verify`,
-  4. push the branch to GitHub,
-  5. use the Cloudflare preview URL for review,
-  6. merge to `master`,
-  7. deploy production from `master`.
+  4. push branch to GitHub,
+  5. deploy preview with `npm run deploy` or `npm run deploy:preview`,
+  6. share preview URL for review,
+  7. merge to `master`,
+  8. on clean `master`, run `npm run deploy:prod`.
