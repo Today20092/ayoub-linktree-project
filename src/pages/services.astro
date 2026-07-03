@@ -210,6 +210,14 @@ const mediaAddOns = [
   'YouTube upload prep: $100-$250',
 ]
 
+const starterLimits = [
+  'Local Tampa-area travel included',
+  'Extra recording time: $100-$150/hr',
+  'Extra camera: $150-$300',
+  'Rush delivery: $75-$150',
+  'Parking, venue fees, or far travel quoted separately',
+]
+
 const services: ServiceWithProjects[] = serviceDefinitions.map((service) => ({
   ...service,
   projects: service.projectIds
@@ -373,12 +381,10 @@ const structuredData = {
           </ul>
         </div>
         <div class="bg-muted/45 rounded-sm p-5">
-          <h3 class="text-lg font-extrabold">Best first booking</h3>
-          <p class="text-muted-foreground mt-4 text-sm leading-6">
-            The easiest offer to sell is the mobile podcast setup: one hour, one
-            camera, controlled lighting, strong microphone audio, and a finished
-            uploaded video. It is clear, useful, and easy to repeat.
-          </p>
+          <h3 class="text-lg font-extrabold">Starter package limits</h3>
+          <ul class="text-muted-foreground mt-4 grid gap-2 text-sm leading-6">
+            {starterLimits.map((item) => <li>{item}</li>)}
+          </ul>
         </div>
       </div>
     </section>
