@@ -6,7 +6,15 @@ import type { ImageMetadata } from 'astro'
 import { Image } from 'astro:assets'
 import { getCollection } from 'astro:content'
 
+import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
@@ -25,6 +33,7 @@ type ProofProject = {
 
 type Service = {
   title: string
+  eyebrow: string
   summary: string
   bestFor: string
   includes: string[]
@@ -38,7 +47,7 @@ type ServiceWithProjects = Service & {
 
 const servicePageTitle = 'Photography and Video Services | Ayoub Abedrabbo'
 const servicePageDescription =
-  'Audio visual setup, event recording, photography, video production, and media planning services in Tampa for mosques, nonprofits, schools, events, and community organizations.'
+  'Photography, video production, mobile podcast recording, AV setup, event galleries, and media planning services in Tampa for businesses, schools, mosques, nonprofits, and community organizations.'
 
 const { siteName, profileName, twitterHandle, ogImage, ogImageAlt } =
   siteConfig.site
@@ -94,9 +103,40 @@ const toProofProject = (entry: PortfolioEntry): ProofProject => {
 
 const serviceDefinitions: Service[] = [
   {
-    title: 'AV setup and recording',
+    title: 'Video production',
+    eyebrow: 'Video',
     summary:
-      'Clear speech audio for lectures, khutbahs, fundraisers, and community events, with wireless microphones and simple full-event recording available.',
+      'Business videos, event films, school stories, interviews, and social-ready pieces shaped around the message first.',
+    bestFor:
+      'Businesses, schools, nonprofits, fundraisers, and people explaining what they do.',
+    includes: [
+      'Talking-head videos',
+      'Event and documentary films',
+      'Editing, color, and delivery',
+    ],
+    startingAt: '$600',
+    projectIds: ['omar-erchid-law-firm', 'aya-academy', 'maan-academy'],
+  },
+  {
+    title: 'Mobile podcast setup',
+    eyebrow: 'Podcast',
+    summary:
+      'A one-camera podcast or interview setup brought to your location with lighting, video, clean audio, color, EQ, and compression.',
+    bestFor:
+      'Business owners, educators, nonprofits, experts, and creators who want a polished episode without building a studio.',
+    includes: [
+      'One-camera recording',
+      'Lighting and Shure MV7+ microphones',
+      'Uploaded video with audio polish',
+    ],
+    startingAt: '$250',
+    projectIds: ['rizqmd-jd-podcast', 'konan-bbq-podcast', 'lavena-health'],
+  },
+  {
+    title: 'AV setup and recording',
+    eyebrow: 'Event sound',
+    summary:
+      'Clear speech audio for lectures, khutbahs, fundraisers, and community events, with wireless microphones and recording available.',
     bestFor:
       'Mosques, nonprofits, schools, lectures, nikahs, fundraisers, and 25-150 person community programs.',
     includes: [
@@ -104,7 +144,7 @@ const serviceDefinitions: Service[] = [
       'Mixer, EQ, and feedback control',
       'Optional full-event recording',
     ],
-    startingAt: '$500 with recording',
+    startingAt: '$250',
     projectIds: [
       'temple-terrace-community-open-house',
       'muslim-business-chamber-2026',
@@ -113,8 +153,9 @@ const serviceDefinitions: Service[] = [
   },
   {
     title: 'Photography',
+    eyebrow: 'Photo',
     summary:
-      'Event coverage, portraits, headshots, and galleries for people and organizations that need clean, useful images.',
+      'Event coverage, portraits, headshots, fast galleries, and guest-friendly download links for people and organizations.',
     bestFor:
       'Workshops, weddings, community events, schools, professional teams, and local leaders.',
     includes: [
@@ -129,52 +170,34 @@ const serviceDefinitions: Service[] = [
       'sanad-silwadi-wedding',
     ],
   },
-  {
-    title: 'Video production',
-    summary:
-      'Business videos, event films, school stories, and social-ready pieces shaped around the message first.',
-    bestFor:
-      'Businesses, schools, nonprofits, fundraisers, and people explaining what they do.',
-    includes: [
-      'Talking-head videos',
-      'Event and documentary films',
-      'Editing, color, and delivery',
-    ],
-    startingAt: '$600',
-    projectIds: ['omar-erchid-law-firm', 'aya-academy', 'maan-academy'],
-  },
-  {
-    title: 'Podcast and media production',
-    summary:
-      'Recording, audio, lighting, editing, and channel planning for recurring shows and media projects.',
-    bestFor:
-      'Podcasts, interviews, YouTube channels, expert conversations, and brand media.',
-    includes: [
-      'Podcast recording setup',
-      'Audio and lighting support',
-      'Publishing-ready edits',
-    ],
-    startingAt: '$500',
-    projectIds: ['rizqmd-jd-podcast', 'konan-bbq-podcast', 'lavena-health'],
-  },
 ]
 
-const avPackages = [
+const servicePackages = [
+  {
+    name: 'Mobile podcast recording',
+    price: 'From $250',
+    label: '1 hour',
+    detail:
+      'One-camera setup at your location with lights, Shure MV7+ microphones, color grade, EQ, compression, and uploaded video delivery.',
+  },
   {
     name: 'AV setup',
     price: '$250-$350',
+    label: 'Setup only',
     detail:
       'Speaker placement, wireless mic setup, mixer setup, EQ, soundcheck, and handoff.',
   },
   {
-    name: 'AV setup with operator',
+    name: 'AV with live support',
     price: '$450-$650',
+    label: 'With operator',
     detail:
       'Setup plus a live operator during the event, managed by Ayoub when the event needs active sound support.',
   },
   {
-    name: 'AV setup with recording',
+    name: 'Event recording',
     price: '$500-$750',
+    label: 'Full program',
     detail:
       'Clean event sound plus a simple full lecture or program recording delivered as a file.',
   },
@@ -251,14 +274,14 @@ const structuredData = {
           <h1
             class="font-heading text-foreground max-w-3xl text-4xl leading-[1.02] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl"
           >
-            Clear event sound, recording, and media coverage.
+            Media production that comes to you.
           </h1>
         </div>
         <div class="max-w-2xl lg:pb-1">
           <p class="text-muted-foreground text-base leading-7 sm:text-lg">
-            I help Tampa mosques, nonprofits, schools, events, and community
-            leaders set up clean speech audio, capture the full program, and
-            produce the photos or videos that help people remember and share it.
+            I help Tampa businesses, schools, mosques, nonprofits, and local
+            events capture clean video, polished audio, useful photos, and
+            shareable galleries without making the production feel complicated.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
             <a href="/#contact" class={buttonVariants({ size: 'lg' })}>
@@ -274,28 +297,27 @@ const structuredData = {
         </div>
       </div>
 
-      <div
-        class="border-border mt-10 grid overflow-hidden rounded-sm border md:grid-cols-2 lg:grid-cols-4"
-        data-reveal="up"
-        style="--reveal-delay: 140ms"
-      >
+      <div class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {
           services.map((service, index) => (
             <a
               href={`#${service.title.toLowerCase().replaceAll(' ', '-')}`}
-              class="group border-border bg-card text-card-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring block border-b p-5 no-underline transition-[background-color,color,transform] last:border-b-0 focus-visible:ring-2 focus-visible:outline-none active:scale-[0.99] lg:border-r lg:border-b-0 lg:last:border-r-0"
+              class="focus-visible:ring-ring block rounded-xl no-underline focus-visible:ring-2 focus-visible:outline-none"
               data-reveal="up"
               style={`--reveal-delay: ${index * 70}ms`}
             >
-              <h2 class="text-xl leading-tight font-extrabold">
-                {service.title}
-              </h2>
-              <p class="text-muted-foreground group-hover:text-accent-foreground/80 mt-3 text-sm leading-6">
-                {service.summary}
-              </p>
-              <p class="text-foreground group-hover:text-accent-foreground mt-4 text-sm font-extrabold">
-                From {service.startingAt}
-              </p>
+              <Card className="h-full transition-[background-color,transform] hover:bg-accent active:scale-[0.99]">
+                <CardHeader>
+                  <Badge variant="secondary">{service.eyebrow}</Badge>
+                  <CardTitle>{service.title}</CardTitle>
+                  <CardDescription>{service.summary}</CardDescription>
+                </CardHeader>
+                <CardFooter>
+                  <span class="text-sm font-extrabold">
+                    From {service.startingAt}
+                  </span>
+                </CardFooter>
+              </Card>
             </a>
           ))
         }
@@ -305,39 +327,38 @@ const structuredData = {
     <section
       class="border-border scroll-mt-20 border-t py-10 lg:py-14"
       data-reveal="up"
-      id="event-sound"
+      id="packages"
     >
       <div class="grid gap-8 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
         <div>
           <h2
             class="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl"
           >
-            Event sound setup for speech-first programs.
+            Simple starting points.
           </h2>
           <p class="text-muted-foreground mt-4 text-base leading-7">
-            The main offer is simple: clear wireless audio, proper speaker
-            placement, a mixer that is actually dialed in, and no feedback or
-            harsh noise during the program.
+            These are not the only options. They are anchors so people can
+            understand what a small job usually costs before asking for a custom
+            quote.
           </p>
         </div>
 
-        <div class="grid gap-4">
+        <div class="grid gap-4 md:grid-cols-2">
           {
-            avPackages.map((item, index) => (
-              <div
-                class="border-border grid gap-3 rounded-sm border p-5 sm:grid-cols-[9rem_minmax(0,1fr)]"
-                data-reveal="up"
-                style={`--reveal-delay: ${index * 70}ms`}
-              >
-                <div>
-                  <h3 class="text-base font-extrabold">{item.name}</h3>
-                  <p class="text-primary mt-1 text-lg font-extrabold">
-                    {item.price}
-                  </p>
-                </div>
-                <p class="text-muted-foreground text-sm leading-6">
-                  {item.detail}
-                </p>
+            servicePackages.map((item, index) => (
+              <div data-reveal="up" style={`--reveal-delay: ${index * 70}ms`}>
+                <Card size="sm" className="h-full">
+                  <CardHeader>
+                    <Badge variant="outline">{item.label}</Badge>
+                    <CardTitle>{item.name}</CardTitle>
+                    <CardDescription>{item.detail}</CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <span class="text-primary text-lg font-extrabold">
+                      {item.price}
+                    </span>
+                  </CardFooter>
+                </Card>
               </div>
             ))
           }
@@ -352,11 +373,11 @@ const structuredData = {
           </ul>
         </div>
         <div class="bg-muted/45 rounded-sm p-5">
-          <h3 class="text-lg font-extrabold">Launch setup</h3>
+          <h3 class="text-lg font-extrabold">Best first booking</h3>
           <p class="text-muted-foreground mt-4 text-sm leading-6">
-            Early bookings may use trusted borrowed gear while the owned kit is
-            being built. The service price covers planning, setup, tuning, and
-            delivery. Equipment is matched to the room and event needs.
+            The easiest offer to sell is the mobile podcast setup: one hour, one
+            camera, controlled lighting, strong microphone audio, and a finished
+            uploaded video. It is clear, useful, and easy to repeat.
           </p>
         </div>
       </div>
@@ -367,13 +388,13 @@ const structuredData = {
         <h2
           class="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl"
         >
-          Event planning is part of the service.
+          Production planning is part of the service.
         </h2>
         <p class="text-muted-foreground max-w-3xl text-base leading-7">
-          Before the event, I work to understand the room, audience size, mic
-          count, program flow, recording needs, and media goals. That planning
-          shapes the sound setup, the capture plan, and what gets delivered
-          after the event.
+          Before showing up with equipment, I work to understand the location,
+          audience, message, schedule, recording needs, and where the final
+          media will be used. That planning shapes what gets captured and how it
+          gets delivered.
         </p>
       </div>
     </section>
@@ -418,7 +439,9 @@ const structuredData = {
                     </p>
                     <ul class="mt-5 grid gap-2 text-sm font-bold sm:grid-cols-3 lg:grid-cols-1">
                       {service.includes.map((item) => (
-                        <li class="bg-muted/60 rounded-sm px-3 py-2">{item}</li>
+                        <li>
+                          <Badge variant="secondary">{item}</Badge>
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -495,10 +518,10 @@ const structuredData = {
           data-reveal="up"
           style="--reveal-delay: 0ms"
         >
-          <h3 class="text-lg font-extrabold">Confirm the setup</h3>
+          <h3 class="text-lg font-extrabold">Plan the setup</h3>
           <p class="text-muted-foreground mt-3 text-sm leading-6">
-            We confirm room size, speaker count, microphones, power, schedule,
-            and recording needs before event day.
+            We confirm the location, schedule, gear needs, message, and delivery
+            format before the shoot or event.
           </p>
         </div>
         <div
@@ -506,10 +529,10 @@ const structuredData = {
           data-reveal="up"
           style="--reveal-delay: 70ms"
         >
-          <h3 class="text-lg font-extrabold">Tune the sound</h3>
+          <h3 class="text-lg font-extrabold">Bring the production</h3>
           <p class="text-muted-foreground mt-3 text-sm leading-6">
-            I place the speakers, set levels, EQ the microphones, control
-            feedback, and make sure speech is clear.
+            I bring the camera, lighting, audio, and support needed for the
+            service, then set it up around the room and people.
           </p>
         </div>
         <div
@@ -517,10 +540,10 @@ const structuredData = {
           data-reveal="up"
           style="--reveal-delay: 140ms"
         >
-          <h3 class="text-lg font-extrabold">Capture and deliver</h3>
+          <h3 class="text-lg font-extrabold">Capture and polish</h3>
           <p class="text-muted-foreground mt-3 text-sm leading-6">
-            When recording or media coverage is included, I deliver the files,
-            gallery, edit, or publishing support agreed before the event.
+            I record, photograph, edit, color, EQ, compress, upload, or deliver
+            the files based on the package.
           </p>
         </div>
       </div>
