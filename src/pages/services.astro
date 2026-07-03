@@ -10,11 +10,13 @@ import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import {
   Card,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import ServicesFaq from '../components/ServicesFaq'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
@@ -36,6 +38,7 @@ type Service = {
   eyebrow: string
   summary: string
   bestFor: string
+  result: string
   includes: string[]
   startingAt: string
   projectIds: string[]
@@ -109,6 +112,8 @@ const serviceDefinitions: Service[] = [
       'Business videos, event films, school stories, interviews, and social-ready pieces shaped around the message first.',
     bestFor:
       'Businesses, schools, nonprofits, fundraisers, and people explaining what they do.',
+    result:
+      'Clear videos that explain the message, document the moment, and give people something worth sharing.',
     includes: [
       'Talking-head videos',
       'Event and documentary films',
@@ -124,6 +129,8 @@ const serviceDefinitions: Service[] = [
       'A one-hour, one-camera podcast or interview setup brought to your location with lighting, clean audio, color, EQ, and compression.',
     bestFor:
       'Business owners, educators, nonprofits, experts, and creators who want a polished episode without building a studio.',
+    result:
+      'A clean uploaded episode without renting a studio or learning cameras, lights, and microphones yourself.',
     includes: [
       'One-hour local recording',
       'Lighting and Shure MV7+ microphones',
@@ -139,6 +146,8 @@ const serviceDefinitions: Service[] = [
       'Clear speech audio for lectures, khutbahs, fundraisers, and community events, with wireless microphones and recording available.',
     bestFor:
       'Mosques, nonprofits, schools, lectures, nikahs, fundraisers, and 25-150 person community programs.',
+    result:
+      'A room where people can hear clearly, speakers feel comfortable, and the program can be recorded properly.',
     includes: [
       'Speaker and microphone setup',
       'Mixer, EQ, and feedback control',
@@ -158,6 +167,8 @@ const serviceDefinitions: Service[] = [
       'Short event coverage, portraits, headshots, fast galleries, and guest-friendly download links for people and organizations.',
     bestFor:
       'Workshops, weddings, community events, schools, professional teams, and local leaders.',
+    result:
+      'Useful event photos and fast galleries that people can open, download, and share without a messy handoff.',
     includes: [
       'Short event starter coverage',
       'Portraits and headshots',
@@ -226,6 +237,22 @@ const services: ServiceWithProjects[] = serviceDefinitions.map((service) => ({
     .map(toProofProject),
 }))
 
+const heroProofProjects = [
+  'rizqmd-jd-podcast',
+  'muslim-business-chamber-2026',
+  'bayaan-academy',
+]
+  .map((id) => entriesById.get(id))
+  .filter((entry): entry is PortfolioEntry => Boolean(entry))
+  .map(toProofProject)
+
+const proofStats = [
+  'Podcast episodes',
+  'Fast event galleries',
+  'Full lecture recordings',
+  'School and nonprofit media',
+]
+
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'Service',
@@ -269,43 +296,106 @@ const structuredData = {
     id="main-content"
     class="mx-auto w-full max-w-screen-xl px-4 sm:px-6 lg:px-8"
   >
-    <section class="pt-10 pb-10 lg:pt-16 lg:pb-14" data-reveal="fade">
+    <section class="pt-10 pb-10 lg:pt-14 lg:pb-14" data-reveal="fade">
       <div
-        class="grid gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-end"
+        class="grid gap-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center"
       >
-        <div>
+        <div class="max-w-3xl">
           <p
             class="text-muted-foreground mb-4 text-xs font-semibold tracking-wider uppercase"
           >
             Services
           </p>
           <h1
-            class="font-heading text-foreground max-w-3xl text-4xl leading-[1.02] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl"
+            class="font-heading text-foreground text-4xl leading-[1.02] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl"
           >
-            Media production that comes to you.
+            On-location media production in Tampa.
           </h1>
-        </div>
-        <div class="max-w-2xl lg:pb-1">
-          <p class="text-muted-foreground text-base leading-7 sm:text-lg">
-            I help Tampa businesses, schools, mosques, nonprofits, and local
-            events capture clean video, polished audio, useful photos, and
-            shareable galleries without making the production feel complicated.
+          <p
+            class="text-muted-foreground mt-5 max-w-2xl text-base leading-7 sm:text-lg"
+          >
+            Video, podcasts, event photos, galleries, and sound support brought
+            to your business, school, mosque, nonprofit, or event.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
             <a href="/#contact" class={buttonVariants({ size: 'lg' })}>
-              Contact
+              Request a quote
             </a>
             <a
-              href="#proof"
+              href="#packages"
               class={buttonVariants({ variant: 'outline', size: 'lg' })}
             >
-              View work
+              View packages
             </a>
           </div>
         </div>
+
+        <div class="grid min-h-72 grid-cols-[1.08fr_0.92fr] gap-3">
+          {
+            heroProofProjects.map((project, index) => (
+              <a
+                href={`/portfolio/${project.slug}/`}
+                class:list={[
+                  'group bg-muted focus-visible:ring-ring block overflow-hidden rounded-xl focus-visible:ring-2 focus-visible:outline-none',
+                  index === 0 ? 'row-span-2' : '',
+                ]}
+                data-reveal="up"
+                style={`--reveal-delay: ${index * 90}ms`}
+              >
+                {typeof project.thumbnail === 'string' ? (
+                  <Image
+                    src={project.thumbnail}
+                    alt={project.imageAlt}
+                    width={project.imageWidth}
+                    height={project.imageHeight}
+                    layout="constrained"
+                    widths={[360, 520, 720, 960]}
+                    sizes="(min-width: 1024px) 34rem, 100vw"
+                    quality={78}
+                    class="h-full min-h-36 w-full object-cover transition duration-300 group-hover:scale-[1.02] group-hover:opacity-95"
+                  />
+                ) : (
+                  <Image
+                    src={project.thumbnail}
+                    alt={project.imageAlt}
+                    width={project.imageWidth}
+                    height={project.imageHeight}
+                    layout="constrained"
+                    widths={[360, 520, 720, 960]}
+                    sizes="(min-width: 1024px) 34rem, 100vw"
+                    quality={78}
+                    class="h-full min-h-36 w-full object-cover transition duration-300 group-hover:scale-[1.02] group-hover:opacity-95"
+                  />
+                )}
+              </a>
+            ))
+          }
+        </div>
       </div>
 
-      <div class="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {proofStats.map((item) => <Badge variant="outline">{item}</Badge>)}
+      </div>
+    </section>
+
+    <section
+      class="border-border scroll-mt-20 border-t py-10 lg:py-14"
+      data-reveal="fade"
+      id="services"
+    >
+      <div class="max-w-2xl">
+        <h2
+          class="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl"
+        >
+          Choose the kind of support you need.
+        </h2>
+        <p class="text-muted-foreground mt-4 text-base leading-7">
+          Start with one service or combine a few for an event, campaign,
+          interview, lecture, or gallery.
+        </p>
+      </div>
+
+      <div class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {
           services.map((service, index) => (
             <a
@@ -320,6 +410,11 @@ const structuredData = {
                   <CardTitle>{service.title}</CardTitle>
                   <CardDescription>{service.summary}</CardDescription>
                 </CardHeader>
+                <CardContent>
+                  <p class="text-muted-foreground text-sm leading-6">
+                    {service.result}
+                  </p>
+                </CardContent>
                 <CardFooter>
                   <span class="text-sm font-extrabold">
                     From {service.startingAt}
@@ -555,6 +650,28 @@ const structuredData = {
       </div>
     </section>
 
+    <section
+      class="border-border border-t py-10 lg:py-14"
+      data-reveal="up"
+      id="faq"
+    >
+      <div class="grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)]">
+        <div>
+          <h2
+            class="font-heading text-3xl font-extrabold tracking-tight sm:text-4xl"
+          >
+            Questions people usually ask first.
+          </h2>
+          <p class="text-muted-foreground mt-4 max-w-xl text-base leading-7">
+            The starter prices are meant to make the first conversation easier.
+            Bigger rooms, longer shoots, extra cameras, or faster delivery can
+            be quoted before anything is booked.
+          </p>
+        </div>
+        <ServicesFaq client:load />
+      </div>
+    </section>
+
     <section class="border-border border-t py-10 lg:py-14" data-reveal="up">
       <div
         class="bg-muted/45 grid gap-6 rounded-sm p-6 sm:p-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
@@ -563,7 +680,7 @@ const structuredData = {
           <h2
             class="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl"
           >
-            Not sure what you need?
+            Tell me what you are planning.
           </h2>
           <p class="text-muted-foreground mt-3 max-w-2xl text-base leading-7">
             Send the event date, venue, audience size, microphone count, and
@@ -571,7 +688,9 @@ const structuredData = {
             recommend the simplest setup that covers it.
           </p>
         </div>
-        <a href="/#contact" class={buttonVariants({ size: 'lg' })}>Contact</a>
+        <a href="/#contact" class={buttonVariants({ size: 'lg' })}>
+          Request a quote
+        </a>
       </div>
     </section>
   </main>
