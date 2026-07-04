@@ -246,12 +246,7 @@ const heroProofProjects = [
   .filter((entry): entry is PortfolioEntry => Boolean(entry))
   .map(toProofProject)
 
-const proofStats = [
-  'Podcast episodes',
-  'Fast event galleries',
-  'Full lecture recordings',
-  'School and nonprofit media',
-]
+const heroReelProjects = [...heroProofProjects, ...heroProofProjects]
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -330,51 +325,56 @@ const structuredData = {
           </div>
         </div>
 
-        <div class="grid min-h-72 grid-cols-[1.08fr_0.92fr] gap-3">
-          {
-            heroProofProjects.map((project, index) => (
-              <a
-                href={`/portfolio/${project.slug}/`}
-                class:list={[
-                  'group bg-muted focus-visible:ring-ring block overflow-hidden rounded-xl focus-visible:ring-2 focus-visible:outline-none',
-                  index === 0 ? 'row-span-2' : '',
-                ]}
-                data-reveal="up"
-                style={`--reveal-delay: ${index * 90}ms`}
-              >
-                {typeof project.thumbnail === 'string' ? (
-                  <Image
-                    src={project.thumbnail}
-                    alt={project.imageAlt}
-                    width={project.imageWidth}
-                    height={project.imageHeight}
-                    layout="constrained"
-                    widths={[360, 520, 720, 960]}
-                    sizes="(min-width: 1024px) 34rem, 100vw"
-                    quality={78}
-                    class="h-full min-h-36 w-full object-cover transition duration-300 group-hover:scale-[1.02] group-hover:opacity-95"
-                  />
-                ) : (
-                  <Image
-                    src={project.thumbnail}
-                    alt={project.imageAlt}
-                    width={project.imageWidth}
-                    height={project.imageHeight}
-                    layout="constrained"
-                    widths={[360, 520, 720, 960]}
-                    sizes="(min-width: 1024px) 34rem, 100vw"
-                    quality={78}
-                    class="h-full min-h-36 w-full object-cover transition duration-300 group-hover:scale-[1.02] group-hover:opacity-95"
-                  />
-                )}
-              </a>
-            ))
-          }
+        <div
+          class="services-reel border-border bg-muted/35 overflow-hidden rounded-xl border py-4"
+          data-reveal="up"
+          style="--reveal-delay: 120ms"
+        >
+          <div class="services-reel-track flex w-max gap-4 px-4">
+            {
+              heroReelProjects.map((project) => (
+                <a
+                  href={`/portfolio/${project.slug}/`}
+                  class="group bg-background focus-visible:ring-ring block w-[18rem] shrink-0 overflow-hidden rounded-lg no-underline ring-1 ring-black/5 focus-visible:ring-2 focus-visible:outline-none sm:w-[22rem]"
+                >
+                  <div class="bg-muted flex aspect-[4/3] items-center justify-center">
+                    {typeof project.thumbnail === 'string' ? (
+                      <Image
+                        src={project.thumbnail}
+                        alt={project.imageAlt}
+                        width={project.imageWidth}
+                        height={project.imageHeight}
+                        layout="constrained"
+                        widths={[320, 480, 640, 800]}
+                        sizes="22rem"
+                        quality={78}
+                        class="h-full w-full object-contain transition duration-300 group-hover:scale-[1.015]"
+                      />
+                    ) : (
+                      <Image
+                        src={project.thumbnail}
+                        alt={project.imageAlt}
+                        width={project.imageWidth}
+                        height={project.imageHeight}
+                        layout="constrained"
+                        widths={[320, 480, 640, 800]}
+                        sizes="22rem"
+                        quality={78}
+                        class="h-full w-full object-contain transition duration-300 group-hover:scale-[1.015]"
+                      />
+                    )}
+                  </div>
+                  <div class="p-3">
+                    <Badge variant="secondary">{project.category}</Badge>
+                    <p class="text-foreground mt-2 text-sm leading-tight font-extrabold">
+                      {project.title}
+                    </p>
+                  </div>
+                </a>
+              ))
+            }
+          </div>
         </div>
-      </div>
-
-      <div class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {proofStats.map((item) => <Badge variant="outline">{item}</Badge>)}
       </div>
     </section>
 
@@ -408,10 +408,12 @@ const structuredData = {
                 <CardHeader>
                   <Badge variant="secondary">{service.eyebrow}</Badge>
                   <CardTitle>{service.title}</CardTitle>
-                  <CardDescription>{service.summary}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p class="text-muted-foreground text-sm leading-6">
+                    {service.summary}
+                  </p>
+                  <p class="text-foreground mt-4 text-sm leading-6 font-bold">
                     {service.result}
                   </p>
                 </CardContent>
@@ -456,9 +458,12 @@ const structuredData = {
                     <CardTitle>{item.name}</CardTitle>
                     <CardDescription>{item.detail}</CardDescription>
                   </CardHeader>
-                  <CardFooter>
+                  <CardFooter className="justify-between">
                     <span class="text-primary text-lg font-extrabold">
                       {item.price}
+                    </span>
+                    <span class="text-muted-foreground text-xs font-bold">
+                      Starting point
                     </span>
                   </CardFooter>
                 </Card>
@@ -469,13 +474,13 @@ const structuredData = {
       </div>
 
       <div class="mt-8 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div class="bg-muted/45 rounded-sm p-5">
+        <div class="bg-muted/45 rounded-xl p-5">
           <h3 class="text-lg font-extrabold">Media add-ons</h3>
           <ul class="text-muted-foreground mt-4 grid gap-2 text-sm leading-6">
             {mediaAddOns.map((item) => <li>{item}</li>)}
           </ul>
         </div>
-        <div class="bg-muted/45 rounded-sm p-5">
+        <div class="bg-muted/45 rounded-xl p-5">
           <h3 class="text-lg font-extrabold">Starter package limits</h3>
           <ul class="text-muted-foreground mt-4 grid gap-2 text-sm leading-6">
             {starterLimits.map((item) => <li>{item}</li>)}
@@ -615,7 +620,7 @@ const structuredData = {
       </div>
       <div class="mt-8 grid gap-4 md:grid-cols-3">
         <div
-          class="border-border rounded-sm border p-5"
+          class="bg-muted/45 rounded-xl p-5"
           data-reveal="up"
           style="--reveal-delay: 0ms"
         >
@@ -626,7 +631,7 @@ const structuredData = {
           </p>
         </div>
         <div
-          class="border-border rounded-sm border p-5"
+          class="bg-muted/45 rounded-xl p-5"
           data-reveal="up"
           style="--reveal-delay: 70ms"
         >
@@ -637,7 +642,7 @@ const structuredData = {
           </p>
         </div>
         <div
-          class="border-border rounded-sm border p-5"
+          class="bg-muted/45 rounded-xl p-5"
           data-reveal="up"
           style="--reveal-delay: 140ms"
         >
@@ -674,7 +679,7 @@ const structuredData = {
 
     <section class="border-border border-t py-10 lg:py-14" data-reveal="up">
       <div
-        class="bg-muted/45 grid gap-6 rounded-sm p-6 sm:p-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+        class="bg-muted/45 grid gap-6 rounded-xl p-6 sm:p-8 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
       >
         <div>
           <h2

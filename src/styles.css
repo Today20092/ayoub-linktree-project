@@ -186,6 +186,24 @@
   .portfolio-prose a {
     @apply text-foreground hover:text-primary focus-visible:ring-ring rounded-sm font-semibold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none;
   }
+
+  .services-reel-track {
+    animation: services-reel 28s linear infinite;
+  }
+
+  .services-reel:hover .services-reel-track {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes services-reel {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-50% - 0.5rem));
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -203,5 +221,9 @@
     transform: none;
     transition: none;
     will-change: auto;
+  }
+
+  .services-reel-track {
+    animation: none;
   }
 }
