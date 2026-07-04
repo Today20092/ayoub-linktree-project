@@ -38,6 +38,16 @@ socialLinks:
     darkColor: 'oklch(0.61 0.19 350)'
     darkColor2: 'oklch(0.7 0.15 38)'
     darkColor3: 'oklch(0.28 0.13 304)'
+  - id: tampa-bay-muslims
+    url: https://www.facebook.com/groups/tampabaymuslims/
+    icon: simple-icons:facebook
+    label: Tampa Bay Muslims Facebook group
+    color: 'oklch(0.48 0.19 260)'
+    color2: 'oklch(0.68 0.13 252)'
+    color3: 'oklch(0.25 0.09 260)'
+    darkColor: 'oklch(0.65 0.14 252)'
+    darkColor2: 'oklch(0.52 0.18 260)'
+    darkColor3: 'oklch(0.22 0.08 260)'
   - id: discord
     url: https://discordapp.com/users/279467079990640641
     icon: simple-icons:discord
