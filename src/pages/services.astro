@@ -38,9 +38,7 @@ type Service = {
   eyebrow: string
   summary: string
   bestFor: string
-  result: string
   includes: string[]
-  startingAt: string
   projectIds: string[]
 }
 
@@ -112,14 +110,11 @@ const serviceDefinitions: Service[] = [
       'Business videos, event films, school stories, interviews, and social-ready pieces shaped around the message first.',
     bestFor:
       'Businesses, schools, nonprofits, fundraisers, and people explaining what they do.',
-    result:
-      'Clear videos that explain the message, document the moment, and give people something worth sharing.',
     includes: [
       'Talking-head videos',
       'Event and documentary films',
       'Editing, color, and delivery',
     ],
-    startingAt: '$600',
     projectIds: ['omar-erchid-law-firm', 'aya-academy', 'maan-academy'],
   },
   {
@@ -129,14 +124,11 @@ const serviceDefinitions: Service[] = [
       'A one-hour, one-camera podcast or interview setup brought to your location with lighting, clean audio, color, EQ, and compression.',
     bestFor:
       'Business owners, educators, nonprofits, experts, and creators who want a polished episode without building a studio.',
-    result:
-      'A clean uploaded episode without renting a studio or learning cameras, lights, and microphones yourself.',
     includes: [
       'One-hour local recording',
       'Lighting and Shure MV7+ microphones',
       'Uploaded video with audio polish',
     ],
-    startingAt: '$250',
     projectIds: ['rizqmd-jd-podcast', 'konan-bbq-podcast', 'lavena-health'],
   },
   {
@@ -146,14 +138,11 @@ const serviceDefinitions: Service[] = [
       'Clear speech audio for lectures, khutbahs, fundraisers, and community events, with wireless microphones and recording available.',
     bestFor:
       'Mosques, nonprofits, schools, lectures, nikahs, fundraisers, and 25-150 person community programs.',
-    result:
-      'A room where people can hear clearly, speakers feel comfortable, and the program can be recorded properly.',
     includes: [
       'Speaker and microphone setup',
       'Mixer, EQ, and feedback control',
       'Optional full-event recording',
     ],
-    startingAt: '$250',
     projectIds: [
       'temple-terrace-community-open-house',
       'muslim-business-chamber-2026',
@@ -167,14 +156,11 @@ const serviceDefinitions: Service[] = [
       'Short event coverage, portraits, headshots, fast galleries, and guest-friendly download links for people and organizations.',
     bestFor:
       'Workshops, weddings, community events, schools, professional teams, and local leaders.',
-    result:
-      'Useful event photos and fast galleries that people can open, download, and share without a messy handoff.',
     includes: [
       'Short event starter coverage',
       'Portraits and headshots',
       'Fast gallery delivery, no editing',
     ],
-    startingAt: '$300',
     projectIds: [
       'muslim-business-chamber-2026',
       'portraits',
@@ -450,14 +436,9 @@ const structuredData = {
                   <p class="text-muted-foreground text-sm leading-6">
                     {service.summary}
                   </p>
-                  <p class="text-foreground mt-4 text-sm leading-6 font-bold">
-                    {service.result}
-                  </p>
                 </CardContent>
                 <CardFooter>
-                  <span class="text-sm font-extrabold">
-                    From {service.startingAt}
-                  </span>
+                  <span class="text-sm font-extrabold">View related work</span>
                 </CardFooter>
               </Card>
             </a>
@@ -566,22 +547,6 @@ const structuredData = {
             </div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="border-border border-t py-10 lg:py-14" data-reveal="up">
-      <div class="grid gap-6 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
-        <h2
-          class="font-heading text-2xl font-extrabold tracking-tight sm:text-3xl"
-        >
-          Production planning is part of the service.
-        </h2>
-        <p class="text-muted-foreground max-w-3xl text-base leading-7">
-          Before showing up with equipment, I work to understand the location,
-          audience, message, schedule, recording needs, and where the final
-          media will be used. That planning shapes what gets captured and how it
-          gets delivered.
-        </p>
       </div>
     </section>
 
@@ -748,9 +713,8 @@ const structuredData = {
             Questions people usually ask first.
           </h2>
           <p class="text-muted-foreground mt-4 max-w-xl text-base leading-7">
-            The starter prices are meant to make the first conversation easier.
-            Bigger rooms, longer shoots, extra cameras, or faster delivery can
-            be quoted before anything is booked.
+            A few details that help people decide what to ask for before sending
+            the first message.
           </p>
         </div>
         <ServicesFaq client:load />

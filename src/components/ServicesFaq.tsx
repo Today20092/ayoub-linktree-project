@@ -7,19 +7,9 @@ import {
 
 const faqs = [
   {
-    question: 'Is travel included in the starter prices?',
-    answer:
-      'Local Tampa-area travel is included. Farther travel, paid parking, venue fees, or unusual load-in requirements are quoted separately before the job is confirmed.',
-  },
-  {
     question: 'What does the $250 mobile podcast setup include?',
     answer:
       'It includes one local recording hour, one camera, lighting, Shure MV7+ microphones, color grade, EQ, compression, and uploaded video delivery.',
-  },
-  {
-    question: 'What costs extra for podcast or video work?',
-    answer:
-      'Extra recording time is usually $100-$150/hr. An extra camera is usually $150-$300. Rush delivery is usually $75-$150 depending on the deadline.',
   },
   {
     question: 'Does the $300 photo starter include editing?',
