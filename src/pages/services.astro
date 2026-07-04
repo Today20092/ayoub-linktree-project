@@ -473,18 +473,39 @@ const structuredData = {
         </div>
       </div>
 
-      <div class="mt-8 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div class="bg-muted/45 rounded-xl p-5">
-          <h3 class="text-lg font-extrabold">Media add-ons</h3>
-          <ul class="text-muted-foreground mt-4 grid gap-2 text-sm leading-6">
-            {mediaAddOns.map((item) => <li>{item}</li>)}
-          </ul>
+      <div class="border-border mt-8 rounded-xl border p-4 sm:p-5">
+        <div class="grid gap-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <div>
+            <h3 class="text-base font-extrabold">Common add-ons</h3>
+            <p class="text-muted-foreground mt-2 text-sm leading-6">
+              Add only what the job actually needs.
+            </p>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            {
+              mediaAddOns.map((item) => (
+                <Badge variant="secondary">{item}</Badge>
+              ))
+            }
+          </div>
         </div>
-        <div class="bg-muted/45 rounded-xl p-5">
-          <h3 class="text-lg font-extrabold">Starter package limits</h3>
-          <ul class="text-muted-foreground mt-4 grid gap-2 text-sm leading-6">
-            {starterLimits.map((item) => <li>{item}</li>)}
-          </ul>
+
+        <div class="border-border mt-5 border-t pt-5">
+          <div
+            class="grid gap-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
+          >
+            <div>
+              <h3 class="text-base font-extrabold">Starter limits</h3>
+              <p class="text-muted-foreground mt-2 text-sm leading-6">
+                Clear boundaries keep small packages affordable.
+              </p>
+            </div>
+            <ul
+              class="text-muted-foreground grid gap-2 text-sm leading-6 sm:grid-cols-2"
+            >
+              {starterLimits.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
         </div>
       </div>
     </section>
