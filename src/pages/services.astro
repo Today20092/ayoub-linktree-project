@@ -215,18 +215,55 @@ const servicePackages = [
 ]
 
 const mediaAddOns = [
-  'Fast photo gallery: $300-$700',
-  'Guest upload and download gallery: $100-$250',
-  'Edited recap or interview video: $600-$1,500',
-  'YouTube upload prep: $100-$250',
+  {
+    name: 'Fast photo gallery',
+    price: '$300-$700',
+    detail: 'Event gallery link with quick delivery and easy downloads.',
+  },
+  {
+    name: 'Guest gallery access',
+    price: '$100-$250',
+    detail: 'Guest upload and download links for shared event photos.',
+  },
+  {
+    name: 'Edited recap or interview video',
+    price: '$600-$1,500',
+    detail: 'A finished short video built from event coverage or interviews.',
+  },
+  {
+    name: 'YouTube upload prep',
+    price: '$100-$250',
+    detail:
+      'Export, title/description support, thumbnail prep, and upload help.',
+  },
 ]
 
 const starterLimits = [
-  'Local Tampa-area travel included',
-  'Extra recording time: $100-$150/hr',
-  'Extra camera: $150-$300',
-  'Rush delivery: $75-$150',
-  'Parking, venue fees, or far travel quoted separately',
+  {
+    label: 'Local travel',
+    value: 'Included',
+    detail: 'Tampa-area travel is included in starter packages.',
+  },
+  {
+    label: 'Extra recording time',
+    value: '$100-$150/hr',
+    detail: 'For longer interviews, podcasts, lectures, or event coverage.',
+  },
+  {
+    label: 'Extra camera',
+    value: '$150-$300',
+    detail: 'Useful for interviews, stage programs, or alternate angles.',
+  },
+  {
+    label: 'Rush delivery',
+    value: '$75-$150',
+    detail: 'Available when files need to be turned around faster.',
+  },
+  {
+    label: 'Parking, venue fees, far travel',
+    value: 'Quoted',
+    detail: 'Added to the quote before booking when they apply.',
+  },
 ]
 
 const services: ServiceWithProjects[] = serviceDefinitions.map((service) => ({
@@ -481,10 +518,20 @@ const structuredData = {
               Add only what the job actually needs.
             </p>
           </div>
-          <div class="grid gap-3 sm:grid-cols-2">
+          <div class="divide-border divide-y">
             {
               mediaAddOns.map((item) => (
-                <Badge variant="secondary">{item}</Badge>
+                <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 py-3 first:pt-0 last:pb-0">
+                  <div class="min-w-0">
+                    <p class="text-sm font-bold">{item.name}</p>
+                    <p class="text-muted-foreground mt-1 text-xs leading-5">
+                      {item.detail}
+                    </p>
+                  </div>
+                  <p class="text-primary text-right text-sm font-extrabold whitespace-nowrap">
+                    {item.price}
+                  </p>
+                </div>
               ))
             }
           </div>
@@ -500,11 +547,23 @@ const structuredData = {
                 Clear boundaries keep small packages affordable.
               </p>
             </div>
-            <ul
-              class="text-muted-foreground grid gap-2 text-sm leading-6 sm:grid-cols-2"
-            >
-              {starterLimits.map((item) => <li>{item}</li>)}
-            </ul>
+            <div class="grid gap-3 sm:grid-cols-2">
+              {
+                starterLimits.map((item) => (
+                  <div class="border-border rounded-lg border p-3">
+                    <div class="flex items-start justify-between gap-3">
+                      <p class="text-sm font-bold">{item.label}</p>
+                      <p class="text-muted-foreground text-right text-xs font-extrabold tracking-wide whitespace-nowrap uppercase">
+                        {item.value}
+                      </p>
+                    </div>
+                    <p class="text-muted-foreground mt-2 text-xs leading-5">
+                      {item.detail}
+                    </p>
+                  </div>
+                ))
+              }
+            </div>
           </div>
         </div>
       </div>
