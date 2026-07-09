@@ -12,6 +12,7 @@ type LinkItem = {
   label: string
   url: string
   icon?: string
+  iconUrl?: string
 }
 
 type Channel = {
@@ -238,11 +239,21 @@ const simpleIconBody = (name?: string) =>
                   class="inline-flex size-5 items-center justify-center"
                   aria-hidden="true"
                 >
-                  <svg
-                    class="size-5"
-                    viewBox="0 0 24 24"
-                    set:html={simpleIconBody(link.icon)}
-                  />
+                  {link.iconUrl ? (
+                    <Image
+                      src={link.iconUrl}
+                      alt=""
+                      width={107}
+                      height={117}
+                      class="size-5"
+                    />
+                  ) : (
+                    <svg
+                      class="size-5"
+                      viewBox="0 0 24 24"
+                      set:html={simpleIconBody(link.icon)}
+                    />
+                  )}
                 </span>
                 <span>{link.label}</span>
               </a>

@@ -35,6 +35,11 @@ export default defineConfig({
         hostname: 'photos.ayoubabed.xyz',
         pathname: '/events/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'keet.io',
+        pathname: '/assets/favicons/**',
+      },
     ],
   },
 
