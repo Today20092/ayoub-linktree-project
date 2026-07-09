@@ -91,7 +91,6 @@ socialLinks:
   - id: keet
     url: https://keet.io/download/
     icon: ''
-    iconUrl: https://keet.io/assets/favicons/favicon.svg
     label: 'Keet: @ayoubabedrabbo1'
     color: 'oklch(0.38 0.08 260)'
     color2: 'oklch(0.62 0.12 255)'

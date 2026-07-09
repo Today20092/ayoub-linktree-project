@@ -4,6 +4,7 @@ import type { ImageMetadata } from 'astro'
 import simpleIcons from '@iconify-json/simple-icons/icons.json'
 import { IdCard, MessageSquareText, Share2 } from 'lucide-react'
 
+import keetIcon from '@/assets/keet.svg'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -239,7 +240,15 @@ const simpleIconBody = (name?: string) =>
                   class="inline-flex size-5 items-center justify-center"
                   aria-hidden="true"
                 >
-                  {link.iconUrl ? (
+                  {link.id === 'keet' ? (
+                    <Image
+                      src={keetIcon}
+                      alt=""
+                      width={107}
+                      height={117}
+                      class="size-5"
+                    />
+                  ) : link.iconUrl ? (
                     <Image
                       src={link.iconUrl}
                       alt=""
