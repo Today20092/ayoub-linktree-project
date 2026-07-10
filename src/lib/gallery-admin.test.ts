@@ -2,10 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { exportJWK, generateKeyPair, SignJWT } from 'jose'
 
-import {
-  galleryAdminAuthorized,
-  parseGalleryAdminAction,
-} from './gallery-admin'
+import { galleryAdminAuthorized } from './gallery-admin'
 
 test('requires a signed Access token outside local development', async () => {
   const production = new Request('https://ayoubabed.xyz/admin/galleries', {
@@ -67,30 +64,4 @@ test('accepts a valid Access JWT for the configured admin', async () => {
   } finally {
     globalThis.fetch = originalFetch
   }
-})
-
-test('parses only supported admin actions', () => {
-  assert.deepEqual(
-    parseGalleryAdminAction({
-      action: 'settings',
-      uploadsEnabled: true,
-      password: 'event-password',
-    }),
-    {
-      action: 'settings',
-      uploadsEnabled: true,
-      password: 'event-password',
-    },
-  )
-  assert.deepEqual(
-    parseGalleryAdminAction({
-      action: 'hideProfessional',
-      filename: 'photo.jpg',
-    }),
-    { action: 'hideProfessional', filename: 'photo.jpg' },
-  )
-  assert.equal(
-    parseGalleryAdminAction({ action: 'deleteEverything' }),
-    undefined,
-  )
 })

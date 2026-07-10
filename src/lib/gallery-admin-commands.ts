@@ -1,7 +1,3 @@
-import {
-  parseGalleryAdminAction,
-  type GalleryAdminAction,
-} from './gallery-admin'
 import { hashGalleryPassword, validGalleryPassword } from './gallery-auth'
 import {
   GALLERY_PUBLIC_ORIGIN,
@@ -37,6 +33,10 @@ import {
 type GalleryAdminObjectBody = Parameters<R2Bucket['put']>[1]
 
 type GalleryAdminPassword = { salt: string; hash: string }
+
+type GuestModerationAction =
+  | { action: 'approveGuest'; photoId: string; alt?: string }
+  | { action: 'rejectGuest' | 'removeGuest'; photoId: string }
 
 export type GalleryAdminEventContext = {
   id: string
@@ -242,7 +242,7 @@ function currentEventInput(
 
 async function moderateGuestPhoto(
   context: GalleryAdminCommandContext,
-  action: Extract<GalleryAdminAction, { photoId: string }>,
+  action: GuestModerationAction,
   dependencies: GalleryAdminCommandDependencies,
 ): Promise<GalleryAdminCommandResult> {
   const photo = await dependencies.data.getGuestPhoto(action.photoId)
@@ -363,11 +363,9 @@ export async function executeGalleryAdminCommand(
   dependencies: GalleryAdminCommandDependencies,
 ): Promise<GalleryAdminCommandResult> {
   const input =
-    value && typeof value === 'object'
-      ? (value as Record<string, unknown>)
-      : undefined
+    value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
 
-  if (input?.action === 'updateEvent') {
+  if (input.action === 'updateEvent') {
     const title = typeof input.title === 'string' ? input.title.trim() : ''
     const summary =
       typeof input.summary === 'string' ? input.summary.trim() : ''
@@ -405,7 +403,7 @@ export async function executeGalleryAdminCommand(
     return ok()
   }
 
-  if (input?.action === 'createInvite') {
+  if (input.action === 'createInvite') {
     const guestName =
       typeof input.guestName === 'string' ? input.guestName.trim() : ''
     if (!guestName) {
@@ -427,7 +425,7 @@ export async function executeGalleryAdminCommand(
     })
   }
 
-  if (input?.action === 'setCover') {
+  if (input.action === 'setCover') {
     const src = typeof input.src === 'string' ? input.src.trim() : ''
     const alt = typeof input.alt === 'string' ? input.alt.trim() : ''
     const width = typeof input.width === 'number' ? input.width : 0
@@ -465,8 +463,8 @@ export async function executeGalleryAdminCommand(
     return ok()
   }
 
-  if (input?.action === 'uploadAdminPhoto') {
-    const file = input.file
+  if (input.action === 'uploadAdminPhoto') {
+    const { file } = input
     if (!(file instanceof File) || !acceptedGalleryImage(file)) {
       throw new GalleryAdminCommandError(
         'Choose a JPEG, PNG, WebP, or HEIC photo under 20 MB.',
@@ -502,8 +500,8 @@ export async function executeGalleryAdminCommand(
     return { status: 201, body: { ok: true, id } }
   }
 
-  if (input?.action === 'updateFlyer') {
-    const file = input.file
+  if (input.action === 'updateFlyer') {
+    const { file } = input
     if (!(file instanceof File) || !acceptedGalleryImage(file)) {
       throw new GalleryAdminCommandError(
         'Choose a JPEG, PNG, WebP, or HEIC image under 20 MB.',
@@ -546,12 +544,16 @@ export async function executeGalleryAdminCommand(
     return { status: 201, body: { ok: true, flyer } }
   }
 
-  const action = parseGalleryAdminAction(value)
-  if (!action) throw new GalleryAdminCommandError('Invalid action.', 400)
-
-  if (action.action === 'settings') {
+  if (input.action === 'settings') {
+    if (
+      typeof input.uploadsEnabled !== 'boolean' ||
+      (input.password !== undefined && typeof input.password !== 'string')
+    ) {
+      throw new GalleryAdminCommandError('Invalid action.', 400)
+    }
     const existing = await dependencies.data.getSettings(context.event.id)
-    const newPassword = action.password?.trim()
+    const newPassword =
+      typeof input.password === 'string' ? input.password.trim() : undefined
     if (newPassword && !dependencies.passwords.valid(newPassword)) {
       throw new GalleryAdminCommandError(
         'Password must be 8 to 128 characters.',
@@ -559,7 +561,7 @@ export async function executeGalleryAdminCommand(
       )
     }
     if (
-      action.uploadsEnabled &&
+      input.uploadsEnabled &&
       !newPassword &&
       (!existing?.password_hash || !existing.password_salt)
     ) {
@@ -573,42 +575,55 @@ export async function executeGalleryAdminCommand(
       : undefined
     await dependencies.data.saveSettings(
       context.event.id,
-      action.uploadsEnabled,
+      input.uploadsEnabled,
       password,
     )
     return ok()
   }
 
   if (
-    action.action === 'hideProfessional' ||
-    action.action === 'restoreProfessional'
+    (input.action === 'hideProfessional' ||
+      input.action === 'restoreProfessional') &&
+    typeof input.filename === 'string'
   ) {
     const available = new Set(
       context.event.staticPhotos.map(({ filename }) => filename),
     )
-    if (!available.has(action.filename)) {
+    if (!available.has(input.filename)) {
       throw new GalleryAdminCommandError('Professional photo not found.', 404)
     }
-    if (action.action === 'hideProfessional') {
+    if (input.action === 'hideProfessional') {
       await dependencies.data.hideProfessionalPhoto(
         context.event.id,
-        action.filename,
+        input.filename,
       )
     } else {
       await dependencies.data.restoreProfessionalPhoto(
         context.event.id,
-        action.filename,
+        input.filename,
       )
     }
     return ok()
   }
 
+  let guestAction: GuestModerationAction
   if (
-    action.action !== 'approveGuest' &&
-    action.action !== 'rejectGuest' &&
-    action.action !== 'removeGuest'
+    input.action === 'approveGuest' &&
+    typeof input.photoId === 'string' &&
+    (input.alt === undefined || typeof input.alt === 'string')
   ) {
+    guestAction = {
+      action: input.action,
+      photoId: input.photoId,
+      alt: typeof input.alt === 'string' ? input.alt : undefined,
+    }
+  } else if (
+    (input.action === 'rejectGuest' || input.action === 'removeGuest') &&
+    typeof input.photoId === 'string'
+  ) {
+    guestAction = { action: input.action, photoId: input.photoId }
+  } else {
     throw new GalleryAdminCommandError('Invalid action.', 400)
   }
-  return moderateGuestPhoto(context, action, dependencies)
+  return moderateGuestPhoto(context, guestAction, dependencies)
 }

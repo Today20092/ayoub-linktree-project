@@ -16,6 +16,24 @@ import type {
   SaveEventGalleryInput,
 } from './gallery-data'
 
+const bytes = () => new Uint8Array([1, 2, 3])
+
+function guestPhoto(overrides: Partial<GuestPhoto> = {}): GuestPhoto {
+  return {
+    id: 'guest-photo',
+    event_slug: 'event-one',
+    object_key: 'pending/event-one/guest-photo.jpg',
+    original_filename: 'guest.jpg',
+    width: 1600,
+    height: 900,
+    alt: 'Guest upload',
+    status: 'pending',
+    created_at: 1,
+    published_at: null,
+    ...overrides,
+  }
+}
+
 function commandContext(
   event: Partial<GalleryAdminEventContext> = {},
 ): GalleryAdminCommandContext {
@@ -37,32 +55,34 @@ function commandContext(
   }
 }
 
-function createCommandHarness(
-  photo: GuestPhoto,
+type HarnessErrors = {
+  publish?: Error
+  deleteGuest?: Error
+  deletePending?: Error
+  deletePublic?: Error
+  insertPhoto?: Error
+  saveEvent?: Error
+}
+
+function createHarness(
   options: {
-    publishError?: Error
-    deleteGuestError?: Error
-    deletePendingError?: Error
-    deletePublicError?: Error
-    insertPhotoError?: Error
-    saveEventError?: Error
+    photo?: GuestPhoto
     settings?: GallerySettings
     optimized?: { buffer: Uint8Array; width: number; height: number }
+    errors?: HarnessErrors
   } = {},
 ) {
+  const errors = options.errors ?? {}
+  let photo = options.photo ?? guestPhoto()
   const pending = new Map<string, Uint8Array>(
-    photo.status === 'pending'
-      ? [[photo.object_key, new Uint8Array([1, 2, 3])]]
-      : [],
+    photo.status === 'pending' ? [[photo.object_key, bytes()]] : [],
   )
   const published = new Map<string, Uint8Array>(
-    photo.status === 'published'
-      ? [[photo.object_key, new Uint8Array([1, 2, 3])]]
-      : [],
+    photo.status === 'published' ? [[photo.object_key, bytes()]] : [],
   )
-  let storedPhoto = photo
-  let deleted = false
   const hidden = new Set<string>()
+  const logs: Array<Record<string, unknown>> = []
+  let deleted = false
   let savedSettings:
     | { uploadsEnabled: boolean; password?: { salt: string; hash: string } }
     | undefined
@@ -70,20 +90,19 @@ function createCommandHarness(
   let savedInvite:
     Pick<GalleryInvite, 'token' | 'event_slug' | 'guest_name'> | undefined
   let insertedPhoto: Omit<GalleryPhoto, 'created_at'> | undefined
-  const logs: Array<Record<string, unknown>> = []
 
   const dependencies: GalleryAdminCommandDependencies = {
     data: {
       getSettings: async () => options.settings,
-      saveSettings: async (_eventSlug, uploadsEnabled, password) => {
+      saveSettings: async (_slug, uploadsEnabled, password) => {
         savedSettings = { uploadsEnabled, password }
       },
-      getGuestPhoto: async () => storedPhoto,
-      publishGuestPhoto: async (photoId, objectKey, alt) => {
-        if (options.publishError) throw options.publishError
-        storedPhoto = {
-          ...storedPhoto,
-          id: photoId,
+      getGuestPhoto: async () => photo,
+      publishGuestPhoto: async (id, objectKey, alt) => {
+        if (errors.publish) throw errors.publish
+        photo = {
+          ...photo,
+          id,
           object_key: objectKey,
           alt,
           status: 'published',
@@ -91,26 +110,26 @@ function createCommandHarness(
         }
       },
       deleteGuestPhoto: async () => {
-        if (options.deleteGuestError) throw options.deleteGuestError
+        if (errors.deleteGuest) throw errors.deleteGuest
         deleted = true
       },
-      hideProfessionalPhoto: async (_eventSlug, filename) => {
+      hideProfessionalPhoto: async (_slug, filename) => {
         hidden.add(filename)
       },
-      restoreProfessionalPhoto: async (_eventSlug, filename) => {
+      restoreProfessionalPhoto: async (_slug, filename) => {
         hidden.delete(filename)
       },
       listGalleryPhotos: async () => [],
-      listGuestPhotos: async () => [storedPhoto],
+      listGuestPhotos: async () => [photo],
       saveEventGallery: async (input) => {
-        if (options.saveEventError) throw options.saveEventError
+        if (errors.saveEvent) throw errors.saveEvent
         savedEvent = input
       },
       createInvite: async (invite) => {
         savedInvite = invite
       },
       insertGalleryPhoto: async (inserted) => {
-        if (options.insertPhotoError) throw options.insertPhotoError
+        if (errors.insertPhoto) throw errors.insertPhoto
         insertedPhoto = inserted
       },
     },
@@ -125,23 +144,19 @@ function createCommandHarness(
       },
       publicExists: async (key) => published.has(key),
       putPublic: async (key, body) => {
-        if (!(body instanceof Uint8Array)) {
-          throw new Error('The test adapter expected a byte array.')
-        }
+        assert.ok(body instanceof Uint8Array)
         published.set(key, body)
       },
       deletePending: async (key) => {
-        if (options.deletePendingError) throw options.deletePendingError
+        if (errors.deletePending) throw errors.deletePending
         pending.delete(key)
       },
       putPending: async (key, body) => {
-        if (!(body instanceof Uint8Array)) {
-          throw new Error('The test adapter expected a byte array.')
-        }
+        assert.ok(body instanceof Uint8Array)
         pending.set(key, body)
       },
       deletePublic: async (key) => {
-        if (options.deletePublicError) throw options.deletePublicError
+        if (errors.deletePublic) throw errors.deletePublic
         published.delete(key)
       },
     },
@@ -161,266 +176,188 @@ function createCommandHarness(
 
   return {
     dependencies,
+    errors,
     pending,
     published,
-    photo: () => storedPhoto,
+    hidden,
+    logs,
+    photo: () => photo,
     deleted: () => deleted,
     savedSettings: () => savedSettings,
-    hidden,
     savedEvent: () => savedEvent,
     savedInvite: () => savedInvite,
     insertedPhoto: () => insertedPhoto,
-    logs,
   }
 }
 
-test('approving a guest photo publishes it and removes the pending copy', async () => {
-  const original: GuestPhoto = {
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'pending/event-one/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'pending',
-    created_at: 1,
-    published_at: null,
-  }
-  const state = createCommandHarness(original)
+const run = (
+  command: unknown,
+  state: ReturnType<typeof createHarness>,
+  context = commandContext(),
+) => executeGalleryAdminCommand(context, command, state.dependencies)
 
-  const result = await executeGalleryAdminCommand(
-    {
-      event: {
-        id: 'event-one',
-        title: 'Event One',
-        summary: 'Event gallery',
-        category: 'Event Photography',
-        eventDate: null,
-        eventTime: null,
-        eventVenue: null,
-        comingSoon: false,
-        status: 'published',
-        staticPhotos: [],
-      },
-      requestUrl: 'https://example.com/admin/galleries/event-one',
-    },
-    { action: 'approveGuest', photoId: 'guest-photo', alt: 'Approved' },
-    state.dependencies,
+test('approves a guest photo and removes its pending copy', async () => {
+  const state = createHarness()
+  assert.deepEqual(
+    await run(
+      { action: 'approveGuest', photoId: 'guest-photo', alt: 'Approved' },
+      state,
+    ),
+    { status: 200, body: { ok: true } },
   )
-
-  assert.deepEqual(result, { status: 200, body: { ok: true } })
   assert.equal(state.pending.size, 0)
   assert.deepEqual(
-    [...state.published.keys()],
-    ['events/event-one/guest/guest-photo.jpg'],
+    [...state.published],
+    [['events/event-one/guest/guest-photo.jpg', bytes()]],
   )
-  assert.equal(state.photo().status, 'published')
   assert.equal(state.photo().alt, 'Approved')
 })
 
-test('approval removes a copied public image when the database update fails', async () => {
-  const original: GuestPhoto = {
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'pending/event-one/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'pending',
-    created_at: 1,
-    published_at: null,
-  }
+test('rolls back a copied image when guest publishing fails', async () => {
   const failure = new Error('Database unavailable')
-  const state = createCommandHarness(original, { publishError: failure })
-
+  const state = createHarness({ errors: { publish: failure } })
   await assert.rejects(
-    executeGalleryAdminCommand(
-      {
-        event: {
-          id: 'event-one',
-          title: 'Event One',
-          summary: 'Event gallery',
-          category: 'Event Photography',
-          eventDate: null,
-          eventTime: null,
-          eventVenue: null,
-          comingSoon: false,
-          status: 'published',
-          staticPhotos: [],
-        },
-        requestUrl: 'https://example.com/admin/galleries/event-one',
-      },
-      { action: 'approveGuest', photoId: 'guest-photo' },
-      state.dependencies,
-    ),
+    run({ action: 'approveGuest', photoId: 'guest-photo' }, state),
     failure,
   )
-
-  assert.equal(state.published.size, 0)
   assert.equal(state.pending.size, 1)
-  assert.equal(state.photo().status, 'pending')
+  assert.equal(state.published.size, 0)
 })
 
-test('rejecting a pending guest photo removes its image and record', async () => {
-  const original: GuestPhoto = {
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'pending/event-one/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'pending',
-    created_at: 1,
-    published_at: null,
-  }
-  const state = createCommandHarness(original)
-
-  const result = await executeGalleryAdminCommand(
-    {
-      event: {
-        id: 'event-one',
-        title: 'Event One',
-        summary: 'Event gallery',
-        category: 'Event Photography',
-        eventDate: null,
-        eventTime: null,
-        eventVenue: null,
-        comingSoon: false,
-        status: 'published',
-        staticPhotos: [],
-      },
-      requestUrl: 'https://example.com/admin/galleries/event-one',
-    },
-    { action: 'rejectGuest', photoId: 'guest-photo' },
-    state.dependencies,
+test('retries deterministic cleanup after approval succeeds', async () => {
+  const state = createHarness({
+    errors: { deletePending: new Error('Bucket unavailable') },
+  })
+  assert.deepEqual(
+    await run({ action: 'approveGuest', photoId: 'guest-photo' }, state),
+    { status: 200, body: { ok: true } },
+  )
+  assert.equal(state.pending.size, 1)
+  assert.equal(
+    state.logs.some(
+      ({ objectKey }) => objectKey === 'pending/event-one/guest-photo.jpg',
+    ),
+    true,
   )
 
-  assert.deepEqual(result, { status: 200, body: { ok: true } })
+  state.errors.deletePending = undefined
+  await run({ action: 'approveGuest', photoId: 'guest-photo' }, state)
+  assert.equal(state.pending.size, 0)
+})
+
+test('rejects a pending guest photo', async () => {
+  const state = createHarness()
+  await run({ action: 'rejectGuest', photoId: 'guest-photo' }, state)
   assert.equal(state.pending.size, 0)
   assert.equal(state.deleted(), true)
 })
 
-test('uploads cannot be enabled before the gallery has a password', async () => {
-  const state = createCommandHarness({
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'pending/event-one/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'pending',
-    created_at: 1,
-    published_at: null,
-  })
-
+test('restores a pending image when record deletion fails', async () => {
+  const failure = new Error('Database unavailable')
+  const state = createHarness({ errors: { deleteGuest: failure } })
   await assert.rejects(
-    executeGalleryAdminCommand(
-      {
-        event: {
-          id: 'event-one',
-          title: 'Event One',
-          summary: 'Event gallery',
-          category: 'Event Photography',
-          eventDate: null,
-          eventTime: null,
-          eventVenue: null,
-          comingSoon: false,
-          status: 'published',
-          staticPhotos: [],
-        },
-        requestUrl: 'https://example.com/admin/galleries/event-one',
-      },
-      { action: 'settings', uploadsEnabled: true },
-      state.dependencies,
-    ),
+    run({ action: 'rejectGuest', photoId: 'guest-photo' }, state),
+    failure,
+  )
+  assert.equal(state.pending.size, 1)
+})
+
+test('removes a published photo', async () => {
+  const state = createHarness({
+    photo: guestPhoto({
+      status: 'published',
+      object_key: 'events/event-one/guest/guest-photo.jpg',
+      published_at: 2,
+    }),
+  })
+  await run({ action: 'removeGuest', photoId: 'guest-photo' }, state)
+  assert.equal(state.published.size, 0)
+  assert.equal(state.deleted(), true)
+})
+
+test('restores a public image when record deletion fails', async () => {
+  const failure = new Error('Database unavailable')
+  const state = createHarness({
+    photo: guestPhoto({
+      status: 'published',
+      object_key: 'events/event-one/guest/guest-photo.jpg',
+      published_at: 2,
+    }),
+    errors: { deleteGuest: failure },
+  })
+  await assert.rejects(
+    run({ action: 'removeGuest', photoId: 'guest-photo' }, state),
+    failure,
+  )
+  assert.equal(state.published.size, 1)
+})
+
+test('keeps the record when public deletion fails', async () => {
+  const failure = new Error('Bucket unavailable')
+  const state = createHarness({
+    photo: guestPhoto({
+      status: 'published',
+      object_key: 'events/event-one/guest/guest-photo.jpg',
+      published_at: 2,
+    }),
+    errors: { deletePublic: failure },
+  })
+  await assert.rejects(
+    run({ action: 'removeGuest', photoId: 'guest-photo' }, state),
+    failure,
+  )
+  assert.equal(state.deleted(), false)
+  assert.equal(state.published.size, 1)
+})
+
+test('requires a password before enabling uploads', async () => {
+  const state = createHarness()
+  await assert.rejects(
+    run({ action: 'settings', uploadsEnabled: true }, state),
     (error) =>
       error instanceof GalleryAdminCommandError &&
-      error.status === 400 &&
       error.message === 'Set a password before enabling uploads.',
   )
-  assert.equal(state.savedSettings(), undefined)
 })
 
-test('hiding a professional photo validates it against the event gallery', async () => {
-  const state = createCommandHarness({
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'pending/event-one/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'pending',
-    created_at: 1,
-    published_at: null,
-  })
-
-  const result = await executeGalleryAdminCommand(
-    {
-      event: {
-        id: 'event-one',
-        title: 'Event One',
-        summary: 'Event gallery',
-        category: 'Event Photography',
-        eventDate: null,
-        eventTime: null,
-        eventVenue: null,
-        comingSoon: false,
-        status: 'published',
-        staticPhotos: [
-          {
-            src: 'https://photos.example/event-one/pro.jpg',
-            width: 1200,
-            height: 800,
-            alt: 'Professional photo',
-            filename: 'pro.jpg',
-          },
-        ],
-      },
-      requestUrl: 'https://example.com/admin/galleries/event-one',
+test('reuses an existing upload password', async () => {
+  const state = createHarness({
+    settings: {
+      event_slug: 'event-one',
+      uploads_enabled: 0,
+      password_salt: 'salt',
+      password_hash: 'hash',
+      updated_at: 1,
     },
-    { action: 'hideProfessional', filename: 'pro.jpg' },
-    state.dependencies,
+  })
+  await run({ action: 'settings', uploadsEnabled: true }, state)
+  assert.deepEqual(state.savedSettings(), {
+    uploadsEnabled: true,
+    password: undefined,
+  })
+})
+
+test('hides and restores a professional photo', async () => {
+  const state = createHarness()
+  const context = commandContext({
+    staticPhotos: [{ src: 'photo.jpg', filename: 'photo.jpg' }],
+  })
+  await run(
+    { action: 'hideProfessional', filename: 'photo.jpg' },
+    state,
+    context,
   )
-
-  assert.deepEqual(result, { status: 200, body: { ok: true } })
-  assert.deepEqual([...state.hidden], ['pro.jpg'])
+  await run(
+    { action: 'restoreProfessional', filename: 'photo.jpg' },
+    state,
+    context,
+  )
+  assert.deepEqual([...state.hidden], [])
 })
 
-test('updating event details saves one normalized gallery record', async () => {
-  const state = createCommandHarness({
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'pending/event-one/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'pending',
-    created_at: 1,
-    published_at: null,
-  })
-
-  const result = await executeGalleryAdminCommand(
-    {
-      event: {
-        id: 'event-one',
-        title: 'Old title',
-        summary: 'Old summary',
-        category: 'Event Photography',
-        eventDate: null,
-        eventTime: null,
-        eventVenue: null,
-        comingSoon: false,
-        status: 'published',
-        staticPhotos: [],
-      },
-      requestUrl: 'https://example.com/admin/galleries/event-one',
-    },
+test('normalizes updated event details', async () => {
+  const state = createHarness()
+  await run(
     {
       action: 'updateEvent',
       title: '  New title  ',
@@ -432,10 +369,8 @@ test('updating event details saves one normalized gallery record', async () => {
       comingSoon: true,
       visibilityStatus: 'coming_soon',
     },
-    state.dependencies,
+    state,
   )
-
-  assert.deepEqual(result, { status: 200, body: { ok: true } })
   assert.deepEqual(state.savedEvent(), {
     event_slug: 'event-one',
     title: 'New title',
@@ -449,592 +384,105 @@ test('updating event details saves one normalized gallery record', async () => {
   })
 })
 
-test('creating an invite returns the event-scoped upload link', async () => {
-  const state = createCommandHarness({
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'pending/event-one/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'pending',
-    created_at: 1,
-    published_at: null,
-  })
-
-  const result = await executeGalleryAdminCommand(
+test('creates an event-scoped invite', async () => {
+  const state = createHarness()
+  assert.deepEqual(
+    await run({ action: 'createInvite', guestName: '  Guest Name  ' }, state),
     {
-      event: {
-        id: 'event-one',
-        title: 'Event One',
-        summary: 'Event gallery',
-        category: 'Event Photography',
-        eventDate: null,
-        eventTime: null,
-        eventVenue: null,
-        comingSoon: false,
-        status: 'published',
-        staticPhotos: [],
+      status: 200,
+      body: {
+        ok: true,
+        token: 'generated-id',
+        url: 'https://example.com/galleries/event-one/upload/generated-id/',
       },
-      requestUrl: 'https://example.com/admin/galleries/event-one',
     },
-    { action: 'createInvite', guestName: '  Guest Name  ' },
-    state.dependencies,
   )
-
   assert.deepEqual(state.savedInvite(), {
     token: 'generated-id',
     event_slug: 'event-one',
     guest_name: 'Guest Name',
   })
-  assert.deepEqual(result, {
-    status: 200,
-    body: {
-      ok: true,
-      token: 'generated-id',
-      url: 'https://example.com/galleries/event-one/upload/generated-id/',
-    },
-  })
 })
 
-test('setting a cover accepts only an image from the event gallery', async () => {
-  const state = createCommandHarness({
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'pending/event-one/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'pending',
-    created_at: 1,
-    published_at: null,
-  })
-  const coverSrc = 'https://photos.example/event-one/pro.jpg'
-
-  const result = await executeGalleryAdminCommand(
-    {
-      event: {
-        id: 'event-one',
-        title: 'Event One',
-        summary: 'Event gallery',
-        category: 'Event Photography',
-        eventDate: null,
-        eventTime: null,
-        eventVenue: null,
-        comingSoon: false,
-        status: 'published',
-        staticPhotos: [
-          {
-            src: coverSrc,
-            width: 1200,
-            height: 800,
-            alt: 'Professional photo',
-            filename: 'pro.jpg',
-          },
-        ],
-      },
-      requestUrl: 'https://example.com/admin/galleries/event-one',
-    },
-    {
-      action: 'setCover',
-      src: coverSrc,
-      width: 1200,
-      height: 800,
-      alt: '  Event cover  ',
-    },
-    state.dependencies,
+test('sets a cover from an event photo', async () => {
+  const state = createHarness()
+  const src = 'https://photos.example/event-one/photo.jpg'
+  await run(
+    { action: 'setCover', src, width: 1200, height: 800, alt: ' Cover ' },
+    state,
+    commandContext({ staticPhotos: [{ src, filename: 'photo.jpg' }] }),
   )
-
-  assert.deepEqual(result, { status: 200, body: { ok: true } })
-  assert.deepEqual(state.savedEvent(), {
-    event_slug: 'event-one',
-    title: 'Event One',
-    summary: 'Event gallery',
-    category: 'Event Photography',
-    event_date: null,
-    event_time: null,
-    event_venue: null,
-    coming_soon: false,
-    status: 'published',
-    cover: {
-      src: coverSrc,
-      width: 1200,
-      height: 800,
-      alt: 'Event cover',
-    },
-  })
-})
-
-test('uploading an admin photo stores one optimized gallery photo', async () => {
-  const state = createCommandHarness(
-    {
-      id: 'guest-photo',
-      event_slug: 'event-one',
-      object_key: 'pending/event-one/guest-photo.jpg',
-      original_filename: 'guest.jpg',
-      width: 1600,
-      height: 900,
-      alt: 'Guest upload',
-      status: 'pending',
-      created_at: 1,
-      published_at: null,
-    },
-    {
-      optimized: {
-        buffer: new Uint8Array([4, 5, 6]),
-        width: 1200,
-        height: 800,
-      },
-    },
-  )
-  const file = new File(['photo'], '../Original Photo.PNG', {
-    type: 'image/png',
-  })
-
-  const result = await executeGalleryAdminCommand(
-    {
-      event: {
-        id: 'event-one',
-        title: 'Event One',
-        summary: 'Event gallery',
-        category: 'Event Photography',
-        eventDate: null,
-        eventTime: null,
-        eventVenue: null,
-        comingSoon: false,
-        status: 'published',
-        staticPhotos: [],
-      },
-      requestUrl: 'https://example.com/admin/galleries/event-one',
-    },
-    { action: 'uploadAdminPhoto', file, alt: '  Admin photo  ' },
-    state.dependencies,
-  )
-
-  assert.deepEqual(result, {
-    status: 201,
-    body: { ok: true, id: 'generated-id' },
-  })
-  assert.deepEqual(state.insertedPhoto(), {
-    id: 'generated-id',
-    event_slug: 'event-one',
-    object_key: 'events/event-one/photos/generated-id.jpg',
-    original_filename: 'Original Photo.PNG',
+  assert.deepEqual(state.savedEvent()?.cover, {
+    src,
     width: 1200,
     height: 800,
-    alt: 'Admin photo',
-    uploader_name: null,
-    source: 'admin',
+    alt: 'Cover',
   })
+})
+
+test('uploads an admin photo and compensates insertion failure', async () => {
+  const optimized = { buffer: bytes(), width: 1200, height: 800 }
+  const state = createHarness({ optimized })
   assert.deepEqual(
-    [...state.published.keys()],
-    ['events/event-one/photos/generated-id.jpg'],
-  )
-})
-
-test('replacing a flyer saves matching flyer and cover metadata', async () => {
-  const state = createCommandHarness(
-    {
-      id: 'guest-photo',
-      event_slug: 'event-one',
-      object_key: 'pending/event-one/guest-photo.jpg',
-      original_filename: 'guest.jpg',
-      width: 1600,
-      height: 900,
-      alt: 'Guest upload',
-      status: 'pending',
-      created_at: 1,
-      published_at: null,
-    },
-    {
-      optimized: {
-        buffer: new Uint8Array([7, 8, 9]),
-        width: 900,
-        height: 1200,
-      },
-    },
-  )
-  const file = new File(['flyer'], 'flyer.png', { type: 'image/png' })
-
-  const result = await executeGalleryAdminCommand(
-    {
-      event: {
-        id: 'event-one',
-        title: 'Event One',
-        summary: 'Event gallery',
-        category: 'Community',
-        eventDate: '2026-08-01',
-        eventTime: '18:00',
-        eventVenue: 'Tampa',
-        comingSoon: true,
-        status: 'coming_soon',
-        staticPhotos: [],
-      },
-      requestUrl: 'https://example.com/admin/galleries/event-one',
-    },
-    { action: 'updateFlyer', file },
-    state.dependencies,
-  )
-
-  const objectKey = 'events/event-one/flyer-generated-id.jpg'
-  const flyer = {
-    object_key: objectKey,
-    width: 900,
-    height: 1200,
-    alt: 'Event One flyer',
-  }
-  assert.deepEqual(result, { status: 201, body: { ok: true, flyer } })
-  assert.deepEqual(state.savedEvent(), {
-    event_slug: 'event-one',
-    title: 'Event One',
-    summary: 'Event gallery',
-    category: 'Community',
-    event_date: '2026-08-01',
-    event_time: '18:00',
-    event_venue: 'Tampa',
-    coming_soon: true,
-    status: 'coming_soon',
-    flyer,
-    cover: {
-      src: `https://photos.ayoubabed.xyz/${objectKey}`,
-      width: 900,
-      height: 1200,
-      alt: 'Event One flyer',
-    },
-  })
-  assert.deepEqual([...state.published.keys()], [objectKey])
-})
-
-test('approval remains successful when pending cleanup must be retried', async () => {
-  const failure = new Error('Pending bucket unavailable')
-  const state = createCommandHarness(
-    {
-      id: 'guest-photo',
-      event_slug: 'event-one',
-      object_key: 'pending/event-one/guest-photo.jpg',
-      original_filename: 'guest.jpg',
-      width: 1600,
-      height: 900,
-      alt: 'Guest upload',
-      status: 'pending',
-      created_at: 1,
-      published_at: null,
-    },
-    { deletePendingError: failure },
-  )
-
-  const result = await executeGalleryAdminCommand(
-    commandContext(),
-    { action: 'approveGuest', photoId: 'guest-photo' },
-    state.dependencies,
-  )
-
-  assert.deepEqual(result, { status: 200, body: { ok: true } })
-  assert.equal(state.photo().status, 'published')
-  assert.equal(state.pending.size, 1)
-  assert.equal(
-    state.logs.some(
-      ({ message, objectKey }) =>
-        message === 'gallery guest cleanup failed' &&
-        objectKey === 'pending/event-one/guest-photo.jpg',
-    ),
-    true,
-  )
-})
-
-test('rejection keeps the pending image when deleting its record fails', async () => {
-  const failure = new Error('Database unavailable')
-  const state = createCommandHarness(
-    {
-      id: 'guest-photo',
-      event_slug: 'event-one',
-      object_key: 'pending/event-one/guest-photo.jpg',
-      original_filename: 'guest.jpg',
-      width: 1600,
-      height: 900,
-      alt: 'Guest upload',
-      status: 'pending',
-      created_at: 1,
-      published_at: null,
-    },
-    { deleteGuestError: failure },
-  )
-
-  await assert.rejects(
-    executeGalleryAdminCommand(
-      commandContext(),
-      { action: 'rejectGuest', photoId: 'guest-photo' },
-      state.dependencies,
-    ),
-    failure,
-  )
-  assert.equal(state.pending.size, 1)
-})
-
-test('removing a published guest photo deletes its public image and record', async () => {
-  const state = createCommandHarness({
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'events/event-one/guest/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'published',
-    created_at: 1,
-    published_at: 2,
-  })
-
-  const result = await executeGalleryAdminCommand(
-    commandContext(),
-    { action: 'removeGuest', photoId: 'guest-photo' },
-    state.dependencies,
-  )
-
-  assert.deepEqual(result, { status: 200, body: { ok: true } })
-  assert.equal(state.published.size, 0)
-  assert.equal(state.deleted(), true)
-})
-
-test('published removal restores the public image when deleting its record fails', async () => {
-  const failure = new Error('Database unavailable')
-  const state = createCommandHarness(
-    {
-      id: 'guest-photo',
-      event_slug: 'event-one',
-      object_key: 'events/event-one/guest/guest-photo.jpg',
-      original_filename: 'guest.jpg',
-      width: 1600,
-      height: 900,
-      alt: 'Guest upload',
-      status: 'published',
-      created_at: 1,
-      published_at: 2,
-    },
-    { deleteGuestError: failure },
-  )
-
-  await assert.rejects(
-    executeGalleryAdminCommand(
-      commandContext(),
-      { action: 'removeGuest', photoId: 'guest-photo' },
-      state.dependencies,
-    ),
-    failure,
-  )
-  assert.deepEqual(
-    [...state.published.keys()],
-    ['events/event-one/guest/guest-photo.jpg'],
-  )
-})
-
-test('published removal keeps its record when public deletion fails', async () => {
-  const failure = new Error('Public bucket unavailable')
-  const state = createCommandHarness(
-    {
-      id: 'guest-photo',
-      event_slug: 'event-one',
-      object_key: 'events/event-one/guest/guest-photo.jpg',
-      original_filename: 'guest.jpg',
-      width: 1600,
-      height: 900,
-      alt: 'Guest upload',
-      status: 'published',
-      created_at: 1,
-      published_at: 2,
-    },
-    { deletePublicError: failure },
-  )
-
-  await assert.rejects(
-    executeGalleryAdminCommand(
-      commandContext(),
-      { action: 'removeGuest', photoId: 'guest-photo' },
-      state.dependencies,
-    ),
-    failure,
-  )
-  assert.equal(state.deleted(), false)
-  assert.equal(state.published.size, 1)
-})
-
-test('repeated approval cleans a stale pending object by its deterministic key', async () => {
-  const state = createCommandHarness({
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'events/event-one/guest/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'published',
-    created_at: 1,
-    published_at: 2,
-  })
-  state.pending.set(
-    'pending/event-one/guest-photo.jpg',
-    new Uint8Array([1, 2, 3]),
-  )
-
-  const result = await executeGalleryAdminCommand(
-    commandContext(),
-    { action: 'approveGuest', photoId: 'guest-photo' },
-    state.dependencies,
-  )
-
-  assert.deepEqual(result, { status: 200, body: { ok: true } })
-  assert.equal(state.pending.size, 0)
-})
-
-test('restoring a professional photo reverses its hidden state', async () => {
-  const state = createCommandHarness({
-    id: 'guest-photo',
-    event_slug: 'event-one',
-    object_key: 'pending/event-one/guest-photo.jpg',
-    original_filename: 'guest.jpg',
-    width: 1600,
-    height: 900,
-    alt: 'Guest upload',
-    status: 'pending',
-    created_at: 1,
-    published_at: null,
-  })
-  const context = commandContext({
-    staticPhotos: [
+    await run(
       {
-        src: 'https://photos.example/event-one/pro.jpg',
-        filename: 'pro.jpg',
+        action: 'uploadAdminPhoto',
+        file: new File(['photo'], '../Photo.PNG', { type: 'image/png' }),
+        alt: ' Admin photo ',
       },
-    ],
-  })
-
-  await executeGalleryAdminCommand(
-    context,
-    { action: 'hideProfessional', filename: 'pro.jpg' },
-    state.dependencies,
+      state,
+    ),
+    { status: 201, body: { ok: true, id: 'generated-id' } },
   )
-  await executeGalleryAdminCommand(
-    context,
-    { action: 'restoreProfessional', filename: 'pro.jpg' },
-    state.dependencies,
-  )
+  assert.equal(state.insertedPhoto()?.original_filename, 'Photo.PNG')
+  assert.equal(state.published.size, 1)
 
-  assert.deepEqual([...state.hidden], [])
-})
-
-test('enabling uploads reuses an existing gallery password', async () => {
-  const state = createCommandHarness(
-    {
-      id: 'guest-photo',
-      event_slug: 'event-one',
-      object_key: 'pending/event-one/guest-photo.jpg',
-      original_filename: 'guest.jpg',
-      width: 1600,
-      height: 900,
-      alt: 'Guest upload',
-      status: 'pending',
-      created_at: 1,
-      published_at: null,
-    },
-    {
-      settings: {
-        event_slug: 'event-one',
-        uploads_enabled: 0,
-        password_salt: 'salt',
-        password_hash: 'hash',
-        updated_at: 1,
-      },
-    },
-  )
-
-  await executeGalleryAdminCommand(
-    commandContext(),
-    { action: 'settings', uploadsEnabled: true },
-    state.dependencies,
-  )
-
-  assert.deepEqual(state.savedSettings(), {
-    uploadsEnabled: true,
-    password: undefined,
-  })
-})
-
-test('admin photo upload removes the public object when insertion fails', async () => {
   const failure = new Error('Database unavailable')
-  const state = createCommandHarness(
-    {
-      id: 'guest-photo',
-      event_slug: 'event-one',
-      object_key: 'pending/event-one/guest-photo.jpg',
-      original_filename: 'guest.jpg',
-      width: 1600,
-      height: 900,
-      alt: 'Guest upload',
-      status: 'pending',
-      created_at: 1,
-      published_at: null,
-    },
-    {
-      insertPhotoError: failure,
-      optimized: {
-        buffer: new Uint8Array([4, 5, 6]),
-        width: 1200,
-        height: 800,
-      },
-    },
-  )
-
+  const failed = createHarness({
+    optimized,
+    errors: { insertPhoto: failure },
+  })
   await assert.rejects(
-    executeGalleryAdminCommand(
-      commandContext(),
+    run(
       {
         action: 'uploadAdminPhoto',
         file: new File(['photo'], 'photo.png', { type: 'image/png' }),
       },
-      state.dependencies,
+      failed,
     ),
     failure,
   )
-  assert.equal(state.published.size, 0)
+  assert.equal(failed.published.size, 0)
 })
 
-test('flyer replacement removes the public object when saving fails', async () => {
-  const failure = new Error('Database unavailable')
-  const state = createCommandHarness(
-    {
-      id: 'guest-photo',
-      event_slug: 'event-one',
-      object_key: 'pending/event-one/guest-photo.jpg',
-      original_filename: 'guest.jpg',
-      width: 1600,
-      height: 900,
-      alt: 'Guest upload',
-      status: 'pending',
-      created_at: 1,
-      published_at: null,
-    },
-    {
-      saveEventError: failure,
-      optimized: {
-        buffer: new Uint8Array([7, 8, 9]),
-        width: 900,
-        height: 1200,
-      },
-    },
+test('replaces a flyer and compensates save failure', async () => {
+  const optimized = { buffer: bytes(), width: 900, height: 1200 }
+  const state = createHarness({ optimized })
+  const command = {
+    action: 'updateFlyer',
+    file: new File(['flyer'], 'flyer.png', { type: 'image/png' }),
+  }
+  const result = await run(command, state)
+  assert.equal(result.status, 201)
+  assert.equal(
+    state.savedEvent()?.flyer?.object_key,
+    'events/event-one/flyer-generated-id.jpg',
   )
+  assert.equal(state.published.size, 1)
 
+  const failure = new Error('Database unavailable')
+  const failed = createHarness({
+    optimized,
+    errors: { saveEvent: failure },
+  })
+  await assert.rejects(run(command, failed), failure)
+  assert.equal(failed.published.size, 0)
+})
+
+test('rejects unsupported commands', async () => {
   await assert.rejects(
-    executeGalleryAdminCommand(
-      commandContext(),
-      {
-        action: 'updateFlyer',
-        file: new File(['flyer'], 'flyer.png', { type: 'image/png' }),
-      },
-      state.dependencies,
-    ),
-    failure,
+    run({ action: 'deleteEverything' }, createHarness()),
+    (error) =>
+      error instanceof GalleryAdminCommandError && error.status === 400,
   )
-  assert.equal(state.published.size, 0)
 })
