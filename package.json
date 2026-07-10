@@ -13,7 +13,7 @@
     "gallery:manifest": "node scripts/generate-event-gallery-manifest.mjs",
     "gallery:prune": "node scripts/prune-gallery.mjs",
     "test:gallery-prune": "node --test scripts/gallery-prune-core.test.mjs",
-    "test:galleries": "tsx --test src/lib/gallery-auth.test.ts src/lib/gallery-upload.test.ts src/lib/gallery-admin.test.ts src/lib/gallery-read.test.ts",
+    "test:galleries": "tsx --test src/lib/gallery-auth.test.ts src/lib/gallery-upload.test.ts src/lib/gallery-admin.test.ts src/lib/gallery-read.test.ts src/lib/gallery-admin-commands.test.ts",
     "faces:index": "node scripts/face-index.mjs",
     "faces:publish": "node scripts/face-publish.mjs",
     "faces:delete": "node scripts/face-delete.mjs",
