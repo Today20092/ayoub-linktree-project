@@ -27,6 +27,20 @@ Project uses Prettier:
 npx prettier --write .
 ```
 
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues; external PRs are not a triage surface. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the default five-label vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This is a single-context repo using root `CONTEXT.md` and `docs/adr/`. See `docs/agents/domain.md`.
+
 ## Deployment Workflow
 
 - GitHub source of truth. Local uncommitted code never go production.
