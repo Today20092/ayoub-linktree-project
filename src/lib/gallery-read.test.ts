@@ -77,12 +77,11 @@ function reader(
       listInvites: async () => [],
       getInvite: async () => invite,
     },
-    fallbackImages: {},
   })
 }
 
 test('D1 controls visibility and overrides mutable gallery metadata', async () => {
-  const gallery = await reader().get('event-one')
+  const gallery = await reader().getPublicDetail('event-one')
 
   assert.equal(gallery?.title, 'Dynamic title')
   assert.equal(gallery?.summary, 'Dynamic summary')
@@ -92,7 +91,9 @@ test('D1 controls visibility and overrides mutable gallery metadata', async () =
 })
 
 test('static-only event galleries remain publicly readable', async () => {
-  const gallery = await reader({ dynamicValue: undefined }).get('event-one')
+  const gallery = await reader({
+    dynamicValue: undefined,
+  }).getPublicDetail('event-one')
 
   assert.equal(gallery?.title, 'Static title')
   assert.equal(gallery?.summary, 'Static gallery description')
@@ -113,9 +114,9 @@ test('hidden galleries are absent from public reads but available to admin reads
   const hidden = { ...dynamicEvent, status: 'hidden' as const }
   const galleryReader = reader({ dynamicValue: hidden })
 
-  assert.equal(await galleryReader.get('event-one'), undefined)
+  assert.equal(await galleryReader.getPublicDetail('event-one'), undefined)
   assert.equal(
-    (await galleryReader.getAdmin('event-one'))?.visibility,
+    (await galleryReader.getAdminDetail('event-one'))?.visibility,
     'hidden',
   )
 })

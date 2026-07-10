@@ -33,7 +33,6 @@ if (!gallery || !eventSlug) {
   return new Response(null, { status: 404 })
 }
 const project = gallery.staticEvent
-const dynamicEvent = gallery.dynamicEvent
 const data = project?.data
 const gallerySettings = gallery.settings
 const images = gallery.professionalImages
@@ -243,8 +242,8 @@ const formatDate = (date: Date) =>
           flyer={flyer}
           flyerAlt={galleryImageAlt}
           date={eventDate ? formatDate(eventDate) : 'Date coming soon'}
-          time={dynamicEvent?.event_time ?? data?.eventTime ?? undefined}
-          venue={dynamicEvent?.event_venue ?? data?.eventVenue ?? undefined}
+          time={gallery.eventTime ?? undefined}
+          venue={gallery.eventVenue ?? undefined}
           upcomingVideo={data?.upcomingVideo}
         />
       ) : (

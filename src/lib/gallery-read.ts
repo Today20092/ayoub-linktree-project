@@ -44,7 +44,6 @@ type GalleryRecordAdapter = {
 type GalleryReaderDependencies = {
   staticContent: StaticContentAdapter
   records: GalleryRecordAdapter
-  fallbackImages: typeof eventGalleries
 }
 
 function validStaticEvent(event: StaticEvent | undefined) {
@@ -77,7 +76,6 @@ function metadata(
 export function createGalleryReader({
   staticContent,
   records,
-  fallbackImages,
 }: GalleryReaderDependencies) {
   async function resolve(eventSlug: string, includeHidden: boolean) {
     const [staticRow, dynamicEvent] = await Promise.all([
@@ -114,11 +112,13 @@ export function createGalleryReader({
     dynamicEvents: EventGallery[],
   ) {
     return [
-      ...staticEvents
-        .filter(({ data }) => data.eventGallery)
-        .map(({ id }) => id),
-      ...dynamicEvents.map(({ event_slug }) => event_slug),
-    ].filter((slug, index, all) => all.indexOf(slug) === index)
+      ...new Set([
+        ...staticEvents
+          .filter(({ data }) => data.eventGallery)
+          .map(({ id }) => id),
+        ...dynamicEvents.map(({ event_slug }) => event_slug),
+      ]),
+    ]
   }
 
   function staticProfessionalImages(
@@ -132,7 +132,7 @@ export function createGalleryReader({
       : []
     return inlineImages.length > 0
       ? inlineImages
-      : (fallbackImages[gallery.eventSlug] ?? [])
+      : (eventGalleries[gallery.eventSlug] ?? [])
   }
 
   async function publicDetail(eventSlug: string) {
@@ -323,9 +323,6 @@ export function createGalleryReader({
     get(eventSlug: string) {
       return resolve(eventSlug, false)
     },
-    getAdmin(eventSlug: string) {
-      return resolve(eventSlug, true)
-    },
     getPublicDetail: publicDetail,
     getAdminDetail: adminDetail,
     listPublic,
@@ -377,6 +374,5 @@ export function galleryReader(database: D1Database) {
       },
     },
     records: databaseRecords(database),
-    fallbackImages: eventGalleries,
   })
 }
