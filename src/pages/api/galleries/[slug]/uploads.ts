@@ -1,18 +1,15 @@
 import type { APIRoute } from 'astro'
-import { getEntry } from 'astro:content'
 import { env } from 'cloudflare:workers'
 
 import { gallerySessionCookie, verifyGallerySession } from '@/lib/gallery-auth'
 import {
   adminPhotoKey,
-  getEventGallery,
-  getGalleryInvite,
-  getGallerySettings,
   insertGalleryPhoto,
   insertPendingGuestPhoto,
   markGalleryInviteUsed,
   pendingGuestKey,
 } from '@/lib/gallery-data'
+import { galleryReader } from '@/lib/gallery-read'
 import {
   acceptedGalleryImage,
   MAX_GALLERY_UPLOAD_BYTES,
@@ -32,29 +29,24 @@ export const POST: APIRoute = async ({ params, request }) => {
   const eventSlug = params.slug
   if (!eventSlug) return json({ error: 'Gallery not found.' }, 404)
 
-  const staticEvent = await getEntry('portfolio', eventSlug)
-  const dynamicEvent = staticEvent?.data.eventGallery
-    ? undefined
-    : await getEventGallery(env.GALLERY_DB, eventSlug)
-  if (!staticEvent?.data.eventGallery && !dynamicEvent) {
+  const reader = galleryReader(env.GALLERY_DB)
+  const gallery = await reader.get(eventSlug)
+  if (!gallery) {
     return json({ error: 'Gallery not found.' }, 404)
   }
-  if (dynamicEvent?.status === 'hidden') {
-    return json({ error: 'Gallery not found.' }, 404)
-  }
-  const eventTitle =
-    staticEvent?.data.title ?? dynamicEvent?.title ?? 'the event'
+  const eventTitle = gallery.title
   const inviteToken = new URL(request.url).searchParams.get('invite')?.trim()
-  const invite = inviteToken
-    ? await getGalleryInvite(env.GALLERY_DB, inviteToken)
-    : null
-  if (inviteToken && invite?.event_slug !== eventSlug) {
+  const inviteContext = inviteToken
+    ? await reader.getInviteContext(eventSlug, inviteToken)
+    : undefined
+  const invite = inviteContext?.invite
+  if (inviteToken && !invite) {
     return json({ error: 'This upload link is not valid.' }, 403)
   }
 
   const sessionToken = gallerySessionCookie(request)
   if (!invite) {
-    const settings = await getGallerySettings(env.GALLERY_DB, eventSlug)
+    const settings = (await reader.getUploadContext(eventSlug))?.settings
     if (!settings?.uploads_enabled) {
       return json({ error: 'Uploads are not open for this gallery.' }, 403)
     }

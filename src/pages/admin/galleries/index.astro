@@ -3,7 +3,6 @@ import '../../../styles.css'
 
 import type { ImageMetadata } from 'astro'
 import { Image } from 'astro:assets'
-import { getCollection } from 'astro:content'
 import { env } from 'cloudflare:workers'
 import { ChevronRight, Images } from 'lucide-react'
 
@@ -16,14 +15,7 @@ import {
   CardTitle,
 } from '../../../components/ui/card'
 import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
-import {
-  getEventGallery,
-  getGallerySettings,
-  listEventGalleries,
-  listGalleryPhotos,
-  listGuestPhotos,
-  publicEventFlyer,
-} from '../../../lib/gallery-data'
+import { galleryReader } from '../../../lib/gallery-read'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 
 export const prerender = false
@@ -39,60 +31,7 @@ if (
   return new Response('Forbidden', { status: 403 })
 }
 
-const events = (await getCollection('portfolio')).filter(
-  ({ data }) => data.eventGallery,
-)
-const staticGalleries = await Promise.all(
-  events.map(async (event) => {
-    const [settings, guests, dynamicEvent] = await Promise.all([
-      getGallerySettings(env.GALLERY_DB, event.id),
-      listGuestPhotos(env.GALLERY_DB, event.id),
-      getEventGallery(env.GALLERY_DB, event.id),
-    ])
-    const cover = event.data.thumbnail ?? event.data.featuredImage
-    return {
-      event,
-      settings,
-      pending: guests.filter(({ status }) => status === 'pending').length,
-      published: guests.filter(({ status }) => status === 'published').length,
-      cover,
-      coverAlt: event.data.imageAlt,
-      category: event.data.category,
-      title: event.data.title,
-      eventDate: event.data.eventDate,
-      visibilityStatus: dynamicEvent?.status ?? 'published',
-    }
-  }),
-)
-const dynamicEvents = await listEventGalleries(env.GALLERY_DB)
-const dynamicGalleries = await Promise.all(
-  dynamicEvents
-    .filter((event) => !events.some((entry) => entry.id === event.event_slug))
-    .map(async (event) => {
-      const [settings, guests, photos] = await Promise.all([
-        getGallerySettings(env.GALLERY_DB, event.event_slug),
-        listGuestPhotos(env.GALLERY_DB, event.event_slug),
-        listGalleryPhotos(env.GALLERY_DB, event.event_slug),
-      ])
-      return {
-        event: { id: event.event_slug },
-        settings,
-        pending: guests.filter(({ status }) => status === 'pending').length,
-        published:
-          guests.filter(({ status }) => status === 'published').length +
-          photos.length,
-        cover: publicEventFlyer(event),
-        coverAlt: `${event.title} flyer`,
-        category: event.category,
-        title: event.title,
-        eventDate: event.event_date
-          ? new Date(`${event.event_date}T00:00:00Z`)
-          : undefined,
-        visibilityStatus: event.status,
-      }
-    }),
-)
-const galleries = [...staticGalleries, ...dynamicGalleries]
+const galleries = await galleryReader(env.GALLERY_DB).listAdmin()
 const firstCover = galleries[0]?.cover
 const ogImage =
   typeof firstCover === 'string'

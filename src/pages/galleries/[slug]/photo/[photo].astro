@@ -1,14 +1,8 @@
 ---
-import { getEntry } from 'astro:content'
 import { env } from 'cloudflare:workers'
 
 import CloudflareWebAnalytics from '../../../../components/CloudflareWebAnalytics.astro'
-import { eventGalleries } from '../../../../data/event-galleries'
-import {
-  getHiddenFilenames,
-  listPublishedGuestPhotos,
-  publicGuestPhoto,
-} from '../../../../lib/gallery-data'
+import { galleryReader } from '../../../../lib/gallery-read'
 
 export const prerender = false
 
@@ -21,46 +15,30 @@ type ShareImage = {
 
 const eventSlug = Astro.params.slug
 const photoNumber = Number(Astro.params.photo)
-const project = eventSlug ? await getEntry('portfolio', eventSlug) : undefined
+const gallery = eventSlug
+  ? await galleryReader(env.GALLERY_DB).getPublicDetail(eventSlug)
+  : undefined
 if (
-  !project?.data.eventGallery ||
+  !gallery ||
   !eventSlug ||
   !Number.isSafeInteger(photoNumber) ||
   photoNumber < 1
 ) {
   return new Response(null, { status: 404 })
 }
-
-const inlineImages = project.data.gallery.filter(
-  (
-    image,
-  ): image is Extract<
-    (typeof project.data.gallery)[number],
-    { filename: string }
-  > => 'filename' in image,
-)
-const professionalImages =
-  inlineImages.length > 0 ? inlineImages : (eventGalleries[project.id] ?? [])
-const [hiddenFilenames, guestRows] = await Promise.all([
-  getHiddenFilenames(env.GALLERY_DB, eventSlug),
-  listPublishedGuestPhotos(env.GALLERY_DB, eventSlug),
-])
-const images: ShareImage[] = [
-  ...professionalImages.filter((image) => !hiddenFilenames.has(image.filename)),
-  ...guestRows.map(publicGuestPhoto),
-]
+const images: ShareImage[] = gallery.allImages
 const image = images[photoNumber - 1]
 if (!image) return new Response(null, { status: 404 })
 const photoCount = images.length
 
 const shareUrl = new URL(
-  `/galleries/${project.id}/photo/${photoNumber}/`,
+  `/galleries/${gallery.eventSlug}/photo/${photoNumber}/`,
   Astro.site,
 ).toString()
-const destinationPath = `/galleries/${project.id}/?photo=${photoNumber}`
+const destinationPath = `/galleries/${gallery.eventSlug}/?photo=${photoNumber}`
 
-const title = `${project.data.title} | Photograph ${photoNumber} of ${photoCount}`
-const description = `${image.alt}. View this photograph from ${project.data.title}.`
+const title = `${gallery.title} | Photograph ${photoNumber} of ${photoCount}`
+const description = `${image.alt}. View this photograph from ${gallery.title}.`
 ---
 
 <!doctype html>
@@ -99,7 +77,7 @@ const description = `${image.alt}. View this photograph from ${project.data.titl
   <body>
     <main>
       <p>
-        Opening photograph {photoNumber} from {project.data.title}.
+        Opening photograph {photoNumber} from {gallery.title}.
         <a href={destinationPath}>Continue to the photograph</a>
       </p>
     </main>

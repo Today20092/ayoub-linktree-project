@@ -1,40 +1,31 @@
 ---
 import '../../../styles.css'
 
-import { getEntry } from 'astro:content'
 import { env } from 'cloudflare:workers'
 import { ArrowLeft } from 'lucide-react'
 
 import GuestUpload from '../../../components/GuestUpload'
 import { Button } from '../../../components/ui/button'
-import { getEventGallery, getGallerySettings } from '../../../lib/gallery-data'
+import { galleryReader } from '../../../lib/gallery-read'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 
 export const prerender = false
 
 const eventSlug = Astro.params.slug
-const event = eventSlug ? await getEntry('portfolio', eventSlug) : undefined
-if (!event?.data.eventGallery || !eventSlug) {
+const context = eventSlug
+  ? await galleryReader(env.GALLERY_DB).getUploadContext(eventSlug)
+  : undefined
+if (!context || !eventSlug) {
   return new Response(null, { status: 404 })
 }
-
-const [settings, statusOverride] = await Promise.all([
-  getGallerySettings(env.GALLERY_DB, eventSlug),
-  getEventGallery(env.GALLERY_DB, eventSlug),
-])
-if (statusOverride?.status === 'hidden') {
-  return new Response(null, { status: 404 })
-}
+const { gallery, settings } = context
 const canonicalUrl = new URL(
   `/galleries/${eventSlug}/upload/`,
   Astro.site,
 ).toString()
-const title = `Share photos from ${event.data.title}`
-const description = `Submit guest photos from ${event.data.title} for review and inclusion in the event gallery.`
-const ogImage =
-  typeof event.data.featuredImage === 'string'
-    ? event.data.featuredImage
-    : event.data.featuredImage.src
+const title = `Share photos from ${gallery.title}`
+const description = `Submit guest photos from ${gallery.title} for review and inclusion in the event gallery.`
+const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc ?? '/og.jpg'
 
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
 ---
@@ -44,7 +35,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
   description={description}
   canonicalUrl={canonicalUrl}
   ogImage={ogImage}
-  ogImageAlt={event.data.imageAlt}
+  ogImageAlt={gallery.imageAlt ?? `${gallery.title} gallery`}
   activeNav="galleries"
 >
   <main
@@ -68,7 +59,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         Share what you captured
       </h1>
       <p class="text-muted-foreground mt-5 max-w-xl text-lg leading-8">
-        Add your photos from {event.data.title}. Every submission is reviewed
+        Add your photos from {gallery.title}. Every submission is reviewed
         before it appears in the public gallery.
       </p>
     </header>
@@ -77,7 +68,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
       <GuestUpload
         client:only="react"
         eventSlug={eventSlug}
-        eventTitle={event.data.title}
+        eventTitle={gallery.title}
         enabled={Boolean(settings?.uploads_enabled)}
       />
     </div>

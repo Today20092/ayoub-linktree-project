@@ -1,17 +1,12 @@
 ---
 import '../../../../styles.css'
 
-import { getEntry } from 'astro:content'
 import { env } from 'cloudflare:workers'
 import { ArrowLeft } from 'lucide-react'
 
 import GuestUpload from '../../../../components/GuestUpload'
 import { Button } from '../../../../components/ui/button'
-import {
-  getEventGallery,
-  getGalleryInvite,
-  publicEventFlyer,
-} from '../../../../lib/gallery-data'
+import { galleryReader } from '../../../../lib/gallery-read'
 import BaseLayout from '../../../../layouts/BaseLayout.astro'
 
 export const prerender = false
@@ -22,36 +17,17 @@ if (!eventSlug || !token) {
   return new Response(null, { status: 404 })
 }
 
-const [staticEvent, dynamicEvent, invite] = await Promise.all([
-  getEntry('portfolio', eventSlug),
-  getEventGallery(env.GALLERY_DB, eventSlug),
-  getGalleryInvite(env.GALLERY_DB, token),
-])
-const validStaticEvent = staticEvent?.data.eventGallery
-  ? staticEvent
-  : undefined
-if ((!validStaticEvent && !dynamicEvent) || invite?.event_slug !== eventSlug) {
+const context = await galleryReader(env.GALLERY_DB).getInviteContext(
+  eventSlug,
+  token,
+)
+if (!context) {
   return new Response(null, { status: 404 })
 }
-if (dynamicEvent?.status === 'hidden') {
-  return new Response(null, { status: 404 })
-}
-
-const eventTitle =
-  validStaticEvent?.data.title ?? dynamicEvent?.title ?? 'Event'
-const summary =
-  validStaticEvent?.data.galleryDescription ??
-  validStaticEvent?.data.summary ??
-  dynamicEvent?.summary ??
-  ''
-const flyer = dynamicEvent ? publicEventFlyer(dynamicEvent) : undefined
-const ogImage =
-  flyer?.src ??
-  (validStaticEvent
-    ? typeof validStaticEvent.data.featuredImage === 'string'
-      ? validStaticEvent.data.featuredImage
-      : validStaticEvent.data.featuredImage.src
-    : '/og.jpg')
+const { gallery, invite } = context
+const eventTitle = gallery.title
+const summary = gallery.summary
+const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc ?? '/og.jpg'
 
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
 ---
