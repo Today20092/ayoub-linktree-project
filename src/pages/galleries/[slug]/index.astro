@@ -3,7 +3,6 @@ import '../../../styles.css'
 
 import { Image } from 'astro:assets'
 import { ArrowRight, Heart, ImageUp } from 'lucide-react'
-import { getEntry } from 'astro:content'
 import { env } from 'cloudflare:workers'
 
 import EventLightbox from '../../../components/EventLightbox'
@@ -19,149 +18,42 @@ import {
 } from '../../../components/ui/breadcrumb'
 import { Badge } from '../../../components/ui/badge'
 import { Button } from '../../../components/ui/button'
-import { eventGalleries } from '../../../data/event-galleries'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { faceManifests } from '../../../lib/face-manifests'
-import {
-  getEventGallery,
-  getGallerySettings,
-  getHiddenFilenames,
-  listGalleryPhotos,
-  listPublishedGuestPhotos,
-  publicEventCover,
-  publicEventFlyer,
-  publicGalleryPhoto,
-  publicGuestPhoto,
-} from '../../../lib/gallery-data'
+import { galleryReader } from '../../../lib/gallery-read'
 import { siteConfig } from '../../../lib/site-config'
 
 export const prerender = false
 
-type RemoteGalleryImage = {
-  src: string
-  width: number
-  height: number
-  alt: string
-  filename: string
-  caption?: string
-  featured?: boolean
-}
-
 const eventSlug = Astro.params.slug
-const staticProject = eventSlug
-  ? await getEntry('portfolio', eventSlug)
+const gallery = eventSlug
+  ? await galleryReader(env.GALLERY_DB).getPublicDetail(eventSlug)
   : undefined
-const project = staticProject?.data.eventGallery ? staticProject : undefined
-const dynamicEvent = eventSlug
-  ? await getEventGallery(env.GALLERY_DB, eventSlug)
-  : undefined
-if ((!project && !dynamicEvent) || !eventSlug) {
+if (!gallery || !eventSlug) {
   return new Response(null, { status: 404 })
 }
-if (dynamicEvent?.status === 'hidden') {
-  return new Response(null, { status: 404 })
-}
+const project = gallery.staticEvent
 const data = project?.data
-const [hiddenFilenames, publishedGuests, gallerySettings, uploadedPhotos] =
-  await Promise.all([
-    getHiddenFilenames(env.GALLERY_DB, eventSlug),
-    listPublishedGuestPhotos(env.GALLERY_DB, eventSlug),
-    getGallerySettings(env.GALLERY_DB, eventSlug),
-    listGalleryPhotos(env.GALLERY_DB, eventSlug),
-  ])
-
-const inlineImages = data
-  ? data.gallery.filter(
-      (
-        image,
-      ): image is Extract<
-        (typeof data.gallery)[number],
-        { filename: string }
-      > => 'filename' in image,
-    )
-  : []
-const fallbackImages = eventGalleries[eventSlug] ?? []
-const rawImages: RemoteGalleryImage[] =
-  inlineImages.length > 0
-    ? (inlineImages as unknown as RemoteGalleryImage[])
-    : fallbackImages
-
-const dynamicComingSoon =
-  dynamicEvent?.status === 'coming_soon' || Boolean(dynamicEvent?.coming_soon)
-const uploadedImages = dynamicComingSoon
-  ? []
-  : uploadedPhotos.map(publicGalleryPhoto)
-const adminUploadedImages = uploadedImages.filter(
-  (image) => image.source === 'admin',
-)
-const images = [
-  ...rawImages
-    .filter((image) => !hiddenFilenames.has(image.filename))
-    .map((image) => ({
-      src: image.src,
-      width: image.width,
-      height: image.height,
-      alt: image.alt,
-      filename: image.filename,
-      caption: image.caption,
-      featured: image.featured,
-    })),
-  ...adminUploadedImages,
-]
-const guestImages = dynamicComingSoon
-  ? []
-  : [
-      ...publishedGuests.map(publicGuestPhoto),
-      ...uploadedImages.filter((image) => image.source === 'guest'),
-    ]
-const allImages = [...images, ...guestImages]
+const gallerySettings = gallery.settings
+const images = gallery.professionalImages
+const guestImages = gallery.guestImages
+const allImages = gallery.allImages
 const totalPhotoCount = allImages.length
 
 const galleryId = `gallery-${eventSlug}`
 const galleryUrl = new URL(`/galleries/${eventSlug}/`, Astro.site).toString()
 const portfolioUrl = project ? `/portfolio/${project.id}/` : '/galleries/'
-const galleryTitle = dynamicEvent?.title ?? data?.title ?? 'Event Gallery'
-const galleryCategory =
-  dynamicEvent?.category ?? data?.category ?? 'Event Photography'
+const galleryTitle = gallery.title
+const galleryCategory = gallery.category
 const galleryImageAlt = data?.imageAlt ?? `${galleryTitle} event gallery`
-const summary =
-  dynamicEvent?.summary ?? data?.galleryDescription ?? data?.summary ?? ''
+const summary = gallery.summary
 const title = `${galleryTitle} - Event Gallery`
-const ogImage =
-  (dynamicEvent ? publicEventCover(dynamicEvent)?.src : undefined) ??
-  allImages[0]?.src ??
-  (dynamicEvent ? publicEventFlyer(dynamicEvent)?.src : undefined) ??
-  (data
-    ? typeof data.featuredImage === 'string'
-      ? data.featuredImage
-      : data.featuredImage.src
-    : '/og.jpg')
-const eventDate = dynamicEvent?.event_date
-  ? new Date(`${dynamicEvent.event_date}T00:00:00Z`)
-  : data?.eventDate
+const ogImage = gallery.ogImage
+const eventDate = gallery.eventDate
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
 const faceManifest = faceManifests[eventSlug]
-const flyer =
-  data &&
-  typeof data.featuredImage === 'object' &&
-  data.featuredImage !== null &&
-  !('filename' in data.featuredImage)
-    ? (data.featuredImage as ImageMetadata)
-    : dynamicEvent
-      ? publicEventFlyer(dynamicEvent)
-      : undefined
-const remoteFeaturedImage =
-  data &&
-  typeof data.featuredImage === 'object' &&
-  data.featuredImage !== null &&
-  'filename' in data.featuredImage &&
-  !hiddenFilenames.has(data.featuredImage.filename)
-    ? data.featuredImage
-    : undefined
-const galleryHeroImage =
-  (dynamicEvent ? publicEventCover(dynamicEvent) : undefined) ??
-  remoteFeaturedImage ??
-  images[0]
+const flyer = gallery.flyerImage
+const galleryHeroImage = gallery.heroImage
 
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', {
@@ -350,8 +242,8 @@ const formatDate = (date: Date) =>
           flyer={flyer}
           flyerAlt={galleryImageAlt}
           date={eventDate ? formatDate(eventDate) : 'Date coming soon'}
-          time={dynamicEvent?.event_time ?? data?.eventTime ?? undefined}
-          venue={dynamicEvent?.event_venue ?? data?.eventVenue ?? undefined}
+          time={gallery.eventTime ?? undefined}
+          venue={gallery.eventVenue ?? undefined}
           upcomingVideo={data?.upcomingVideo}
         />
       ) : (

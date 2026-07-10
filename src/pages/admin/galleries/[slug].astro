@@ -1,24 +1,13 @@
 ---
 import '../../../styles.css'
 
-import { getEntry } from 'astro:content'
 import { env } from 'cloudflare:workers'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 
 import AdminGallery from '../../../components/AdminGallery'
 import { Button } from '../../../components/ui/button'
-import { eventGalleries } from '../../../data/event-galleries'
 import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
-import {
-  getEventGallery,
-  getGallerySettings,
-  getHiddenFilenames,
-  listGalleryInvites,
-  listGalleryPhotos,
-  listGuestPhotos,
-  publicEventCover,
-  publicEventFlyer,
-} from '../../../lib/gallery-data'
+import { galleryReader } from '../../../lib/gallery-read'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 
 export const prerender = false
@@ -35,71 +24,32 @@ if (
 }
 
 const eventSlug = Astro.params.slug
-const staticEvent = eventSlug
-  ? await getEntry('portfolio', eventSlug)
+const gallery = eventSlug
+  ? await galleryReader(env.GALLERY_DB).getAdminDetail(eventSlug)
   : undefined
-const event = staticEvent?.data.eventGallery ? staticEvent : undefined
-const dynamicEvent = eventSlug
-  ? await getEventGallery(env.GALLERY_DB, eventSlug)
-  : undefined
-if ((!event && !dynamicEvent) || !eventSlug) {
+if (!gallery || !eventSlug) {
   return new Response(null, { status: 404 })
 }
-
-const [settings, guests, hiddenFilenames, uploadedPhotos, invites] =
-  await Promise.all([
-    getGallerySettings(env.GALLERY_DB, eventSlug),
-    listGuestPhotos(env.GALLERY_DB, eventSlug),
-    getHiddenFilenames(env.GALLERY_DB, eventSlug),
-    listGalleryPhotos(env.GALLERY_DB, eventSlug),
-    listGalleryInvites(env.GALLERY_DB, eventSlug),
-  ])
-const inlineImages = event
-  ? event.data.gallery.filter(
-      (
-        image,
-      ): image is Extract<
-        (typeof event.data.gallery)[number],
-        { filename: string }
-      > => 'filename' in image,
-    )
-  : []
-const professionalImages =
-  inlineImages.length > 0 ? inlineImages : (eventGalleries[eventSlug] ?? [])
-const professional = professionalImages.map((image) => ({
-  src: image.src,
-  alt: image.alt,
-  filename: image.filename,
-  width: image.width,
-  height: image.height,
-  hidden: hiddenFilenames.has(image.filename),
-}))
+const event = gallery.staticEvent
+const { settings, guests, uploadedPhotos, invites, professional } = gallery
 const ogImage =
-  (dynamicEvent ? publicEventFlyer(dynamicEvent)?.src : undefined) ??
+  gallery.flyer?.src ??
   (event
     ? typeof event.data.featuredImage === 'string'
       ? event.data.featuredImage
       : event.data.featuredImage.src
     : '/og.jpg')
-const eventTitle = dynamicEvent?.title ?? event?.data.title ?? 'Event gallery'
+const eventTitle = gallery.title
 const eventMeta = {
   title: eventTitle,
-  summary:
-    dynamicEvent?.summary ??
-    event?.data.galleryDescription ??
-    event?.data.summary ??
-    '',
-  category:
-    dynamicEvent?.category ?? event?.data.category ?? 'Event Photography',
-  eventDate:
-    dynamicEvent?.event_date ??
-    event?.data.eventDate?.toISOString().slice(0, 10) ??
-    '',
-  eventTime: dynamicEvent?.event_time ?? event?.data.eventTime ?? '',
-  eventVenue: dynamicEvent?.event_venue ?? event?.data.eventVenue ?? '',
-  comingSoon: dynamicEvent ? Boolean(dynamicEvent.coming_soon) : false,
-  visibilityStatus: dynamicEvent?.status ?? 'published',
-  coverSrc: dynamicEvent ? publicEventCover(dynamicEvent)?.src : undefined,
+  summary: gallery.summary,
+  category: gallery.category,
+  eventDate: gallery.eventDate?.toISOString().slice(0, 10) ?? '',
+  eventTime: gallery.eventTime ?? '',
+  eventVenue: gallery.eventVenue ?? '',
+  comingSoon: gallery.comingSoon,
+  visibilityStatus: gallery.visibility,
+  coverSrc: gallery.cover?.src,
 }
 
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')

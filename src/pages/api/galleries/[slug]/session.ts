@@ -1,5 +1,4 @@
 import type { APIRoute } from 'astro'
-import { getEntry } from 'astro:content'
 import { env } from 'cloudflare:workers'
 
 import {
@@ -8,7 +7,7 @@ import {
   validGalleryPassword,
   verifyGalleryPassword,
 } from '@/lib/gallery-auth'
-import { getEventGallery, getGallerySettings } from '@/lib/gallery-data'
+import { galleryReader } from '@/lib/gallery-read'
 
 export const prerender = false
 
@@ -25,12 +24,10 @@ export const POST: APIRoute = async ({ params, request }) => {
   const eventSlug = params.slug
   if (!eventSlug) return json({ error: 'Gallery not found.' }, 404)
 
-  const event = await getEntry('portfolio', eventSlug)
-  if (!event?.data.eventGallery) {
-    return json({ error: 'Gallery not found.' }, 404)
-  }
-  const statusOverride = await getEventGallery(env.GALLERY_DB, eventSlug)
-  if (statusOverride?.status === 'hidden') {
+  const context = await galleryReader(env.GALLERY_DB).getUploadContext(
+    eventSlug,
+  )
+  if (!context) {
     return json({ error: 'Gallery not found.' }, 404)
   }
 
@@ -66,7 +63,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     return json({ error: 'Invalid password.' }, 401)
   }
 
-  const settings = await getGallerySettings(env.GALLERY_DB, eventSlug)
+  const { settings } = context
   if (
     !settings?.uploads_enabled ||
     !settings.password_salt ||

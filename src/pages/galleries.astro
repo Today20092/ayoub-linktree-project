@@ -1,9 +1,7 @@
 ---
 import '../styles.css'
 
-import type { ImageMetadata } from 'astro'
 import { Image } from 'astro:assets'
-import { getCollection } from 'astro:content'
 import { env } from 'cloudflare:workers'
 import { Calendar, Images } from 'lucide-react'
 
@@ -15,18 +13,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '../components/ui/empty'
-import { eventGalleries } from '../data/event-galleries'
-import {
-  getEventGallery,
-  getHiddenFilenames,
-  listPublicEventGalleries,
-  listGalleryPhotos,
-  listPublishedGuestPhotos,
-  publicEventCover,
-  publicEventFlyer,
-  publicGalleryPhoto,
-  publicGuestPhoto,
-} from '../lib/gallery-data'
+import { galleryReader } from '../lib/gallery-read'
 import BaseLayout from '../layouts/BaseLayout.astro'
 
 export const prerender = false
@@ -41,121 +28,7 @@ const formatDate = (date: Date) =>
     timeZone: 'UTC',
   }).format(date)
 
-const collections = await getCollection('portfolio')
-const staticGalleries = await Promise.all(
-  collections
-    .filter((entry) => entry.data.eventGallery)
-    .map(async (entry) => {
-      const [hiddenFilenames, guestPhotos, uploadedPhotos, statusOverride] =
-        await Promise.all([
-          getHiddenFilenames(env.GALLERY_DB, entry.id),
-          listPublishedGuestPhotos(env.GALLERY_DB, entry.id),
-          listGalleryPhotos(env.GALLERY_DB, entry.id),
-          getEventGallery(env.GALLERY_DB, entry.id),
-        ])
-      if (statusOverride?.status === 'hidden') return
-      const inlineRemoteImages = entry.data.gallery.filter(
-        (image) => 'filename' in image,
-      )
-      const professionalImages =
-        inlineRemoteImages.length > 0
-          ? inlineRemoteImages
-          : (eventGalleries[entry.id] ?? [])
-      const visibleProfessional = professionalImages.filter(
-        (image) => !hiddenFilenames.has(image.filename),
-      )
-      const requestedCover =
-        (statusOverride ? publicEventCover(statusOverride) : undefined) ??
-        entry.data.thumbnail ??
-        entry.data.featuredImage
-      const requestedCoverIsHidden =
-        typeof requestedCover === 'object' &&
-        requestedCover !== null &&
-        'filename' in requestedCover &&
-        hiddenFilenames.has(requestedCover.filename)
-      const coverAsset = requestedCoverIsHidden
-        ? (visibleProfessional[0] ??
-          (uploadedPhotos[0]
-            ? publicGalleryPhoto(uploadedPhotos[0])
-            : undefined) ??
-          (guestPhotos[0] ? publicGuestPhoto(guestPhotos[0]) : undefined))
-        : requestedCover
-      const isRemote =
-        typeof coverAsset === 'object' &&
-        coverAsset !== null &&
-        'filename' in coverAsset
-      const comingSoon = statusOverride?.status === 'coming_soon'
-      const photoCount = comingSoon
-        ? 0
-        : visibleProfessional.length +
-          guestPhotos.length +
-          uploadedPhotos.length
-      return {
-        id: entry.id,
-        title: statusOverride?.title ?? entry.data.title,
-        category: statusOverride?.category ?? entry.data.category,
-        eventDate: statusOverride?.event_date
-          ? new Date(`${statusOverride.event_date}T00:00:00Z`)
-          : entry.data.eventDate,
-        photoCount,
-        isRemote,
-        cover: isRemote
-          ? (coverAsset as { src: string }).src
-          : (coverAsset as ImageMetadata | undefined),
-        coverAlt: isRemote
-          ? (coverAsset as { alt: string }).alt
-          : coverAsset
-            ? entry.data.imageAlt
-            : 'No published photographs',
-        coverWidth: isRemote
-          ? (coverAsset as { width: number }).width
-          : entry.data.imageWidth,
-        coverHeight: isRemote
-          ? (coverAsset as { height: number }).height
-          : entry.data.imageHeight,
-      }
-    }),
-)
-const dynamicEvents = await listPublicEventGalleries(env.GALLERY_DB)
-const dynamicGalleries = await Promise.all(
-  dynamicEvents
-    .filter(
-      (event) => !collections.some((entry) => entry.id === event.event_slug),
-    )
-    .map(async (event) => {
-      const photos = await listGalleryPhotos(env.GALLERY_DB, event.event_slug)
-      const coverAsset =
-        publicEventCover(event) ??
-        publicEventFlyer(event) ??
-        (event.status === 'published' && photos[0]
-          ? publicGalleryPhoto(photos[0])
-          : undefined)
-      const photoCount = event.status === 'coming_soon' ? 0 : photos.length
-      return {
-        id: event.event_slug,
-        title: event.title,
-        category: event.category,
-        eventDate: event.event_date
-          ? new Date(`${event.event_date}T00:00:00Z`)
-          : undefined,
-        photoCount,
-        isRemote: Boolean(coverAsset),
-        cover: coverAsset?.src,
-        coverAlt: coverAsset?.alt ?? `${event.title} flyer`,
-        coverWidth: coverAsset?.width ?? 1200,
-        coverHeight: coverAsset?.height ?? 800,
-      }
-    }),
-)
-const sortedGalleries = [
-  ...staticGalleries.filter((gallery) => gallery),
-  ...dynamicGalleries,
-].sort((a, b) => {
-  const aTime = a.eventDate?.getTime() ?? 0
-  const bTime = b.eventDate?.getTime() ?? 0
-  if (bTime !== aTime) return bTime - aTime
-  return 0
-})
+const sortedGalleries = await galleryReader(env.GALLERY_DB).listPublic()
 
 const title = 'Event Galleries — Ayoub Abedrabbo'
 const description =
