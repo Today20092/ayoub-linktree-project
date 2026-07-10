@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+@import './typeset.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -151,40 +152,6 @@
     opacity: 1;
     transform: translate3d(0, 0, 0);
     will-change: auto;
-  }
-
-  .portfolio-prose {
-    @apply text-muted-foreground max-w-4xl leading-7;
-  }
-
-  .portfolio-prose h2 {
-    @apply font-heading text-foreground mt-10 mb-4 text-2xl font-bold;
-  }
-
-  .portfolio-prose h2:first-child {
-    @apply mt-0;
-  }
-
-  .portfolio-prose h3 {
-    @apply font-heading text-foreground mt-8 mb-3 text-xl font-bold;
-  }
-
-  .portfolio-prose p + p,
-  .portfolio-prose p + ul,
-  .portfolio-prose ul + p {
-    @apply mt-4;
-  }
-
-  .portfolio-prose ul {
-    @apply list-disc pl-6;
-  }
-
-  .portfolio-prose li + li {
-    @apply mt-2;
-  }
-
-  .portfolio-prose a {
-    @apply text-foreground hover:text-primary focus-visible:ring-ring rounded-sm font-semibold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none;
   }
 
   .services-reel-track {

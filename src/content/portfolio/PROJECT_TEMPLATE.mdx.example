@@ -58,6 +58,6 @@ Write the project story here using normal Markdown. The filename becomes the URL
 You can add paragraphs, lists, links, and additional headings. Delete the body
 entirely if the project does not have a written case study yet.
 
-Heading spacing is controlled globally by `.portfolio-prose` in `src/styles.css`.
+Heading spacing is controlled globally by `.typeset-portfolio` in `src/typeset.css`.
 Keep normal Markdown blank lines for readability; do not add extra blank lines
 to create visual spacing.
