@@ -5,9 +5,12 @@ import {
   createFaceAnalyzer,
   decodeFaceImage,
   FaceTimeoutError,
-  firstSuccessful,
   withTimeout,
 } from './face-client'
+
+const faceFile = (name = 'photo') => new File([name], `${name}.jpg`)
+const bitmap = (close = () => {}) =>
+  ({ width: 10, height: 10, close }) as ImageBitmap
 
 function detector(
   detect: () => Promise<{
@@ -23,7 +26,7 @@ function detector(
 test('falls back to WASM when WebGL cannot prepare', async () => {
   const attempted: string[] = []
   const analyzer = createFaceAnalyzer({
-    decode: async () => ({ width: 10, height: 10, close() {} }) as ImageBitmap,
+    decode: async () => bitmap(),
     backends: [
       {
         name: 'webgl',
@@ -53,7 +56,7 @@ test('falls back to WASM when WebGL cannot prepare', async () => {
 })
 
 test('retries detection with the fallback backend', async () => {
-  const image = { width: 10, height: 10, close() {} } as ImageBitmap
+  const image = bitmap()
   const analyzer = createFaceAnalyzer({
     decode: async () => image,
     backends: [
@@ -74,7 +77,7 @@ test('retries detection with the fallback backend', async () => {
     ],
   })
 
-  const result = await analyzer.analyze(new File(['photo'], 'photo.jpg'))
+  const result = await analyzer.analyze(faceFile())
 
   assert.deepEqual(result?.faces[0].box, [1, 2, 3, 4])
   assert.equal(result?.image, image)
@@ -83,12 +86,8 @@ test('retries detection with the fallback backend', async () => {
 test('releases decoded images from stale analysis attempts', async () => {
   let finishFirstDecode: ((image: ImageBitmap) => void) | undefined
   let closed = 0
-  const firstImage = {
-    width: 10,
-    height: 10,
-    close: () => closed++,
-  } as ImageBitmap
-  const secondImage = { width: 10, height: 10, close() {} } as ImageBitmap
+  const firstImage = bitmap(() => closed++)
+  const secondImage = bitmap()
   let decodeCount = 0
   const analyzer = createFaceAnalyzer({
     decode: async () => {
@@ -108,8 +107,8 @@ test('releases decoded images from stale analysis attempts', async () => {
     ],
   })
 
-  const stale = analyzer.analyze(new File(['first'], 'first.jpg'))
-  const current = analyzer.analyze(new File(['second'], 'second.jpg'))
+  const stale = analyzer.analyze(faceFile('first'))
+  const current = analyzer.analyze(faceFile('second'))
   finishFirstDecode?.(firstImage)
 
   assert.equal(await stale, undefined)
@@ -119,11 +118,7 @@ test('releases decoded images from stale analysis attempts', async () => {
 
 test('cancel releases the selected image and suppresses pending results', async () => {
   let closed = 0
-  const image = {
-    width: 10,
-    height: 10,
-    close: () => closed++,
-  } as ImageBitmap
+  const image = bitmap(() => closed++)
   const analyzer = createFaceAnalyzer({
     decode: async () => image,
     backends: [
@@ -134,7 +129,7 @@ test('cancel releases the selected image and suppresses pending results', async 
     ],
   })
 
-  const result = await analyzer.analyze(new File(['photo'], 'photo.jpg'))
+  const result = await analyzer.analyze(faceFile())
   analyzer.cancel(result)
 
   assert.equal(closed, 1)
@@ -152,15 +147,8 @@ test('releases an image that finishes decoding after timeout', async () => {
     backends: [],
   })
 
-  await assert.rejects(
-    analyzer.analyze(new File(['photo'], 'photo.jpg')),
-    FaceTimeoutError,
-  )
-  finishDecode?.({
-    width: 10,
-    height: 10,
-    close: () => closed++,
-  } as ImageBitmap)
+  await assert.rejects(analyzer.analyze(faceFile()), FaceTimeoutError)
+  finishDecode?.(bitmap(() => closed++))
   await new Promise<void>((resolve) => setImmediate(resolve))
 
   assert.equal(closed, 1)
@@ -170,7 +158,7 @@ test('a retry resets the backend chain after both detectors fail', async () => {
   const attempts: string[] = []
   let retry = false
   const analyzer = createFaceAnalyzer({
-    decode: async () => ({ width: 10, height: 10, close() {} }) as ImageBitmap,
+    decode: async () => bitmap(),
     backends: ['webgl', 'wasm'].map((name) => ({
       name,
       create: async () => {
@@ -183,32 +171,11 @@ test('a retry resets the backend chain after both detectors fail', async () => {
     })),
   })
 
-  await assert.rejects(analyzer.analyze(new File(['first'], 'first.jpg')))
+  await assert.rejects(analyzer.analyze(faceFile('first')))
   retry = true
-  await analyzer.analyze(new File(['second'], 'second.jpg'))
+  await analyzer.analyze(faceFile('second'))
 
   assert.deepEqual(attempts, ['webgl', 'wasm', 'webgl'])
-})
-
-test('tries analysis backends in order until one works', async () => {
-  const attempted: string[] = []
-  const result = await firstSuccessful([
-    async () => {
-      attempted.push('webgl')
-      throw new Error('WebGL unavailable')
-    },
-    async () => {
-      attempted.push('wasm')
-      return 'wasm'
-    },
-    async () => {
-      attempted.push('cpu')
-      return 'cpu'
-    },
-  ])
-
-  assert.equal(result, 'wasm')
-  assert.deepEqual(attempted, ['webgl', 'wasm'])
 })
 
 test('times out a stalled face operation', async () => {

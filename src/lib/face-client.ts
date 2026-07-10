@@ -73,22 +73,6 @@ export function releaseFaceImage(image: FaceImage) {
   if ('close' in image) image.close()
 }
 
-export async function firstSuccessful<T>(
-  attempts: Array<() => Promise<T>>,
-): Promise<T> {
-  let lastError: unknown
-
-  for (const attempt of attempts) {
-    try {
-      return await attempt()
-    } catch (error) {
-      lastError = error
-    }
-  }
-
-  throw lastError
-}
-
 export async function decodeFaceImage(file: File): Promise<FaceImage> {
   if (typeof createImageBitmap === 'function') {
     try {
@@ -132,25 +116,26 @@ export function createFaceAnalyzer({
     if (loaded) return loaded
     if (detectorLoad) return detectorLoad
 
-    detectorLoad = firstSuccessful(
-      backends
-        .filter((backend) => !failedBackends.has(backend.name))
-        .map((backend) => async () => {
+    detectorLoad = (async () => {
+      let lastError: unknown
+      for (const backend of backends) {
+        if (failedBackends.has(backend.name)) continue
+        try {
           const candidate = await backend.create()
-          try {
-            await withTimeout(
-              candidate.load(),
-              modelTimeout,
-              'Face recognition took too long to prepare.',
-            )
-            loaded = { backend, detector: candidate }
-            return loaded
-          } catch (error) {
-            failedBackends.add(backend.name)
-            throw error
-          }
-        }),
-    )
+          await withTimeout(
+            candidate.load(),
+            modelTimeout,
+            'Face recognition took too long to prepare.',
+          )
+          loaded = { backend, detector: candidate }
+          return loaded
+        } catch (error) {
+          failedBackends.add(backend.name)
+          lastError = error
+        }
+      }
+      throw lastError
+    })()
 
     try {
       return await detectorLoad
@@ -246,13 +231,11 @@ export function createFaceAnalyzer({
   }
 }
 
-type HumanModule = typeof import('@vladmandic/human')
-
 function humanBackend(name: 'webgl' | 'wasm'): FaceBackend {
   return {
     name,
     async create() {
-      const module: HumanModule = await import('@vladmandic/human')
+      const module = await import('@vladmandic/human')
       const human = new module.Human({
         backend: name,
         warmup: 'none',
@@ -283,8 +266,8 @@ function humanBackend(name: 'webgl' | 'wasm'): FaceBackend {
   }
 }
 
-export const webglFaceBackend = humanBackend('webgl')
-export const wasmFaceBackend = humanBackend('wasm')
+const webglFaceBackend = humanBackend('webgl')
+const wasmFaceBackend = humanBackend('wasm')
 
 export function createBrowserFaceAnalyzer() {
   return createFaceAnalyzer({
