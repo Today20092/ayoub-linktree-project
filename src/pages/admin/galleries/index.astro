@@ -137,7 +137,13 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
                   {visibilityStatus === 'hidden' && (
                     <Badge variant="destructive">Hidden</Badge>
                   )}
-                  <Badge variant="outline">{category}</Badge>
+                  <Badge
+                    variant="outline"
+                    className="min-w-0 flex-1"
+                    title={category}
+                  >
+                    <span class="truncate">{category}</span>
+                  </Badge>
                   <Badge variant="secondary">
                     <Images aria-hidden="true" />
                     {published} guest
