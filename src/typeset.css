@@ -118,6 +118,26 @@
   }
 
   .typeset
+    :where(h2, h3, h4, h5, h6):where(
+      :not(
+        .not-typeset,
+        [data-not-typeset],
+        .not-typeset *,
+        [data-not-typeset] *
+      )
+    )
+    + :where(p, ul, ol, dl, blockquote, pre, table, figure):where(
+      :not(
+        .not-typeset,
+        [data-not-typeset],
+        .not-typeset *,
+        [data-not-typeset] *
+      )
+    ) {
+    margin-block-start: calc(var(--typeset-flow) * 0.5);
+  }
+
+  .typeset
     :where(h2):where(
       :not(
         .not-typeset,
