@@ -11,6 +11,8 @@ import ServicesFaq from '../components/ServicesFaq'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
+export const prerender = false
+
 type PortfolioEntry = CollectionEntry<'portfolio'>
 
 type ProofProject = {
@@ -203,6 +205,9 @@ const structuredData = {
     name: siteName,
   },
 }
+
+// Temporarily hide services and pricing. Remove this redirect to restore the page.
+return Astro.redirect(baseUrl, 302)
 ---
 
 <BaseLayout
