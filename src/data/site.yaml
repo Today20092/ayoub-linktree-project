@@ -88,6 +88,13 @@ socialLinks:
   #   darkColor: 'oklch(0.6 0.13 230)'
   #   darkColor2: 'oklch(0.72 0.12 215)'
   #   darkColor3: 'oklch(0.23 0.07 225)'
+  - id: patreon
+    url: https://www.patreon.com/c/AyoubAbedrabbo
+    icon: simple-icons:patreon
+    label: Support me on Patreon
+    color: 'oklch(0.26 0.012 255)'
+    color2: 'oklch(0.46 0.025 255)'
+    color3: 'oklch(0.14 0.014 255)'
   - id: keet
     url: https://keet.io/download/
     icon: ''
