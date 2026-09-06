@@ -45,6 +45,24 @@ try {
         false,
       )
       assert.deepEqual(errors, [])
+      for (const filter of [
+        'photography',
+        'video',
+        'podcasts',
+        'photography',
+        'all',
+      ]) {
+        await page.locator(`[data-filter="${filter}"]`).click()
+        const visible = await page
+          .locator('[data-project-filters]:not([hidden])')
+          .evaluateAll((items) =>
+            items.map((item) => item.dataset.projectFilters),
+          )
+        assert.ok(visible.length > 0)
+        if (filter !== 'all')
+          assert.ok(visible.every((value) => value.split(' ').includes(filter)))
+      }
+      await page.waitForTimeout(800)
       await page.waitForFunction(() => {
         const card = document.querySelector('#portfolio article:last-child')
         return (
@@ -60,7 +78,17 @@ try {
         new URL(projectURL, baseURL).searchParams.get('motion'),
         mode === 'off' ? 'off' : 'gsap',
       )
-      await page.goto(new URL(projectURL, baseURL).href)
+      if (mode === 'gsap') {
+        await Promise.all([
+          page.waitForSelector('[data-photo-transition]', {
+            state: 'attached',
+          }),
+          page.locator('#portfolio article a').first().click(),
+        ])
+        await page.waitForSelector('[data-photo-transition]', {
+          state: 'detached',
+        })
+      } else await page.locator('#portfolio article a').first().click()
       await page.waitForSelector('[data-motion-option][aria-current="true"]')
       await page.locator('[data-motion-group] h1').scrollIntoViewIfNeeded()
       await page.waitForFunction(
@@ -78,6 +106,34 @@ try {
         () =>
           getComputedStyle(document.querySelector('#av h2')).opacity === '1',
       )
+      assert.deepEqual(errors, [])
+      await page
+        .locator('#production-walkthrough ol li')
+        .last()
+        .scrollIntoViewIfNeeded()
+      if (mode === 'gsap') {
+        await page.waitForFunction(() =>
+          document
+            .querySelector('[data-walkthrough-label]')
+            .textContent.includes('03'),
+        )
+      } else
+        assert.equal(
+          await page.locator('[data-walkthrough-progress]').isVisible(),
+          false,
+        )
+      await page.goto(
+        `${baseURL}/portfolio/konan-bbq-podcast/?motion=${mode === 'off' ? 'off' : 'gsap'}`,
+      )
+      await page.locator('[data-comparison-select="1"]').click()
+      assert.equal(
+        await page.locator('[data-comparison-panel]:visible').count(),
+        1,
+      )
+      assert.equal(await page.locator('#comparison-1').isVisible(), true)
+      await page.locator('[data-comparison-select="0"]').click()
+      assert.equal(await page.locator('#comparison-0').isVisible(), true)
+      assert.equal(await page.locator('#comparison-1').isVisible(), false)
       assert.deepEqual(errors, [])
       if (process.env.GSAP_SCREENSHOT_DIR && mode === 'gsap') {
         await page.goto(`${baseURL}/?motion=gsap`)

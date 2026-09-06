@@ -378,9 +378,30 @@ const galleryHeading =
               production workflow.
             </p>
 
-            <div class="mt-7 grid gap-8 lg:grid-cols-2">
+            <div
+              data-comparison-controls
+              hidden
+              class="mt-6 flex flex-wrap gap-3"
+              role="group"
+              aria-label="Choose production version"
+            >
+              {comparisonVideos.map((video, index) => (
+                <button
+                  type="button"
+                  data-comparison-select={index}
+                  aria-pressed={index === 0}
+                  aria-controls={`comparison-${index}`}
+                  class="border-border aria-pressed:bg-foreground aria-pressed:text-background min-h-11 rounded-sm border px-5 font-bold"
+                >
+                  {video.comparisonRole === 'before' ? 'Before' : 'After'}
+                </button>
+              ))}
+            </div>
+            <div data-comparison class="mt-7 grid gap-8 lg:grid-cols-2">
               {comparisonVideos.map((video, index) => (
                 <article
+                  id={`comparison-${index}`}
+                  data-comparison-panel
                   class="flex flex-col gap-4"
                   data-reveal="up"
                   style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
@@ -396,6 +417,7 @@ const galleryHeading =
                   <YouTubeEmbed
                     youtubeId={video.youtubeId}
                     title={`${video.label}: ${video.title}`}
+                    autoplay={false}
                   />
                   <p class="text-muted-foreground leading-7">
                     {video.description}

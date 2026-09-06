@@ -481,12 +481,14 @@ if (
 
     <section
       class="bg-black py-20 text-white sm:py-24 lg:py-32"
+      id="production-walkthrough"
+      data-walkthrough
       data-reveal="up"
     >
       <div
         class="mx-auto grid w-full max-w-screen-xl gap-12 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:px-8"
       >
-        <div>
+        <div class="lg:sticky lg:top-24 lg:self-start">
           <p class="text-sm font-bold text-white/60">
             A simple production process
           </p>
@@ -495,6 +497,16 @@ if (
           >
             Plan clearly. Capture intentionally. Deliver something useful.
           </h2>
+          <div data-walkthrough-progress hidden class="mt-8">
+            <p class="text-sm" data-walkthrough-label>01 / Plan</p>
+            <div class="mt-4 h-1 bg-white/25" aria-hidden="true">
+              <div data-walkthrough-bar class="h-full origin-left bg-white">
+              </div>
+            </div>
+            <p class="mt-4 text-sm text-white/70">
+              Scroll through the production process.
+            </p>
+          </div>
         </div>
         <ol class="divide-y divide-white/25 border-y border-white/25">
           <li class="grid grid-cols-[2rem_minmax(0,1fr)] gap-4 py-6">

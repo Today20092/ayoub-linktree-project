@@ -74,6 +74,17 @@ const portfolioProjects = (await getCollection('portfolio'))
       slug: entry.id,
       title: entry.data.title,
       category: entry.data.category,
+      filters: [
+        /photograph|portrait/i.test(entry.data.category) && 'photography',
+        (Boolean(entry.data.heroVideo) ||
+          /video|documentary storytelling|field production/i.test(
+            entry.data.category,
+          )) &&
+          'video',
+        /podcast/i.test(entry.data.category) && 'podcasts',
+      ]
+        .filter(Boolean)
+        .join(' '),
       thumbnail,
       imageAlt: thumbnailAlt,
       imageWidth: thumbnailWidth,

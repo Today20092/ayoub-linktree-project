@@ -24,6 +24,7 @@ type Channel = {
 }
 
 type PortfolioCard = {
+  filters: string
   slug: string
   title: string
   category: string
@@ -272,10 +273,38 @@ const simpleIconBody = (name?: string) =>
 
   <section id="portfolio" class="scroll-mt-6 pt-10 lg:pt-16" data-reveal="fade">
     <h2 class="sr-only">Portfolio</h2>
+    <div data-portfolio-filters hidden class="mb-6">
+      <div
+        role="group"
+        aria-label="Filter portfolio"
+        class="flex flex-wrap gap-2"
+      >
+        {
+          ['all', 'photography', 'video', 'podcasts'].map((filter) => (
+            <button
+              type="button"
+              data-filter={filter}
+              aria-pressed={filter === 'all'}
+              class="border-border hover:bg-muted aria-pressed:bg-foreground aria-pressed:text-background min-h-11 rounded-sm border px-4 text-sm font-semibold capitalize"
+            >
+              {filter}
+            </button>
+          ))
+        }
+      </div>
+      <p
+        data-filter-count
+        role="status"
+        class="text-muted-foreground mt-3 text-xs"
+      >
+        {projects.length} projects
+      </p>
+    </div>
     <div class="columns-1 gap-4 space-y-8 md:columns-2 lg:gap-6 xl:columns-3">
       {
         projects.map((project, index) => (
           <article
+            data-project-filters={project.filters}
             class="break-inside-avoid"
             data-reveal="up"
             style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}

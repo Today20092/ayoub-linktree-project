@@ -28,6 +28,7 @@
 <script>
   import gsap from 'gsap'
   import { ScrollTrigger } from 'gsap/ScrollTrigger'
+  import { initializeMotionExperiments } from '../scripts/motion-experiments'
 
   const mode =
     new URLSearchParams(location.search).get('motion') === 'off'
@@ -50,6 +51,7 @@
     }
   })
 
+  initializeMotionExperiments(mode === 'gsap')
   if (mode === 'gsap') {
     gsap.registerPlugin(ScrollTrigger)
     const main = document.querySelector<HTMLElement>('#main-content')!
@@ -73,7 +75,12 @@
         introduction.forEach((item) => animations.set(item, intro))
       }
       reveals.forEach((item) => {
-        if (introduction.includes(item) || item.id === 'portfolio') return
+        if (
+          introduction.includes(item) ||
+          item.id === 'portfolio' ||
+          item.hasAttribute('data-comparison-panel')
+        )
+          return
         const timeline = gsap.timeline({
           defaults,
           scrollTrigger: { trigger: item, start: 'top 92%', once: true },
@@ -127,6 +134,15 @@
 </script>
 
 <style is:global>
+  [data-walkthrough-ready] ol > li {
+    min-height: 45svh;
+    align-content: center;
+  }
+  [data-comparison-controls][hidden],
+  [data-project-filters][hidden],
+  [data-comparison-panel][hidden] {
+    display: none !important;
+  }
   @media (prefers-reduced-motion: reduce), (hover: none) {
     html[data-motion='gsap'] #portfolio article img {
       transform: none;
