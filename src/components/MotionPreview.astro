@@ -123,6 +123,12 @@
         animations.set(item, timeline)
       })
       const revealFocus = (event: FocusEvent) => {
+        // Pointer focus must not move a button between pointerdown and click.
+        if (
+          !(event.target instanceof HTMLElement) ||
+          !event.target.matches(':focus-visible')
+        )
+          return
         animations.forEach((animation, element) => {
           if (element.contains(event.target as Node)) animation.progress(1)
         })
