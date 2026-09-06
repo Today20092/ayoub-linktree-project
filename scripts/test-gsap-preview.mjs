@@ -14,11 +14,9 @@ try {
       const errors = []
       page.on('pageerror', (error) => errors.push(error.message))
       await page.goto(`${baseURL}/?motion=${mode === 'off' ? 'off' : 'gsap'}`)
-      await page.waitForSelector('[data-motion-option][aria-current="true"]')
+      await page.waitForSelector('html[data-motion]')
       assert.equal(
-        await page
-          .locator('[aria-current="true"][data-motion-option]')
-          .getAttribute('data-motion-option'),
+        await page.locator('html').getAttribute('data-motion'),
         mode === 'off' ? 'off' : 'gsap',
       )
       assert.equal(
@@ -76,7 +74,7 @@ try {
         .getAttribute('href')
       assert.equal(
         new URL(projectURL, baseURL).searchParams.get('motion'),
-        mode === 'off' ? 'off' : 'gsap',
+        mode === 'off' ? 'off' : null,
       )
       if (mode === 'gsap') {
         await Promise.all([
@@ -89,7 +87,7 @@ try {
           state: 'detached',
         })
       } else await page.locator('#portfolio article a').first().click()
-      await page.waitForSelector('[data-motion-option][aria-current="true"]')
+      await page.waitForSelector('html[data-motion]')
       await page.locator('[data-motion-group] h1').scrollIntoViewIfNeeded()
       await page.waitForFunction(
         () =>

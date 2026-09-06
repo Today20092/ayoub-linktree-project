@@ -1,30 +1,3 @@
-<nav
-  aria-label="Animation preview"
-  class="border-border text-muted-foreground mb-6 flex flex-wrap items-center gap-4 border-b pb-3 text-xs"
->
-  <span>Motion study</span>
-  <a
-    href="?motion=gsap"
-    data-motion-option="gsap"
-    class="min-h-11 content-center underline underline-offset-4"
-  >
-    GSAP motion / replay
-  </a>
-  <a
-    href="?motion=off"
-    data-motion-option="off"
-    class="min-h-11 content-center underline underline-offset-4"
-  >
-    Original motion
-  </a>
-  <a
-    href="/services?motion=gsap"
-    class="min-h-11 content-center underline underline-offset-4"
-  >
-    Services preview
-  </a>
-</nav>
-
 <script>
   import gsap from 'gsap'
   import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -35,18 +8,17 @@
       ? 'off'
       : 'gsap'
   document.documentElement.dataset.motion = mode
-  document
-    .querySelector(`[data-motion-option="${mode}"]`)
-    ?.setAttribute('aria-current', 'true')
-  // Keep the comparison selected when following internal portfolio links.
+  // Preserve an explicit motion opt-out without adding preview URLs.
   document.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((link) => {
     const url = new URL(link.href)
     if (
       url.origin === location.origin &&
-      (url.pathname === '/' || url.pathname.startsWith('/portfolio/')) &&
-      !link.hasAttribute('data-motion-option')
+      (url.pathname === '/' ||
+        url.pathname === '/services' ||
+        url.pathname.startsWith('/portfolio/'))
     ) {
-      url.searchParams.set('motion', mode)
+      if (mode === 'off') url.searchParams.set('motion', 'off')
+      else url.searchParams.delete('motion')
       link.href = url.href
     }
   })

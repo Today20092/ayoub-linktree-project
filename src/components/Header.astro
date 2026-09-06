@@ -11,8 +11,7 @@ const navItems: Array<{
   key: 'home' | 'services' | 'galleries' | 'contact'
 }> = [
   { href: '/', label: 'Home', key: 'home' },
-  // Temporarily hidden alongside the services pricing page.
-  // { href: '/services', label: 'Services', key: 'services' },
+  { href: '/services', label: 'Services', key: 'services' },
   { href: '/galleries', label: 'Galleries', key: 'galleries' },
   { href: '/#contact', label: 'Contact', key: 'contact' },
 ]
@@ -40,7 +39,7 @@ const navItems: Array<{
           navItems.map((item) => {
             const isActive = item.key === activeNav
             return (
-              <li>
+              <li class:list={[item.key === 'home' && 'hidden sm:block']}>
                 <a
                   href={item.href}
                   aria-current={isActive ? 'page' : undefined}
