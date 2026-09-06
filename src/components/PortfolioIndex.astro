@@ -5,6 +5,7 @@ import simpleIcons from '@iconify-json/simple-icons/icons.json'
 import { IdCard, MessageSquareText, Share2 } from 'lucide-react'
 
 import keetIcon from '@/assets/keet.svg?raw'
+import MotionPreview from './MotionPreview.astro'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -66,28 +67,10 @@ const simpleIconBody = (name?: string) =>
 
 <main
   id="main-content"
+  data-motion-home
   class="mx-auto w-full max-w-screen-2xl px-4 py-6 text-left sm:px-6 sm:py-8 lg:px-8"
 >
-  <nav
-    aria-label="Animation preview"
-    class="border-border text-muted-foreground mb-6 flex flex-wrap items-center gap-4 border-b pb-3 text-xs"
-  >
-    <span>Motion study</span>
-    <a
-      href="?motion=gsap"
-      data-motion-option="gsap"
-      class="min-h-11 content-center underline underline-offset-4"
-    >
-      GSAP motion / replay
-    </a>
-    <a
-      href="?motion=off"
-      data-motion-option="off"
-      class="min-h-11 content-center underline underline-offset-4"
-    >
-      Original motion
-    </a>
-  </nav>
+  <MotionPreview />
   <header class="border-border border-b pb-8 lg:pb-12">
     <div
       class="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-12 lg:items-start lg:gap-y-10"
@@ -380,61 +363,6 @@ const simpleIconBody = (name?: string) =>
 </main>
 
 <script>
-  import gsap from 'gsap'
-  import { ScrollTrigger } from 'gsap/ScrollTrigger'
-
-  const motionMode =
-    new URLSearchParams(window.location.search).get('motion') === 'off'
-      ? 'off'
-      : 'gsap'
-  document
-    .querySelector(`[data-motion-option="${motionMode}"]`)
-    ?.setAttribute('aria-current', 'true')
-
-  if (motionMode === 'gsap') {
-    gsap.registerPlugin(ScrollTrigger)
-    const main = document.querySelector<HTMLElement>('#main-content')!
-    const introduction = Array.from(
-      main.querySelectorAll<HTMLElement>('header [data-reveal]'),
-    )
-    // GSAP owns these transforms; keep the existing CSS reveals for comparison.
-    main
-      .querySelectorAll('[data-reveal]')
-      .forEach((item) => item.removeAttribute('data-reveal'))
-
-    const media = gsap.matchMedia()
-    media.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap
-        .timeline({ defaults: { duration: 0.85, ease: 'power3.out' } })
-        .from(introduction, {
-          opacity: 0,
-          y: 28,
-          stagger: 0.12,
-          clearProps: 'opacity,transform',
-        })
-
-      main
-        .querySelectorAll<HTMLElement>('#portfolio article')
-        .forEach((card) => {
-          gsap.from(card, {
-            opacity: 0,
-            y: 48,
-            duration: 1,
-            ease: 'power3.out',
-            clearProps: 'opacity,transform',
-            scrollTrigger: { trigger: card, start: 'top 95%', once: true },
-          })
-        })
-      // Reveal focused links immediately, including keyboard jumps below the fold.
-      const revealFocusedCard = (event: FocusEvent) => {
-        const card = (event.target as HTMLElement).closest('#portfolio article')
-        if (card) gsap.getTweensOf(card).forEach((tween) => tween.progress(1))
-      }
-      main.addEventListener('focusin', revealFocusedCard)
-      return () => main.removeEventListener('focusin', revealFocusedCard)
-    })
-  }
-
   const shareButton = document.querySelector<HTMLButtonElement>('#share-site')
   const shareStatus = document.querySelector<HTMLElement>('#share-status')
 

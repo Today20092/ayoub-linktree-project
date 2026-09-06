@@ -45,6 +45,40 @@ try {
         false,
       )
       assert.deepEqual(errors, [])
+      await page.waitForFunction(() => {
+        const card = document.querySelector('#portfolio article:last-child')
+        return (
+          getComputedStyle(card.querySelector('img')).clipPath === 'none' &&
+          getComputedStyle(card.querySelector('a > span')).opacity === '1'
+        )
+      })
+      const projectURL = await page
+        .locator('#portfolio article a')
+        .first()
+        .getAttribute('href')
+      assert.equal(
+        new URL(projectURL, baseURL).searchParams.get('motion'),
+        mode === 'off' ? 'off' : 'gsap',
+      )
+      await page.goto(new URL(projectURL, baseURL).href)
+      await page.waitForSelector('[data-motion-option][aria-current="true"]')
+      await page.locator('[data-motion-group] h1').scrollIntoViewIfNeeded()
+      await page.waitForFunction(
+        () =>
+          getComputedStyle(document.querySelector('[data-motion-group] h1'))
+            .opacity === '1',
+      )
+      await page.goto(
+        `${baseURL}/services?motion=${mode === 'off' ? 'off' : 'gsap'}`,
+      )
+      await page.waitForSelector('#outcomes')
+      assert.equal(await page.locator('#outcomes > section').count(), 4)
+      await page.locator('#av h2').scrollIntoViewIfNeeded()
+      await page.waitForFunction(
+        () =>
+          getComputedStyle(document.querySelector('#av h2')).opacity === '1',
+      )
+      assert.deepEqual(errors, [])
       if (process.env.GSAP_SCREENSHOT_DIR && mode === 'gsap') {
         await page.goto(`${baseURL}/?motion=gsap`)
         await page.waitForTimeout(1800)

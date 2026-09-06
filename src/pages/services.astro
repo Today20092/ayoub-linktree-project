@@ -8,6 +8,7 @@ import { getCollection } from 'astro:content'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import ServicesFaq from '../components/ServicesFaq'
+import MotionPreview from '../components/MotionPreview.astro'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
@@ -207,7 +208,15 @@ const structuredData = {
 }
 
 // Temporarily hide services and pricing. Remove this redirect to restore the page.
-return Astro.redirect(baseUrl, 302)
+const motionPreviewHost =
+  import.meta.env.DEV ||
+  Astro.url.hostname ===
+    'ayoub-linktree-project-preview.ayoub-abedrabbo.workers.dev'
+if (
+  !motionPreviewHost ||
+  !['gsap', 'off'].includes(Astro.url.searchParams.get('motion') ?? '')
+)
+  return Astro.redirect(baseUrl, 302)
 ---
 
 <BaseLayout
@@ -225,6 +234,9 @@ return Astro.redirect(baseUrl, 302)
   activeNav="services"
 >
   <main id="main-content">
+    <div class="mx-auto max-w-screen-xl px-4 pt-6 sm:px-6 lg:px-8">
+      <MotionPreview />
+    </div>
     <section
       class="mx-auto w-full max-w-screen-xl px-4 pt-8 sm:px-6 lg:px-8 lg:pt-12"
     >
@@ -262,7 +274,7 @@ return Astro.redirect(baseUrl, 302)
             <span class="hidden sm:inline">Photo · Film · Sound</span>
           </div>
 
-          <div class="max-w-4xl py-16" data-reveal="up">
+          <div class="max-w-4xl py-16" data-reveal="up" data-motion-group>
             <h1
               class="font-heading text-5xl leading-[0.94] font-extrabold tracking-[-0.045em] text-balance sm:text-7xl lg:text-[6.6rem]"
             >
@@ -322,7 +334,11 @@ return Astro.redirect(baseUrl, 302)
           >
             <div class="mx-auto w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
               <div class="grid gap-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-16">
-                <div class="lg:sticky lg:top-24 lg:self-start" data-reveal="up">
+                <div
+                  class="lg:sticky lg:top-24 lg:self-start"
+                  data-reveal="up"
+                  data-motion-group
+                >
                   <p class="text-primary text-sm font-extrabold">
                     {outcome.number}
                   </p>

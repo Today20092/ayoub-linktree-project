@@ -1,0 +1,147 @@
+<nav
+  aria-label="Animation preview"
+  class="border-border text-muted-foreground mb-6 flex flex-wrap items-center gap-4 border-b pb-3 text-xs"
+>
+  <span>Motion study</span>
+  <a
+    href="?motion=gsap"
+    data-motion-option="gsap"
+    class="min-h-11 content-center underline underline-offset-4"
+  >
+    GSAP motion / replay
+  </a>
+  <a
+    href="?motion=off"
+    data-motion-option="off"
+    class="min-h-11 content-center underline underline-offset-4"
+  >
+    Original motion
+  </a>
+  <a
+    href="/services?motion=gsap"
+    class="min-h-11 content-center underline underline-offset-4"
+  >
+    Services preview
+  </a>
+</nav>
+
+<script>
+  import gsap from 'gsap'
+  import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+  const mode =
+    new URLSearchParams(location.search).get('motion') === 'off'
+      ? 'off'
+      : 'gsap'
+  document.documentElement.dataset.motion = mode
+  document
+    .querySelector(`[data-motion-option="${mode}"]`)
+    ?.setAttribute('aria-current', 'true')
+  // Keep the comparison selected when following internal portfolio links.
+  document.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((link) => {
+    const url = new URL(link.href)
+    if (
+      url.origin === location.origin &&
+      (url.pathname === '/' || url.pathname.startsWith('/portfolio/')) &&
+      !link.hasAttribute('data-motion-option')
+    ) {
+      url.searchParams.set('motion', mode)
+      link.href = url.href
+    }
+  })
+
+  if (mode === 'gsap') {
+    gsap.registerPlugin(ScrollTrigger)
+    const main = document.querySelector<HTMLElement>('#main-content')!
+    const reveals = Array.from(
+      main.querySelectorAll<HTMLElement>('[data-reveal]'),
+    )
+    const introduction = reveals.filter(
+      (item) =>
+        item.closest('[data-motion-home] > header') && item.id !== 'contact',
+    )
+    reveals.forEach((item) => item.removeAttribute('data-reveal'))
+
+    gsap.matchMedia().add('(prefers-reduced-motion: no-preference)', () => {
+      const animations = new Map<Element, gsap.core.Animation>()
+      const defaults = { duration: 0.85, ease: 'power3.out' }
+      const entrance = { opacity: 0, y: 28, clearProps: 'opacity,transform' }
+      if (introduction.length) {
+        const intro = gsap
+          .timeline({ defaults })
+          .from(introduction, { ...entrance, stagger: 0.12 })
+        introduction.forEach((item) => animations.set(item, intro))
+      }
+      reveals.forEach((item) => {
+        if (introduction.includes(item) || item.id === 'portfolio') return
+        const timeline = gsap.timeline({
+          defaults,
+          scrollTrigger: { trigger: item, start: 'top 92%', once: true },
+        })
+        const photo = item.matches('#portfolio article')
+          ? item.querySelector('img')
+          : null
+        if (photo) {
+          timeline
+            .from(photo, {
+              clipPath: 'inset(0% 0% 100% 0%)',
+              duration: 1.1,
+              clearProps: 'clipPath',
+            })
+            .from(
+              item.querySelector('a > span'),
+              { ...entrance, y: 14, duration: 0.6 },
+              '-=0.45',
+            )
+        } else if (item.hasAttribute('data-motion-hero')) {
+          timeline.from(item, {
+            clipPath: 'inset(0% 0% 100% 0%)',
+            duration: 1.1,
+            clearProps: 'clipPath',
+          })
+        } else if (item.id === 'contact') {
+          timeline.from(item.querySelectorAll(':scope > p, li'), {
+            ...entrance,
+            y: 18,
+            stagger: 0.12,
+          })
+        } else if (item.hasAttribute('data-motion-group')) {
+          timeline.from(Array.from(item.children), {
+            ...entrance,
+            stagger: 0.1,
+          })
+        } else {
+          timeline.from(item, entrance)
+        }
+        animations.set(item, timeline)
+      })
+      const revealFocus = (event: FocusEvent) => {
+        animations.forEach((animation, element) => {
+          if (element.contains(event.target as Node)) animation.progress(1)
+        })
+      }
+      main.addEventListener('focusin', revealFocus)
+      return () => main.removeEventListener('focusin', revealFocus)
+    })
+  }
+</script>
+
+<style is:global>
+  @media (prefers-reduced-motion: reduce), (hover: none) {
+    html[data-motion='gsap'] #portfolio article img {
+      transform: none;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    html[data-motion='gsap'] #portfolio article strong {
+      transition: transform 300ms ease;
+    }
+    html[data-motion='gsap']
+      #portfolio
+      article
+      a:is(:hover, :focus-visible)
+      strong {
+      transform: translateX(4px);
+    }
+  }
+</style>

@@ -12,6 +12,7 @@ import {
   Play,
 } from 'lucide-react'
 import PortfolioLocation from '../../components/PortfolioLocation.astro'
+import MotionPreview from '../../components/MotionPreview.astro'
 import UpcomingVideo from '../../components/UpcomingVideo'
 import YouTubeEmbed from '../../components/YouTubeEmbed.astro'
 import {
@@ -184,6 +185,7 @@ const galleryHeading =
     id="main-content"
     class="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
   >
+    <MotionPreview />
     <header class="mx-auto max-w-4xl" data-reveal="fade">
       <Breadcrumb>
         <BreadcrumbList>
@@ -204,7 +206,7 @@ const galleryHeading =
     </header>
 
     <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
-      <div data-reveal="up">
+      <div data-reveal="up" data-motion-hero>
         {
           projectData.heroVideo ? (
             <YouTubeEmbed
@@ -243,7 +245,11 @@ const galleryHeading =
         }
       </div>
 
-      <div class="mx-auto max-w-4xl py-10 sm:py-14" data-reveal="up">
+      <div
+        class="mx-auto max-w-4xl py-10 sm:py-14"
+        data-reveal="up"
+        data-motion-group
+      >
         <p class="text-primary text-xs font-bold tracking-wider uppercase">
           {projectData.category}
         </p>
