@@ -78,6 +78,7 @@
         if (
           introduction.includes(item) ||
           item.id === 'portfolio' ||
+          item.getAttribute('aria-labelledby') === 'comparison-title' ||
           item.hasAttribute('data-comparison-panel')
         )
           return

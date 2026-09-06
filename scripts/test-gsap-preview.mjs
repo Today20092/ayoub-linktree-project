@@ -125,6 +125,9 @@ try {
       await page.goto(
         `${baseURL}/portfolio/konan-bbq-podcast/?motion=${mode === 'off' ? 'off' : 'gsap'}`,
       )
+      await page.locator('[data-comparison-controls]').scrollIntoViewIfNeeded()
+      // Let the entrance and lazy video layout settle before pointer checks.
+      await page.waitForTimeout(1000)
       await page.locator('[data-comparison-select="1"]').click()
       assert.equal(
         await page.locator('[data-comparison-panel]:visible').count(),
