@@ -9,6 +9,7 @@ import cloudflare from '@astrojs/cloudflare'
 // https://astro.build/config
 export default defineConfig({
   site: 'https://ayoubabed.xyz',
+  session: false,
 
   integrations: [
     mdx(),
@@ -47,5 +48,10 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
 
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    imageService: {
+      build: 'cloudflare-binding',
+      runtime: 'cloudflare-binding',
+    },
+  }),
 })

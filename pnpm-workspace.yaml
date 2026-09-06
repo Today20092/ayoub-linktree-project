@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true
+patchedDependencies:
+  '@astrojs/cloudflare@14.3.0': patches/@astrojs__cloudflare@14.3.0.patch

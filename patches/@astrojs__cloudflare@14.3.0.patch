@@ -1,0 +1,13 @@
+diff --git a/dist/utils/prerender.js b/dist/utils/prerender.js
+index 10168659bf233bdd89242cc085e3b2efc7180366..24c2f84f3fee31b6dd96919b64996e5c51370de1 100644
+--- a/dist/utils/prerender.js
++++ b/dist/utils/prerender.js
+@@ -120,7 +120,7 @@ async function handleImageTransformRequest(request, { images, assets }) {
+       status: 503
+     });
+   }
+-  if (request.body) {
++  if (request.body && request.headers.get("content-length") !== "0") {
+     return transformStreamWithImagesBinding(
+       request.body,
+       new URL(request.url).searchParams,
