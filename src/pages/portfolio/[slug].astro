@@ -188,16 +188,16 @@ const galleryHeading =
     <MotionPreview />
     <header class="mx-auto max-w-4xl" data-reveal="fade">
       <Breadcrumb>
-        <BreadcrumbList>
+        <BreadcrumbList className="gap-x-3 gap-y-2">
           <BreadcrumbItem>
             <BreadcrumbLink
               href="/#portfolio"
-              className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
             >
               Portfolio
             </BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbSeparator />
+          <BreadcrumbSeparator>/</BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbPage>{projectData.title}</BreadcrumbPage>
           </BreadcrumbItem>
@@ -206,7 +206,7 @@ const galleryHeading =
     </header>
 
     <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
-      <div data-reveal="up" data-motion-hero>
+      <div class="mx-auto max-w-4xl" data-reveal="up" data-motion-hero>
         {
           projectData.heroVideo ? (
             <YouTubeEmbed
@@ -223,7 +223,7 @@ const galleryHeading =
               height={heroImageHeight}
               layout="full-width"
               widths={[640, 960, 1280, 1600]}
-              sizes="(min-width: 1280px) 1216px, 100vw"
+              sizes="(min-width: 960px) 896px, (min-width: 640px) calc(100vw - 48px), calc(100vw - 32px)"
               quality={82}
               priority
               class="bg-muted block h-auto w-full"
@@ -236,7 +236,7 @@ const galleryHeading =
               height={heroImageHeight}
               layout="full-width"
               widths={[640, 960, 1280, 1600]}
-              sizes="(min-width: 1280px) 1216px, 100vw"
+              sizes="(min-width: 960px) 896px, (min-width: 640px) calc(100vw - 48px), calc(100vw - 32px)"
               quality={82}
               priority
               class="bg-muted block h-auto w-full"
@@ -297,7 +297,7 @@ const galleryHeading =
             </h2>
             <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
               {projectData.services.map((service) => (
-                <li class="py-1 leading-snug font-semibold">{service}</li>
+                <li class="py-1 leading-7">{service}</li>
               ))}
             </ul>
           </section>
@@ -307,7 +307,7 @@ const galleryHeading =
       {
         hasDetails && (
           <section
-            class="mx-auto max-w-4xl py-8 sm:py-10"
+            class="bg-muted/50 mx-auto my-8 max-w-4xl rounded-sm p-6 sm:my-10 sm:p-8"
             aria-labelledby="details-title"
             data-reveal="up"
           >
@@ -320,7 +320,7 @@ const galleryHeading =
                   <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                     Role
                   </dt>
-                  <dd class="mt-1 font-semibold">{projectData.role}</dd>
+                  <dd class="mt-2 leading-7">{projectData.role}</dd>
                 </div>
               )}
               {projectData.collaborators.length > 0 && (
@@ -328,7 +328,7 @@ const galleryHeading =
                   <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                     Collaborators
                   </dt>
-                  <dd class="mt-1 font-semibold">
+                  <dd class="mt-2 leading-7">
                     {projectData.collaborators.join(', ')}
                   </dd>
                 </div>
@@ -338,20 +338,21 @@ const galleryHeading =
                   <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                     Duration
                   </dt>
-                  <dd class="mt-1 font-semibold">{projectData.duration}</dd>
-                </div>
-              )}
-              {projectData.tools.length > 0 && (
-                <div>
-                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                    Tools
-                  </dt>
-                  <dd class="mt-1 font-semibold">
-                    {projectData.tools.join(', ')}
-                  </dd>
+                  <dd class="mt-2 leading-7">{projectData.duration}</dd>
                 </div>
               )}
             </dl>
+            {projectData.tools.length > 0 && (
+              <details class="mt-6">
+                <summary class="text-muted-foreground focus-visible:ring-ring hover:text-foreground cursor-pointer rounded-sm py-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none">
+                  Tools and equipment
+                </summary>
+                <Separator className="my-2" />
+                <p class="text-muted-foreground mt-2 text-sm leading-7">
+                  {projectData.tools.join(', ')}
+                </p>
+              </details>
+            )}
           </section>
         )
       }
@@ -547,16 +548,16 @@ const galleryHeading =
       {
         projectData.outcomes.length > 0 && (
           <section
-            class="mx-auto max-w-4xl py-8 sm:py-10"
+            class="border-primary mx-auto my-8 max-w-4xl border-l-2 pl-6 sm:my-10 sm:pl-8"
             aria-labelledby="outcomes-title"
             data-reveal="up"
           >
             <h2 id="outcomes-title" class="font-heading text-2xl font-bold">
               Outcomes
             </h2>
-            <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+            <ul class="mt-5 grid gap-x-10 gap-y-5 sm:grid-cols-2">
               {projectData.outcomes.map((outcome) => (
-                <li class="py-1 leading-snug font-semibold">{outcome}</li>
+                <li class="leading-7">{outcome}</li>
               ))}
             </ul>
           </section>
@@ -783,7 +784,7 @@ const galleryHeading =
               <h2 id="links-title" class="font-heading text-2xl font-bold">
                 Project links
               </h2>
-              <div class="mt-4 flex flex-col gap-1">
+              <div class="mt-6 flex flex-wrap gap-3">
                 {projectData.links.map((link) => (
                   <a
                     href={link.url}
@@ -791,10 +792,10 @@ const galleryHeading =
                     rel="noopener noreferrer"
                     class={cn(
                       buttonVariants({
-                        variant: 'ghost',
+                        variant: 'outline',
                         size: 'lg',
                       }),
-                      'h-auto w-full justify-between px-3 py-3 text-left font-bold whitespace-normal',
+                      'h-auto min-h-11 max-w-full justify-start gap-3 px-4 py-3 text-left whitespace-normal',
                     )}
                   >
                     <span>
