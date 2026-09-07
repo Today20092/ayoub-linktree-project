@@ -17,6 +17,7 @@ export default defineConfig({
     sitemap({
       filter: (page) =>
         page !== 'https://ayoubabed.xyz/portfolio/alphabravomedia/' &&
+        new URL(page).pathname.replace(/\/$/, '') !== '/services' &&
         !page.includes('/photo/'),
     }),
   ],

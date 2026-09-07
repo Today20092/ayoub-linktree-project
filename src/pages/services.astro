@@ -14,6 +14,9 @@ import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
 export const prerender = false
 
+// Keep the Services draft off the public site.
+return Astro.redirect('/', 302)
+
 type PortfolioEntry = CollectionEntry<'portfolio'>
 
 type ProofProject = {
