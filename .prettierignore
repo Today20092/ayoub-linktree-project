@@ -2,6 +2,7 @@ node_modules
 dist
 .astro
 .agents
+.claude/skills
 material-theme
 src/data/latest-youtube-videos.json
 .codex-remote-attachments/
