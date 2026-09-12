@@ -29,7 +29,7 @@ const { socialLinks, actionLinks, youtubeChannels } = siteConfig
 const baseUrl = getBaseUrl(import.meta.env.BASE_URL)
 const currentYear = new Date().getFullYear()
 const canonicalUrl = new URL(baseUrl, Astro.site).toString()
-const sitemapUrl = new URL(`${baseUrl}sitemap-index.xml`, Astro.site).toString()
+const sitemapUrl = new URL(`${baseUrl}sitemap.xml`, Astro.site).toString()
 const ogImageUrl = new URL(
   resolveSiteAsset(baseUrl, ogImage),
   Astro.site,

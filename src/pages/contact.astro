@@ -1,0 +1,89 @@
+---
+import '../styles.css'
+
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { siteConfig } from '../lib/site-config'
+
+const { site } = siteConfig
+const title = 'Contact Ayoub Abedrabbo | Tampa Digital Media'
+const description =
+  'Contact Ayoub Abedrabbo in Tampa about photography, videography, podcast production, and digital media work.'
+const canonicalUrl = new URL('/contact/', Astro.site).toString()
+const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  ogImageWidth={1200}
+  ogImageHeight={630}
+  ogImageType="image/jpeg"
+  ogImageAlt={site.ogImageAlt}
+  activeNav="contact"
+>
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-3xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-20"
+  >
+    <header data-reveal="up">
+      <p class="text-primary text-sm font-bold tracking-wide uppercase">
+        Contact
+      </p>
+      <h1
+        class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
+      >
+        Let’s talk about your project
+      </h1>
+      <p class="text-muted-foreground mt-5 text-lg leading-8">
+        Reach Ayoub Abedrabbo for photography, video, podcast production, and
+        other digital media work in the Tampa area.
+      </p>
+    </header>
+    <address class="mt-10 not-italic" data-reveal="up">
+      <ul class="grid gap-4 sm:grid-cols-2">
+        <li class="border-border rounded-xl border p-5">
+          <a
+            class="font-bold underline underline-offset-4"
+            href="mailto:Ayoub@AyoubAbed.xyz"
+          >
+            Email Ayoub
+          </a><p class="text-muted-foreground mt-2 text-sm leading-6">
+            Ayoub@AyoubAbed.xyz
+          </p>
+        </li>
+        <li class="border-border rounded-xl border p-5">
+          <a
+            class="font-bold underline underline-offset-4"
+            href="tel:+18134240606"
+          >
+            Call Ayoub
+          </a><p class="text-muted-foreground mt-2 text-sm leading-6">
+            (813) 424-0606
+          </p>
+        </li>
+        <li class="border-border rounded-xl border p-5">
+          <a
+            class="font-bold underline underline-offset-4"
+            href="sms:+18134240606?body=Hi%20Ayoub%2C%20this%20is%20"
+          >
+            Text Ayoub
+          </a><p class="text-muted-foreground mt-2 text-sm leading-6">
+            Send your name and a short note.
+          </p>
+        </li>
+        <li class="border-border rounded-xl border p-5">
+          <a
+            class="font-bold underline underline-offset-4"
+            href="/AyoubA-Contact-Card.vcf"
+          >
+            Save contact card
+          </a><p class="text-muted-foreground mt-2 text-sm leading-6">
+            Tampa, Florida
+          </p>
+        </li>
+      </ul>
+    </address>
+  </main>
+</BaseLayout>

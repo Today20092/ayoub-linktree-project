@@ -37,6 +37,9 @@ type GalleryImage = {
   src: string
   filename: string
   alt: string
+  width: number
+  height: number
+  caption?: string
 }
 
 type EventLightboxProps = {
@@ -114,7 +117,7 @@ export default function EventLightbox({
   const [customTipError, setCustomTipError] = React.useState('')
   const slidesRef = React.useRef<HTMLDivElement>(null)
   const lastFocusedRef = React.useRef<HTMLElement | null>(null)
-  const wasOpenRef = React.useRef(false)
+  const lastFocusedIndexRef = React.useRef<number | null>(null)
   const touchStartX = React.useRef<number | null>(null)
   const touchStartY = React.useRef<number | null>(null)
   const selectionStorageKey = `event-gallery:${projectSlug}:favorites`
@@ -174,24 +177,50 @@ export default function EventLightbox({
   }, [])
 
   const syncVisibleSlide = React.useCallback(
-    (container: HTMLDivElement, index: number) => {
-      const slides = container.querySelectorAll<HTMLElement>(
-        '[data-gallery-slide]',
-      )
-      slides.forEach((slide, slideIndex) => {
-        slide.hidden = slideIndex !== index
-      })
+    (container: HTMLDivElement, index: number, loadOriginal = false) => {
+      const slide = container.querySelector<HTMLElement>('[data-gallery-slide]')
+      const image = images[index]
+      if (!slide || !image) return
+
+      slide.hidden = false
+      slide.dataset.gallerySlide = String(index)
+      const element = slide.querySelector<HTMLImageElement>('img')
+      if (element) {
+        element.alt = image.alt
+        element.width = image.width
+        element.height = image.height
+        if (loadOriginal && element.src !== image.src) {
+          element.removeAttribute('srcset')
+          element.removeAttribute('sizes')
+          element.removeAttribute('data-astro-image')
+          element.dataset.galleryOriginal = image.src
+          element.src = image.src
+        }
+      }
+      const caption = slide.querySelector<HTMLElement>('[data-gallery-caption]')
+      if (caption) caption.textContent = image.caption ?? image.filename
     },
-    [],
+    [images],
   )
 
   const setSlidesContainer = React.useCallback(
     (container: HTMLDivElement | null) => {
       slidesRef.current = container
-      if (container) syncVisibleSlide(container, currentIndex)
+      if (container) syncVisibleSlide(container, currentIndex, open)
     },
-    [currentIndex, syncVisibleSlide],
+    [currentIndex, open, syncVisibleSlide],
   )
+
+  const getLastFocusedOpener = React.useCallback(() => {
+    if (lastFocusedRef.current?.isConnected) return lastFocusedRef.current
+    if (lastFocusedIndexRef.current === null) return null
+
+    return document
+      .getElementById(galleryId)
+      ?.querySelector<HTMLElement>(
+        `[data-gallery-open="${lastFocusedIndexRef.current}"]`,
+      )
+  }, [galleryId])
 
   const getPhotoIndexFromUrl = React.useCallback(() => {
     const value = new URL(window.location.href).searchParams.get('photo')
@@ -264,7 +293,7 @@ export default function EventLightbox({
 
   React.useEffect(() => {
     if (slidesRef.current) {
-      syncVisibleSlide(slidesRef.current, currentIndex)
+      syncVisibleSlide(slidesRef.current, currentIndex, open)
     }
   }, [currentIndex, open, syncVisibleSlide])
 
@@ -288,6 +317,7 @@ export default function EventLightbox({
         event.preventDefault()
         lastFocusedRef.current = opener
         const index = Number(opener.dataset.galleryOpen ?? 0)
+        lastFocusedIndexRef.current = index
         showSlide(index, false)
         updatePhotoUrl(index, 'push')
         setOpen(true)
@@ -331,13 +361,6 @@ export default function EventLightbox({
     window.addEventListener('popstate', syncFromUrl)
     return () => window.removeEventListener('popstate', syncFromUrl)
   }, [getPhotoIndexFromUrl, showSlide])
-
-  React.useEffect(() => {
-    if (wasOpenRef.current && !open) {
-      lastFocusedRef.current?.focus()
-    }
-    wasOpenRef.current = open
-  }, [open])
 
   const currentImage = images[currentIndex]
   const currentImageSelected = currentImage
@@ -485,6 +508,13 @@ export default function EventLightbox({
           showCloseButton={false}
           className="flex h-dvh max-h-none w-screen max-w-none flex-col gap-0 rounded-none bg-black p-0 text-white shadow-none ring-0 sm:max-w-none"
           onInteractOutside={(event) => event.preventDefault()}
+          onCloseAutoFocus={(event) => {
+            const opener = getLastFocusedOpener()
+            if (opener) {
+              event.preventDefault()
+              opener.focus()
+            }
+          }}
           onKeyDown={(event) => {
             if (event.key === 'ArrowLeft') showSlide(currentIndex - 1)
             if (event.key === 'ArrowRight') showSlide(currentIndex + 1)
