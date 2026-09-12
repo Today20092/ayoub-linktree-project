@@ -118,7 +118,7 @@ const socialImageUrl =
 const projectTitle =
   projectData.seoTitle ?? `${projectData.title} - Ayoub Abedrabbo`
 const projectDescription = projectData.seoDescription ?? projectData.summary
-const sitemapUrl = new URL('/sitemap-index.xml', Astro.site).toString()
+const sitemapUrl = new URL('/sitemap.xml', Astro.site).toString()
 const comparisonVideos = projectData.videos.filter(
   (video) => video.comparisonRole,
 )
@@ -176,6 +176,8 @@ const galleryHeading =
   canonicalUrl={canonicalUrl}
   ogImage={socialImageUrl}
   ogImageAlt={heroImageAlt}
+  ogImageWidth={heroImageWidth}
+  ogImageHeight={heroImageHeight}
   ogType="article"
   robots="index,follow,max-image-preview:large"
   sitemapUrl={sitemapUrl}
@@ -317,7 +319,7 @@ const galleryHeading =
             <dl class="mt-5 grid gap-6 sm:grid-cols-2">
               {projectData.role && (
                 <div>
-                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
                     Role
                   </dt>
                   <dd class="mt-2 leading-7">{projectData.role}</dd>
@@ -325,7 +327,7 @@ const galleryHeading =
               )}
               {projectData.collaborators.length > 0 && (
                 <div>
-                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
                     Collaborators
                   </dt>
                   <dd class="mt-2 leading-7">
@@ -335,7 +337,7 @@ const galleryHeading =
               )}
               {projectData.duration && (
                 <div>
-                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
                     Duration
                   </dt>
                   <dd class="mt-2 leading-7">{projectData.duration}</dd>
@@ -824,7 +826,6 @@ const galleryHeading =
               {previousProject && (
                 <a
                   href={`/portfolio/${previousProject.id}/`}
-                  aria-label={`Previous project: ${previousProject.title}`}
                   class={cn(
                     buttonVariants({
                       variant: 'ghost',
@@ -845,7 +846,6 @@ const galleryHeading =
               {nextProject && (
                 <a
                   href={`/portfolio/${nextProject.id}/`}
-                  aria-label={`Next project: ${nextProject.title}`}
                   class={cn(
                     buttonVariants({
                       variant: 'ghost',

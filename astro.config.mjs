@@ -9,16 +9,48 @@ import cloudflare from '@astrojs/cloudflare'
 // https://astro.build/config
 export default defineConfig({
   site: 'https://ayoubabed.xyz',
+  trailingSlash: 'always',
   session: false,
+  security: {
+    csp: {
+      directives: [
+        "default-src 'self'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+        "object-src 'none'",
+        "img-src 'self' data: blob: https://i.ytimg.com https://i1.ytimg.com https://photos.ayoubabed.xyz",
+        "font-src 'self' https://cdn.fontshare.com data:",
+        'frame-src https://www.youtube-nocookie.com https://www.openstreetmap.org',
+        "connect-src 'self' https://photos.ayoubabed.xyz https://cloudflareinsights.com",
+        'upgrade-insecure-requests',
+      ],
+      scriptDirective: {
+        resources: [
+          "'self'",
+          "'wasm-unsafe-eval'",
+          'https://static.cloudflareinsights.com',
+        ],
+      },
+      styleDirective: {
+        resources: ["'self'", 'https://api.fontshare.com', "'unsafe-inline'"],
+      },
+    },
+  },
 
   integrations: [
     mdx(),
     react(),
     sitemap({
-      filter: (page) =>
-        page !== 'https://ayoubabed.xyz/portfolio/alphabravomedia/' &&
-        new URL(page).pathname.replace(/\/$/, '') !== '/services' &&
-        !page.includes('/photo/'),
+      filter: (page) => {
+        const pathname = new URL(page).pathname.replace(/\/$/, '')
+        return (
+          !pathname.startsWith('/admin/') &&
+          pathname !== '/services' &&
+          pathname !== '/portfolio/alphabravomedia' &&
+          !pathname.includes('/photo/')
+        )
+      },
     }),
   ],
 

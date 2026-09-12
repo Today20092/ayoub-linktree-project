@@ -33,9 +33,26 @@ const sortedGalleries = await galleryReader(env.GALLERY_DB).listPublic()
 const title = 'Event Galleries — Ayoub Abedrabbo'
 const description =
   'Browse every event and wedding photography gallery by date. Find your gallery, view photographs full screen, and download copies.'
-const firstCover = sortedGalleries[0]?.cover
+const firstGallery = sortedGalleries[0]
+const firstCover = firstGallery?.cover
 const ogImage =
-  typeof firstCover === 'string' ? firstCover : (firstCover?.src ?? '/og.jpg')
+  typeof firstCover === 'string'
+    ? firstCover
+    : (firstCover?.src ?? '/og-ayoub-digital-media.jpg')
+const ogImageWidth =
+  typeof firstCover === 'object' &&
+  firstCover !== null &&
+  'width' in firstCover &&
+  typeof firstCover.width === 'number'
+    ? firstCover.width
+    : (firstGallery?.coverWidth ?? 1200)
+const ogImageHeight =
+  typeof firstCover === 'object' &&
+  firstCover !== null &&
+  'height' in firstCover &&
+  typeof firstCover.height === 'number'
+    ? firstCover.height
+    : (firstGallery?.coverHeight ?? 630)
 ---
 
 <BaseLayout
@@ -44,6 +61,8 @@ const ogImage =
   canonicalUrl={canonicalUrl}
   ogImage={ogImage}
   ogImageAlt="Ayoub Abedrabbo event galleries"
+  ogImageWidth={ogImageWidth}
+  ogImageHeight={ogImageHeight}
   ogType="website"
   activeNav="galleries"
 >
@@ -159,7 +178,7 @@ const ogImage =
   >
     <a
       href="/admin/galleries/"
-      class="text-muted-foreground/50 hover:text-muted-foreground focus-visible:ring-ring rounded-sm text-[0.6875rem] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
+      class="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm text-[0.6875rem] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
     >
       Admin dashboard
     </a>
