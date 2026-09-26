@@ -26,9 +26,9 @@ The companion server changes and migration `0005_gallery_companion.sql` must be 
 1. Open Settings in the app. Confirm the preview website address.
 2. Tap **Get a pairing key**. Sign into the existing gallery admin through Cloudflare Access.
 3. Name your phone and create a key. Copy it into the app and tap **Connect**.
-4. Pick a published gallery. Choose the LUMIX folder or an SD-import folder using Android's directory picker.
+4. Pick any gallery, including hidden or coming-soon galleries. Choose the LUMIX folder or an SD-import folder using Android's directory picker.
 5. For LUMIX's shared folder, set **Photos taken since**. For a dedicated event folder, leave all dates selected.
-6. Check for photos, review the count, and tap **Sync & publish**. Allow notifications to see progress while the phone is locked.
+6. Check for photos, review the count, and tap **Sync photos**. Allow notifications to see progress while the phone is locked.
 
 Device keys allow listing galleries and uploading photos only, expire in 90 days, and can be revoked in the dashboard. The phone encrypts its key using Android Keystore. Backups are disabled so the key is not exported with app data.
 
@@ -41,7 +41,8 @@ Device keys allow listing galleries and uploading photos only, expire in 90 days
 - Failed uploads retry with backoff. The queue survives process death; **Resume/Retry** recovers unfinished files. After a reboot or force-stop, reopen the app and resume. No promise of unattended auto-resume is made.
 - Pausing/clearing a batch does not remove website photos. Phone deletions never propagate. Keep source files until upload finishes.
 - Wi-Fi-only waits for unmetered Wi-Fi. Otherwise Android can use an available internet connection. Camera Wi-Fi plus cellular must be tested on the S25 Ultra.
-- Only published galleries accept companion uploads. Hidden/coming-soon galleries must be published explicitly in the dashboard first.
+- Uploads preserve the gallery's visibility. Hidden and coming-soon galleries can receive photos before you publish them in the dashboard.
+- Tailscale and other VPN networks are eligible for transfers. The queue displays Android's pending-job reason when a job is delayed. After updating from the first beta, tap **Pause**, then **Resume** to replace the old network request without clearing your queue.
 
 ## GitHub builds and signing
 
