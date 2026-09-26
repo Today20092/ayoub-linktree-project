@@ -21,16 +21,16 @@ Do not install the debug Actions artifact over the release app: it has a differe
 
 ## First connection
 
-The companion server changes and migration `0005_gallery_companion.sql` must be deployed before pairing works. Publishing an APK does **not** deploy the website. The app defaults to the isolated preview website for testing; production is unchanged until separately deployed.
+The app defaults to the production website, `https://ayoubabed.xyz`. The website and D1 migrations `0005_gallery_companion.sql` and `0006_gallery_device_management.sql` must be deployed before pairing and management work. Publishing an APK does **not** deploy the website. Existing preview connections remain unchanged when updating.
 
-1. Open Settings in the app. Confirm the preview website address.
+1. Open Settings in the app. Confirm `https://ayoubabed.xyz` for production, or explicitly enter the preview website for testing. Finish or clear any pending batch before changing websites.
 2. Tap **Get a pairing key**. Sign into the existing gallery admin through Cloudflare Access.
-3. Name your phone and create a key. Copy it into the app and tap **Connect**.
+3. Name your phone and enable **Allow gallery management** to create galleries and change their settings. Create the key, copy it into the app, and tap **Connect**. Use a key from the same website you selected.
 4. Pick any gallery, including hidden or coming-soon galleries. Choose the LUMIX folder or an SD-import folder using Android's directory picker.
 5. For LUMIX's shared folder, set **Photos taken since**. For a dedicated event folder, leave all dates selected.
 6. Check for photos, review the count, and tap **Sync photos**. Allow notifications to see progress while the phone is locked.
 
-Device keys allow listing galleries and uploading photos only, expire in 90 days, and can be revoked in the dashboard. The phone encrypts its key using Android Keystore. Backups are disabled so the key is not exported with app data.
+Device keys allow listing galleries and uploading photos, expire in 90 days, and can be revoked in the dashboard. Explicitly enabled management keys also allow gallery creation, settings, and moderation. The phone encrypts its key using Android Keystore. Backups are disabled so the key is not exported with app data. Switching websites never moves galleries or photos between environments.
 
 ## Sync behavior
 
@@ -46,7 +46,7 @@ Device keys allow listing galleries and uploading photos only, expire in 90 days
 
 ## GitHub builds and signing
 
-`.github/workflows/android.yml` runs unit tests and Android lint, builds an APK, and stores an Actions artifact. Tags beginning `android-v` additionally build a signed release and attach it to a GitHub prerelease.
+`.github/workflows/android.yml` runs emulator tests, unit tests, and Android lint, builds an APK, and stores an Actions artifact. Tags beginning `android-v` additionally build a signed release. Versions containing a hyphen are prereleases; other versions are published as the latest stable release.
 
 Repository Actions secrets:
 
@@ -66,6 +66,6 @@ The Gradle wrapper and pinned dependency versions are included. No proprietary u
 
 ## Website rollout and device checks
 
-Apply D1 migration 0005 to the **preview** database `ayoub-gallery-data-preview`, verify the preview bindings in `scripts/deploy-preview-worker.mjs`, and deploy the feature branch to preview using the repository's authorized deployment workflow. Keep `/admin/galleries/*` and `/api/admin/galleries/*` behind Cloudflare Access. `/api/companion/*` uses its own revocable device bearer key and must not be redirected to interactive Access login.
+Apply outstanding D1 migrations to the **preview** database `ayoub-gallery-data-preview`, verify the preview bindings in `scripts/deploy-preview-worker.mjs`, and deploy the feature branch to preview using the repository's authorized deployment workflow. Verify uploads, creation, moderation, and media there before merging. Deploy production only from clean `master`, with outstanding production migrations applied. Keep `/admin/galleries/*` and `/api/admin/galleries/*` behind Cloudflare Access. `/api/companion/*` uses its own revocable device bearer key and must not be redirected to interactive Access login. `/api/gallery-media/*` serves only public gallery images from that environment's R2 bucket.
 
 Before production: test LUMIX directory visibility, 400-photo batches with screen locked, rotation and large fonts, light/dark themes, notification denial, Wi-Fi/cellular handoff, mid-upload process death, expired/revoked keys, duplicate retries, and removal followed by resync. Android can stop long jobs; persisted state and recovery are essential. The source folder must be accessible through Android's picker; app-private LUMIX storage would need an explicit export or another supported source.

@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter
 import java.security.MessageDigest
 
 object SyncRules {
+    const val PRODUCTION_SITE = "https://ayoubabed.xyz"
     const val MAX_BYTES = 20L * 1024 * 1024
     fun site(value: String): String {
         val uri = URI(value.trim())
