@@ -84,7 +84,7 @@ private fun GalleryApp(activity: MainActivity) {
     val store = remember { Store(activity) }
     val scope = rememberCoroutineScope()
     var tab by rememberSaveable { mutableIntStateOf(0) }
-    var website by rememberSaveable { mutableStateOf(store.prefs.getString("site", "https://ayoub-linktree-project-preview.ayoub-abedrabbo.workers.dev")!!) }
+    var website by rememberSaveable { mutableStateOf(store.prefs.getString("site", SyncRules.PRODUCTION_SITE)!!) }
     var key by rememberSaveable { mutableStateOf("") }
     var connected by remember { mutableStateOf(store.token().isNotBlank()) }
     var galleries by remember { mutableStateOf(emptyList<Gallery>()) }
@@ -174,7 +174,7 @@ private fun GalleryApp(activity: MainActivity) {
     val titles = listOf("Galleries", "Uploads", "Settings")
     val icons = listOf(Icons.Outlined.PhotoLibrary, Icons.Outlined.CloudUpload, Icons.Outlined.Settings)
     Scaffold(
-        topBar = { LargeTopAppBar(title = { Text(titles[tab], fontWeight = FontWeight.Bold) }, actions = {
+        topBar = { TopAppBar(title = { Text(titles[tab], fontWeight = FontWeight.SemiBold) }, actions = {
             if(tab == 0 && connected) IconButton(onClick = { refresh() }, enabled = !busy) { Icon(Icons.Outlined.Refresh, "Refresh galleries") }
         }) },
         bottomBar = {
@@ -188,17 +188,20 @@ private fun GalleryApp(activity: MainActivity) {
                 if (problem != null) item { Message(problem!!, true) }
                 when(tab) {
                     0 -> {
-                        item {
+                        if (!connected) item {
                             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer), shape = RoundedCornerShape(32.dp)) {
                                 Column(Modifier.fillMaxWidth().padding(28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     Icon(Icons.Outlined.CameraAlt, null, Modifier.size(32.dp))
                                     Text("Your galleries", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
                                     Text("Publish photos, edit events, and manage guest access.", style = MaterialTheme.typography.bodyLarge)
-                                    if(!connected) Button(onClick = { tab = 2 }, modifier = Modifier.padding(top = 8.dp)) { Text("Connect your website") }
+                                    Button(onClick = { tab = 2 }, modifier = Modifier.padding(top = 8.dp)) { Text("Connect your website") }
                                 }
                             }
                         }
                         if(connected) {
+                            if (store.prefs.getString("site", "")!!.contains("-preview.")) item {
+                                TextButton(onClick = { tab = 2 }) { Text("Preview website · Connection settings") }
+                            }
                             item { FilledTonalButton(onClick = { creating = true }, enabled = !busy,
                                 modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                                 Icon(Icons.Outlined.Add, null); Spacer(Modifier.width(8.dp)); Text("New gallery")
@@ -307,7 +310,9 @@ private fun GalleryApp(activity: MainActivity) {
                                             val site = SyncRules.site(website)
                                             require(Regex("ayoub_[a-f0-9]{64}").matches(key)) { "Paste the complete pairing key from your dashboard." }
                                             val list = withContext(Dispatchers.IO) { GalleryApi.galleries(site, key) }
-                                            store.saveConnection(site,key); key = ""; connected = true; galleries = list; tab = 0
+                                            store.saveConnection(site,key)
+                                            selected = null; folder = ""; since = 0L; scan = null; gallerySearch = ""
+                                            key = ""; connected = true; galleries = list; tab = 0
                                         } catch (e: Exception) { problem = e.message ?: "Could not connect." }
                                         finally { busy = false }
                                     }
@@ -318,7 +323,7 @@ private fun GalleryApp(activity: MainActivity) {
                         item { SectionCard("Made for the field", Icons.Outlined.CameraAlt) {
                             Text("Choose a gallery, select your transfer folder, and publish a batch. The upload queue stays on your phone if a connection drops.")
                             Text("Photos are resized to 2400px for the website. Full-resolution originals stay with you.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("Ayoub Gallery · 0.1.1 beta 1", style = MaterialTheme.typography.labelLarge)
+                            Text("Ayoub Gallery · ${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.labelLarge)
                         } }
                     }
                 }

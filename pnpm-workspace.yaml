@@ -4,3 +4,6 @@ allowBuilds:
   workerd: true
 patchedDependencies:
   '@astrojs/cloudflare@14.3.0': patches/@astrojs__cloudflare@14.3.0.patch
+overrides:
+  # Miniflare pins an older Sharp; this patch includes the libheif security fixes.
+  'miniflare>sharp': 0.35.4

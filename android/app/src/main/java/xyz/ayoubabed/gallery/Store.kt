@@ -62,6 +62,9 @@ class Store(context: Context) : SQLiteOpenHelper(context.applicationContext, "up
         }.generateKey()
     }
     fun saveConnection(site: String, token: String) {
+        require(!hasPending() || batch()?.first == site) {
+            "Finish or clear the current upload batch before changing websites."
+        }
         val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply { init(Cipher.ENCRYPT_MODE, key()) }
         val data = cipher.doFinal(token.toByteArray())
         prefs.edit().putString("site", site).putString("token", Base64.encodeToString(cipher.iv + data, Base64.NO_WRAP)).commit()

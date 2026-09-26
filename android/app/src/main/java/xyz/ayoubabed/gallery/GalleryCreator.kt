@@ -35,7 +35,7 @@ fun GalleryCreator(onBack: () -> Unit, onCreated: (Gallery) -> Unit,
         title = { Text("Discard new gallery?") }, text = { Text("Your gallery has not been saved.") },
         confirmButton = { TextButton(onClick = onBack) { Text("Discard") } },
         dismissButton = { TextButton(onClick = { discard = false }) { Text("Keep editing") } })
-    Scaffold(topBar = { LargeTopAppBar(title = { Text("New gallery") },
+    Scaffold(topBar = { TopAppBar(title = { Text("New gallery") },
         navigationIcon = { IconButton(onClick = { back() }, enabled = !busy) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, "Back") } }) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).imePadding().verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {

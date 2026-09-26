@@ -21,6 +21,7 @@ class GalleryAppTest {
         compose.onNodeWithText("Connect your website").performClick()
         compose.onNodeWithText("Make the connection").assertIsDisplayed()
         compose.onNodeWithText("Website address").assertExists()
+        compose.onNodeWithText(SyncRules.PRODUCTION_SITE).assertExists()
         capture("settings")
         compose.onNodeWithText("Uploads").performClick()
         compose.onNodeWithText("Your upload queue").assertIsDisplayed()

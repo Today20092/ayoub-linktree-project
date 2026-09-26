@@ -10,11 +10,11 @@ android {
         applicationId = "xyz.ayoubabed.gallery"
         minSdk = 34
         targetSdk = 35
-        versionCode = 4
-        versionName = "0.2.1-beta.1"
+        versionCode = 6
+        versionName = "0.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; buildConfig = true }
     signingConfigs {
         create("release") {
             val keyPath = System.getenv("GALLERY_KEYSTORE_PATH")
