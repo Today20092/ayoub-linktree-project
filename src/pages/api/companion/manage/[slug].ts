@@ -3,7 +3,7 @@ import { env } from 'cloudflare:workers'
 import { companionAuthorized, companionJson } from '@/lib/gallery-companion'
 import { readGalleryAdmin, writeGalleryAdmin } from '@/lib/gallery-admin-route'
 import { galleryReader } from '@/lib/gallery-read'
-import { GALLERY_PUBLIC_ORIGIN } from '@/lib/gallery-data'
+import { galleryObjectUrl } from '@/lib/gallery-media'
 
 export const prerender = false
 const denied = () =>
@@ -24,6 +24,7 @@ export const GET: APIRoute = async ({ request, params }) => {
     ? await galleryReader(env.GALLERY_DB).getAdminDetail(params.slug)
     : undefined
   if (!gallery) return companionJson({ error: 'Gallery not found.' }, 404)
+  const absolute = (src: string) => new URL(src, request.url).toString()
   return companionJson({
     event: {
       title: gallery.title,
@@ -34,7 +35,7 @@ export const GET: APIRoute = async ({ request, params }) => {
       eventVenue: gallery.eventVenue ?? '',
       visibilityStatus: gallery.visibility,
       comingSoon: gallery.comingSoon,
-      coverSrc: gallery.cover?.src ?? '',
+      coverSrc: gallery.cover ? absolute(gallery.cover.src) : '',
     },
     settings: {
       uploadsEnabled: Boolean(gallery.settings?.uploads_enabled),
@@ -46,7 +47,7 @@ export const GET: APIRoute = async ({ request, params }) => {
         id: photo.id,
         kind: photo.status,
         label: photo.original_filename,
-        src: `${GALLERY_PUBLIC_ORIGIN}/${photo.object_key}`,
+        src: absolute(galleryObjectUrl(photo.object_key)),
         width: photo.width,
         height: photo.height,
         alt: photo.alt,
@@ -55,7 +56,7 @@ export const GET: APIRoute = async ({ request, params }) => {
         id: photo.id,
         kind: 'uploaded',
         label: photo.original_filename,
-        src: `${GALLERY_PUBLIC_ORIGIN}/${photo.object_key}`,
+        src: absolute(galleryObjectUrl(photo.object_key)),
         width: photo.width,
         height: photo.height,
         alt: photo.alt,

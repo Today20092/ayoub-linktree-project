@@ -102,6 +102,7 @@ private fun GalleryApp(activity: MainActivity) {
     var scheduled by remember { mutableStateOf(false) }
     var clearConfirm by remember { mutableStateOf(false) }
     var managing by remember { mutableStateOf<Gallery?>(null) }
+    var creating by rememberSaveable { mutableStateOf(false) }
     var pickSinceDate by remember { mutableStateOf(false) }
     var sinceDate by remember { mutableStateOf<LocalDate?>(null) }
     val notice = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -147,6 +148,14 @@ private fun GalleryApp(activity: MainActivity) {
             delay(1000)
         }
     }
+    if (creating) {
+        GalleryCreator(onBack = { creating = false }, onCreated = { gallery ->
+            creating = false; galleries = galleries + gallery; select(gallery); managing = gallery
+        }, create = { details -> withContext(Dispatchers.IO) {
+            GalleryApi.createGallery(store.prefs.getString("site", "")!!, store.token(), details)
+        } })
+        return
+    }
     managing?.let { gallery ->
         GalleryManager(gallery, store, onBack = { managing = null; refresh() })
         return
@@ -190,11 +199,15 @@ private fun GalleryApp(activity: MainActivity) {
                             }
                         }
                         if(connected) {
+                            item { FilledTonalButton(onClick = { creating = true }, enabled = !busy,
+                                modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                                Icon(Icons.Outlined.Add, null); Spacer(Modifier.width(8.dp)); Text("New gallery")
+                            } }
                             item { Text("CHOOSE A GALLERY", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(top = 8.dp)) }
                             item { OutlinedTextField(gallerySearch, { gallerySearch = it }, label = { Text("Find a gallery") },
                                 leadingIcon = { Icon(Icons.Outlined.Search, null) }, singleLine = true, shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth()) }
                             if(busy && galleries.isEmpty()) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
-                            if(galleries.isEmpty() && !busy) item { Message("No galleries loaded. Refresh, or create a gallery in the dashboard.") }
+                            if(galleries.isEmpty() && !busy) item { Message("No galleries yet. Create your first gallery above, or refresh to load existing galleries.") }
                             items(galleries.filter { it.title.contains(gallerySearch, ignoreCase = true) || it.category.contains(gallerySearch, ignoreCase = true) }, key = { it.id }) { gallery ->
                                 val active = selected?.id == gallery.id
                                 Card(onClick = { if(!busy) select(gallery) }, shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = if(active) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerLow)) {

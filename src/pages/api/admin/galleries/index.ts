@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro'
 import { env } from 'cloudflare:workers'
 
 import { galleryAdminAuthorized } from '@/lib/gallery-admin'
+import { galleryObjectUrl } from '@/lib/gallery-media'
 import { flyerKey, galleryStatus, saveEventGallery } from '@/lib/gallery-data'
 import {
   acceptedGalleryImage,
@@ -88,7 +89,7 @@ export const POST: APIRoute = async ({ request }) => {
     flyer: savedFlyer,
     cover: savedFlyer
       ? {
-          src: `https://photos.ayoubabed.xyz/${savedFlyer.object_key}`,
+          src: galleryObjectUrl(savedFlyer.object_key),
           width: savedFlyer.width,
           height: savedFlyer.height,
           alt: savedFlyer.alt,

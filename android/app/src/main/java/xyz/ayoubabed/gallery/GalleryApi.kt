@@ -78,7 +78,7 @@ object GalleryApi {
         val privatePhoto = photo.getString("kind") in listOf("pending", "published")
         val conn = if (privatePhoto) connection(site, managePath(gallery) + "?photo=" + URLEncoder.encode(photo.getString("id"), "UTF-8"), token)
         else {
-            val url = URL(photo.getString("src"))
+            val url = URL(URL(SyncRules.site(site)), photo.getString("src"))
             require(url.protocol == "https")
             (url.openConnection() as HttpURLConnection).apply {
                 connectTimeout = 20_000; readTimeout = 30_000; instanceFollowRedirects = false
@@ -102,6 +102,18 @@ object GalleryApi {
         return try {
             val list = result(conn).getJSONArray("galleries")
             (0 until list.length()).map { i -> list.getJSONObject(i).let { Gallery(it.getString("id"), it.getString("title"), it.optString("category"), it.getString("status")) } }
+        } finally { conn.disconnect() }
+    }
+    fun createGallery(site: String, token: String, details: JSONObject): Gallery {
+        val conn = connection(site, "/api/companion/galleries/", token)
+        return try {
+            val bytes = details.toString().toByteArray(Charsets.UTF_8)
+            conn.requestMethod = "POST"; conn.doOutput = true
+            conn.setRequestProperty("Content-Type", "application/json")
+            conn.setFixedLengthStreamingMode(bytes.size)
+            conn.outputStream.use { it.write(bytes) }
+            val item = result(conn).getJSONObject("gallery")
+            Gallery(item.getString("id"), item.getString("title"), item.getString("category"), item.getString("status"))
         } finally { conn.disconnect() }
     }
     fun upload(context: Context, site: String, gallery: String, token: String, item: QueueItem, network: Network?): String {

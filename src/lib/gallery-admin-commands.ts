@@ -1,6 +1,6 @@
 import { hashGalleryPassword, validGalleryPassword } from './gallery-auth'
+import { galleryMediaUrl, galleryObjectUrl } from './gallery-media'
 import {
-  GALLERY_PUBLIC_ORIGIN,
   adminPhotoKey,
   createGalleryInvite,
   deleteGuestPhoto,
@@ -426,7 +426,10 @@ export async function executeGalleryAdminCommand(
   }
 
   if (input.action === 'setCover') {
-    const src = typeof input.src === 'string' ? input.src.trim() : ''
+    const src =
+      typeof input.src === 'string'
+        ? galleryMediaUrl(input.src.trim(), context.requestUrl)
+        : ''
     const alt = typeof input.alt === 'string' ? input.alt.trim() : ''
     const width = typeof input.width === 'number' ? input.width : 0
     const height = typeof input.height === 'number' ? input.height : 0
@@ -439,10 +442,10 @@ export async function executeGalleryAdminCommand(
       dependencies.data.listGuestPhotos(context.event.id),
     ])
     const allowed = new Set([
-      ...photos.map((photo) => `${GALLERY_PUBLIC_ORIGIN}/${photo.object_key}`),
+      ...photos.map((photo) => galleryObjectUrl(photo.object_key)),
       ...guests
         .filter(({ status }) => status === 'published')
-        .map((photo) => `${GALLERY_PUBLIC_ORIGIN}/${photo.object_key}`),
+        .map((photo) => galleryObjectUrl(photo.object_key)),
       ...context.event.staticPhotos.map(({ src: photoSrc }) => photoSrc),
       ...(context.event.flyerSrc ? [context.event.flyerSrc] : []),
       ...(context.event.coverSrc ? [context.event.coverSrc] : []),
@@ -531,7 +534,7 @@ export async function executeGalleryAdminCommand(
         ...currentEventInput(context.event),
         flyer,
         cover: {
-          src: `${GALLERY_PUBLIC_ORIGIN}/${objectKey}`,
+          src: galleryObjectUrl(objectKey),
           width: optimized.width,
           height: optimized.height,
           alt: flyer.alt,

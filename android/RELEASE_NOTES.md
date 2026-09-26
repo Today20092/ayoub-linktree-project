@@ -1,6 +1,10 @@
-# Ayoub Gallery 0.2.0 beta 1
+# Ayoub Gallery 0.2.1 beta 1
 
-Native gallery management and theme-aware Material 3 date and time pickers.
+Create galleries directly from Android. Uploaded photo links now use the connected website's storage, fixing missing preview photos without re-uploading.
+
+- Tap **New gallery**, enter its name and description, and choose visibility. New galleries default to hidden.
+- Continue straight into native management to set dates, covers, guest access, and photos.
+- Creation requires a pairing key with gallery management enabled. Failed requests preserve entered details.
 
 - Search galleries and open their management controls directly from the gallery list.
 - Edit event details and visibility, manage guest upload passwords, and create or share guest invites.
