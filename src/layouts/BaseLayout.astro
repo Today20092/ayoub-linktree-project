@@ -147,7 +147,7 @@ if (Astro.csp) {
     <CloudflareWebAnalytics />
   </head>
   <body
-    class="bg-background text-foreground min-h-[100dvh] subpixel-antialiased"
+    class="bg-background text-foreground flex min-h-[100dvh] flex-col subpixel-antialiased"
   >
     <a
       href="#main-content"
@@ -159,7 +159,7 @@ if (Astro.csp) {
     <slot />
     {
       !minimal && (
-        <footer class="text-muted-foreground mx-auto flex w-full max-w-screen-2xl justify-center gap-4 px-4 py-8 text-xs sm:px-6 lg:px-8">
+        <footer class="text-muted-foreground mx-auto mt-auto flex w-full max-w-screen-2xl shrink-0 justify-center gap-4 px-4 py-8 text-xs sm:px-6 lg:px-8">
           <a class="underline underline-offset-4" href="/about/">
             About
           </a>
