@@ -137,7 +137,7 @@ private fun GalleryApp(activity: MainActivity) {
     LaunchedEffect(Unit) {
         while(true) {
             queue = withContext(Dispatchers.IO) { store.items() }
-            status = store.prefs.getString("message", "No uploads yet.")!!
+            status = UploadJobService.pendingMessage(activity, wifi) ?: store.prefs.getString("message", "No uploads yet.")!!
             scheduled = activity.getSystemService(JobScheduler::class.java).getPendingJob(UploadJobService.JOB_ID) != null
             delay(1000)
         }
@@ -186,7 +186,7 @@ private fun GalleryApp(activity: MainActivity) {
                                 }
                             }
                             selected?.let { gallery ->
-                                if(gallery.status != "published") item { Message("This gallery is ${gallery.status.replace('_',' ')}. Publish it in the dashboard before syncing.") }
+                                if(gallery.status != "published") item { Message("This gallery is ${gallery.status.replace('_',' ')}. You can upload now; its visibility stays unchanged.") }
                                 item {
                                     SectionCard("Photo source", Icons.Outlined.FolderOpen, "Choose the LUMIX transfer folder or a folder from your SD card. Subfolders are included.") {
                                         FilledTonalButton(onClick = { picker.launch(folder.takeIf { it.isNotBlank() }?.let(Uri::parse)) }, enabled = !busy, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
@@ -217,7 +217,7 @@ private fun GalleryApp(activity: MainActivity) {
                                             Column(Modifier.weight(1f)) { Text("Wi-Fi only", style = MaterialTheme.typography.titleMedium); Text("Wait for unmetered Wi-Fi", style = MaterialTheme.typography.bodySmall) }
                                             Switch(wifi, onCheckedChange = { wifi = it; store.prefs.edit().putBoolean("wifi",it).apply() })
                                         }
-                                        Text("New photos publish immediately. Existing photos are skipped. Nothing is deleted from your phone.", style = MaterialTheme.typography.bodyMedium)
+                                        Text("Photos follow the gallery’s visibility. Existing photos are skipped. Nothing is deleted from your phone.", style = MaterialTheme.typography.bodyMedium)
                                         Button(onClick = {
                                             scope.launch {
                                                 busy = true; scan = null; problem = null; scanned = 0
@@ -225,7 +225,7 @@ private fun GalleryApp(activity: MainActivity) {
                                                 catch (e: Exception) { problem = e.message ?: "Could not scan folder." }
                                                 finally { busy = false }
                                             }
-                                        }, enabled = folder.isNotBlank() && gallery.status == "published" && !busy && !queue.any { it.state in listOf("queued","uploading","failed") }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                                        }, enabled = folder.isNotBlank() && !busy && !queue.any { it.state in listOf("queued","uploading","failed") }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                                             Icon(Icons.Outlined.Sync, null); Spacer(Modifier.width(10.dp)); Text(if(busy) "Checking $scanned photos…" else "Check for photos")
                                         }
                                         if(busy) LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -286,7 +286,7 @@ private fun GalleryApp(activity: MainActivity) {
                         item { SectionCard("Made for the field", Icons.Outlined.CameraAlt) {
                             Text("Choose a gallery, select your transfer folder, and publish a batch. The upload queue stays on your phone if a connection drops.")
                             Text("Photos are resized to 2400px for the website. Full-resolution originals stay with you.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("Ayoub Gallery · 0.1.0", style = MaterialTheme.typography.labelLarge)
+                            Text("Ayoub Gallery · 0.1.1 beta 1", style = MaterialTheme.typography.labelLarge)
                         } }
                     }
                 }
@@ -296,7 +296,7 @@ private fun GalleryApp(activity: MainActivity) {
     scan?.let { result ->
         AlertDialog(onDismissRequest = { scan = null }, icon = { Icon(Icons.Outlined.PhotoLibrary,null) }, title = { Text("${result.photos.size} photos ready") }, text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Publish to ${selected?.title}?")
+                Text("Upload to ${selected?.title}? Its visibility will stay unchanged.")
                 Text("${result.photos.sumOf { it.size } / (1024*1024)} MB before resizing. Already uploaded photos will be skipped.")
                 if(result.photos.any { it.fallback }) Text("${result.photos.count { it.fallback }} photos have no usable capture date. Their file date was used.")
                 if(result.tooLarge + result.unreadable > 0) Text("Excluded: ${result.tooLarge} over 20 MB; ${result.unreadable} unreadable.")
@@ -304,7 +304,7 @@ private fun GalleryApp(activity: MainActivity) {
             }
         }, confirmButton = { TextButton(onClick = {
             selected?.let { store.replaceBatch(store.prefs.getString("site", "")!!,it,result.photos); scan = null; schedule() }
-        }, enabled = result.photos.isNotEmpty()) { Text("Sync & publish") } }, dismissButton = { TextButton(onClick = { scan = null }) { Text("Cancel") } })
+        }, enabled = result.photos.isNotEmpty()) { Text("Sync photos") } }, dismissButton = { TextButton(onClick = { scan = null }) { Text("Cancel") } })
     }
     if(clearConfirm) AlertDialog(onDismissRequest = { clearConfirm = false }, title = { Text("Clear this batch?") }, text = { Text("Unfinished uploads will be removed from this phone’s queue. Published photos stay on the website. You can scan the folder again later.") }, confirmButton = { TextButton(onClick = { store.clearQueue(); queue = emptyList(); clearConfirm = false; store.message("No uploads yet.") }) { Text("Clear batch") } }, dismissButton = { TextButton(onClick = { clearConfirm = false }) { Text("Keep batch") } })
 }

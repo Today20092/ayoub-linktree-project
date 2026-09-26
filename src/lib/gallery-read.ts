@@ -323,6 +323,9 @@ export function createGalleryReader({
     get(eventSlug: string) {
       return resolve(eventSlug, false)
     },
+    getAdmin(eventSlug: string) {
+      return resolve(eventSlug, true)
+    },
     getPublicDetail: publicDetail,
     getAdminDetail: adminDetail,
     listPublic,

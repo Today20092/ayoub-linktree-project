@@ -18,13 +18,8 @@ export const POST: APIRoute = async ({ request }) => {
   const hash = request.headers.get('x-content-sha256') ?? ''
   if (!/^[a-f0-9]{64}$/.test(hash))
     return companionJson({ error: 'Invalid photo checksum.' }, 400)
-  const event = await galleryReader(env.GALLERY_DB).get(slug)
+  const event = await galleryReader(env.GALLERY_DB).getAdmin(slug)
   if (!event) return companionJson({ error: 'Gallery not found.' }, 404)
-  if (event.visibility !== 'published' || event.comingSoon)
-    return companionJson(
-      { error: 'Publish this gallery in the dashboard before syncing.' },
-      422,
-    )
   if (request.headers.get('content-type') !== 'image/jpeg')
     return companionJson({ error: 'Only JPEG photos are supported.' }, 415)
   const length = Number(request.headers.get('content-length'))

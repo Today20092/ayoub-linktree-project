@@ -88,16 +88,41 @@ class UploadJobService : JobService() {
 
     companion object {
         const val JOB_ID = 71
-        fun schedule(context: Context, wifiOnly: Boolean): Boolean {
-            val store = Store(context)
-            val network = NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).apply {
+        fun networkRequest(wifiOnly: Boolean): NetworkRequest =
+            NetworkRequest.Builder().addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                // Tailscale is a VPN even when it is only used for DNS.
+                .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN).apply {
                 if(wifiOnly) { addTransportType(NetworkCapabilities.TRANSPORT_WIFI); addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) }
             }.build()
-            val info = JobInfo.Builder(JOB_ID, ComponentName(context, UploadJobService::class.java))
-                .setUserInitiated(true).setRequiredNetwork(network)
-                .setEstimatedNetworkBytes(0, store.items().filter { it.state == "queued" }.sumOf { it.size })
+
+        fun jobInfo(context: Context, wifiOnly: Boolean, sizes: List<Long>): JobInfo =
+            JobInfo.Builder(JOB_ID, ComponentName(context, UploadJobService::class.java))
+                .setUserInitiated(true).setRequiredNetwork(networkRequest(wifiOnly))
+                .setEstimatedNetworkBytes(0, sizes.sum())
+                // Each completed photo is durable; the whole batch need not fit in one run.
+                .setMinimumNetworkChunkBytes(sizes.maxOrNull()?.coerceAtLeast(1) ?: 1)
                 .build()
-            store.message(if(wifiOnly) "Queued. Waiting for unmetered Wi-Fi." else "Queued. Waiting for an internet connection.")
+
+        fun pendingMessage(context: Context, wifiOnly: Boolean): String? {
+            val scheduler = context.getSystemService(JobScheduler::class.java)
+            if (scheduler.getPendingJob(JOB_ID) == null) return null
+            return when(val reason = scheduler.getPendingJobReason(JOB_ID)) {
+                JobScheduler.PENDING_JOB_REASON_EXECUTING -> null
+                JobScheduler.PENDING_JOB_REASON_INVALID_JOB_ID -> null
+                JobScheduler.PENDING_JOB_REASON_CONSTRAINT_CONNECTIVITY -> if(wifiOnly)
+                    "Waiting for unmetered Wi-Fi. Turn off Wi-Fi only to use other connections."
+                    else "Android is waiting for a usable internet network. VPN connections are allowed."
+                JobScheduler.PENDING_JOB_REASON_BACKGROUND_RESTRICTION,
+                JobScheduler.PENDING_JOB_REASON_APP_STANDBY -> "Android has restricted background uploads. Allow background usage in this app’s battery settings."
+                JobScheduler.PENDING_JOB_REASON_USER -> "Android paused this upload. Tap Pause, then Resume."
+                else -> "Queued by Android (reason $reason). Waiting for the transfer job to start."
+            }
+        }
+
+        fun schedule(context: Context, wifiOnly: Boolean): Boolean {
+            val store = Store(context)
+            val info = jobInfo(context, wifiOnly, store.items().filter { it.state == "queued" }.map { it.size })
+            store.message("Queued. Asking Android to start the transfer…")
             return context.getSystemService(JobScheduler::class.java).schedule(info) == JobScheduler.RESULT_SUCCESS
         }
         fun pause(context: Context) {

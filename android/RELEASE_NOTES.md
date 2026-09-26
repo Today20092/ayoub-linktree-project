@@ -1,14 +1,15 @@
-# Ayoub Gallery 0.1.0 beta 1
+# Ayoub Gallery 0.1.1 beta 1
 
-First Android test build with a Material 3 interface inspired by ImageToolbox and ObtainX.
+Fixes for gallery visibility and queued transfers.
 
-- Connect a device using a revocable dashboard pairing key.
-- Choose a gallery and folder; filter by photo capture time.
-- Review a batch and publish JPEGs, with checksum duplicate detection.
-- Persistent upload queue, notification progress, retries, pause/resume, and optional Wi-Fi-only transfers.
-- Dynamic colors and system light/dark themes.
+- Upload to hidden, coming-soon, and published galleries without changing visibility.
+- Allow Tailscale/VPN networks, excluded by the original Android network request.
+- Tell Android that large batches can resume between individual photos.
+- Display Android's pending-job reason instead of always claiming there is no internet.
 
 ## Installation
+
+Install over the previous beta. Pairing and queued photos are preserved. After updating, tap **Pause**, then **Resume** on an existing queued batch to replace its old network constraints. Do not uninstall or clear app data.
 
 Download `ayoub-gallery.apk`. Requires Android 14+. Use this signed release for future updates; debug artifacts have a different signing key. Obtainium/ObtainX setup is in [the Android README](https://github.com/Today20092/ayoub-linktree-project/blob/codex/android-gallery-uploader/android/README.md).
 
