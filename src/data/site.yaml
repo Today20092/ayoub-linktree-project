@@ -1,27 +1,36 @@
 site:
-  pageTitle: Ayoub Abedrabbo | Tampa Photographer & Videographer
-  pageDescription: 'Tampa photographer and videographer covering Muslim-community weddings, events, and portraits. Teaches editing and videography on AlphaBravoMedia, and shares books and reflections on his personal channel.'
+  pageTitle: Ayoub Abedrabbo | Digital Media Specialist
+  pageDescription: 'Tampa digital media specialist for local businesses and communities, with video, photography, marketing, and education on AlphaBravoMedia and personal channels.'
+  shareTitle: Ayoub Abedrabbo | Digital Media Specialist
+  shareDescription: 'Video, photography, marketing, education, and digital media support for Tampa businesses and communities.'
+  shareText: 'Check out Ayoub Abedrabbo, a digital media specialist helping businesses and creators with video, photography, marketing, and education.'
   siteName: Ayoub Abedrabbo
   profileName: Ayoub
   twitterHandle: '@ayoubabedrabbo'
-  heroImageAlt: Portrait of Ayoub Abedrabbo
   profileImage: AyoubBayaan.jpg
-  ogImage: AyoubContactCardImage.jpg
+  ogImage: og-ayoub-digital-media.jpg
+  ogImageAlt: Ayoub Abedrabbo, Digital Media Specialist for video, photography, marketing, and education
+  ogImageWidth: 1200
+  ogImageHeight: 630
+  ogImageType: image/jpeg
+
+payments:
+  stripePaymentLink: ''
 
 features:
   showTampaWork: false
 
 socialLinks:
-  - id: alphabravomedia-website
-    url: https://alphabravomedia.co
-    icon: simple-icons:googlechrome
-    label: 'My business — AlphaBravoMedia'
-    color: '#8f3f37'
-    color2: '#f0a097'
-    color3: '#15110d'
-    darkColor: '#f0a097'
-    darkColor2: '#8f3f37'
-    darkColor3: '#211211'
+  # - id: alphabravomedia-website
+  #   url: https://alphabravomedia.co
+  #   icon: simple-icons:googlechrome
+  #   label: 'My business - AlphaBravoMedia'
+  #   color: '#8f3f37'
+  #   color2: '#f0a097'
+  #   color3: '#15110d'
+  #   darkColor: '#f0a097'
+  #   darkColor2: '#8f3f37'
+  #   darkColor3: '#211211'
   - id: instagram
     url: https://instagram.com/alphabravomedia
     icon: simple-icons:instagram
@@ -32,6 +41,16 @@ socialLinks:
     darkColor: 'oklch(0.61 0.19 350)'
     darkColor2: 'oklch(0.7 0.15 38)'
     darkColor3: 'oklch(0.28 0.13 304)'
+  - id: tampa-bay-muslims
+    url: https://www.facebook.com/groups/tampabaymuslims/
+    icon: simple-icons:facebook
+    label: Tampa Bay Muslims Facebook group
+    color: 'oklch(0.48 0.19 260)'
+    color2: 'oklch(0.68 0.13 252)'
+    color3: 'oklch(0.25 0.09 260)'
+    darkColor: 'oklch(0.65 0.14 252)'
+    darkColor2: 'oklch(0.52 0.18 260)'
+    darkColor3: 'oklch(0.22 0.08 260)'
   - id: discord
     url: https://discordapp.com/users/279467079990640641
     icon: simple-icons:discord
@@ -62,16 +81,33 @@ socialLinks:
     darkColor: 'oklch(0.31 0.018 255)'
     darkColor2: 'oklch(0.5 0.024 255)'
     darkColor3: 'oklch(0.17 0.014 255)'
-  - id: telegram
-    url: https://t.me/AyoubAb1
-    icon: simple-icons:telegram
-    label: Telegram
-    color: 'oklch(0.55 0.13 235)'
-    color2: 'oklch(0.75 0.13 215)'
-    color3: 'oklch(0.28 0.08 225)'
-    darkColor: 'oklch(0.6 0.13 230)'
-    darkColor2: 'oklch(0.72 0.12 215)'
-    darkColor3: 'oklch(0.23 0.07 225)'
+  # - id: telegram
+  #   url: https://t.me/AyoubAb1
+  #   icon: simple-icons:telegram
+  #   label: Telegram
+  #   color: 'oklch(0.55 0.13 235)'
+  #   color2: 'oklch(0.75 0.13 215)'
+  #   color3: 'oklch(0.28 0.08 225)'
+  #   darkColor: 'oklch(0.6 0.13 230)'
+  #   darkColor2: 'oklch(0.72 0.12 215)'
+  #   darkColor3: 'oklch(0.23 0.07 225)'
+  - id: patreon
+    url: https://www.patreon.com/c/AyoubAbedrabbo
+    icon: simple-icons:patreon
+    label: Support me on Patreon
+    color: 'oklch(0.26 0.012 255)'
+    color2: 'oklch(0.46 0.025 255)'
+    color3: 'oklch(0.14 0.014 255)'
+  - id: keet
+    url: https://keet.io/download/
+    icon: ''
+    label: 'Keet: @ayoubabedrabbo1'
+    color: 'oklch(0.38 0.08 260)'
+    color2: 'oklch(0.62 0.12 255)'
+    color3: 'oklch(0.22 0.05 260)'
+    darkColor: 'oklch(0.55 0.1 255)'
+    darkColor2: 'oklch(0.42 0.08 260)'
+    darkColor3: 'oklch(0.18 0.04 260)'
   - id: tiktok
     url: https://www.tiktok.com/@ayoubabedrabbo
     icon: simple-icons:tiktok
@@ -95,7 +131,7 @@ socialLinks:
 
 actionLinks:
   - id: contact
-    label: '1. Download my contact card'
+    label: '1. Save Ayoub to contacts'
     url: https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf
     icon: lucide:id-card
     group: primary
@@ -108,8 +144,8 @@ actionLinks:
     textColor: 'var(--primary-foreground)'
     pulse: true
   - id: sms
-    label: '2. Send me a text'
-    url: 'sms:+18134240606?body=Hello Ayoub from AlphaBravoMedia, It was nice to meet you.'
+    label: '2. Text me your name'
+    url: 'sms:+18134240606?body=Hi%20Ayoub%2C%20this%20is%20'
     icon: lucide:message-square-text
     group: primary
     color: 'var(--color-brand-600)'

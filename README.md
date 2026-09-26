@@ -564,12 +564,12 @@ This file defines:
 - Typography
 - Tailwind theme values
 - Base styles
-- MDX case-study styles under `.portfolio-prose`
+- MDX case-study styles under `.typeset-portfolio`
 - Reduced-motion behavior
 
 The site follows the visitor's operating-system light or dark preference.
 
-Portfolio heading and paragraph spacing is controlled by `.portfolio-prose`,
+Portfolio heading and paragraph spacing is controlled by `.typeset-portfolio`,
 not by the number of blank lines in an MDX file. Markdown blank lines separate
 content in the source, but they do not create extra visual space in the rendered
 HTML. Adjust the shared prose rules when vertical rhythm needs to change so

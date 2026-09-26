@@ -2,10 +2,12 @@
 import '../../../styles.css'
 
 import { Image } from 'astro:assets'
-import { ArrowRight } from 'lucide-react'
-import { getCollection, type CollectionEntry } from 'astro:content'
+import { ArrowRight, Heart, ImageUp } from 'lucide-react'
+import { env } from 'cloudflare:workers'
 
 import EventLightbox from '../../../components/EventLightbox'
+import EventComingSoon from '../../../components/EventComingSoon.astro'
+import FaceFinder from '../../../components/FaceFinder'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,72 +17,56 @@ import {
   BreadcrumbSeparator,
 } from '../../../components/ui/breadcrumb'
 import { Badge } from '../../../components/ui/badge'
-import { eventGalleries } from '../../../data/event-galleries'
+import { Button } from '../../../components/ui/button'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { faceManifests } from '../../../lib/face-manifests'
+import { galleryReader } from '../../../lib/gallery-read'
 import { siteConfig } from '../../../lib/site-config'
 
-type RemoteGalleryImage = {
-  src: string
-  width: number
-  height: number
-  alt: string
-  filename: string
-  caption?: string
-  featured?: boolean
+export const prerender = false
+
+const eventSlug = Astro.params.slug
+const gallery = eventSlug
+  ? await galleryReader(env.GALLERY_DB).getPublicDetail(eventSlug)
+  : undefined
+if (!gallery || !eventSlug) {
+  return new Response(null, { status: 404 })
 }
+const project = gallery.staticEvent
+const data = project?.data
+const gallerySettings = gallery.settings
+const images = gallery.professionalImages
+const guestImages = gallery.guestImages
+const allImages = gallery.allImages
+const totalPhotoCount = allImages.length
 
-type Props = {
-  project: CollectionEntry<'portfolio'>
-}
-
-export async function getStaticPaths() {
-  const projects = (await getCollection('portfolio')).filter(
-    (entry) => entry.data.eventGallery,
-  )
-
-  return projects.map((project) => ({
-    params: { slug: project.id },
-    props: { project },
-  }))
-}
-
-const { project } = Astro.props as Props
-const data = project.data
-
-const inlineImages = data.gallery.filter(
-  (
-    image,
-  ): image is Extract<(typeof data.gallery)[number], { filename: string }> =>
-    'filename' in image,
-)
-const fallbackImages = eventGalleries[project.id] ?? []
-const rawImages: RemoteGalleryImage[] =
-  inlineImages.length > 0
-    ? (inlineImages as unknown as RemoteGalleryImage[])
-    : fallbackImages
-
-const images = rawImages.map((image) => ({
-  src: image.src,
-  width: image.width,
-  height: image.height,
-  alt: image.alt,
-  filename: image.filename,
-  caption: image.caption,
-  featured: image.featured,
-}))
-
-const galleryId = `gallery-${project.id}`
-const galleryUrl = new URL(`/galleries/${project.id}/`, Astro.site).toString()
-const portfolioUrl = `/portfolio/${project.id}/`
-const summary = data.galleryDescription ?? data.summary
-const title = `${data.title} — Event Gallery`
-const ogImage =
-  images[0]?.src ??
-  (typeof data.featuredImage === 'string'
-    ? data.featuredImage
-    : data.featuredImage.src)
-const eventDate = data.eventDate
+const galleryId = `gallery-${eventSlug}`
+const galleryUrl = new URL(`/galleries/${eventSlug}/`, Astro.site).toString()
+const portfolioUrl = project ? `/portfolio/${project.id}/` : '/galleries/'
+const galleryTitle = gallery.title
+const galleryCategory = gallery.category
+const galleryImageAlt = data?.imageAlt ?? `${galleryTitle} event gallery`
+const summary = gallery.summary
+const title = `${galleryTitle} - Event Gallery`
+const ogImage = gallery.ogImage
+const eventDate = gallery.eventDate
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
+const faceManifest = faceManifests[eventSlug]
+const flyer = gallery.flyerImage
+const galleryHeroImage = gallery.heroImage
+
+const imageDimensions = (width: number, height: number, maxWidth: number) => {
+  const scale = Math.min(1, maxWidth / width)
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale)),
+  }
+}
+const lightboxPreview = allImages[0]
+  ? imageDimensions(allImages[0].width, allImages[0].height, 720)
+  : undefined
+const ogImageWidth = galleryHeroImage?.width ?? allImages[0]?.width ?? 1200
+const ogImageHeight = galleryHeroImage?.height ?? allImages[0]?.height ?? 800
 
 const formatDate = (date: Date) =>
   new Intl.DateTimeFormat('en-US', {
@@ -96,140 +82,348 @@ const formatDate = (date: Date) =>
   description={summary}
   canonicalUrl={galleryUrl}
   ogImage={ogImage}
-  ogImageAlt={data.imageAlt}
+  ogImageAlt={galleryImageAlt}
+  ogImageWidth={ogImageWidth}
+  ogImageHeight={ogImageHeight}
   ogType="article"
   robots="index,follow,max-image-preview:large"
   activeNav="galleries"
 >
   <main
     id="main-content"
-    class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+    class="mx-auto w-full max-w-screen-2xl scroll-mt-20 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
   >
-    <Breadcrumb>
-      <BreadcrumbList>
-        <BreadcrumbItem>
-          <BreadcrumbLink
-            href="/"
-            className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
-          >
-            Home
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbLink
-            href="/galleries"
-            className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
-          >
-            Galleries
-          </BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbSeparator />
-        <BreadcrumbItem>
-          <BreadcrumbPage>{data.title}</BreadcrumbPage>
-        </BreadcrumbItem>
-      </BreadcrumbList>
-    </Breadcrumb>
+    <div data-reveal="fade">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              href="/"
+              className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+            >
+              Home
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              href="/galleries/"
+              className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+            >
+              Galleries
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{galleryTitle}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+    </div>
 
-    <header class="mx-auto max-w-4xl pt-6 sm:pt-8">
+    <header class="mx-auto max-w-4xl pt-6 sm:pt-8" data-reveal="up">
       <div class="flex flex-wrap items-center gap-2">
         {
           eventDate && (
             <Badge variant="secondary">{formatDate(eventDate)}</Badge>
           )
         }
-        <Badge variant="outline">{data.category}</Badge>
-        <span class="text-muted-foreground text-xs font-semibold">
-          {images.length}
-          {images.length === 1 ? ' photograph' : ' photographs'}
-        </span>
+        <Badge variant="outline">{galleryCategory}</Badge>
+        {
+          totalPhotoCount > 0 ? (
+            <span class="text-muted-foreground text-xs font-semibold">
+              {totalPhotoCount}
+              {totalPhotoCount === 1 ? ' photograph' : ' photographs'}
+            </span>
+          ) : (
+            <Badge variant="outline">Coming soon</Badge>
+          )
+        }
       </div>
       <h1
         class="font-heading mt-3 text-3xl leading-none font-extrabold tracking-tight sm:text-4xl lg:text-5xl"
       >
-        {data.title}
+        {galleryTitle}
       </h1>
       <p class="text-muted-foreground mt-4 max-w-2xl text-base leading-7">
         {summary}
       </p>
-      <div class="mt-6 flex flex-wrap items-center gap-3">
-        <EventLightbox
-          client:load
-          galleryId={galleryId}
-          heading={data.title}
-          projectSlug={project.id}
-          projectTitle={data.title}
-          tipUrl={tipUrl}
-          images={images.map(({ src, filename, alt }) => ({
-            src,
-            filename,
-            alt,
-          }))}
-        >
-          {
-            images.map((image, index) => (
-              <figure
-                class="m-0 flex h-full w-full flex-col items-center justify-center"
-                data-gallery-slide={index}
-                hidden={index !== 0}
+      {
+        (totalPhotoCount > 0 || gallerySettings?.uploads_enabled) && (
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            {totalPhotoCount > 0 && (
+              <EventLightbox
+                client:load
+                galleryId={galleryId}
+                heading={galleryTitle}
+                projectSlug={eventSlug}
+                projectTitle={galleryTitle}
+                downloadAllUrl={data?.downloadAllUrl}
+                tipUrl={tipUrl}
+                images={allImages.map((image) => ({
+                  src: image.src,
+                  filename: image.filename,
+                  alt: image.alt,
+                  width: image.width,
+                  height: image.height,
+                  caption:
+                    'caption' in image && typeof image.caption === 'string'
+                      ? image.caption
+                      : undefined,
+                }))}
               >
-                <Image
-                  src={image.src}
-                  alt={image.alt}
-                  width={image.width}
-                  height={image.height}
-                  layout="constrained"
-                  widths={[1280, 2400]}
-                  sizes="100vw"
-                  loading="lazy"
-                  decoding="async"
-                  class="max-h-[calc(100dvh-9rem)] w-auto max-w-full object-contain"
-                />
-                {(image.caption || image.filename) && (
-                  <figcaption class="mt-3 max-w-3xl text-center text-sm text-white/75">
-                    {image.caption ?? image.filename}
-                  </figcaption>
-                )}
-              </figure>
-            ))
-          }
-        </EventLightbox>
-      </div>
+                {allImages.slice(0, 1).map((image) => (
+                  <figure
+                    class="m-0 flex h-full w-full flex-col items-center justify-center"
+                    data-gallery-slide="0"
+                  >
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      width={lightboxPreview?.width ?? image.width}
+                      height={lightboxPreview?.height ?? image.height}
+                      layout="constrained"
+                      widths={[480, 720]}
+                      sizes="min(100vw, 1600px)"
+                      quality={75}
+                      loading="lazy"
+                      decoding="async"
+                      data-gallery-original={image.src}
+                      class="max-h-[calc(100dvh-9rem)] w-auto max-w-full object-contain"
+                    />
+                    <figcaption
+                      data-gallery-caption
+                      class="mt-3 max-w-3xl text-center text-sm text-white/75"
+                    >
+                      {'caption' in image && image.caption
+                        ? image.caption
+                        : image.filename}
+                    </figcaption>
+                  </figure>
+                ))}
+              </EventLightbox>
+            )}
+            {gallerySettings?.uploads_enabled ? (
+              <Button variant="outline" size="lg" asChild>
+                <a href={`/galleries/${eventSlug}/upload/`}>
+                  <ImageUp data-icon="inline-start" aria-hidden="true" />
+                  Share your photos
+                </a>
+              </Button>
+            ) : null}
+          </div>
+        )
+      }
     </header>
 
-    <section
-      id={galleryId}
-      class="mt-10"
-      aria-label={`${data.title} photographs`}
-    >
-      <div class="columns-1 gap-1 sm:columns-2 lg:columns-3">
-        {
-          images.map((image, index) => (
-            <a
-              href={image.src}
-              data-gallery-open={index}
-              aria-label={`Open photograph ${index + 1}: ${image.alt}`}
-              class="group bg-muted focus-visible:ring-ring mb-1 block break-inside-avoid overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                width={image.width}
-                height={image.height}
-                layout="full-width"
-                widths={[480, 960, 1280]}
-                sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                loading="lazy"
-                decoding="async"
-                class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
-              />
-            </a>
-          ))
-        }
-      </div>
-    </section>
+    {
+      images.length > 0 && (
+        <figure
+          class="mx-auto mt-8 max-w-4xl overflow-hidden rounded-2xl"
+          data-reveal="up"
+        >
+          {galleryHeroImage
+            ? (() => {
+                const dimensions = imageDimensions(
+                  galleryHeroImage.width,
+                  galleryHeroImage.height,
+                  1280,
+                )
+                return (
+                  <Image
+                    src={galleryHeroImage.src}
+                    alt={galleryHeroImage.alt}
+                    width={dimensions.width}
+                    height={dimensions.height}
+                    layout="constrained"
+                    widths={[720, 960, 1280]}
+                    sizes="(min-width: 1024px) 56rem, 100vw"
+                    quality={85}
+                    priority
+                    class="bg-muted block aspect-[3/2] size-full object-cover"
+                  />
+                )
+              })()
+            : flyer && (
+                <Image
+                  src={flyer as ImageMetadata}
+                  alt={galleryImageAlt}
+                  widths={[720, 1080, 1440, 1920]}
+                  sizes="(min-width: 1024px) 56rem, 100vw"
+                  quality={85}
+                  priority
+                  class="bg-muted block aspect-[3/2] size-full object-cover"
+                />
+              )}
+        </figure>
+      )
+    }
 
-    <footer class="border-border mt-12 border-t pt-6">
+    {
+      faceManifest && (
+        <FaceFinder
+          client:only="react"
+          eventSlug={eventSlug}
+          indexVersion={faceManifest.version}
+          galleryId={galleryId}
+        />
+      )
+    }
+
+    {
+      totalPhotoCount === 0 && flyer ? (
+        <EventComingSoon
+          flyer={flyer}
+          flyerAlt={galleryImageAlt}
+          date={eventDate ? formatDate(eventDate) : 'Date coming soon'}
+          time={gallery.eventTime ?? undefined}
+          venue={gallery.eventVenue ?? undefined}
+          upcomingVideo={data?.upcomingVideo}
+        />
+      ) : (
+        <section
+          id={galleryId}
+          class="mt-10"
+          aria-label={`${galleryTitle} photographs`}
+        >
+          {images.length > 0 && (
+            <div
+              class="columns-1 gap-1 sm:columns-2 lg:columns-3"
+              data-gallery-grid
+            >
+              {images.map((image, index) => {
+                const dimensions = imageDimensions(
+                  image.width,
+                  image.height,
+                  960,
+                )
+                return (
+                  <figure
+                    class="relative mb-1 break-inside-avoid"
+                    data-gallery-filename={image.filename}
+                  >
+                    <Badge
+                      variant="secondary"
+                      data-face-rank
+                      hidden
+                      className="absolute top-2 left-2"
+                    >
+                      Match
+                    </Badge>
+                    <a
+                      href={image.src}
+                      data-gallery-open={index}
+                      aria-label={`Open photograph ${index + 1}: ${image.alt}`}
+                      class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                    >
+                      <Image
+                        src={image.src}
+                        alt={image.alt}
+                        width={dimensions.width}
+                        height={dimensions.height}
+                        layout="full-width"
+                        widths={[480, 960]}
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        quality={85}
+                        loading="lazy"
+                        decoding="async"
+                        class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                      />
+                    </a>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="icon"
+                      data-gallery-favorite
+                      data-filename={image.filename}
+                      data-selected="false"
+                      aria-label={`Add photograph ${index + 1} to favorites`}
+                      aria-pressed="false"
+                      className="absolute top-2 right-2 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
+                    >
+                      <Heart aria-hidden="true" />
+                    </Button>
+                  </figure>
+                )
+              })}
+            </div>
+          )}
+          {guestImages.length > 0 && (
+            <section
+              class="mt-14"
+              aria-labelledby="guest-photos-heading"
+              data-reveal="up"
+            >
+              <div class="mb-6 max-w-2xl">
+                <Badge variant="secondary">Community gallery</Badge>
+                <h2
+                  id="guest-photos-heading"
+                  class="font-heading mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl"
+                >
+                  Photos shared by guests
+                </h2>
+                <p class="text-muted-foreground mt-2 leading-7">
+                  Moments captured and submitted by people who attended the
+                  event.
+                </p>
+              </div>
+              <div class="columns-1 gap-1 sm:columns-2 lg:columns-3">
+                {guestImages.map((image, index) => {
+                  const dimensions = imageDimensions(
+                    image.width,
+                    image.height,
+                    960,
+                  )
+                  const photoIndex = images.length + index
+                  return (
+                    <figure
+                      class="relative mb-1 break-inside-avoid"
+                      data-gallery-filename={image.filename}
+                    >
+                      <a
+                        href={image.src}
+                        data-gallery-open={photoIndex}
+                        aria-label={`Open guest photograph ${index + 1}: ${image.alt}`}
+                        class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                      >
+                        <Image
+                          src={image.src}
+                          alt={image.alt}
+                          width={dimensions.width}
+                          height={dimensions.height}
+                          layout="full-width"
+                          widths={[480, 960]}
+                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                          quality={85}
+                          loading="lazy"
+                          decoding="async"
+                          class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                        />
+                      </a>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        data-gallery-favorite
+                        data-filename={image.filename}
+                        data-selected="false"
+                        aria-label={`Add guest photograph ${index + 1} to favorites`}
+                        aria-pressed="false"
+                        className="absolute top-2 right-2 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
+                      >
+                        <Heart aria-hidden="true" />
+                      </Button>
+                    </figure>
+                  )
+                })}
+              </div>
+            </section>
+          )}
+        </section>
+      )
+    }
+
+    <footer class="border-border mt-12 border-t pt-6" data-reveal="fade">
       <a
         href={portfolioUrl}
         class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"

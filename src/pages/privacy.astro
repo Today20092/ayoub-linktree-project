@@ -1,0 +1,85 @@
+---
+import '../styles.css'
+
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { siteConfig } from '../lib/site-config'
+
+const { site } = siteConfig
+const title = 'Privacy | Ayoub Abedrabbo'
+const description =
+  'Privacy information for the Ayoub Abedrabbo portfolio and event gallery site.'
+const canonicalUrl = new URL('/privacy/', Astro.site).toString()
+const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  ogImageWidth={1200}
+  ogImageHeight={630}
+  ogImageType="image/jpeg"
+  ogImageAlt={site.ogImageAlt}
+>
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-3xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-20"
+  >
+    <header data-reveal="up">
+      <p class="text-primary text-sm font-bold tracking-wide uppercase">
+        Privacy
+      </p>
+      <h1
+        class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
+      >
+        Privacy information
+      </h1>
+      <p class="text-muted-foreground mt-5 text-lg leading-8">
+        This page explains the services and information involved when you use
+        this site.
+      </p>
+    </header>
+    <div
+      class="prose prose-stone dark:prose-invert mt-10 max-w-none"
+      data-reveal="up"
+    >
+      <h2>Site hosting and analytics</h2>
+      <p>
+        The site is hosted on Cloudflare. Cloudflare Web Analytics is loaded on
+        public pages through its beacon script. Requests to the site and that
+        script may include ordinary technical information needed to deliver and
+        measure a page.
+      </p>
+      <h2>Gallery uploads and face search</h2>
+      <p>
+        Public event galleries can contain photographs and, when enabled, guest
+        uploads. Upload links and gallery sessions use the site’s authorization
+        checks. Face search analyzes a selected photo in your browser, then
+        sends a numeric face representation to the site’s face-search API for
+        matching against the enabled gallery index.
+      </p>
+      <p>
+        Do not upload a photograph unless you have permission to share it for
+        that gallery. Published gallery photographs may be downloaded by
+        visitors when a download is provided.
+      </p>
+      <h2>Third-party resources</h2>
+      <p>
+        The site requests fonts from Fontshare. Some portfolio pages embed
+        YouTube content or maps; those services receive a request when the
+        corresponding resource is loaded or used. External links open the
+        destination service under its own policies.
+      </p>
+      <h2>Contact</h2>
+      <p>
+        If you contact Ayoub by email, phone, or text, the information you
+        provide is delivered through that service so the request can be
+        answered. For questions about this page, use the <a href="/contact/">
+          contact page
+        </a>.
+      </p>
+      <p>Last reviewed: September 11, 2026.</p>
+    </div>
+  </main>
+</BaseLayout>

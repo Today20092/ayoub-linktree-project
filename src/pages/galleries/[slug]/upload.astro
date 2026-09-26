@@ -1,0 +1,76 @@
+---
+import '../../../styles.css'
+
+import { env } from 'cloudflare:workers'
+import { ArrowLeft } from 'lucide-react'
+
+import GuestUpload from '../../../components/GuestUpload'
+import { Button } from '../../../components/ui/button'
+import { galleryReader } from '../../../lib/gallery-read'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+
+export const prerender = false
+
+const eventSlug = Astro.params.slug
+const context = eventSlug
+  ? await galleryReader(env.GALLERY_DB).getUploadContext(eventSlug)
+  : undefined
+if (!context || !eventSlug) {
+  return new Response(null, { status: 404 })
+}
+const { gallery, settings } = context
+const canonicalUrl = new URL(
+  `/galleries/${eventSlug}/upload/`,
+  Astro.site,
+).toString()
+const title = `Share photos from ${gallery.title}`
+const description = `Submit guest photos from ${gallery.title} for review and inclusion in the event gallery.`
+const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc ?? '/og.jpg'
+
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  ogImageAlt={gallery.imageAlt ?? `${gallery.title} gallery`}
+  activeNav="galleries"
+>
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-2xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14"
+  >
+    <Button variant="ghost" size="sm" asChild>
+      <a href={`/galleries/${eventSlug}/`}>
+        <ArrowLeft data-icon="inline-start" aria-hidden="true" />
+        Back to gallery
+      </a>
+    </Button>
+
+    <header class="mt-8">
+      <p class="text-primary text-sm font-bold tracking-wide uppercase">
+        Guest photos
+      </p>
+      <h1
+        class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
+      >
+        Share what you captured
+      </h1>
+      <p class="text-muted-foreground mt-5 max-w-xl text-lg leading-8">
+        Add your photos from {gallery.title}. Every submission is reviewed
+        before it appears in the public gallery.
+      </p>
+    </header>
+
+    <div class="mt-8">
+      <GuestUpload
+        client:only="react"
+        eventSlug={eventSlug}
+        eventTitle={gallery.title}
+        enabled={Boolean(settings?.uploads_enabled)}
+      />
+    </div>
+  </main>
+</BaseLayout>

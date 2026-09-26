@@ -5,12 +5,18 @@ import siteYaml from '../data/site.yaml?raw'
 export type SiteInfo = {
   pageTitle: string
   pageDescription: string
+  shareTitle: string
+  shareDescription: string
+  shareText: string
   siteName: string
   profileName: string
   twitterHandle: string
-  heroImageAlt: string
   profileImage: string
   ogImage: string
+  ogImageAlt: string
+  ogImageWidth: number
+  ogImageHeight: number
+  ogImageType: string
 }
 
 export type SiteFeatures = {
@@ -21,6 +27,7 @@ export type SocialLink = {
   id: string
   url: string
   icon: string
+  iconUrl?: string
   label: string
   color: string
   color2: string
@@ -87,6 +94,7 @@ export type ActionLink = {
 }
 
 export type SiteConfig = {
+  payments?: { stripePaymentLink?: string }
   site: SiteInfo
   features: SiteFeatures
   socialLinks: SocialLink[]

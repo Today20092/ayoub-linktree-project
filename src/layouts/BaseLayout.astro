@@ -1,39 +1,80 @@
 ---
+import CloudflareWebAnalytics from '../components/CloudflareWebAnalytics.astro'
 import Header from '../components/Header.astro'
+import { cacheControlForPage } from '../lib/public-delivery'
 
 type Props = {
   title: string
   description: string
   canonicalUrl: string
+  ogTitle?: string
+  ogDescription?: string
   ogImage: string
   ogImageAlt?: string
   ogType?: 'website' | 'article'
   ogImageWidth?: number
   ogImageHeight?: number
+  ogImageType?: string
   twitterHandle?: string
   robots?: string
   sitemapUrl?: string
   preconnectHints?: string[]
   structuredData?: Record<string, unknown>
-  activeNav?: 'home' | 'galleries' | 'contact'
+  activeNav?: 'home' | 'services' | 'galleries' | 'about' | 'contact'
+  minimal?: boolean
 }
 
 const {
   title,
   description,
   canonicalUrl,
+  ogTitle = title,
+  ogDescription = description,
   ogImage,
   ogImageAlt,
   ogType = 'website',
   ogImageWidth = 960,
   ogImageHeight = 1200,
+  ogImageType,
   twitterHandle,
   robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
   sitemapUrl,
   preconnectHints = ['https://api.fontshare.com'],
   structuredData,
   activeNav,
+  minimal = false,
 } = Astro.props as Props
+
+const pageCacheControl = cacheControlForPage(
+  Astro.url,
+  Astro.request,
+  Astro.response.headers,
+)
+if (pageCacheControl)
+  Astro.response.headers.set('Cache-Control', pageCacheControl)
+
+const themeScript = `;(() => {
+  const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+  const applyTheme = () => {
+    const isDark = systemQuery.matches
+    document.documentElement.classList.toggle('dark', isDark)
+    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
+  }
+
+  applyTheme()
+  systemQuery.addEventListener('change', applyTheme)
+  document.documentElement.dataset.revealReady = 'true'
+})()`
+
+if (Astro.csp) {
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(themeScript),
+  )
+  const hash = btoa(String.fromCharCode(...new Uint8Array(digest)))
+  Astro.csp.insertScriptHash(`sha256-${hash}`)
+}
 ---
 
 <!doctype html>
@@ -71,10 +112,11 @@ const {
       media="(prefers-color-scheme: dark)"
     />
 
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={ogDescription} />
     <meta property="og:image" content={ogImage} />
     {ogImageAlt && <meta property="og:image:alt" content={ogImageAlt} />}
+    {ogImageType && <meta property="og:image:type" content={ogImageType} />}
     <meta property="og:image:width" content={String(ogImageWidth)} />
     <meta property="og:image:height" content={String(ogImageHeight)} />
     <meta property="og:type" content={ogType} />
@@ -84,25 +126,14 @@ const {
     <meta name="twitter:card" content="summary_large_image" />
     {twitterHandle && <meta name="twitter:site" content={twitterHandle} />}
     {twitterHandle && <meta name="twitter:creator" content={twitterHandle} />}
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:title" content={ogTitle} />
+    <meta name="twitter:description" content={ogDescription} />
     <meta name="twitter:image" content={ogImage} />
+    {ogImageAlt && <meta name="twitter:image:alt" content={ogImageAlt} />}
     <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" type="text/markdown" href="/index.md" />
 
-    <script is:inline>
-      ;(() => {
-        const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
-
-        const applyTheme = () => {
-          const isDark = systemQuery.matches
-          document.documentElement.classList.toggle('dark', isDark)
-          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
-        }
-
-        applyTheme()
-        systemQuery.addEventListener('change', applyTheme)
-      })()
-    </script>
+    <script is:inline set:html={themeScript} />
 
     {
       structuredData && (
@@ -113,6 +144,7 @@ const {
         />
       )
     }
+    <CloudflareWebAnalytics />
   </head>
   <body
     class="bg-background text-foreground min-h-[100dvh] subpixel-antialiased"
@@ -123,7 +155,52 @@ const {
     >
       Skip to content
     </a>
-    <Header activeNav={activeNav} />
+    {!minimal && <Header activeNav={activeNav} />}
     <slot />
+    {
+      !minimal && (
+        <footer class="text-muted-foreground mx-auto flex w-full max-w-screen-2xl justify-center gap-4 px-4 py-8 text-xs sm:px-6 lg:px-8">
+          <a class="underline underline-offset-4" href="/about/">
+            About
+          </a>
+          <a class="underline underline-offset-4" href="/contact/">
+            Contact
+          </a>
+          <a class="underline underline-offset-4" href="/privacy/">
+            Privacy
+          </a>
+        </footer>
+      )
+    }
+    <script>
+      const revealItems = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-reveal]'),
+      )
+      const reducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      )
+      const showRevealItem = (item: HTMLElement) => {
+        item.dataset.revealVisible = 'true'
+      }
+
+      if (revealItems.length > 0) {
+        if (reducedMotion.matches || !('IntersectionObserver' in window)) {
+          revealItems.forEach(showRevealItem)
+        } else {
+          const revealObserver = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (!entry.isIntersecting) return
+                showRevealItem(entry.target as HTMLElement)
+                revealObserver.unobserve(entry.target)
+              })
+            },
+            { rootMargin: '0px 0px 20%', threshold: 0.05 },
+          )
+
+          revealItems.forEach((item) => revealObserver.observe(item))
+        }
+      }
+    </script>
   </body>
 </html>

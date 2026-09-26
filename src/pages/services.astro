@@ -1,0 +1,575 @@
+---
+import '../styles.css'
+
+import type { CollectionEntry } from 'astro:content'
+import { Image } from 'astro:assets'
+import { getCollection } from 'astro:content'
+
+import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
+import ServicesFaq from '../components/ServicesFaq'
+import MotionPreview from '../components/MotionPreview.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
+
+export const prerender = false
+
+// Keep the Services draft off the public site.
+return Astro.redirect('/', 302)
+
+type PortfolioEntry = CollectionEntry<'portfolio'>
+
+type ProofProject = {
+  slug: string
+  title: string
+  category: string
+  summary: string
+  thumbnail: string
+  imageAlt: string
+  imageWidth: number
+  imageHeight: number
+}
+
+type Outcome = {
+  id: string
+  number: string
+  title: string
+  summary: string
+  price: string
+  priceNote: string
+  services: string[]
+  primaryProjectId?: string
+  secondaryProjectIds: string[]
+  proofHeading?: string
+}
+
+type OutcomeWithProjects = Outcome & {
+  primaryProject?: ProofProject
+  secondaryProjects: ProofProject[]
+}
+
+const servicePageTitle = 'Photography and Video Services | Ayoub Abedrabbo'
+const servicePageDescription =
+  'Story-driven video, podcast production, event coverage, and AV support in Tampa for businesses, schools, mosques, nonprofits, and community organizations.'
+
+const { siteName, profileName, twitterHandle, ogImage, ogImageAlt } =
+  siteConfig.site
+const baseUrl = getBaseUrl(import.meta.env.BASE_URL)
+const canonicalUrl = new URL(`${baseUrl}services`, Astro.site).toString()
+const sitemapUrl = new URL(`${baseUrl}sitemap-index.xml`, Astro.site).toString()
+const ogImageUrl = new URL(
+  resolveSiteAsset(baseUrl, ogImage),
+  Astro.site,
+).toString()
+
+const portfolioEntries = await getCollection('portfolio')
+const entriesById = new Map(portfolioEntries.map((entry) => [entry.id, entry]))
+
+const toProofProject = (entry: PortfolioEntry): ProofProject => {
+  const thumbnailAsset = entry.data.thumbnail ?? entry.data.featuredImage
+  const thumbnail = thumbnailAsset.src
+
+  return {
+    slug: entry.id,
+    title: entry.data.title,
+    category: entry.data.category,
+    summary: entry.data.summary,
+    thumbnail,
+    imageAlt:
+      typeof thumbnailAsset === 'object' &&
+      thumbnailAsset !== null &&
+      'alt' in thumbnailAsset
+        ? thumbnailAsset.alt
+        : entry.data.imageAlt,
+    imageWidth:
+      typeof thumbnailAsset === 'object' &&
+      thumbnailAsset !== null &&
+      'width' in thumbnailAsset
+        ? thumbnailAsset.width
+        : entry.data.imageWidth,
+    imageHeight:
+      typeof thumbnailAsset === 'object' &&
+      thumbnailAsset !== null &&
+      'height' in thumbnailAsset
+        ? thumbnailAsset.height
+        : entry.data.imageHeight,
+  }
+}
+
+const getProject = (id: string) => {
+  const entry = entriesById.get(id)
+  return entry ? toProofProject(entry) : undefined
+}
+
+const outcomeDefinitions: Outcome[] = [
+  {
+    id: 'story',
+    number: '01',
+    title: 'Tell your story and build trust.',
+    summary:
+      'Turn the people, purpose, and work behind your organization into a film that feels human. Interviews and documentary footage give your audience a reason to care before you ask them to act.',
+    price: 'From $600',
+    priceNote: 'Custom quote based on filming, interviews, and editing.',
+    services: [
+      'Story films',
+      'Interviews',
+      'Fundraising videos',
+      'School and business profiles',
+    ],
+    primaryProjectId: 'aya-academy',
+    secondaryProjectIds: ['maan-academy'],
+    proofHeading: 'A senior year remembered through the students who lived it.',
+  },
+  {
+    id: 'content',
+    number: '02',
+    title: 'Create content people return to.',
+    summary:
+      'Build a repeatable recording setup for conversations worth following. I bring the camera, light, and sound to you, then shape each recording into polished long-form content.',
+    price: 'From $250',
+    priceNote: 'Single-camera podcast recording. Multi-camera quoted by scope.',
+    services: [
+      'Video podcasts',
+      'On-location recording',
+      'Audio polish',
+      'Social-ready edits',
+    ],
+    primaryProjectId: 'konan-bbq-podcast',
+    secondaryProjectIds: ['lavena-health'],
+    proofHeading: 'An ongoing podcast built to look and sound consistent.',
+  },
+  {
+    id: 'event',
+    number: '03',
+    title: 'Capture the room, then share the moment.',
+    summary:
+      'Document the people, energy, and ideas that made your event matter. Photography, video, and guest-friendly galleries keep the experience useful after the room clears.',
+    price: 'From $300',
+    priceNote:
+      'Photo coverage entry point. Video and combined coverage quoted by scope.',
+    services: [
+      'Event photography',
+      'Recap videos',
+      'Lecture recording',
+      'Fast galleries',
+    ],
+    primaryProjectId: 'muslim-business-chamber-2026',
+    secondaryProjectIds: ['temple-terrace-community-open-house'],
+    proofHeading:
+      'One workshop captured as portraits, photographs, and full talks.',
+  },
+  {
+    id: 'av',
+    number: '04',
+    title: 'Make every word clear in the room and on the recording.',
+    summary:
+      'Give lectures, fundraisers, khutbahs, and community programs dependable speech sound. I plan the microphone and speaker setup, run the soundcheck, and can stay to operate or record the program.',
+    price: 'From $450',
+    priceNote:
+      'Equipment rental or specialized gear is added to the custom quote.',
+    services: [
+      'Wireless microphones',
+      'Speaker setup',
+      'Live sound support',
+      'Full-program recording',
+    ],
+    secondaryProjectIds: [],
+  },
+]
+
+const outcomes: OutcomeWithProjects[] = outcomeDefinitions.map((outcome) => ({
+  ...outcome,
+  primaryProject: outcome.primaryProjectId
+    ? getProject(outcome.primaryProjectId)
+    : undefined,
+  secondaryProjects: outcome.secondaryProjectIds
+    .map(getProject)
+    .filter((project): project is ProofProject => Boolean(project)),
+}))
+
+const heroProject = outcomes[0].primaryProject
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  '@id': `${canonicalUrl}#services`,
+  name: servicePageTitle,
+  description: servicePageDescription,
+  provider: {
+    '@type': 'Person',
+    name: profileName,
+    url: new URL(baseUrl, Astro.site).toString(),
+  },
+  areaServed: { '@type': 'Place', name: 'Tampa Bay' },
+  serviceType: outcomes.map((outcome) => outcome.title),
+  isPartOf: {
+    '@type': 'WebSite',
+    '@id': `${new URL(baseUrl, Astro.site).toString()}#website`,
+    url: new URL(baseUrl, Astro.site).toString(),
+    name: siteName,
+  },
+}
+---
+
+<BaseLayout
+  title={servicePageTitle}
+  description={servicePageDescription}
+  canonicalUrl={canonicalUrl}
+  ogTitle={servicePageTitle}
+  ogDescription={servicePageDescription}
+  ogImage={ogImageUrl}
+  ogImageAlt={ogImageAlt}
+  ogType="website"
+  twitterHandle={twitterHandle}
+  sitemapUrl={sitemapUrl}
+  structuredData={structuredData}
+  activeNav="services"
+>
+  <main id="main-content">
+    <MotionPreview />
+    <section
+      class="mx-auto w-full max-w-screen-xl px-4 pt-8 sm:px-6 lg:px-8 lg:pt-12"
+    >
+      <div
+        class="bg-foreground relative min-h-[78svh] overflow-hidden text-white"
+      >
+        {
+          heroProject && (
+            <Image
+              src={heroProject.thumbnail}
+              alt={heroProject.imageAlt}
+              width={heroProject.imageWidth}
+              height={heroProject.imageHeight}
+              layout="full-width"
+              widths={[640, 960, 1280, 1600, 1920]}
+              sizes="(min-width: 1280px) 1216px, 100vw"
+              quality={84}
+              loading="eager"
+              class="absolute inset-0 size-full object-cover opacity-55"
+            />
+          )
+        }
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-black/10"
+        >
+        </div>
+
+        <div
+          class="relative flex min-h-[78svh] flex-col justify-between p-6 sm:p-10 lg:p-14"
+        >
+          <div
+            class="flex items-center justify-between gap-6 text-xs font-semibold tracking-[0.16em] uppercase"
+          >
+            <span>Media production in Tampa</span>
+            <span class="hidden sm:inline">Photo · Film · Sound</span>
+          </div>
+
+          <div class="max-w-4xl py-16" data-reveal="up" data-motion-group>
+            <h1
+              class="font-heading text-5xl leading-[0.94] font-extrabold tracking-[-0.045em] text-balance sm:text-7xl lg:text-[6.6rem]"
+            >
+              Make the work matter to the people watching.
+            </h1>
+            <div
+              class="mt-8 grid gap-6 border-t border-white/40 pt-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end"
+            >
+              <p class="max-w-2xl text-base leading-7 text-white/80 sm:text-lg">
+                Story-driven video, podcasts, event coverage, and sound support
+                for organizations with something worth remembering.
+              </p>
+              <a href="#outcomes" class={buttonVariants({ size: 'lg' })}>
+                Find your outcome
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <nav
+      aria-label="Service outcomes"
+      class="mx-auto w-full max-w-screen-xl px-4 sm:px-6 lg:px-8"
+    >
+      <ol class="grid border-x border-b md:grid-cols-4">
+        {
+          outcomes.map((outcome) => (
+            <li class="border-b last:border-b-0 md:border-r md:border-b-0 md:last:border-r-0">
+              <a
+                href={`#${outcome.id}`}
+                class="group focus-visible:ring-ring hover:bg-muted flex h-full gap-4 p-5 no-underline transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <span class="text-muted-foreground text-xs font-bold">
+                  {outcome.number}
+                </span>
+                <span class="text-sm leading-5 font-extrabold">
+                  {outcome.title}
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <div id="outcomes" class="scroll-mt-20">
+      {
+        outcomes.map((outcome, index) => (
+          <section
+            id={outcome.id}
+            class:list={[
+              'scroll-mt-20 py-20 sm:py-24 lg:py-32',
+              index % 2 === 1 && 'bg-muted/40',
+            ]}
+            aria-labelledby={`${outcome.id}-title`}
+          >
+            <div class="mx-auto w-full max-w-screen-xl px-4 sm:px-6 lg:px-8">
+              <div class="grid gap-10 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:gap-16">
+                <div
+                  class="lg:sticky lg:top-24 lg:self-start"
+                  data-reveal="up"
+                  data-motion-group
+                >
+                  <p class="text-primary text-sm font-extrabold">
+                    {outcome.number}
+                  </p>
+                  <h2
+                    id={`${outcome.id}-title`}
+                    class="font-heading mt-5 max-w-xl text-4xl leading-[1.02] font-extrabold tracking-[-0.035em] text-balance sm:text-5xl"
+                  >
+                    {outcome.title}
+                  </h2>
+                  <p class="text-muted-foreground mt-6 max-w-xl text-base leading-7 sm:text-lg">
+                    {outcome.summary}
+                  </p>
+
+                  <ul
+                    class="mt-8 flex flex-wrap gap-2"
+                    aria-label="Included services"
+                  >
+                    {outcome.services.map((service) => (
+                      <li>
+                        <Badge variant="outline">{service}</Badge>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div class="mt-10 border-t pt-6">
+                    <p class="text-muted-foreground text-xs font-semibold tracking-[0.14em] uppercase">
+                      Starting point
+                    </p>
+                    <p class="font-heading mt-2 text-3xl font-extrabold">
+                      {outcome.price}
+                    </p>
+                    <p class="text-muted-foreground mt-2 max-w-md text-sm leading-6">
+                      {outcome.priceNote}
+                    </p>
+                    <a
+                      href="/#contact"
+                      class={`${buttonVariants({ size: 'lg' })} mt-6`}
+                    >
+                      Ask for a custom quote
+                    </a>
+                  </div>
+                </div>
+
+                <div class="min-w-0">
+                  {outcome.primaryProject ? (
+                    <article data-reveal="up">
+                      <a
+                        href={`/portfolio/${outcome.primaryProject.slug}/`}
+                        class="group focus-visible:ring-ring block no-underline focus-visible:ring-2 focus-visible:outline-none"
+                      >
+                        <div class="bg-muted aspect-[4/3] overflow-hidden sm:aspect-[16/11]">
+                          <Image
+                            src={outcome.primaryProject.thumbnail}
+                            alt={outcome.primaryProject.imageAlt}
+                            width={outcome.primaryProject.imageWidth}
+                            height={outcome.primaryProject.imageHeight}
+                            layout="full-width"
+                            widths={[480, 768, 1024, 1280]}
+                            sizes="(min-width: 1024px) 58vw, 100vw"
+                            quality={82}
+                            class="size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                          />
+                        </div>
+                        <div class="grid gap-4 border-x border-b p-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:p-7">
+                          <div>
+                            <p class="text-primary text-xs font-bold tracking-[0.14em] uppercase">
+                              Selected work · {outcome.primaryProject.category}
+                            </p>
+                            <h3 class="font-heading mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
+                              {outcome.proofHeading ??
+                                outcome.primaryProject.title}
+                            </h3>
+                            <p class="text-muted-foreground mt-3 max-w-2xl text-sm leading-6">
+                              {outcome.primaryProject.summary}
+                            </p>
+                          </div>
+                          <span class="text-sm font-extrabold underline decoration-1 underline-offset-4">
+                            View project
+                          </span>
+                        </div>
+                      </a>
+                    </article>
+                  ) : (
+                    <div class="border-y py-12 sm:py-16" data-reveal="up">
+                      <p class="text-primary text-xs font-bold tracking-[0.14em] uppercase">
+                        Available now
+                      </p>
+                      <p class="font-heading mt-4 max-w-2xl text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl">
+                        A practical sound setup built around your room,
+                        audience, and program.
+                      </p>
+                      <p class="text-muted-foreground mt-5 max-w-2xl leading-7">
+                        Every AV job starts with the venue, microphone count,
+                        audience size, and recording needs. Equipment is sourced
+                        for the job and included transparently in the quote.
+                      </p>
+                    </div>
+                  )}
+
+                  {outcome.secondaryProjects.length > 0 && (
+                    <div class="mt-8 grid gap-5 sm:grid-cols-2">
+                      {outcome.secondaryProjects.map((project) => (
+                        <a
+                          href={`/portfolio/${project.slug}/`}
+                          class="group focus-visible:ring-ring block no-underline focus-visible:ring-2 focus-visible:outline-none"
+                          data-reveal="up"
+                        >
+                          <div class="bg-muted aspect-[3/2] overflow-hidden">
+                            <Image
+                              src={project.thumbnail}
+                              alt={project.imageAlt}
+                              width={project.imageWidth}
+                              height={project.imageHeight}
+                              layout="full-width"
+                              widths={[360, 540, 720]}
+                              sizes="(min-width: 640px) 30vw, 100vw"
+                              quality={78}
+                              class="size-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                            />
+                          </div>
+                          <div class="border-x border-b p-4">
+                            <p class="text-muted-foreground text-xs font-semibold">
+                              Also in this outcome
+                            </p>
+                            <h3 class="mt-1 text-base font-extrabold">
+                              {project.title}
+                            </h3>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+        ))
+      }
+    </div>
+
+    <section
+      class="bg-black py-20 text-white sm:py-24 lg:py-32"
+      id="production-walkthrough"
+      data-walkthrough
+      data-reveal="up"
+    >
+      <div
+        class="mx-auto grid w-full max-w-screen-xl gap-12 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] lg:px-8"
+      >
+        <div class="lg:sticky lg:top-24 lg:self-start">
+          <p class="text-sm font-bold text-white/60">
+            A simple production process
+          </p>
+          <h2
+            class="font-heading mt-5 max-w-3xl text-4xl leading-[1.02] font-extrabold tracking-[-0.035em] text-balance sm:text-6xl"
+          >
+            Plan clearly. Capture intentionally. Deliver something useful.
+          </h2>
+          <div data-walkthrough-progress hidden class="mt-8">
+            <p class="text-sm" data-walkthrough-label>01 / Plan</p>
+            <div class="mt-4 h-1 bg-white/25" aria-hidden="true">
+              <div data-walkthrough-bar class="h-full origin-left bg-white">
+              </div>
+            </div>
+            <p class="mt-4 text-sm text-white/70">
+              Scroll through the production process.
+            </p>
+          </div>
+        </div>
+        <ol class="divide-y divide-white/25 border-y border-white/25">
+          <li class="grid grid-cols-[2rem_minmax(0,1fr)] gap-4 py-6">
+            <span class="text-sm text-white/50">01</span>
+            <div>
+              <h3 class="font-extrabold">Define the outcome</h3>
+              <p class="mt-2 text-sm leading-6 text-white/65">
+                We agree on the audience, message, location, and finished
+                deliverable.
+              </p>
+            </div>
+          </li>
+          <li class="grid grid-cols-[2rem_minmax(0,1fr)] gap-4 py-6">
+            <span class="text-sm text-white/50">02</span>
+            <div>
+              <h3 class="font-extrabold">Build the right setup</h3>
+              <p class="mt-2 text-sm leading-6 text-white/65">
+                I bring the camera, light, audio, and support the job actually
+                needs.
+              </p>
+            </div>
+          </li>
+          <li class="grid grid-cols-[2rem_minmax(0,1fr)] gap-4 py-6">
+            <span class="text-sm text-white/50">03</span>
+            <div>
+              <h3 class="font-extrabold">Capture and deliver</h3>
+              <p class="mt-2 text-sm leading-6 text-white/65">
+                You receive the agreed film, recording, photographs, or gallery
+                ready to use.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section
+      class="mx-auto grid w-full max-w-screen-xl gap-10 px-4 py-20 sm:px-6 sm:py-24 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1.28fr)] lg:px-8 lg:py-32"
+      id="faq"
+    >
+      <div>
+        <h2
+          class="font-heading text-4xl font-extrabold tracking-[-0.035em] sm:text-5xl"
+        >
+          Before you ask for a quote.
+        </h2>
+        <p class="text-muted-foreground mt-5 max-w-xl leading-7">
+          The useful details are your date, location, audience, desired outcome,
+          and where the finished work will be shared.
+        </p>
+      </div>
+      <ServicesFaq client:load />
+    </section>
+
+    <section class="border-t">
+      <div
+        class="mx-auto grid w-full max-w-screen-xl gap-8 px-4 py-16 sm:px-6 sm:py-20 md:grid-cols-[minmax(0,1fr)_auto] md:items-end lg:px-8"
+      >
+        <div>
+          <p class="text-primary text-sm font-extrabold">
+            Start with the outcome
+          </p>
+          <h2
+            class="font-heading mt-4 max-w-4xl text-4xl leading-[1.02] font-extrabold tracking-[-0.035em] text-balance sm:text-6xl"
+          >
+            Tell me what needs to happen. I’ll recommend the simplest production
+            that gets you there.
+          </h2>
+        </div>
+        <a href="/#contact" class={buttonVariants({ size: 'lg' })}>
+          Request a custom quote
+        </a>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

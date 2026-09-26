@@ -1,0 +1,452 @@
+---
+import '../styles.css'
+
+export const prerender = false
+import simpleIcons from '@iconify-json/simple-icons/icons.json'
+import { ArrowUpRight, Check, CreditCard, QrCode, X } from 'lucide-react'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { siteConfig } from '../lib/site-config'
+
+const canonicalUrl = 'https://payments.ayoubabed.xyz/'
+if (['ayoubabed.xyz', 'www.ayoubabed.xyz'].includes(Astro.url.hostname)) {
+  return Astro.redirect(canonicalUrl, 302)
+}
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+const paymentLinks = ['cash-app', 'venmo', 'paypal'].map((id) => {
+  const link = siteConfig.actionLinks.find((link) => link.id === id)
+  if (!link) throw new Error(`Missing payment link: ${id}`)
+  return {
+    ...link,
+    label:
+      id === 'cash-app' ? 'Cash App' : id === 'paypal' ? 'PayPal' : 'Venmo',
+  }
+})
+const stripePaymentLink = siteConfig.payments?.stripePaymentLink
+const zellePhone = '+18134240606'
+---
+
+<BaseLayout
+  title="Send a tip | Ayoub Abedrabbo"
+  description="Thanks for letting me capture you. Choose a way to send a tip."
+  canonicalUrl={canonicalUrl}
+  ogImage="https://ayoubabed.xyz/og-ayoub-digital-media.jpg"
+  robots="noindex,nofollow"
+  minimal
+>
+  <main id="main-content" class="payment-page">
+    <header class="payment-header">
+      <span class="text-sm font-semibold">Ayoub Abedrabbo</span>
+      <button
+        id="show-qr"
+        class="qr-trigger"
+        aria-label="Show QR code to scan"
+        aria-haspopup="dialog"
+      >
+        <QrCode size={20} aria-hidden="true" />
+        <span>Scan</span>
+      </button>
+    </header>
+
+    <section aria-labelledby="payment-title" class="payment-content">
+      <h1 id="payment-title" class="font-heading">Send a tip</h1>
+      <p class="intro">Your photos are free. Tips are always appreciated.</p>
+      {
+        stripePaymentLink && (
+          <a class="card-option" href={stripePaymentLink}>
+            <CreditCard size={24} aria-hidden="true" />
+            <span>
+              <>
+                <strong>Card or mobile wallet</strong>
+                <small>Apple Pay · Google Pay</small>
+              </>
+            </span>
+            <ArrowUpRight size={20} aria-hidden="true" />
+          </a>
+        )
+      }
+      <div class="payment-options" aria-label="Payment apps">
+        {
+          paymentLinks.map((link) => {
+            const icon =
+              simpleIcons.icons[
+                link.icon.replace(
+                  'simple-icons:',
+                  '',
+                ) as keyof typeof simpleIcons.icons
+              ]
+            return (
+              <a
+                class:list={['payment-option', link.id]}
+                href={link.url}
+                aria-label={link.label}
+              >
+                <svg
+                  class="brand-logo"
+                  viewBox={link.id === 'venmo' ? '0 8 24 8' : '0 0 24 24'}
+                  width="24"
+                  height="24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  set:html={icon.body}
+                />
+                <span class={link.id === 'venmo' ? 'sr-only' : undefined}>
+                  {link.label}
+                </span>
+                <ArrowUpRight
+                  className="app-arrow"
+                  size={16}
+                  aria-hidden="true"
+                />
+              </a>
+            )
+          })
+        }
+        <button
+          id="copy-zelle"
+          class="payment-option zelle-option"
+          data-phone={zellePhone}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            fill="currentColor"
+            aria-hidden="true"
+            set:html={simpleIcons.icons.zelle.body}
+          />
+          <span class="zelle-label">
+            <strong>Zelle</strong>
+          </span>
+          <span class="zelle-detail">
+            <span class="phone">813-424-0606</span><span
+              id="copy-label"
+              class="copy-label"
+            >
+              Copy
+            </span>
+          </span>
+          <Check
+            id="copy-check"
+            size={20}
+            aria-hidden="true"
+            className="hidden"
+          />
+        </button>
+      </div>
+      <p id="copy-status" class="copy-status" role="status" aria-live="polite">
+        For Zelle, copy the number into your banking app.
+      </p>
+    </section>
+
+    <a class="back-link" href="https://ayoubabed.xyz/">
+      Visit my website <ArrowUpRight size={16} aria-hidden="true" />
+    </a>
+  </main>
+
+  <dialog id="qr-dialog" aria-labelledby="qr-title">
+    <div class="dialog-header">
+      <h2 id="qr-title" class="font-heading">Scan to send a tip</h2>
+      <form method="dialog">
+        <button class="close-button" aria-label="Close QR code">
+          <X size={24} aria-hidden="true" />
+        </button>
+      </form>
+    </div>
+    <div
+      class="qr-code"
+      role="img"
+      aria-label="QR code linking to this payment page"
+    >
+    </div>
+    <p id="qr-status" role="status">Open your camera and point it here.</p>
+  </dialog>
+</BaseLayout>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('#qr-dialog')!
+  document.querySelector('#show-qr')!.addEventListener('click', async () => {
+    dialog.showModal()
+    const status = document.querySelector<HTMLElement>('#qr-status')!
+    const code = document.querySelector<HTMLElement>('.qr-code')!
+    const shareUrl = window.location.origin + window.location.pathname
+    status.textContent = 'Preparing QR code…'
+    try {
+      const { default: QRCode } = await import('qrcode')
+      code.innerHTML = await QRCode.toString(shareUrl, {
+        type: 'svg',
+        errorCorrectionLevel: 'L',
+        margin: 4,
+      })
+      code.dataset.url = shareUrl
+      status.textContent = 'Open your camera and point it here.'
+    } catch {
+      status.textContent = `Could not load the QR code. Open ${shareUrl}`
+    }
+  })
+  dialog.addEventListener('click', (event) => {
+    if (event.target !== dialog) return
+    const rect = dialog.getBoundingClientRect()
+    if (
+      event.clientX < rect.left ||
+      event.clientX > rect.right ||
+      event.clientY < rect.top ||
+      event.clientY > rect.bottom
+    )
+      dialog.close()
+  })
+  const copyButton = document.querySelector<HTMLButtonElement>('#copy-zelle')!
+  copyButton.addEventListener('click', async () => {
+    const status = document.querySelector<HTMLElement>('#copy-status')!
+    try {
+      await navigator.clipboard.writeText(copyButton.dataset.phone!)
+      document.querySelector('#copy-label')!.textContent = 'Copied'
+      document.querySelector('#copy-check')!.classList.remove('hidden')
+      status.textContent =
+        'Number copied. Paste it into Zelle in your banking app.'
+    } catch {
+      status.textContent =
+        'Could not copy. Enter 813-424-0606 in your banking app.'
+    }
+  })
+</script>
+
+<style>
+  .payment-page {
+    max-width: 28rem;
+    min-height: 100dvh;
+    margin: auto;
+    padding: max(1rem, env(safe-area-inset-top)) 1.25rem
+      max(1rem, env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+  }
+  .payment-header,
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .qr-trigger,
+  .close-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    min-width: 44px;
+    cursor: pointer;
+  }
+  .qr-trigger {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  .payment-content {
+    margin-block: auto;
+    padding-block: 1.5rem 0.5rem;
+  }
+  h1 {
+    font-size: clamp(2.5rem, 10vw, 3.5rem);
+    line-height: 1.15;
+    letter-spacing: -0.055em;
+  }
+  .intro {
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    margin: 0.75rem 0 1.25rem;
+  }
+  .payment-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .card-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 68px;
+    margin-bottom: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--radius);
+    background: var(--foreground);
+    color: var(--background);
+  }
+  .card-option > span {
+    flex: 1;
+    min-width: 0;
+  }
+  .card-option strong {
+    display: block;
+    font-size: 0.875rem;
+  }
+  .card-option small {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+  }
+  .payment-option {
+    position: relative;
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 96px;
+    padding: 1rem 0.875rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    text-align: left;
+    font-weight: 600;
+    background: var(--brand-background);
+    color: var(--brand-foreground);
+    cursor: pointer;
+  }
+  .cash-app {
+    --brand-background: #00d632;
+    --brand-foreground: #002b09;
+  }
+  .venmo {
+    --brand-background: #008cff;
+    --brand-foreground: #001c40;
+  }
+  .paypal {
+    --brand-background: #003087;
+    --brand-foreground: #ffffff;
+  }
+  .venmo .brand-logo {
+    grid-column: 1 / -1;
+    width: 96px;
+    height: 32px;
+    max-width: 100%;
+  }
+  .payment-option :global(.app-arrow) {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+  }
+  .payment-option:hover,
+  .card-option:hover {
+    box-shadow: inset 0 0 0 2px currentColor;
+  }
+  .zelle-option {
+    --brand-background: #6d1ed4;
+    --brand-foreground: #ffffff;
+  }
+  .zelle-label {
+    display: grid;
+    gap: 0.125rem;
+  }
+  .phone,
+  .copy-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  .zelle-detail {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+  .phone {
+    font-size: 0.6875rem;
+    white-space: nowrap;
+  }
+  .copy-label {
+    font-size: 0.6875rem;
+  }
+  .zelle-option :global(#copy-check) {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+  }
+  .copy-status {
+    min-height: 2.5rem;
+    margin-top: 0.875rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--muted-foreground);
+  }
+  .back-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 44px;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  :is(button, a):focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 4px;
+  }
+  :is(button, a):active {
+    opacity: 0.8;
+  }
+  dialog {
+    margin: auto;
+    width: min(94vw, 30rem);
+    max-height: 94svh;
+    overflow: auto;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--background);
+    color: var(--foreground);
+  }
+  dialog::backdrop {
+    background: rgb(0 0 0 / 0.75);
+  }
+  .dialog-header h2 {
+    font-size: 1.25rem;
+  }
+  .qr-code {
+    background: white;
+    margin-block: 1rem;
+    aspect-ratio: 1;
+  }
+  .qr-code :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 65svh;
+  }
+  dialog p {
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+    overflow-wrap: anywhere;
+  }
+  @media (max-width: 360px) {
+    .payment-option {
+      font-size: 0.875rem;
+      padding-inline: 0.75rem;
+    }
+    .phone,
+    .copy-label {
+      font-size: 0.625rem;
+    }
+  }
+  @media (max-height: 650px) {
+    .payment-content {
+      padding-block: 0.5rem;
+    }
+    .intro {
+      margin-bottom: 1rem;
+    }
+    .payment-options {
+      gap: 0.5rem;
+    }
+    .payment-option {
+      min-height: 84px;
+      padding-block: 0.75rem;
+    }
+  }
+</style>

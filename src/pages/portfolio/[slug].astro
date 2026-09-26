@@ -12,6 +12,7 @@ import {
   Play,
 } from 'lucide-react'
 import PortfolioLocation from '../../components/PortfolioLocation.astro'
+import MotionPreview from '../../components/MotionPreview.astro'
 import UpcomingVideo from '../../components/UpcomingVideo'
 import YouTubeEmbed from '../../components/YouTubeEmbed.astro'
 import {
@@ -117,7 +118,7 @@ const socialImageUrl =
 const projectTitle =
   projectData.seoTitle ?? `${projectData.title} - Ayoub Abedrabbo`
 const projectDescription = projectData.seoDescription ?? projectData.summary
-const sitemapUrl = new URL('/sitemap-index.xml', Astro.site).toString()
+const sitemapUrl = new URL('/sitemap.xml', Astro.site).toString()
 const comparisonVideos = projectData.videos.filter(
   (video) => video.comparisonRole,
 )
@@ -175,6 +176,8 @@ const galleryHeading =
   canonicalUrl={canonicalUrl}
   ogImage={socialImageUrl}
   ogImageAlt={heroImageAlt}
+  ogImageWidth={heroImageWidth}
+  ogImageHeight={heroImageHeight}
   ogType="article"
   robots="index,follow,max-image-preview:large"
   sitemapUrl={sitemapUrl}
@@ -182,20 +185,21 @@ const galleryHeading =
 >
   <main
     id="main-content"
-    class="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
+    class="mx-auto w-full max-w-screen-2xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
   >
-    <header class="mx-auto max-w-4xl">
+    <MotionPreview />
+    <header class="mx-auto max-w-4xl" data-reveal="fade">
       <Breadcrumb>
-        <BreadcrumbList>
+        <BreadcrumbList className="gap-x-3 gap-y-2">
           <BreadcrumbItem>
             <BreadcrumbLink
               href="/#portfolio"
-              className="focus-visible:ring-ring rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+              className="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
             >
               Portfolio
             </BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbSeparator />
+          <BreadcrumbSeparator>/</BreadcrumbSeparator>
           <BreadcrumbItem>
             <BreadcrumbPage>{projectData.title}</BreadcrumbPage>
           </BreadcrumbItem>
@@ -204,44 +208,50 @@ const galleryHeading =
     </header>
 
     <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
-      {
-        projectData.heroVideo ? (
-          <YouTubeEmbed
-            youtubeId={projectData.heroVideo}
-            title={`${projectData.title} featured video`}
-            poster={heroImage}
-            posterAlt={heroImageAlt}
-          />
-        ) : typeof heroImage === 'string' ? (
-          <Image
-            src={heroImage}
-            alt={heroImageAlt}
-            width={heroImageWidth}
-            height={heroImageHeight}
-            layout="full-width"
-            widths={[640, 960, 1280, 1600]}
-            sizes="(min-width: 1280px) 1216px, 100vw"
-            quality={82}
-            priority
-            class="bg-muted block h-auto w-full"
-          />
-        ) : (
-          <Image
-            src={heroImage}
-            alt={heroImageAlt}
-            width={heroImageWidth}
-            height={heroImageHeight}
-            layout="full-width"
-            widths={[640, 960, 1280, 1600]}
-            sizes="(min-width: 1280px) 1216px, 100vw"
-            quality={82}
-            priority
-            class="bg-muted block h-auto w-full"
-          />
-        )
-      }
+      <div class="mx-auto max-w-4xl" data-reveal="up" data-motion-hero>
+        {
+          projectData.heroVideo ? (
+            <YouTubeEmbed
+              youtubeId={projectData.heroVideo}
+              title={`${projectData.title} featured video`}
+              poster={heroImage}
+              posterAlt={heroImageAlt}
+            />
+          ) : typeof heroImage === 'string' ? (
+            <Image
+              src={heroImage}
+              alt={heroImageAlt}
+              width={heroImageWidth}
+              height={heroImageHeight}
+              layout="full-width"
+              widths={[640, 960, 1280, 1600]}
+              sizes="(min-width: 960px) 896px, (min-width: 640px) calc(100vw - 48px), calc(100vw - 32px)"
+              quality={82}
+              priority
+              class="bg-muted block h-auto w-full"
+            />
+          ) : (
+            <Image
+              src={heroImage}
+              alt={heroImageAlt}
+              width={heroImageWidth}
+              height={heroImageHeight}
+              layout="full-width"
+              widths={[640, 960, 1280, 1600]}
+              sizes="(min-width: 960px) 896px, (min-width: 640px) calc(100vw - 48px), calc(100vw - 32px)"
+              quality={82}
+              priority
+              class="bg-muted block h-auto w-full"
+            />
+          )
+        }
+      </div>
 
-      <div class="mx-auto max-w-4xl py-10 sm:py-14">
+      <div
+        class="mx-auto max-w-4xl py-10 sm:py-14"
+        data-reveal="up"
+        data-motion-group
+      >
         <p class="text-primary text-xs font-bold tracking-wider uppercase">
           {projectData.category}
         </p>
@@ -259,7 +269,10 @@ const galleryHeading =
 
       {
         hasBody && (
-          <section class="portfolio-prose mx-auto max-w-4xl py-8 sm:py-10">
+          <section
+            class="typeset typeset-portfolio mx-auto max-w-4xl py-8 sm:py-10"
+            data-reveal="up"
+          >
             <Content />
           </section>
         )
@@ -279,13 +292,14 @@ const galleryHeading =
           <section
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="services-title"
+            data-reveal="up"
           >
             <h2 id="services-title" class="font-heading text-2xl font-bold">
               Work
             </h2>
             <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
               {projectData.services.map((service) => (
-                <li class="py-1 leading-snug font-semibold">{service}</li>
+                <li class="py-1 leading-7">{service}</li>
               ))}
             </ul>
           </section>
@@ -295,8 +309,9 @@ const galleryHeading =
       {
         hasDetails && (
           <section
-            class="mx-auto max-w-4xl py-8 sm:py-10"
+            class="bg-muted/50 mx-auto my-8 max-w-4xl rounded-sm p-6 sm:my-10 sm:p-8"
             aria-labelledby="details-title"
+            data-reveal="up"
           >
             <h2 id="details-title" class="font-heading text-2xl font-bold">
               Details
@@ -304,41 +319,42 @@ const galleryHeading =
             <dl class="mt-5 grid gap-6 sm:grid-cols-2">
               {projectData.role && (
                 <div>
-                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
                     Role
                   </dt>
-                  <dd class="mt-1 font-semibold">{projectData.role}</dd>
+                  <dd class="mt-2 leading-7">{projectData.role}</dd>
                 </div>
               )}
               {projectData.collaborators.length > 0 && (
                 <div>
-                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
                     Collaborators
                   </dt>
-                  <dd class="mt-1 font-semibold">
+                  <dd class="mt-2 leading-7">
                     {projectData.collaborators.join(', ')}
                   </dd>
                 </div>
               )}
               {projectData.duration && (
                 <div>
-                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+                  <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
                     Duration
                   </dt>
-                  <dd class="mt-1 font-semibold">{projectData.duration}</dd>
-                </div>
-              )}
-              {projectData.tools.length > 0 && (
-                <div>
-                  <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                    Tools
-                  </dt>
-                  <dd class="mt-1 font-semibold">
-                    {projectData.tools.join(', ')}
-                  </dd>
+                  <dd class="mt-2 leading-7">{projectData.duration}</dd>
                 </div>
               )}
             </dl>
+            {projectData.tools.length > 0 && (
+              <details class="mt-6">
+                <summary class="text-muted-foreground focus-visible:ring-ring hover:text-foreground cursor-pointer rounded-sm py-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none">
+                  Tools and equipment
+                </summary>
+                <Separator className="my-2" />
+                <p class="text-muted-foreground mt-2 text-sm leading-7">
+                  {projectData.tools.join(', ')}
+                </p>
+              </details>
+            )}
           </section>
         )
       }
@@ -348,6 +364,7 @@ const galleryHeading =
           <section
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="comparison-title"
+            data-reveal="up"
           >
             <p class="text-primary text-xs font-bold tracking-wider uppercase">
               Production comparison
@@ -364,9 +381,34 @@ const galleryHeading =
               production workflow.
             </p>
 
-            <div class="mt-7 grid gap-8 lg:grid-cols-2">
-              {comparisonVideos.map((video) => (
-                <article class="flex flex-col gap-4">
+            <div
+              data-comparison-controls
+              hidden
+              class="mt-6 flex flex-wrap gap-3"
+              role="group"
+              aria-label="Choose production version"
+            >
+              {comparisonVideos.map((video, index) => (
+                <button
+                  type="button"
+                  data-comparison-select={index}
+                  aria-pressed={index === 0}
+                  aria-controls={`comparison-${index}`}
+                  class="border-border aria-pressed:bg-foreground aria-pressed:text-background min-h-11 rounded-sm border px-5 font-bold"
+                >
+                  {video.comparisonRole === 'before' ? 'Before' : 'After'}
+                </button>
+              ))}
+            </div>
+            <div data-comparison class="mt-7 grid gap-8 lg:grid-cols-2">
+              {comparisonVideos.map((video, index) => (
+                <article
+                  id={`comparison-${index}`}
+                  data-comparison-panel
+                  class="flex flex-col gap-4"
+                  data-reveal="up"
+                  style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+                >
                   <div>
                     <p class="text-primary text-xs font-bold tracking-wider uppercase">
                       {video.label}
@@ -378,6 +420,7 @@ const galleryHeading =
                   <YouTubeEmbed
                     youtubeId={video.youtubeId}
                     title={`${video.label}: ${video.title}`}
+                    autoplay={false}
                   />
                   <p class="text-muted-foreground leading-7">
                     {video.description}
@@ -394,6 +437,7 @@ const galleryHeading =
           <section
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="milestones-title"
+            data-reveal="up"
           >
             <h2 id="milestones-title" class="font-heading text-2xl font-bold">
               {isYaHalaProject
@@ -409,8 +453,11 @@ const galleryHeading =
             </p>
             {isYaHalaProject ? (
               <ol class="mt-6 grid gap-6 sm:grid-cols-2">
-                {milestoneVideos.map((video) => (
-                  <li>
+                {milestoneVideos.map((video, index) => (
+                  <li
+                    data-reveal="up"
+                    style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+                  >
                     <a
                       href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
                       target="_blank"
@@ -460,8 +507,11 @@ const galleryHeading =
               </ol>
             ) : (
               <div class="mt-6 space-y-8">
-                {milestoneVideos.map((video) => (
-                  <article>
+                {milestoneVideos.map((video, index) => (
+                  <article
+                    data-reveal="up"
+                    style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+                  >
                     <YouTubeEmbed
                       youtubeId={video.youtubeId}
                       title={`${video.label}: ${video.title}`}
@@ -500,15 +550,16 @@ const galleryHeading =
       {
         projectData.outcomes.length > 0 && (
           <section
-            class="mx-auto max-w-4xl py-8 sm:py-10"
+            class="border-primary mx-auto my-8 max-w-4xl border-l-2 pl-6 sm:my-10 sm:pl-8"
             aria-labelledby="outcomes-title"
+            data-reveal="up"
           >
             <h2 id="outcomes-title" class="font-heading text-2xl font-bold">
               Outcomes
             </h2>
-            <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+            <ul class="mt-5 grid gap-x-10 gap-y-5 sm:grid-cols-2">
               {projectData.outcomes.map((outcome) => (
-                <li class="py-1 leading-snug font-semibold">{outcome}</li>
+                <li class="leading-7">{outcome}</li>
               ))}
             </ul>
           </section>
@@ -520,6 +571,7 @@ const galleryHeading =
           <aside
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="gallery-cta-title"
+            data-reveal="up"
           >
             <Separator className="mb-8 sm:mb-10" />
             <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -569,14 +621,23 @@ const galleryHeading =
           <section
             class="mx-auto max-w-4xl py-8 sm:py-10"
             aria-labelledby="gallery-title"
+            data-reveal="up"
           >
             <h2 id="gallery-title" class="font-heading text-2xl font-bold">
               {galleryHeading}
             </h2>
             {projectData.galleryLayout === 'masonry' ? (
               <div class="mt-6 columns-1 gap-4 sm:columns-2">
-                {galleryImages.map((image) => (
-                  <figure class="mb-6 break-inside-avoid">
+                {galleryImages.map((image, index) => (
+                  <figure
+                    class="mb-6 break-inside-avoid"
+                    data-reveal={index < 12 ? 'up' : undefined}
+                    style={
+                      index < 12
+                        ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
+                        : undefined
+                    }
+                  >
                     <Image
                       src={image.src}
                       alt={image.alt}
@@ -600,7 +661,7 @@ const galleryHeading =
               <div class="mt-6 space-y-6">
                 {bayaanGalleryGroups.map((group) =>
                   group.type === 'landscape' ? (
-                    <figure>
+                    <figure data-reveal="up">
                       <Image
                         src={group.image.src}
                         alt={group.image.alt}
@@ -619,8 +680,16 @@ const galleryHeading =
                     </figure>
                   ) : (
                     <div class="columns-1 gap-4 sm:columns-2">
-                      {group.images.map((image) => (
-                        <figure class="mb-6 break-inside-avoid">
+                      {group.images.map((image, index) => (
+                        <figure
+                          class="mb-6 break-inside-avoid"
+                          data-reveal={index < 12 ? 'up' : undefined}
+                          style={
+                            index < 12
+                              ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
+                              : undefined
+                          }
+                        >
                           <Image
                             src={image.src}
                             alt={image.alt}
@@ -644,8 +713,15 @@ const galleryHeading =
               </div>
             ) : project.id === 'arqam-academy' ? (
               <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                {galleryImages.map((image) => (
-                  <figure>
+                {galleryImages.map((image, index) => (
+                  <figure
+                    data-reveal={index < 12 ? 'up' : undefined}
+                    style={
+                      index < 12
+                        ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
+                        : undefined
+                    }
+                  >
                     <Image
                       src={image.src}
                       alt={image.alt}
@@ -666,8 +742,15 @@ const galleryHeading =
               </div>
             ) : (
               <div class="mt-6 space-y-8">
-                {galleryImages.map((image) => (
-                  <figure>
+                {galleryImages.map((image, index) => (
+                  <figure
+                    data-reveal={index < 12 ? 'up' : undefined}
+                    style={
+                      index < 12
+                        ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
+                        : undefined
+                    }
+                  >
                     <Image
                       src={image.src}
                       alt={image.alt}
@@ -698,11 +781,12 @@ const galleryHeading =
             <section
               class="mx-auto max-w-4xl py-8 sm:py-10"
               aria-labelledby="links-title"
+              data-reveal="up"
             >
               <h2 id="links-title" class="font-heading text-2xl font-bold">
                 Project links
               </h2>
-              <div class="mt-4 flex flex-col gap-1">
+              <div class="mt-6 flex flex-wrap gap-3">
                 {projectData.links.map((link) => (
                   <a
                     href={link.url}
@@ -710,10 +794,10 @@ const galleryHeading =
                     rel="noopener noreferrer"
                     class={cn(
                       buttonVariants({
-                        variant: 'ghost',
+                        variant: 'outline',
                         size: 'lg',
                       }),
-                      'h-auto w-full justify-between px-3 py-3 text-left font-bold whitespace-normal',
+                      'h-auto min-h-11 max-w-full justify-start gap-3 px-4 py-3 text-left whitespace-normal',
                     )}
                   >
                     <span>
@@ -737,11 +821,11 @@ const galleryHeading =
             <nav
               class="mx-auto grid max-w-4xl gap-2 pt-6 sm:grid-cols-2 sm:pt-8"
               aria-label="More portfolio projects"
+              data-reveal="fade"
             >
               {previousProject && (
                 <a
                   href={`/portfolio/${previousProject.id}/`}
-                  aria-label={`Previous project: ${previousProject.title}`}
                   class={cn(
                     buttonVariants({
                       variant: 'ghost',
@@ -762,7 +846,6 @@ const galleryHeading =
               {nextProject && (
                 <a
                   href={`/portfolio/${nextProject.id}/`}
-                  aria-label={`Next project: ${nextProject.title}`}
                   class={cn(
                     buttonVariants({
                       variant: 'ghost',

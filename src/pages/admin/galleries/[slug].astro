@@ -1,0 +1,115 @@
+---
+import '../../../styles.css'
+
+import { env } from 'cloudflare:workers'
+import { ArrowLeft, ExternalLink } from 'lucide-react'
+
+import AdminGallery from '../../../components/AdminGallery'
+import { Button } from '../../../components/ui/button'
+import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
+import { galleryReader } from '../../../lib/gallery-read'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+
+export const prerender = false
+
+if (
+  !(await galleryAdminAuthorized(
+    Astro.request,
+    env.GALLERY_ADMIN_EMAIL,
+    env.GALLERY_ACCESS_TEAM_DOMAIN,
+    env.GALLERY_ACCESS_AUDS,
+  ))
+) {
+  return new Response('Forbidden', { status: 403 })
+}
+
+const eventSlug = Astro.params.slug
+const gallery = eventSlug
+  ? await galleryReader(env.GALLERY_DB).getAdminDetail(eventSlug)
+  : undefined
+if (!gallery || !eventSlug) {
+  return new Response(null, { status: 404 })
+}
+const event = gallery.staticEvent
+const { settings, guests, uploadedPhotos, invites, professional } = gallery
+const ogImage =
+  gallery.flyer?.src ??
+  (event
+    ? typeof event.data.featuredImage === 'string'
+      ? event.data.featuredImage
+      : event.data.featuredImage.src
+    : '/og.jpg')
+const eventTitle = gallery.title
+const eventMeta = {
+  title: eventTitle,
+  summary: gallery.summary,
+  category: gallery.category,
+  eventDate: gallery.eventDate?.toISOString().slice(0, 10) ?? '',
+  eventTime: gallery.eventTime ?? '',
+  eventVenue: gallery.eventVenue ?? '',
+  comingSoon: gallery.comingSoon,
+  visibilityStatus: gallery.visibility,
+  coverSrc: gallery.cover?.src,
+}
+
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+---
+
+<BaseLayout
+  title={`Manage ${eventTitle}`}
+  description={`Review guest uploads and curate ${eventTitle}.`}
+  canonicalUrl={new URL(
+    `/admin/galleries/${eventSlug}/`,
+    Astro.site,
+  ).toString()}
+  ogImage={ogImage}
+  ogImageAlt={eventTitle}
+>
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-10 sm:px-6 lg:px-8"
+  >
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <Button variant="ghost" size="sm" asChild>
+        <a href="/admin/galleries/">
+          <ArrowLeft data-icon="inline-start" aria-hidden="true" />
+          All galleries
+        </a>
+      </Button>
+      <Button variant="outline" size="sm" asChild>
+        <a href={`/galleries/${eventSlug}/`} target="_blank">
+          View public gallery
+          <ExternalLink data-icon="inline-end" aria-hidden="true" />
+        </a>
+      </Button>
+    </div>
+
+    <header class="mt-8 max-w-3xl">
+      <p class="text-primary text-sm font-bold tracking-wide uppercase">
+        Gallery administration
+      </p>
+      <h1
+        class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
+      >
+        {eventTitle}
+      </h1>
+      <p class="text-muted-foreground mt-4 text-lg leading-8">
+        Review guest submissions, control upload access, and hide professional
+        photos from the live gallery.
+      </p>
+    </header>
+
+    <div class="mt-10">
+      <AdminGallery
+        client:only="react"
+        eventSlug={eventSlug}
+        eventMeta={eventMeta}
+        settings={settings}
+        guests={guests}
+        uploadedPhotos={uploadedPhotos}
+        invites={invites}
+        professional={professional}
+      />
+    </div>
+  </main>
+</BaseLayout>

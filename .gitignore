@@ -3,6 +3,9 @@ dist/
 
 # generated types
 .astro/
+.wrangler/
+public/face-models/
+.face-index/
 
 # dependencies
 node_modules/
@@ -16,6 +19,7 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+.dev.vars
 .gallery-prune.local.json
 
 # macOS-specific files
@@ -23,3 +27,6 @@ pnpm-debug.log*
 
 #claude
 CLAUDE.MD
+
+# Codex attachments
+.codex-remote-attachments/

@@ -84,6 +84,8 @@ const portfolio = defineCollection({
       galleryLayout: z.enum(['stack', 'masonry']).default('stack'),
       eventGallery: z.boolean().default(false),
       eventDate: z.coerce.date().optional(),
+      eventTime: z.string().optional(),
+      eventVenue: z.string().optional(),
       galleryDescription: z.string().optional(),
       downloadAllUrl: z.url().optional(),
       gallery: z.array(portfolioImage).default([]),
