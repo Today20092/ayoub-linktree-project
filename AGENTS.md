@@ -1,8 +1,20 @@
 # AGENTS.md
 
-## Project Overview
+## Project overview
 
-Personal portfolio for Ayoub Abedrabbo, Tampa photographer and videographer. Built with Astro, Tailwind CSS, astro-icon, lucide icon, and shadcn.
+This repository contains Ayoub Abedrabbo's Astro website and link hub, MDX portfolio, Cloudflare-backed event galleries, and native Kotlin/Compose Android app in `android/`.
+
+## Task documentation
+
+- For repository orientation, read `README.md` for the project map and production/preview boundaries.
+- For homepage links, portfolio content, or shared page styles, read `docs/website-content.md`. Use `src/content.config.ts` and the MDX template for current portfolio fields.
+- For gallery storage, guest uploads, moderation, or Access configuration, read `docs/interactive-event-galleries.md`.
+- For native gallery controls or companion API authorization, read `docs/native-gallery-management.md`.
+- For Android pairing, upload behavior, builds, or signing, read `android/README.md`. Check `android/RELEASE_NOTES.md` and the relevant release tag before claiming a feature is available in an installed APK.
+- For watched-folder discovery, session recovery, or background transfer changes, read `docs/android-watched-folder-design.md` and `docs/adr/0001-android-folder-discovery-and-transfer.md`.
+- For payment destinations or payment-host routing, read `docs/payments.md`.
+
+Keep this file focused on working rules and task-specific pointers. Put operator instructions in the relevant guide, and update its README pointer when adding a new workflow. Verify documented behavior against the implementation; research and design notes do not establish release status.
 
 ## Development Commands
 
@@ -22,7 +34,7 @@ Personal portfolio for Ayoub Abedrabbo, Tampa photographer and videographer. Bui
 ## Portfolio and Gallery Work
 
 - A **portfolio piece** is curated public work or a case study shown on the main portfolio. Start from `src/content/portfolio/PROJECT_TEMPLATE.mdx.example` and store its local media under `src/assets/client-work/`.
-- A **gallery** is an event or client photo collection for browsing, delivery, uploads, or attendee access. Create and manage it through `/admin/galleries/`; follow `docs/event-galleries.md` only for the legacy local/R2 manifest workflow.
+- A **gallery** is an event or client photo collection for browsing, delivery, uploads, or attendee access. Create and manage it through `/admin/galleries/` or the Android app with a management-enabled key; follow `docs/event-galleries.md` for legacy manifests, ZIPs, pruning, or face-index workflows.
 - Do not turn a gallery into a portfolio piece, or a portfolio piece into a gallery, unless the user explicitly wants both. If the destination is unclear, confirm it before changing content.
 - Work that is neither belongs in its existing route or feature area; inspect the current pattern before adding a new content type.
 

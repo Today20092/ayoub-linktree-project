@@ -1,6 +1,6 @@
 # Ayoub Abedrabbo Portfolio
 
-The public-facing language used to help prospective clients understand and request media services.
+The language used to describe media services and publishing photos to client galleries.
 
 ## Language
 
@@ -19,3 +19,7 @@ _Avoid_: Package price, fixed price
 **Custom quote**:
 A project-specific price based on the client's actual scope after the starting price establishes initial expectations.
 _Avoid_: Custom price, final package
+
+**Watched-folder upload session**:
+A session that sends new arrivals in a selected folder to a selected gallery using the chosen upload settings, until the operator stops it. Files already present when the session starts are excluded, and local edits or deletions do not change uploaded photos.
+_Avoid_: Live sync, folder mirroring
