@@ -1,4 +1,4 @@
-export const GALLERY_PUBLIC_ORIGIN = 'https://photos.ayoubabed.xyz'
+import { galleryMediaUrl, galleryObjectUrl } from './gallery-media'
 
 export type GallerySettings = {
   event_slug: string
@@ -126,7 +126,7 @@ export function flyerKey(eventSlug: string) {
 export function publicGuestPhoto(photo: GuestPhoto) {
   return {
     id: photo.id,
-    src: `${GALLERY_PUBLIC_ORIGIN}/${photo.object_key}`,
+    src: galleryObjectUrl(photo.object_key),
     width: photo.width,
     height: photo.height,
     alt: photo.alt,
@@ -137,7 +137,7 @@ export function publicGuestPhoto(photo: GuestPhoto) {
 export function publicGalleryPhoto(photo: GalleryPhoto) {
   return {
     id: photo.id,
-    src: `${GALLERY_PUBLIC_ORIGIN}/${photo.object_key}`,
+    src: galleryObjectUrl(photo.object_key),
     width: photo.width,
     height: photo.height,
     alt: photo.alt,
@@ -156,7 +156,7 @@ export function publicEventFlyer(gallery: EventGallery) {
     return
   }
   return {
-    src: `${GALLERY_PUBLIC_ORIGIN}/${gallery.flyer_object_key}`,
+    src: galleryObjectUrl(gallery.flyer_object_key),
     width: gallery.flyer_width,
     height: gallery.flyer_height,
     alt: gallery.flyer_alt || `${gallery.title} flyer`,
@@ -169,7 +169,7 @@ export function publicEventCover(gallery: EventGallery) {
     return
   }
   return {
-    src: gallery.cover_src,
+    src: galleryMediaUrl(gallery.cover_src),
     width: gallery.cover_width,
     height: gallery.cover_height,
     alt: gallery.cover_alt || `${gallery.title} cover photo`,

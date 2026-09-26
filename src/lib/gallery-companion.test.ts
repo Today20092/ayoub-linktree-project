@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { DatabaseSync } from 'node:sqlite'
 import { test } from 'node:test'
+import { createCompanionGallery } from './gallery-create'
 import {
   companionAuthorized,
   contentHash,
@@ -95,6 +96,76 @@ function fixture() {
 const event = { id: 'event', title: 'Event' }
 const file = new File(['test'], 'camera.jpg', { type: 'image/jpeg' })
 const hash = 'a'.repeat(64)
+
+test('native gallery creation requires management permission and cannot overwrite existing galleries', async () => {
+  const { db, sqlite } = fixture()
+  // The fixture starts with the upload schema; creation also uses visibility migration.
+  sqlite.exec(
+    "ALTER TABLE event_galleries ADD COLUMN status TEXT NOT NULL DEFAULT 'published'",
+  )
+  const manager = await createDevice(db, 'Manager', true)
+  const uploader = await createDevice(db, 'Uploader')
+  const input = {
+    title: 'New event',
+    summary: 'About the event',
+    slug: 'new-event',
+  }
+  const request = (token: string, body = input) =>
+    new Request('https://example.com/api/companion/galleries/', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+  const exists = async () => false
+  assert.equal(
+    (await createCompanionGallery(request(uploader.token), db, exists)).status,
+    403,
+  )
+  assert.equal(
+    (
+      await createCompanionGallery(
+        request(manager.token, { ...input, title: '' }),
+        db,
+        exists,
+      )
+    ).status,
+    400,
+  )
+  assert.equal(
+    (await createCompanionGallery(request(manager.token), db, async () => true))
+      .status,
+    409,
+  )
+  const response = await createCompanionGallery(
+    request(manager.token),
+    db,
+    exists,
+  )
+  assert.equal(response.status, 201)
+  assert.equal(
+    ((await response.json()) as { gallery: { status: string } }).gallery.status,
+    'hidden',
+  )
+  assert.equal(
+    (
+      await createCompanionGallery(
+        request(manager.token, { ...input, title: 'Overwrite' }),
+        db,
+        exists,
+      )
+    ).status,
+    409,
+  )
+  assert.equal(
+    sqlite
+      .prepare('SELECT title FROM event_galleries WHERE event_slug = ?')
+      .get('new-event')?.title,
+    input.title,
+  )
+})
 
 test('device keys are hashed, expire, and can be revoked', async () => {
   const { db, sqlite } = fixture()

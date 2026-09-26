@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { galleryObjectUrl } from '@/lib/gallery-media'
 import {
   Check,
   Copy,
@@ -303,7 +304,7 @@ export default function AdminGallery({
       })),
       ...uploadedPhotos.map((photo) => ({
         key: `uploaded:${photo.id}`,
-        src: `https://photos.ayoubabed.xyz/${photo.object_key}`,
+        src: galleryObjectUrl(photo.object_key),
         alt: photo.alt,
         label: photo.uploader_name
           ? `${photo.original_filename} by ${photo.uploader_name}`
@@ -1104,13 +1105,10 @@ export default function AdminGallery({
                   selected={selected.has(`published:${photo.id}`)}
                   onSelect={() => toggle(`published:${photo.id}`)}
                   onOpen={() => setReviewKey(`published:${photo.id}`)}
-                  cover={
-                    `https://photos.ayoubabed.xyz/${photo.object_key}` ===
-                    coverSrc
-                  }
+                  cover={galleryObjectUrl(photo.object_key) === coverSrc}
                   onSetCover={() =>
                     void setCover({
-                      src: `https://photos.ayoubabed.xyz/${photo.object_key}`,
+                      src: galleryObjectUrl(photo.object_key),
                       width: photo.width,
                       height: photo.height,
                       alt: photo.alt,
@@ -1140,7 +1138,7 @@ export default function AdminGallery({
               {uploadedPhotos.map((photo) => (
                 <PhotoTile
                   key={photo.id}
-                  src={`https://photos.ayoubabed.xyz/${photo.object_key}`}
+                  src={galleryObjectUrl(photo.object_key)}
                   alt={photo.alt}
                   label={
                     photo.uploader_name
@@ -1150,13 +1148,10 @@ export default function AdminGallery({
                   selected={selected.has(`uploaded:${photo.id}`)}
                   onSelect={() => toggle(`uploaded:${photo.id}`)}
                   onOpen={() => setReviewKey(`uploaded:${photo.id}`)}
-                  cover={
-                    `https://photos.ayoubabed.xyz/${photo.object_key}` ===
-                    coverSrc
-                  }
+                  cover={galleryObjectUrl(photo.object_key) === coverSrc}
                   onSetCover={() =>
                     void setCover({
-                      src: `https://photos.ayoubabed.xyz/${photo.object_key}`,
+                      src: galleryObjectUrl(photo.object_key),
                       width: photo.width,
                       height: photo.height,
                       alt: photo.alt,

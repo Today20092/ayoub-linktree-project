@@ -1,4 +1,6 @@
 import type { APIRoute } from 'astro'
+import { env } from 'cloudflare:workers'
+import { galleryMediaKey, readGalleryMedia } from '@/lib/gallery-media'
 
 export const prerender = false
 
@@ -20,19 +22,24 @@ export const GET: APIRoute = async ({ url }) => {
 
   let sourceUrl: URL
   try {
-    sourceUrl = new URL(source)
+    sourceUrl = new URL(source, url)
   } catch {
     return new Response('Invalid download URL', { status: 400 })
   }
+  const local =
+    sourceUrl.origin === url.origin && galleryMediaKey(sourceUrl.pathname)
   if (
-    sourceUrl.protocol !== 'https:' ||
-    sourceUrl.hostname !== PHOTO_HOST ||
-    !sourceUrl.pathname.startsWith('/events/')
+    !local &&
+    (sourceUrl.protocol !== 'https:' ||
+      sourceUrl.hostname !== PHOTO_HOST ||
+      !sourceUrl.pathname.startsWith('/events/'))
   ) {
     return new Response('Download URL is not allowed', { status: 400 })
   }
 
-  const response = await fetch(sourceUrl)
+  const response = local
+    ? await readGalleryMedia(env.GALLERY_PUBLIC, sourceUrl.pathname)
+    : await fetch(sourceUrl)
   if (!response.ok || !response.body) {
     return new Response('Download unavailable', { status: response.status })
   }

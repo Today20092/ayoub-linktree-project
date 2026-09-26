@@ -48,7 +48,7 @@ const galleryCategory = gallery.category
 const galleryImageAlt = data?.imageAlt ?? `${galleryTitle} event gallery`
 const summary = gallery.summary
 const title = `${galleryTitle} - Event Gallery`
-const ogImage = gallery.ogImage
+const ogImage = new URL(gallery.ogImage, Astro.url).toString()
 const eventDate = gallery.eventDate
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
 const faceManifest = faceManifests[eventSlug]
