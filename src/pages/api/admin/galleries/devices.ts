@@ -18,7 +18,7 @@ export const POST: APIRoute = async ({ request }) => {
     return companionJson({ error: 'Invalid origin.' }, 403)
   if (Number(request.headers.get('content-length')) > 1024)
     return companionJson({ error: 'Request too large.' }, 413)
-  let data: { name?: string; revoke?: string }
+  let data: { name?: string; revoke?: string; canManage?: boolean }
   try {
     data = await request.json()
   } catch {
@@ -33,7 +33,11 @@ export const POST: APIRoute = async ({ request }) => {
   if (typeof data.name !== 'string' || !data.name.trim())
     return companionJson({ error: 'Enter a device name.' }, 400)
   return companionJson(
-    await createDevice(env.GALLERY_DB, data.name.trim()),
+    await createDevice(
+      env.GALLERY_DB,
+      data.name.trim(),
+      data.canManage === true,
+    ),
     201,
   )
 }

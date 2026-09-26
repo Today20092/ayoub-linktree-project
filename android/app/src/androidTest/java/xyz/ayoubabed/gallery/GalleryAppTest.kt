@@ -16,7 +16,7 @@ class GalleryAppTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
     @Test fun onboardingAndNavigation() {
-        compose.onNodeWithText("From camera\nto gallery.").assertIsDisplayed()
+        compose.onNodeWithText("Your galleries").assertIsDisplayed()
         capture("galleries")
         compose.onNodeWithText("Connect your website").performClick()
         compose.onNodeWithText("Make the connection").assertIsDisplayed()

@@ -10,8 +10,8 @@ android {
         applicationId = "xyz.ayoubabed.gallery"
         minSdk = 34
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.1.1-beta.1"
+        versionCode = 3
+        versionName = "0.2.0-beta.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true }

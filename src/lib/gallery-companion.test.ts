@@ -27,6 +27,15 @@ function fixture() {
       'utf8',
     ),
   )
+  sqlite.exec(
+    readFileSync(
+      new URL(
+        '../../migrations/0006_gallery_device_management.sql',
+        import.meta.url,
+      ),
+      'utf8',
+    ),
+  )
   class Statement {
     values: (string | number | null)[] = []
     constructor(readonly sql: string) {}
@@ -106,6 +115,37 @@ test('device keys are hashed, expire, and can be revoked', async () => {
   assert.equal(await companionAuthorized(request, db), false)
   sqlite.exec('DELETE FROM gallery_devices')
   assert.equal(await companionAuthorized(request, db), false)
+})
+
+test('management requires explicit permission and remains revocable', async () => {
+  const { db, sqlite } = fixture()
+  const upload = await createDevice(db, 'Upload only')
+  const manager = await createDevice(db, 'Manager', true)
+  const request = (token: string) =>
+    new Request('https://example.com', {
+      headers: { authorization: `Bearer ${token}` },
+    })
+  assert.equal(await companionAuthorized(request(upload.token), db), true)
+  assert.equal(
+    await companionAuthorized(request(upload.token), db, true),
+    false,
+  )
+  assert.equal(
+    await companionAuthorized(request(manager.token), db, true),
+    true,
+  )
+  sqlite
+    .prepare('UPDATE gallery_devices SET expires_at = 0 WHERE id = ?')
+    .run(manager.id)
+  assert.equal(
+    await companionAuthorized(request(manager.token), db, true),
+    false,
+  )
+  sqlite.prepare('DELETE FROM gallery_devices WHERE id = ?').run(manager.id)
+  assert.equal(
+    await companionAuthorized(request(manager.token), db, true),
+    false,
+  )
 })
 
 test('same bytes skip after repeat, rename, and gallery photo deletion', async () => {

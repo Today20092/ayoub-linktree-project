@@ -14,7 +14,6 @@ import {
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
 import {
   Card,
   CardContent,
@@ -220,20 +219,6 @@ function timeRange(start: string, end: string) {
   return formatTime(start || end)
 }
 
-function parseDate(value: string) {
-  const [year, month, day] = value.split('-').map(Number)
-  if (!year || !month || !day) return undefined
-  return new Date(year, month - 1, day)
-}
-
-function isoDate(date: Date | undefined) {
-  if (!date) return ''
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
 function parseTimeRange(value: string) {
   return [...value.matchAll(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/gi)]
     .slice(0, 2)
@@ -273,6 +258,15 @@ export default function AdminGallery({
   const [uploadProgress, setUploadProgress] = React.useState('')
   const [coverSrc, setCoverSrc] = React.useState(eventMeta.coverSrc ?? '')
   const [pending, setPending] = React.useState(false)
+  const sections = ['Details', 'Sharing & uploads', 'Guest access', 'Photos']
+  const [activeSection, setActiveSection] = React.useState(() => {
+    const hash = typeof window === 'undefined' ? '' : window.location.hash
+    return (
+      sections.find(
+        (section) => hash === `#gallery-${sections.indexOf(section)}`,
+      ) ?? 'Details'
+    )
+  })
   const [message, setMessage] = React.useState('')
   const [error, setError] = React.useState('')
   const [reviewKey, setReviewKey] = React.useState<string | null>(null)
@@ -603,7 +597,33 @@ export default function AdminGallery({
     : `/galleries/${eventSlug}/`
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 [&_button]:min-h-11 [&_input:not([type=checkbox])]:min-h-11 [&_select]:min-h-11">
+      <nav
+        aria-label="Gallery settings"
+        className="bg-muted/50 grid grid-cols-2 gap-2 rounded-2xl p-2 sm:flex sm:flex-wrap"
+      >
+        {sections.map((section) => (
+          <Button
+            key={section}
+            type="button"
+            variant={activeSection === section ? 'default' : 'ghost'}
+            aria-pressed={activeSection === section}
+            onClick={() => {
+              setActiveSection(section)
+              window.history.replaceState(
+                null,
+                '',
+                `#gallery-${sections.indexOf(section)}`,
+              )
+            }}
+          >
+            {section}
+            {section === 'Photos' && pendingGuests.length > 0
+              ? ` · ${pendingGuests.length} pending`
+              : ''}
+          </Button>
+        ))}
+      </nav>
       {(message || error) && (
         <p
           className={error ? 'text-destructive text-sm' : 'text-sm font-medium'}
@@ -618,612 +638,644 @@ export default function AdminGallery({
         </p>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Event details</CardTitle>
-          <CardDescription>
-            These details power the public gallery and coming-soon view.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="grid gap-4" onSubmit={saveEvent}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="event-title">Name</Label>
-                <Textarea
-                  id="event-title"
-                  rows={2}
-                  value={meta.title}
-                  onChange={(event) =>
-                    setMeta((current) => ({
-                      ...current,
-                      title: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="event-category">Category</Label>
-                <Input
-                  id="event-category"
-                  value={meta.category}
-                  onChange={(event) =>
-                    setMeta((current) => ({
-                      ...current,
-                      category: event.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="event-summary">About information</Label>
-              <Textarea
-                id="event-summary"
-                rows={4}
-                value={meta.summary}
-                onChange={(event) =>
-                  setMeta((current) => ({
-                    ...current,
-                    summary: event.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Date</Label>
-                <div className="border-border w-fit max-w-full overflow-x-auto rounded-2xl border">
-                  <Calendar
-                    mode="single"
-                    selected={parseDate(meta.eventDate)}
-                    onSelect={(date) =>
+      <div hidden={activeSection !== 'Details'}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Event details</CardTitle>
+            <CardDescription>
+              These details power the public gallery and coming-soon view.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form className="grid gap-4" onSubmit={saveEvent}>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="event-title">Name</Label>
+                  <Input
+                    id="event-title"
+                    value={meta.title}
+                    onChange={(event) =>
                       setMeta((current) => ({
                         ...current,
-                        eventDate: isoDate(date),
+                        title: event.target.value,
                       }))
                     }
-                    captionLayout="dropdown"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="event-category">Category</Label>
+                  <Input
+                    id="event-category"
+                    value={meta.category}
+                    onChange={(event) =>
+                      setMeta((current) => ({
+                        ...current,
+                        category: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="event-summary">About information</Label>
+                <Textarea
+                  id="event-summary"
+                  rows={4}
+                  value={meta.summary}
+                  onChange={(event) =>
+                    setMeta((current) => ({
+                      ...current,
+                      summary: event.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="event-date">Date</Label>
+                  <Input
+                    id="event-date"
+                    type="date"
+                    value={meta.eventDate}
+                    onChange={(event) =>
+                      setMeta((current) => ({
+                        ...current,
+                        eventDate: event.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="event-start-time">Start time</Label>
+                    <Input
+                      id="event-start-time"
+                      type="time"
+                      value={startTime ?? ''}
+                      onChange={(event) => {
+                        const next = event.target.value
+                        setTimes([next, endTime])
+                        setMeta((current) => ({
+                          ...current,
+                          eventTime: timeRange(next, endTime ?? ''),
+                        }))
+                      }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="event-end-time">End time</Label>
+                    <Input
+                      id="event-end-time"
+                      type="time"
+                      value={endTime ?? ''}
+                      onChange={(event) => {
+                        const next = event.target.value
+                        setTimes([startTime, next])
+                        setMeta((current) => ({
+                          ...current,
+                          eventTime: timeRange(startTime ?? '', next),
+                        }))
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="event-venue">Venue</Label>
+                <Input
+                  id="event-venue"
+                  value={meta.eventVenue}
+                  autoComplete="street-address"
+                  onChange={(event) =>
+                    setMeta((current) => ({
+                      ...current,
+                      eventVenue: event.target.value,
+                    }))
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="event-status">Public status</Label>
+                <select
+                  id="event-status"
+                  className="border-input bg-background ring-offset-background focus-visible:ring-ring h-10 rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  value={meta.visibilityStatus}
+                  onChange={(event) =>
+                    setMeta((current) => ({
+                      ...current,
+                      visibilityStatus: event.target.value as GalleryStatus,
+                      comingSoon: event.target.value === 'coming_soon',
+                    }))
+                  }
+                >
+                  <option value="published">Published</option>
+                  <option value="coming_soon">Coming soon</option>
+                  <option value="hidden">Hidden</option>
+                </select>
                 <p className="text-muted-foreground text-sm">
-                  {meta.eventDate || 'No date selected'}
+                  Published shows photos, coming soon hides photos, hidden
+                  removes the gallery from public pages.
                 </p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label htmlFor="event-start-time">Start time</Label>
-                  <Input
-                    id="event-start-time"
-                    type="time"
-                    value={startTime ?? ''}
-                    onChange={(event) => {
-                      const next = event.target.value
-                      setTimes([next, endTime])
-                      setMeta((current) => ({
-                        ...current,
-                        eventTime: timeRange(next, endTime ?? ''),
-                      }))
-                    }}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="event-end-time">End time</Label>
-                  <Input
-                    id="event-end-time"
-                    type="time"
-                    value={endTime ?? ''}
-                    onChange={(event) => {
-                      const next = event.target.value
-                      setTimes([startTime, next])
-                      setMeta((current) => ({
-                        ...current,
-                        eventTime: timeRange(startTime ?? '', next),
-                      }))
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="event-venue">Venue</Label>
-              <Input
-                id="event-venue"
-                value={meta.eventVenue}
-                autoComplete="street-address"
-                onChange={(event) =>
-                  setMeta((current) => ({
-                    ...current,
-                    eventVenue: event.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="event-status">Public status</Label>
-              <select
-                id="event-status"
-                className="border-input bg-background ring-offset-background focus-visible:ring-ring h-10 rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                value={meta.visibilityStatus}
-                onChange={(event) =>
-                  setMeta((current) => ({
-                    ...current,
-                    visibilityStatus: event.target.value as GalleryStatus,
-                    comingSoon: event.target.value === 'coming_soon',
-                  }))
-                }
+              <Button
+                type="submit"
+                className="sm:justify-self-start"
+                disabled={pending}
               >
-                <option value="published">Published</option>
-                <option value="coming_soon">Coming soon</option>
-                <option value="hidden">Hidden</option>
-              </select>
-              <p className="text-muted-foreground text-sm">
-                Published shows photos, coming soon hides photos, hidden removes
-                the gallery from public pages.
-              </p>
-            </div>
-            <Button type="submit" disabled={pending}>
-              {pending && (
-                <Loader2
-                  className="animate-spin"
-                  data-icon="inline-start"
-                  aria-hidden="true"
-                />
-              )}
-              Save event
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Gallery links</CardTitle>
-            <CardDescription>
-              Copy the public gallery link for sharing.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3">
-            <code className="bg-muted truncate rounded-md px-3 py-2 text-sm">
-              {publicGalleryUrl}
-            </code>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() =>
-                void navigator.clipboard.writeText(publicGalleryUrl)
-              }
-            >
-              <Copy data-icon="inline-start" aria-hidden="true" />
-              Copy public link
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Flyer or cover photo</CardTitle>
-            <CardDescription>
-              Replace the flyer and use it as the gallery cover.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="grid gap-4" onSubmit={updateFlyer}>
-              <Input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-                onChange={(event) =>
-                  setFlyerFile(event.target.files?.[0] ?? null)
-                }
-              />
-              <Button type="submit" disabled={pending || !flyerFile}>
-                <ImagePlus data-icon="inline-start" aria-hidden="true" />
-                Replace flyer
+                {pending && (
+                  <Loader2
+                    className="animate-spin"
+                    data-icon="inline-start"
+                    aria-hidden="true"
+                  />
+                )}
+                Save event
               </Button>
             </form>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Upload photographer photos</CardTitle>
-            <CardDescription>
-              Photos are resized to 2400px and stored in the public R2 bucket.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="grid gap-4" onSubmit={uploadAdminPhotos}>
-              <Input
-                type="file"
-                multiple
-                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
-                onChange={(event) =>
-                  setUploadFiles([...(event.target.files ?? [])])
-                }
-              />
-              <Button type="submit" disabled={pending || !uploadFiles.length}>
-                <ImagePlus data-icon="inline-start" aria-hidden="true" />
-                Upload {uploadFiles.length || ''} photos
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Guest invite links</CardTitle>
-            <CardDescription>
-              Each link uploads without a password and tracks the guest name.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <form className="flex gap-2" onSubmit={createInvite}>
-              <Input
-                value={guestName}
-                onChange={(event) => setGuestName(event.target.value)}
-                placeholder="Guest name"
-                maxLength={120}
-              />
-              <Button type="submit" disabled={pending || !guestName.trim()}>
-                <Link data-icon="inline-start" aria-hidden="true" />
-                Create
-              </Button>
-            </form>
-            <div className="grid gap-2">
-              {inviteList.map((invite) => {
-                const url = `${origin}/galleries/${eventSlug}/upload/${invite.token}/`
-                return (
-                  <div
-                    key={invite.token}
-                    className="border-border grid gap-2 rounded-lg border p-3 text-sm"
-                  >
-                    <p className="font-medium">{invite.guest_name}</p>
-                    <code className="bg-muted truncate rounded-md px-2 py-1 text-xs">
-                      {url}
-                    </code>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => void navigator.clipboard.writeText(url)}
-                    >
-                      <Copy data-icon="inline-start" aria-hidden="true" />
-                      Copy link
-                    </Button>
-                  </div>
-                )
-              })}
-            </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Guest upload access</CardTitle>
-          <CardDescription>
-            Enable submissions and set or rotate the shared event password.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"
-            onSubmit={(event) => {
-              event.preventDefault()
-              void run(
-                [
-                  {
-                    action: 'settings',
-                    uploadsEnabled,
-                    password: password || undefined,
-                  },
-                ],
-                'Upload settings saved.',
-              )
-            }}
-          >
-            <div className="space-y-2">
-              <Label htmlFor="new-gallery-password">
-                {settings?.password_hash
-                  ? 'New password (leave blank to keep current)'
-                  : 'Upload password'}
-              </Label>
-              <Input
-                id="new-gallery-password"
-                type="password"
-                minLength={8}
-                maxLength={128}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-              <label className="flex items-center gap-2 text-sm font-medium">
-                <input
-                  type="checkbox"
-                  className="accent-primary size-4"
-                  checked={uploadsEnabled}
-                  onChange={(event) => setUploadsEnabled(event.target.checked)}
+      <div hidden={activeSection !== 'Sharing & uploads'}>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gallery links</CardTitle>
+              <CardDescription>
+                Copy the public gallery link for sharing.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3">
+              <code className="bg-muted truncate rounded-md px-3 py-2 text-sm">
+                {publicGalleryUrl}
+              </code>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() =>
+                  void navigator.clipboard.writeText(publicGalleryUrl)
+                }
+              >
+                <Copy data-icon="inline-start" aria-hidden="true" />
+                Copy public link
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Flyer or cover photo</CardTitle>
+              <CardDescription>
+                Replace the flyer and use it as the gallery cover.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form className="grid gap-4" onSubmit={updateFlyer}>
+                <Input
+                  type="file"
+                  aria-label="Choose a flyer or cover photo"
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+                  onChange={(event) =>
+                    setFlyerFile(event.target.files?.[0] ?? null)
+                  }
                 />
-                Accept guest uploads
-              </label>
+                <Button type="submit" disabled={pending || !flyerFile}>
+                  <ImagePlus data-icon="inline-start" aria-hidden="true" />
+                  Replace flyer
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload photographer photos</CardTitle>
+              <CardDescription>
+                Add photographer photos to this gallery. Photos follow its
+                public visibility setting.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form className="grid gap-4" onSubmit={uploadAdminPhotos}>
+                <Input
+                  type="file"
+                  multiple
+                  aria-label="Choose photographer photos"
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+                  onChange={(event) =>
+                    setUploadFiles([...(event.target.files ?? [])])
+                  }
+                />
+                <Button type="submit" disabled={pending || !uploadFiles.length}>
+                  <ImagePlus data-icon="inline-start" aria-hidden="true" />
+                  Upload {uploadFiles.length || ''} photos
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Guest invite links</CardTitle>
+              <CardDescription>
+                Each link uploads without a password and tracks the guest name.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <form className="flex gap-2" onSubmit={createInvite}>
+                <Input
+                  value={guestName}
+                  aria-label="Guest name"
+                  onChange={(event) => setGuestName(event.target.value)}
+                  placeholder="Guest name"
+                  maxLength={120}
+                />
+                <Button type="submit" disabled={pending || !guestName.trim()}>
+                  <Link data-icon="inline-start" aria-hidden="true" />
+                  Create
+                </Button>
+              </form>
+              <div className="grid gap-2">
+                {inviteList.map((invite) => {
+                  const url = `${origin}/galleries/${eventSlug}/upload/${invite.token}/`
+                  return (
+                    <div
+                      key={invite.token}
+                      className="border-border grid gap-2 rounded-lg border p-3 text-sm"
+                    >
+                      <p className="font-medium">{invite.guest_name}</p>
+                      <code className="bg-muted truncate rounded-md px-2 py-1 text-xs">
+                        {url}
+                      </code>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => void navigator.clipboard.writeText(url)}
+                      >
+                        <Copy data-icon="inline-start" aria-hidden="true" />
+                        Copy link
+                      </Button>
+                    </div>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <div hidden={activeSection !== 'Guest access'}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Guest upload access</CardTitle>
+            <CardDescription>
+              Enable submissions and set or rotate the shared event password.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form
+              className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void run(
+                  [
+                    {
+                      action: 'settings',
+                      uploadsEnabled,
+                      password: password || undefined,
+                    },
+                  ],
+                  'Upload settings saved.',
+                )
+              }}
+            >
+              <div className="space-y-2">
+                <Label htmlFor="new-gallery-password">
+                  {settings?.password_hash
+                    ? 'New password (leave blank to keep current)'
+                    : 'Upload password'}
+                </Label>
+                <Input
+                  id="new-gallery-password"
+                  type="password"
+                  minLength={8}
+                  maxLength={128}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+                <label className="flex items-center gap-2 text-sm font-medium">
+                  <input
+                    type="checkbox"
+                    className="accent-primary size-4"
+                    checked={uploadsEnabled}
+                    onChange={(event) =>
+                      setUploadsEnabled(event.target.checked)
+                    }
+                  />
+                  Accept guest uploads
+                </label>
+              </div>
+              <Button type="submit" disabled={pending}>
+                {pending && (
+                  <Loader2
+                    className="animate-spin"
+                    data-icon="inline-start"
+                    aria-hidden="true"
+                  />
+                )}
+                Save settings
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div hidden={activeSection !== 'Photos'}>
+        <div className="space-y-8">
+          <section aria-labelledby="pending-heading">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <Badge>{pendingGuests.length} pending</Badge>
+                <h2
+                  id="pending-heading"
+                  className="font-heading mt-2 text-2xl font-extrabold"
+                >
+                  Guest photos awaiting review
+                </h2>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  disabled={
+                    pending ||
+                    ![...selected].some((key) => key.startsWith('pending:'))
+                  }
+                  onClick={() =>
+                    void run(
+                      selectedActions('pending', (photoId) => ({
+                        action: 'approveGuest',
+                        photoId,
+                      })),
+                      'Guest photos published.',
+                    )
+                  }
+                >
+                  <Check data-icon="inline-start" aria-hidden="true" />
+                  Approve selected
+                </Button>
+                <Button
+                  variant="destructive"
+                  disabled={
+                    pending ||
+                    ![...selected].some((key) => key.startsWith('pending:'))
+                  }
+                  onClick={() =>
+                    confirmAndRun(
+                      selectedActions('pending', (photoId) => ({
+                        action: 'rejectGuest',
+                        photoId,
+                      })),
+                      'Permanently reject and delete the selected guest photos?',
+                      'Guest photos rejected.',
+                    )
+                  }
+                >
+                  <X data-icon="inline-start" aria-hidden="true" />
+                  Reject selected
+                </Button>
+              </div>
             </div>
-            <Button type="submit" disabled={pending}>
-              {pending && (
-                <Loader2
-                  className="animate-spin"
-                  data-icon="inline-start"
-                  aria-hidden="true"
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {pendingGuests.map((photo) => (
+                <PhotoTile
+                  key={photo.id}
+                  src={`/api/admin/galleries/${eventSlug}?photo=${photo.id}`}
+                  alt={photo.alt}
+                  label={photo.original_filename}
+                  selected={selected.has(`pending:${photo.id}`)}
+                  onSelect={() => toggle(`pending:${photo.id}`)}
+                  onOpen={() => setReviewKey(`pending:${photo.id}`)}
                 />
-              )}
-              Save settings
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+            {!pendingGuests.length && (
+              <p className="text-muted-foreground text-sm">
+                No guest photos are waiting for review.
+              </p>
+            )}
+          </section>
 
-      <section aria-labelledby="pending-heading">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <Badge>{pendingGuests.length} pending</Badge>
-            <h2
-              id="pending-heading"
-              className="font-heading mt-2 text-2xl font-extrabold"
-            >
-              Guest photos awaiting review
-            </h2>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              disabled={pending}
-              onClick={() =>
-                void run(
-                  selectedActions('pending', (photoId) => ({
-                    action: 'approveGuest',
-                    photoId,
-                  })),
-                  'Guest photos published.',
-                )
-              }
-            >
-              <Check data-icon="inline-start" aria-hidden="true" />
-              Approve selected
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={pending}
-              onClick={() =>
-                confirmAndRun(
-                  selectedActions('pending', (photoId) => ({
-                    action: 'rejectGuest',
-                    photoId,
-                  })),
-                  'Permanently reject and delete the selected guest photos?',
-                  'Guest photos rejected.',
-                )
-              }
-            >
-              <X data-icon="inline-start" aria-hidden="true" />
-              Reject selected
-            </Button>
-          </div>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {pendingGuests.map((photo) => (
-            <PhotoTile
-              key={photo.id}
-              src={`/api/admin/galleries/${eventSlug}?photo=${photo.id}`}
-              alt={photo.alt}
-              label={photo.original_filename}
-              selected={selected.has(`pending:${photo.id}`)}
-              onSelect={() => toggle(`pending:${photo.id}`)}
-              onOpen={() => setReviewKey(`pending:${photo.id}`)}
-            />
-          ))}
-        </div>
-        {!pendingGuests.length && (
-          <p className="text-muted-foreground text-sm">
-            No guest photos are waiting for review.
-          </p>
-        )}
-      </section>
+          <section aria-labelledby="published-heading">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <h2
+                id="published-heading"
+                className="font-heading text-2xl font-extrabold"
+              >
+                Published guest photos
+              </h2>
+              <Button
+                variant="destructive"
+                disabled={
+                  pending ||
+                  ![...selected].some((key) => key.startsWith('published:'))
+                }
+                onClick={() =>
+                  confirmAndRun(
+                    selectedActions('published', (photoId) => ({
+                      action: 'removeGuest',
+                      photoId,
+                    })),
+                    'Permanently remove the selected published guest photos?',
+                    'Guest photos removed.',
+                  )
+                }
+              >
+                <Trash2 data-icon="inline-start" aria-hidden="true" />
+                Remove selected
+              </Button>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {publishedGuests.map((photo) => (
+                <PhotoTile
+                  key={photo.id}
+                  src={`/api/admin/galleries/${eventSlug}?photo=${photo.id}`}
+                  alt={photo.alt}
+                  label={photo.original_filename}
+                  selected={selected.has(`published:${photo.id}`)}
+                  onSelect={() => toggle(`published:${photo.id}`)}
+                  onOpen={() => setReviewKey(`published:${photo.id}`)}
+                  cover={
+                    `https://photos.ayoubabed.xyz/${photo.object_key}` ===
+                    coverSrc
+                  }
+                  onSetCover={() =>
+                    void setCover({
+                      src: `https://photos.ayoubabed.xyz/${photo.object_key}`,
+                      width: photo.width,
+                      height: photo.height,
+                      alt: photo.alt,
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </section>
 
-      <section aria-labelledby="published-heading">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <h2
-            id="published-heading"
-            className="font-heading text-2xl font-extrabold"
-          >
-            Published guest photos
-          </h2>
-          <Button
-            variant="destructive"
-            disabled={pending}
-            onClick={() =>
-              confirmAndRun(
-                selectedActions('published', (photoId) => ({
-                  action: 'removeGuest',
-                  photoId,
-                })),
-                'Permanently remove the selected published guest photos?',
-                'Guest photos removed.',
-              )
-            }
-          >
-            <Trash2 data-icon="inline-start" aria-hidden="true" />
-            Remove selected
-          </Button>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {publishedGuests.map((photo) => (
-            <PhotoTile
-              key={photo.id}
-              src={`/api/admin/galleries/${eventSlug}?photo=${photo.id}`}
-              alt={photo.alt}
-              label={photo.original_filename}
-              selected={selected.has(`published:${photo.id}`)}
-              onSelect={() => toggle(`published:${photo.id}`)}
-              onOpen={() => setReviewKey(`published:${photo.id}`)}
-              cover={
-                `https://photos.ayoubabed.xyz/${photo.object_key}` === coverSrc
-              }
-              onSetCover={() =>
-                void setCover({
-                  src: `https://photos.ayoubabed.xyz/${photo.object_key}`,
-                  width: photo.width,
-                  height: photo.height,
-                  alt: photo.alt,
-                })
-              }
-            />
-          ))}
-        </div>
-      </section>
+          <section aria-labelledby="uploaded-heading">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2
+                  id="uploaded-heading"
+                  className="font-heading text-2xl font-extrabold"
+                >
+                  Uploaded gallery photos
+                </h2>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Includes photographer uploads and trusted guest invite
+                  uploads.
+                </p>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {uploadedPhotos.map((photo) => (
+                <PhotoTile
+                  key={photo.id}
+                  src={`https://photos.ayoubabed.xyz/${photo.object_key}`}
+                  alt={photo.alt}
+                  label={
+                    photo.uploader_name
+                      ? `${photo.original_filename} by ${photo.uploader_name}`
+                      : photo.original_filename
+                  }
+                  selected={selected.has(`uploaded:${photo.id}`)}
+                  onSelect={() => toggle(`uploaded:${photo.id}`)}
+                  onOpen={() => setReviewKey(`uploaded:${photo.id}`)}
+                  cover={
+                    `https://photos.ayoubabed.xyz/${photo.object_key}` ===
+                    coverSrc
+                  }
+                  onSetCover={() =>
+                    void setCover({
+                      src: `https://photos.ayoubabed.xyz/${photo.object_key}`,
+                      width: photo.width,
+                      height: photo.height,
+                      alt: photo.alt,
+                    })
+                  }
+                />
+              ))}
+            </div>
+            {!uploadedPhotos.length && (
+              <p className="text-muted-foreground text-sm">
+                No direct gallery photos have been uploaded yet.
+              </p>
+            )}
+          </section>
 
-      <section aria-labelledby="uploaded-heading">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2
-              id="uploaded-heading"
-              className="font-heading text-2xl font-extrabold"
-            >
-              Uploaded gallery photos
-            </h2>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Includes photographer uploads and trusted guest invite uploads.
-            </p>
-          </div>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {uploadedPhotos.map((photo) => (
-            <PhotoTile
-              key={photo.id}
-              src={`https://photos.ayoubabed.xyz/${photo.object_key}`}
-              alt={photo.alt}
-              label={
-                photo.uploader_name
-                  ? `${photo.original_filename} by ${photo.uploader_name}`
-                  : photo.original_filename
-              }
-              selected={selected.has(`uploaded:${photo.id}`)}
-              onSelect={() => toggle(`uploaded:${photo.id}`)}
-              onOpen={() => setReviewKey(`uploaded:${photo.id}`)}
-              cover={
-                `https://photos.ayoubabed.xyz/${photo.object_key}` === coverSrc
-              }
-              onSetCover={() =>
-                void setCover({
-                  src: `https://photos.ayoubabed.xyz/${photo.object_key}`,
-                  width: photo.width,
-                  height: photo.height,
-                  alt: photo.alt,
-                })
-              }
-            />
-          ))}
-        </div>
-        {!uploadedPhotos.length && (
-          <p className="text-muted-foreground text-sm">
-            No direct gallery photos have been uploaded yet.
-          </p>
-        )}
-      </section>
+          <section aria-labelledby="professional-heading">
+            <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2
+                  id="professional-heading"
+                  className="font-heading text-2xl font-extrabold"
+                >
+                  Professional gallery
+                </h2>
+                <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
+                  Hiding is immediate, but does not delete the R2 object or
+                  remove it from the prebuilt Download All ZIP.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                disabled={
+                  pending ||
+                  ![...selected].some((key) => key.startsWith('professional:'))
+                }
+                onClick={() =>
+                  void run(
+                    selectedActions('professional', (filename) => ({
+                      action: 'hideProfessional',
+                      filename,
+                    })),
+                    'Professional photos hidden.',
+                  )
+                }
+              >
+                <EyeOff data-icon="inline-start" aria-hidden="true" />
+                Hide selected
+              </Button>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {visibleProfessional.map((photo) => (
+                <PhotoTile
+                  key={photo.filename}
+                  src={photo.src}
+                  alt={photo.alt}
+                  label={photo.filename}
+                  selected={selected.has(`professional:${photo.filename}`)}
+                  onSelect={() => toggle(`professional:${photo.filename}`)}
+                  onOpen={() => setReviewKey(`professional:${photo.filename}`)}
+                  cover={photo.src === coverSrc}
+                  onSetCover={() =>
+                    void setCover({
+                      src: photo.src,
+                      width: photo.width,
+                      height: photo.height,
+                      alt: photo.alt,
+                    })
+                  }
+                />
+              ))}
+            </div>
+          </section>
 
-      <section aria-labelledby="professional-heading">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2
-              id="professional-heading"
-              className="font-heading text-2xl font-extrabold"
-            >
-              Professional gallery
-            </h2>
-            <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
-              Hiding is immediate, but does not delete the R2 object or remove
-              it from the prebuilt Download All ZIP.
-            </p>
-          </div>
-          <Button
-            variant="outline"
-            disabled={pending}
-            onClick={() =>
-              void run(
-                selectedActions('professional', (filename) => ({
-                  action: 'hideProfessional',
-                  filename,
-                })),
-                'Professional photos hidden.',
-              )
-            }
-          >
-            <EyeOff data-icon="inline-start" aria-hidden="true" />
-            Hide selected
-          </Button>
+          {hiddenProfessional.length > 0 && (
+            <section aria-labelledby="hidden-heading">
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+                <h2
+                  id="hidden-heading"
+                  className="font-heading text-2xl font-extrabold"
+                >
+                  Hidden professional photos
+                </h2>
+                <Button
+                  variant="outline"
+                  disabled={
+                    pending ||
+                    ![...selected].some((key) => key.startsWith('hidden:'))
+                  }
+                  onClick={() =>
+                    void run(
+                      selectedActions('hidden', (filename) => ({
+                        action: 'restoreProfessional',
+                        filename,
+                      })),
+                      'Professional photos restored.',
+                    )
+                  }
+                >
+                  <RotateCcw data-icon="inline-start" aria-hidden="true" />
+                  Restore selected
+                </Button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {hiddenProfessional.map((photo) => (
+                  <PhotoTile
+                    key={photo.filename}
+                    src={photo.src}
+                    alt={photo.alt}
+                    label={photo.filename}
+                    selected={selected.has(`hidden:${photo.filename}`)}
+                    onSelect={() => toggle(`hidden:${photo.filename}`)}
+                    onOpen={() => setReviewKey(`hidden:${photo.filename}`)}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {visibleProfessional.map((photo) => (
-            <PhotoTile
-              key={photo.filename}
-              src={photo.src}
-              alt={photo.alt}
-              label={photo.filename}
-              selected={selected.has(`professional:${photo.filename}`)}
-              onSelect={() => toggle(`professional:${photo.filename}`)}
-              onOpen={() => setReviewKey(`professional:${photo.filename}`)}
-              cover={photo.src === coverSrc}
-              onSetCover={() =>
-                void setCover({
-                  src: photo.src,
-                  width: photo.width,
-                  height: photo.height,
-                  alt: photo.alt,
-                })
-              }
-            />
-          ))}
-        </div>
-      </section>
-
-      {hiddenProfessional.length > 0 && (
-        <section aria-labelledby="hidden-heading">
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-            <h2
-              id="hidden-heading"
-              className="font-heading text-2xl font-extrabold"
-            >
-              Hidden professional photos
-            </h2>
-            <Button
-              variant="outline"
-              disabled={pending}
-              onClick={() =>
-                void run(
-                  selectedActions('hidden', (filename) => ({
-                    action: 'restoreProfessional',
-                    filename,
-                  })),
-                  'Professional photos restored.',
-                )
-              }
-            >
-              <RotateCcw data-icon="inline-start" aria-hidden="true" />
-              Restore selected
-            </Button>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {hiddenProfessional.map((photo) => (
-              <PhotoTile
-                key={photo.filename}
-                src={photo.src}
-                alt={photo.alt}
-                label={photo.filename}
-                selected={selected.has(`hidden:${photo.filename}`)}
-                onSelect={() => toggle(`hidden:${photo.filename}`)}
-                onOpen={() => setReviewKey(`hidden:${photo.filename}`)}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      </div>
 
       {reviewPhoto && (
         <div

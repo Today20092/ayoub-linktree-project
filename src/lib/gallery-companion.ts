@@ -11,31 +11,40 @@ export async function contentHash(bytes: ArrayBuffer) {
   ).join('')
 }
 
-export async function companionAuthorized(request: Request, db: D1Database) {
+export async function companionAuthorized(
+  request: Request,
+  db: D1Database,
+  management = false,
+) {
   const token = request.headers.get('authorization')?.replace(/^Bearer /, '')
   if (!token || !/^ayoub_[a-f0-9]{64}$/.test(token)) return false
   return Boolean(
     await db
       .prepare(
-        'SELECT id FROM gallery_devices WHERE token_hash = ? AND expires_at > unixepoch()',
+        `SELECT id FROM gallery_devices WHERE token_hash = ? AND expires_at > unixepoch()${management ? ' AND can_manage = 1' : ''}`,
       )
       .bind(await contentHash(new TextEncoder().encode(token).buffer))
       .first(),
   )
 }
 
-export async function createDevice(db: D1Database, name: string) {
+export async function createDevice(
+  db: D1Database,
+  name: string,
+  canManage = false,
+) {
   const token = `ayoub_${crypto.randomUUID().replaceAll('-', '')}${crypto.randomUUID().replaceAll('-', '')}`
   const id = crypto.randomUUID()
   await db
     .prepare(
-      'INSERT INTO gallery_devices (id, name, token_hash, expires_at) VALUES (?, ?, ?, ?)',
+      'INSERT INTO gallery_devices (id, name, token_hash, expires_at, can_manage) VALUES (?, ?, ?, ?, ?)',
     )
     .bind(
       id,
       name.slice(0, 80),
       await contentHash(new TextEncoder().encode(token).buffer),
       Math.floor(Date.now() / 1000) + 90 * 86400,
+      canManage ? 1 : 0,
     )
     .run()
   return { id, token }

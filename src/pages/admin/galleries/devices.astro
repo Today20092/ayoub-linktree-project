@@ -15,8 +15,8 @@ if (
 )
   return new Response('Forbidden', { status: 403 })
 const devices = await env.GALLERY_DB.prepare(
-  'SELECT id, name, expires_at FROM gallery_devices ORDER BY created_at DESC',
-).all<{ id: string; name: string; expires_at: number }>()
+  'SELECT id, name, expires_at, can_manage FROM gallery_devices ORDER BY created_at DESC',
+).all<{ id: string; name: string; expires_at: number; can_manage: number }>()
 Astro.response.headers.set('Cache-Control', 'no-store')
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
 ---
@@ -44,6 +44,17 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         required
         class="border-input bg-background w-full rounded-xl border p-3"
       />
+      <label class="flex items-start gap-3">
+        <input id="device-management" type="checkbox" class="mt-1 size-5" />
+        <span>
+          Allow gallery management<span
+            class="text-muted-foreground block text-sm"
+          >
+            Edit every gallery, manage guest access, and approve or delete guest
+            photos.
+          </span>
+        </span>
+      </label>
       <button
         class="bg-primary text-primary-foreground rounded-full px-6 py-3 font-semibold"
         type="submit"
@@ -68,7 +79,8 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         Copy key
       </button>
       <p class="text-muted-foreground mt-2 text-sm">
-        This key allows gallery listing and photo uploads. Keep it private.
+        This key allows uploads and any management access selected above. Keep
+        it private.
       </p>
     </section>
     <h2 class="mt-10 text-2xl font-semibold">Connected devices</h2>
@@ -79,6 +91,11 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
             <div>
               <>
                 <p>{device.name}</p>
+                <p class="text-muted-foreground text-sm">
+                  {device.can_manage
+                    ? 'Uploads and management'
+                    : 'Uploads only'}
+                </p>
                 <p class="text-muted-foreground text-sm">
                   Expires{' '}
                   {new Date(device.expires_at * 1000).toLocaleDateString(
@@ -126,6 +143,9 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
       try {
         const data = await send({
           name: document.querySelector<HTMLInputElement>('#device-name')!.value,
+          canManage:
+            document.querySelector<HTMLInputElement>('#device-management')!
+              .checked,
         })
         document.querySelector<HTMLTextAreaElement>('#pair-key')!.value =
           data.token ?? ''
