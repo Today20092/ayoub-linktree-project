@@ -11,6 +11,12 @@ export default defineConfig({
   site: 'https://ayoubabed.xyz',
   trailingSlash: 'always',
   session: false,
+  server: {
+    allowedHosts: [
+      'desktop-ayoub.cuttlefish-coho.ts.net',
+      'payments.ayoubabed.xyz',
+    ],
+  },
   security: {
     csp: {
       directives: [
@@ -47,6 +53,7 @@ export default defineConfig({
         return (
           !pathname.startsWith('/admin/') &&
           pathname !== '/services' &&
+          pathname !== '/payments' &&
           pathname !== '/portfolio/alphabravomedia' &&
           !pathname.includes('/photo/')
         )

@@ -94,6 +94,7 @@ export type ActionLink = {
 }
 
 export type SiteConfig = {
+  payments?: { stripePaymentLink?: string }
   site: SiteInfo
   features: SiteFeatures
   socialLinks: SocialLink[]

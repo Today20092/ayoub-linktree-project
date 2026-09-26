@@ -1,6 +1,9 @@
 ---
 import '../styles.css'
 
+// Host-based middleware routes the payments subdomain before rendering this page.
+export const prerender = false
+
 import type { ImageMetadata } from 'astro'
 import { getCollection } from 'astro:content'
 
