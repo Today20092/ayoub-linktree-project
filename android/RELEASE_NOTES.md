@@ -1,33 +1,34 @@
-# Ayoub Gallery 0.3.0
+# Ayoub Gallery 0.4.0
 
-Stable release for the production website, with compact headers and native gallery management.
+Watched-folder uploads automatically queue new JPEGs imported into your selected folder.
 
-- Galleries, Uploads, Settings, and New gallery use a compact, single-row toolbar.
-- The duplicate “Your galleries” banner is hidden once your website is connected.
-- Existing native gallery creation, management, uploads, and dark-theme pickers remain available.
-- New installations connect to `https://ayoubabed.xyz` by default. Existing connections and upload queues are preserved.
-- Preview connections are labeled. Finish or clear a pending batch before changing websites; keys and galleries are never moved automatically.
-- Settings shows the installed app version.
+## Using watched folders
 
-- Search galleries and open their management controls directly from the gallery list.
-- Edit event details and visibility, manage guest upload passwords, and create or share guest invites.
-- Review guest photos, approve or delete submissions, hide or restore professional photos, and choose a cover.
-- Share the public gallery link and replace the flyer from your phone.
-- Date and time pickers follow the phone's light or dark theme and wallpaper colors.
-- Uploads retain support for hidden and coming-soon galleries, Tailscale, and resumable batches.
+1. Select the gallery, folder, capture-time filter, and Wi-Fi preference.
+2. Tap **Start watching** before importing new photos. Files already present are excluded.
+3. Import JPEGs into the folder or its subfolders. The app waits for completed files and queues eligible arrivals.
+4. Tap **Stop watching** to end discovery. Photos already queued can finish uploading. **Pause uploads** pauses transfers while discovery continues.
+
+The session saves its original baseline. After a restart, reopen the app and tap **Resume watching** to catch up on missed arrivals. Starting a new session creates a new baseline.
+
+- Local edits and deletions do not change website photos.
+- Identical files still use the existing SHA-256 duplicate checks.
+- Lost folder access pauses discovery and offers a restore action.
+- Failed or incomplete files remain available for retry while other files continue.
+- Watching uses a visible notification and consumes battery while active. Android controls when background transfers run.
 
 ## Installation
 
-Install over the previous beta. Pairing and queued photos are preserved. Existing pairing keys remain upload-only. To manage galleries, create a new key at your website's `/admin/galleries/devices/` page with **Allow gallery management** enabled, then reconnect in Settings. Do not uninstall or clear app data.
+Install `ayoub-gallery.apk` over the previous signed release. The app keeps your connection and queue, and migrates its local database. Android 14 or newer is required. Do not uninstall or clear app data to update.
 
-To switch from preview to production, finish or clear your current upload batch, set the website to `https://ayoubabed.xyz`, and create a production key at [Device pairing](https://ayoubabed.xyz/admin/galleries/devices/). Your preview galleries and photos stay in preview. Stable releases can be followed in Obtainium/ObtainX without enabling prereleases.
+For production, use `https://ayoubabed.xyz` and a pairing key from that website. Gallery management requires **Allow gallery management** on the key. Preview photos and keys remain separate from production.
 
-Download `ayoub-gallery.apk`. Requires Android 14+. Use this signed release for future updates; debug artifacts have a different signing key. Obtainium/ObtainX setup is in [the Android README](https://github.com/Today20092/ayoub-linktree-project/blob/master/android/README.md).
+[Setup and update instructions](https://github.com/Today20092/ayoub-linktree-project/blob/master/android/README.md)
 
-## Testing status and limitations
+## Verification and remaining field checks
 
-CI runs Android unit tests and lint before attaching the APK. Backend tests cover authorization expiry/revocation, checksum identity, duplicate/deletion behavior, concurrent requests, stale leases, and failed processing recovery.
+The implementation passed 13 unit tests and 16 Android 15 emulator tests locally, including screen-off discovery, saved-session recovery, incomplete copies, subfolders, date filtering, and paused uploads. Release CI reruns emulator tests, unit tests, lint, and signed packaging.
 
-No S25 Ultra field test has been performed. LUMIX folder access, locked-screen transfers, camera Wi-Fi with cellular, and 400-photo batches need device testing. After reboot or force-stop, open the app and resume the saved queue.
+Physical S25 Ultra/LUMIX-provider testing, real reboot recovery, large-folder timing, battery use, and end-to-end uploads through network loss remain field checks. The 15-second discovery target is not a guarantee. After a force-stop or reboot, reopen the app and resume the saved session.
 
-Management requires the website update and D1 migration `0006_gallery_device_management.sql`. Use the same website address when creating a key and connecting the app. Existing uploaded photos have no companion checksum receipts, so the first sync cannot deduplicate against those older uploads.
+This release uses the existing website upload API and needs no new server migration.

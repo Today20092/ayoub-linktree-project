@@ -100,6 +100,12 @@ private fun GalleryApp(activity: MainActivity) {
     var queue by remember { mutableStateOf(store.items()) }
     var status by remember { mutableStateOf(store.prefs.getString("message", "No uploads yet.")!!) }
     var scheduled by remember { mutableStateOf(false) }
+    var watch by remember { mutableStateOf(store.watch()) }
+    var watching by remember { mutableStateOf(FolderWatchService.running) }
+    var watchFailures by remember { mutableIntStateOf(0) }
+    var uploadsPaused by remember { mutableStateOf(store.prefs.getBoolean("uploads_paused", false)) }
+    val watchLocked = watch?.status in listOf("active", "attention")
+    val sourceLocked = watchLocked || watch != null && queue.any { it.state in listOf("queued", "uploading", "failed") }
     var clearConfirm by remember { mutableStateOf(false) }
     var managing by remember { mutableStateOf<Gallery?>(null) }
     var creating by rememberSaveable { mutableStateOf(false) }
@@ -116,6 +122,7 @@ private fun GalleryApp(activity: MainActivity) {
         }
     }
     fun select(gallery: Gallery) {
+        if (sourceLocked && gallery.id != store.batch()?.second) { problem = "Stop watching and finish or clear the queue before changing galleries."; return }
         selected = gallery
         val source = store.source(gallery.id)
         folder = source.first; since = source.second; scan = null; problem = null
@@ -123,10 +130,35 @@ private fun GalleryApp(activity: MainActivity) {
     }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         if (uri != null) try {
+            require(!sourceLocked || uri.toString() == watch?.folder) { "Choose the same watched folder to restore access. Stop watching and clear the queue to change folders." }
             activity.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             folder = uri.toString(); scan = null
             selected?.let { store.saveSource(it.id, folder, since) }
         } catch (_: Exception) { problem = "Could not keep access to that folder. Choose another folder." }
+    }
+    val restoreFolder = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        if (uri != null) try {
+            require(uri.toString() == watch?.folder) { "Select the same watched folder. Stop watching first to change folders." }
+            activity.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            problem = null
+            FolderWatchService.start(activity)
+        } catch (e: Exception) { problem = e.message ?: "Could not restore folder access." }
+    }
+    fun startWatching(gallery: Gallery) {
+        notice.launch(Manifest.permission.POST_NOTIFICATIONS)
+        scope.launch {
+            busy = true; problem = null; scan = null
+            try {
+                withContext(Dispatchers.IO) {
+                    val baseline = WatchFiles.list(activity, folder)
+                    store.startWatch(store.prefs.getString("site", "")!!, gallery, folder, since, baseline)
+                }
+                watch = store.watch()
+                FolderWatchService.start(activity)
+                tab = 1
+            } catch (e: Exception) { problem = e.message ?: "Could not start watching. Your saved session can be resumed." }
+            finally { busy = false }
+        }
     }
     fun schedule() {
         notice.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -143,6 +175,10 @@ private fun GalleryApp(activity: MainActivity) {
     LaunchedEffect(Unit) {
         while(true) {
             queue = withContext(Dispatchers.IO) { store.items() }
+            watch = store.watch()
+            watching = FolderWatchService.running
+            uploadsPaused = store.prefs.getBoolean("uploads_paused", false)
+            watchFailures = withContext(Dispatchers.IO) { store.watchEntries().values.count { it.state == "failed" } }
             status = UploadJobService.pendingMessage(activity, wifi) ?: store.prefs.getString("message", "No uploads yet.")!!
             scheduled = activity.getSystemService(JobScheduler::class.java).getPendingJob(UploadJobService.JOB_ID) != null
             delay(1000)
@@ -186,6 +222,37 @@ private fun GalleryApp(activity: MainActivity) {
         Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
             LazyColumn(Modifier.widthIn(max = 640.dp).fillMaxSize(), contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 if (problem != null) item { Message(problem!!, true) }
+                if (watch != null) item {
+                    SectionCard("Watched folder", Icons.Outlined.FolderOpen) {
+                        Text(store.batch()?.third.orEmpty(), style = MaterialTheme.typography.titleMedium)
+                        Text(when {
+                            watch?.status == "stopped" -> "Watching stopped. Queued photos can finish uploading."
+                            !watching && watch?.status == "active" -> "Session saved. Resume watching to catch up on missed arrivals."
+                            else -> watch?.message.orEmpty()
+                        })
+                        Text("New arrivals only · Subfolders included · Upload only", style = MaterialTheme.typography.bodySmall)
+                        if (watchLocked) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                if (!watching) Button(onClick = {
+                                    try { notice.launch(Manifest.permission.POST_NOTIFICATIONS); FolderWatchService.start(activity) }
+                                    catch (e: Exception) { problem = e.message ?: "Could not resume watching." }
+                                }) { Text("Resume watching") }
+                                OutlinedButton(onClick = { FolderWatchService.stop(activity); watch = store.watch() }) { Text("Stop watching") }
+                            }
+                            if (watch?.status == "attention") TextButton(onClick = { restoreFolder.launch(watch?.folder?.let(Uri::parse)) }) { Text("Restore folder access") }
+                            if (watchFailures > 0) TextButton(onClick = {
+                                store.watchEntries().values.filter { it.state == "failed" }.forEach { store.saveWatchEntry(it.copy(state = "waiting", failures = 0, stableSince = System.currentTimeMillis())) }
+                            }) { Text("Retry $watchFailures unreadable files") }
+                            TextButton(onClick = {
+                                if (uploadsPaused) {
+                                    store.prefs.edit().putBoolean("uploads_paused", false).apply()
+                                    if (queue.any { it.state in listOf("queued", "uploading", "failed") }) { store.retry(); schedule() }
+                                } else UploadJobService.pause(activity)
+                                uploadsPaused = !uploadsPaused
+                            }) { Text(if (uploadsPaused) "Resume uploads" else "Pause uploads") }
+                        }
+                    }
+                }
                 when(tab) {
                     0 -> {
                         if (!connected) item {
@@ -233,16 +300,16 @@ private fun GalleryApp(activity: MainActivity) {
                                 if(gallery.status != "published") item { Message("This gallery is ${gallery.status.replace('_',' ')}. You can upload now; its visibility stays unchanged.") }
                                 item {
                                     SectionCard("Photo source", Icons.Outlined.FolderOpen, "Choose the LUMIX transfer folder or a folder from your SD card. Subfolders are included.") {
-                                        FilledTonalButton(onClick = { picker.launch(folder.takeIf { it.isNotBlank() }?.let(Uri::parse)) }, enabled = !busy, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
+                                        FilledTonalButton(onClick = { picker.launch(folder.takeIf { it.isNotBlank() }?.let(Uri::parse)) }, enabled = !busy && !sourceLocked, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
                                             Icon(Icons.Outlined.FolderOpen, null); Spacer(Modifier.width(8.dp)); Text(if(folder.isBlank()) "Choose folder" else "Change folder")
                                         }
                                         if(folder.isNotBlank()) Text(Uri.decode(folder.substringAfterLast('/')), style = MaterialTheme.typography.bodyMedium)
                                         HorizontalDivider()
                                         Text("Photos taken since", style = MaterialTheme.typography.titleSmall)
-                                        OutlinedButton(onClick = { pickSinceDate = true }, enabled = !busy, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
+                                        OutlinedButton(onClick = { pickSinceDate = true }, enabled = !busy && !sourceLocked, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
                                             Icon(Icons.Outlined.Schedule,null); Spacer(Modifier.width(8.dp)); Text(if(since == 0L) "All photos in this folder" else DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.SHORT).format(Date(since)))
                                         }
-                                        if(since != 0L) TextButton(onClick = { since = 0; scan = null; store.saveSource(gallery.id,folder,0) }) { Text("Include all dates") }
+                                        if(since != 0L) TextButton(onClick = { since = 0; scan = null; store.saveSource(gallery.id,folder,0) }, enabled = !busy && !sourceLocked) { Text("Include all dates") }
                                         Text("Camera time uses your phone’s timezone unless the photo includes one.", style = MaterialTheme.typography.bodySmall)
                                     }
                                 }
@@ -250,7 +317,7 @@ private fun GalleryApp(activity: MainActivity) {
                                     SectionCard("Ready when you are", Icons.Outlined.CloudUpload) {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Column(Modifier.weight(1f)) { Text("Wi-Fi only", style = MaterialTheme.typography.titleMedium); Text("Wait for unmetered Wi-Fi", style = MaterialTheme.typography.bodySmall) }
-                                            Switch(wifi, onCheckedChange = { wifi = it; store.prefs.edit().putBoolean("wifi",it).apply() })
+                                            Switch(wifi, onCheckedChange = { wifi = it; store.prefs.edit().putBoolean("wifi",it).apply() }, enabled = !scheduled && !watchLocked)
                                         }
                                         Text("Photos follow the gallery’s visibility. Existing photos are skipped. Nothing is deleted from your phone.", style = MaterialTheme.typography.bodyMedium)
                                         Button(onClick = {
@@ -260,9 +327,13 @@ private fun GalleryApp(activity: MainActivity) {
                                                 catch (e: Exception) { problem = e.message ?: "Could not scan folder." }
                                                 finally { busy = false }
                                             }
-                                        }, enabled = folder.isNotBlank() && !busy && !queue.any { it.state in listOf("queued","uploading","failed") }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                                        }, enabled = folder.isNotBlank() && !busy && !watchLocked && !scheduled && !queue.any { it.state in listOf("queued","uploading","failed") }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
                                             Icon(Icons.Outlined.Sync, null); Spacer(Modifier.width(10.dp)); Text(if(busy) "Checking $scanned photos…" else "Check for photos")
                                         }
+                                        OutlinedButton(onClick = { startWatching(gallery) }, enabled = folder.isNotBlank() && !busy && !watchLocked && !watching && !scheduled && !queue.any { it.state in listOf("queued", "uploading", "failed") }, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) {
+                                            Icon(Icons.Outlined.FolderOpen, null); Spacer(Modifier.width(10.dp)); Text("Start watching")
+                                        }
+                                        Text("Watching skips files already present, then automatically queues completed new JPEGs using your selected date and time.", style = MaterialTheme.typography.bodySmall)
                                         if(busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                                         if(queue.any { it.state in listOf("queued","uploading","failed") }) TextButton(onClick = { tab = 1 }) { Text("Finish or clear the previous batch first") }
                                     }
@@ -283,7 +354,7 @@ private fun GalleryApp(activity: MainActivity) {
                                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                         if(scheduled) FilledTonalButton(onClick = { UploadJobService.pause(activity) }) { Icon(Icons.Outlined.Pause,null); Text("Pause") }
                                         else if(queue.any { it.state in listOf("queued","uploading","failed") }) Button(onClick = { store.retry(); schedule() }) { Icon(Icons.Outlined.PlayArrow,null); Text(if(queue.any { it.state == "failed" }) "Retry" else "Resume") }
-                                        if(!scheduled) TextButton(onClick = { clearConfirm = true }) { Text("Clear batch") }
+                                        if(!scheduled && !watchLocked) TextButton(onClick = { clearConfirm = true }) { Text("Clear batch") }
                                     }
                                 } else TextButton(onClick = { tab = 0 }) { Text("Choose photos to upload") }
                             }
@@ -297,7 +368,7 @@ private fun GalleryApp(activity: MainActivity) {
                     2 -> {
                         item {
                             SectionCard(if(connected) "Website connected" else "Make the connection", Icons.Outlined.Link, "Create a pairing key in your gallery dashboard, then paste it here. Your computer is not needed.") {
-                                OutlinedTextField(website, onValueChange = { website = it }, label = { Text("Website address") }, singleLine = true, modifier = Modifier.fillMaxWidth(), enabled = !busy && !store.hasPending())
+                                OutlinedTextField(website, onValueChange = { website = it }, label = { Text("Website address") }, singleLine = true, modifier = Modifier.fillMaxWidth(), enabled = !busy && !watchLocked && !store.hasPending())
                                 OutlinedTextField(key, onValueChange = { key = it.trim() }, label = { Text("Pairing key") }, visualTransformation = PasswordVisualTransformation(), singleLine = true, modifier = Modifier.fillMaxWidth(), enabled = !busy)
                                 TextButton(onClick = {
                                     try { activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("${SyncRules.site(website)}/admin/galleries/devices/"))) }
@@ -316,7 +387,7 @@ private fun GalleryApp(activity: MainActivity) {
                                         } catch (e: Exception) { problem = e.message ?: "Could not connect." }
                                         finally { busy = false }
                                     }
-                                }, enabled = !busy && key.isNotBlank() && !scheduled, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text(if(busy) "Connecting…" else if(connected) "Update connection" else "Connect") }
+                                }, enabled = !busy && key.isNotBlank() && !scheduled && !watchLocked, modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp)) { Text(if(busy) "Connecting…" else if(connected) "Update connection" else "Connect") }
                                 if(store.hasPending()) Text("Finish or clear the current batch before changing websites.", style = MaterialTheme.typography.bodySmall)
                             }
                         }

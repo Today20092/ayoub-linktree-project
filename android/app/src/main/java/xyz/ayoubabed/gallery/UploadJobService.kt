@@ -31,38 +31,69 @@ class UploadJobService : JobService() {
     override fun onStartJob(params: JobParameters): Boolean {
         setNotification(params, 7, notification("Preparing your photos"), JOB_END_NOTIFICATION_POLICY_REMOVE)
         work = scope.launch {
+            var reschedule = false
             try {
                 store.recover()
                 val batch = store.batch() ?: return@launch
                 val token = store.token()
                 if (token.isBlank() || batch.first != store.prefs.getString("site", "")) {
+                    store.prefs.edit().putBoolean("uploads_paused", true).apply()
                     store.message("Reconnect this website in Settings, then resume."); return@launch
                 }
                 store.message("Uploading to ${batch.third}")
                 val queued = store.items().filter { it.state == "queued" }
                 val known = GalleryApi.known(batch.first, batch.second, token, queued.map { it.hash }, params.network)
                 ensureActive()
+                if (store.batch() != batch) return@launch
                 queued.filter { it.hash in known }.forEach { store.state(it.id, "skipped") }
-                for (item in store.items().filter { it.state == "queued" }) {
+                for (original in store.items().filter { it.state == "queued" }) {
                     ensureActive()
+                    if (store.batch() != batch) return@launch
+                    var item = original
                     var attempt = item.attempts
                     while (true) {
                         ensureActive()
                         store.state(item.id, "uploading", attempts = ++attempt)
                         try {
+                            if (item.watchPath.isNotBlank()) {
+                                val photo = try {
+                                    val file = WatchFiles.metadata(this@UploadJobService, WatchedFile(item.watchPath, item.uri, item.name, item.size, 0))
+                                    val observed = store.watchEntries()[item.watchPath]?.file
+                                    if (observed == null || !WatchRules.sameVersion(observed, file)) delay(WatchRules.SETTLE_MS)
+                                    if (!WatchRules.sameVersion(file, WatchFiles.metadata(this@UploadJobService, file))) throw IncompletePhoto()
+                                    WatchFiles.read(this@UploadJobService, file)
+                                } catch (error: CancellationException) { throw error }
+                                catch (error: IncompletePhoto) { throw error }
+                                catch (error: Exception) { throw ApiException(400, error.message ?: "Photo is no longer readable. Restore the source file, then retry.") }
+                                ensureActive()
+                                if (photo.taken < (store.watch()?.since ?: 0)) { store.state(item.id, "skipped", "Outside the selected capture-time filter."); break }
+                                item = store.refreshWatchedPhoto(item, photo) ?: break
+                                if (item.hash != original.hash && item.hash in GalleryApi.known(batch.first, batch.second, token, listOf(item.hash), params.network)) {
+                                    store.state(item.id, "skipped"); break
+                                }
+                            }
                             val state = GalleryApi.upload(this@UploadJobService, batch.first, batch.second, token, item, params.network)
                             ensureActive()
                             store.state(item.id, state)
                             break
                         } catch (error: CancellationException) { throw error }
                         catch (error: Exception) {
+                            if (item.watchPath.isNotBlank() && (error is IncompletePhoto || error is ApiException && error.code == 400 && error.message.orEmpty().contains("Photo changed"))) {
+                                store.state(item.id, if (attempt < 12) "queued" else "failed", "Photo is changing or incomplete. Check the source file, then retry.", attempt)
+                                if (attempt < 12) reschedule = true
+                                break
+                            }
                             val retryable = error !is ApiException || SyncRules.retryable(error.code)
                             if (retryable && attempt < 4) {
                                 store.state(item.id, "queued", "Connection interrupted. Retrying…", attempt)
                                 delay(2000L shl (attempt - 1)); continue
                             }
-                            store.state(item.id, "failed", error.message ?: "Upload interrupted.", attempt)
-                            if (error is ApiException && error.code in listOf(401, 403, 404, 422)) {
+                            if (retryable && item.watchPath.isNotBlank() && (error is java.io.IOException || error is ApiException)) {
+                                store.state(item.id, "queued", "Waiting for the connection to recover.", 0)
+                                reschedule = true
+                            } else store.state(item.id, "failed", error.message ?: "Upload interrupted.", attempt)
+                            if (error is ApiException && error.code in listOf(401, 403, 404)) {
+                                store.prefs.edit().putBoolean("uploads_paused", true).apply()
                                 store.message(error.message ?: "Check the connection and gallery."); return@launch
                             }
                             break
@@ -72,15 +103,30 @@ class UploadJobService : JobService() {
                     val done = items.count { it.state in listOf("uploaded", "skipped") }
                     getSystemService(NotificationManager::class.java).notify(7, notification("$done of ${items.size} photos complete"))
                 }
-                store.message(if (store.items().any { it.state == "failed" }) "Some photos need attention. Tap Retry." else "Batch complete. Sync again when new photos arrive.")
+                store.message(when {
+                    reschedule -> "Waiting to retry unfinished photos."
+                    store.items().any { it.state == "failed" } -> "Some photos need attention. Tap Retry."
+                    store.watchLocked() -> "Uploads caught up. Watching for new arrivals."
+                    else -> "Batch complete."
+                })
             } catch (_: CancellationException) { /* onStopJob owns rescheduling. */ }
-            catch (error: Exception) { store.message(error.message ?: "Upload interrupted. Your queue is saved. Tap Resume.") }
-            finally { if (currentCoroutineContext().isActive) jobFinished(params, false) }
+            catch (error: Exception) {
+                reschedule = store.watch() != null && (error !is ApiException || SyncRules.retryable(error.code))
+                if (!reschedule) store.prefs.edit().putBoolean("uploads_paused", true).apply()
+                store.message(error.message ?: "Upload interrupted. Your queue is saved. Tap Resume.")
+            }
+            finally {
+                if (currentCoroutineContext().isActive) {
+                    val remaining = store.watch() != null && store.items().any { it.state == "queued" }
+                    jobFinished(params, (reschedule || remaining) && !store.prefs.getBoolean("uploads_paused", false))
+                }
+            }
         }
         return true
     }
     override fun onStopJob(params: JobParameters): Boolean {
         work?.cancel()
+        if (params.stopReason == JobParameters.STOP_REASON_USER) store.prefs.edit().putBoolean("uploads_paused", true).apply()
         store.message("Waiting for a connection, or paused. Your queue is saved.")
         return params.stopReason != JobParameters.STOP_REASON_CANCELLED_BY_APP && params.stopReason != JobParameters.STOP_REASON_USER
     }
@@ -95,9 +141,9 @@ class UploadJobService : JobService() {
                 if(wifiOnly) { addTransportType(NetworkCapabilities.TRANSPORT_WIFI); addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED) }
             }.build()
 
-        fun jobInfo(context: Context, wifiOnly: Boolean, sizes: List<Long>): JobInfo =
+        fun jobInfo(context: Context, wifiOnly: Boolean, sizes: List<Long>, userInitiated: Boolean = true): JobInfo =
             JobInfo.Builder(JOB_ID, ComponentName(context, UploadJobService::class.java))
-                .setUserInitiated(true).setRequiredNetwork(networkRequest(wifiOnly))
+                .setUserInitiated(userInitiated).setRequiredNetwork(networkRequest(wifiOnly))
                 .setEstimatedNetworkBytes(0, sizes.sum())
                 // Each completed photo is durable; the whole batch need not fit in one run.
                 .setMinimumNetworkChunkBytes(sizes.maxOrNull()?.coerceAtLeast(1) ?: 1)
@@ -119,13 +165,28 @@ class UploadJobService : JobService() {
             }
         }
 
-        fun schedule(context: Context, wifiOnly: Boolean): Boolean {
+        @Synchronized fun schedule(context: Context, wifiOnly: Boolean): Boolean {
             val store = Store(context)
+            store.prefs.edit().putBoolean("uploads_paused", false).commit()
             val info = jobInfo(context, wifiOnly, store.items().filter { it.state == "queued" }.map { it.size })
             store.message("Queued. Asking Android to start the transfer…")
             return context.getSystemService(JobScheduler::class.java).schedule(info) == JobScheduler.RESULT_SUCCESS
         }
-        fun pause(context: Context) {
+        @Synchronized fun scheduleAutomatic(context: Context) {
+            Store(context).use { store ->
+                if (store.watch() == null || store.prefs.getBoolean("uploads_paused", false)) return
+                val scheduler = context.getSystemService(JobScheduler::class.java)
+                if (scheduler.getPendingJob(JOB_ID) != null) return
+                val items = store.items().filter { it.state == "queued" }
+                if (items.isEmpty()) return
+                val info = jobInfo(context, store.prefs.getBoolean("wifi", false), items.map { it.size }, userInitiated = false)
+                try {
+                    if (scheduler.schedule(info) != JobScheduler.RESULT_SUCCESS) store.message("Android could not schedule uploads. Tap Resume.")
+                } catch (_: Exception) { store.message("Android could not schedule uploads. Tap Resume.") }
+            }
+        }
+        @Synchronized fun pause(context: Context) {
+            Store(context).use { it.prefs.edit().putBoolean("uploads_paused", true).commit() }
             context.getSystemService(JobScheduler::class.java).cancel(JOB_ID)
             Store(context).message("Paused. Tap Resume when you’re ready.")
         }

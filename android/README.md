@@ -8,12 +8,12 @@ The interface takes design direction from [ImageToolbox](https://github.com/T8RI
 
 [Download from GitHub Releases](https://github.com/Today20092/ayoub-linktree-project/releases) · [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22xyz.ayoubabed.gallery%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FToday20092%2Fayoub-linktree-project%22%2C%22author%22%3A%22Today20092%22%2C%22name%22%3A%22Ayoub%20Gallery%22%7D)
 
-Install `ayoub-gallery.apk` from an **Android** release. Android 14 or newer is required. The app ID is `xyz.ayoubabed.gallery`. The first releases are prereleases for device testing, not claims of completed field testing.
+Install `ayoub-gallery.apk` from the latest stable Android release. Android 14 or newer is required. The app ID is `xyz.ayoubabed.gallery`. Watched-folder uploads are included starting with 0.4.0; physical-phone testing limits are listed in the release notes.
 
 In Obtainium or ObtainX:
 
 1. Add `https://github.com/Today20092/ayoub-linktree-project` as the source.
-2. Enable prereleases while testing the beta.
+2. Leave prereleases off for stable updates. Enable them only when testing a beta.
 3. Set the release-title filter to `^Ayoub Gallery` and APK filter to `^ayoub-gallery\.apk$` if the client offers these filters.
 4. Install the signed release APK. Later versions use the same application ID and signing key, so they update the app without clearing its connection or queue.
 
@@ -28,13 +28,13 @@ The app defaults to the production website, `https://ayoubabed.xyz`. The website
 3. Name your phone and enable **Allow gallery management** to create galleries and change their settings. Create the key, copy it into the app, and tap **Connect**. Use a key from the same website you selected.
 4. Pick any gallery, including hidden or coming-soon galleries. Choose the LUMIX folder or an SD-import folder using Android's directory picker.
 5. For LUMIX's shared folder, set **Photos taken since**. For a dedicated event folder, leave all dates selected.
-6. Check for photos, review the count, and tap **Sync photos**. Allow notifications to see progress while the phone is locked.
+6. For a one-time batch, check for photos, review the count, and tap **Sync photos**. For ongoing imports, tap **Start watching** before importing new photos. Allow notifications to see progress and stop watching while the phone is locked.
 
 Device keys allow listing galleries and uploading photos, expire in 90 days, and can be revoked in the dashboard. Explicitly enabled management keys also allow gallery creation, settings, and moderation. The phone encrypts its key using Android Keystore. Backups are disabled so the key is not exported with app data. Switching websites never moves galleries or photos between environments.
 
 ## Sync behavior
 
-- A sync captures a fixed batch; new arrivals wait for the next scan.
+- A manual sync captures a fixed batch; new arrivals wait for the next scan. **Start watching** instead continuously discovers new arrivals in the selected folder and its subfolders.
 - JPEG files up to 20 MB are supported. The server keeps the existing 2400px, quality-90 web processing.
 - SHA-256 identifies identical original bytes within each gallery, including renamed files. A small checksum check skips known files before transferring their bytes. Server receipts survive later photo removal. Edited/recompressed files count as new photos. Previously uploaded website photos without companion receipts cannot be recognized retroactively.
 - EXIF capture time is preferred. Without a usable capture date, file modification time is used and disclosed before upload. EXIF without an offset uses the phone's timezone; set the camera clock correctly.
@@ -43,6 +43,18 @@ Device keys allow listing galleries and uploading photos, expire in 90 days, and
 - Wi-Fi-only waits for unmetered Wi-Fi. Otherwise Android can use an available internet connection. Camera Wi-Fi plus cellular must be tested on the S25 Ultra.
 - Uploads preserve the gallery's visibility. Hidden and coming-soon galleries can receive photos before you publish them in the dashboard.
 - Tailscale and other VPN networks are eligible for transfers. The queue displays Android's pending-job reason when a job is delayed. After updating from the first beta, tap **Pause**, then **Resume** to replace the old network request without clearing your queue.
+
+## Watched-folder uploads
+
+Select one gallery, folder, capture-time filter, and Wi-Fi preference, then tap **Start watching**. Existing JPEG paths become the session's baseline and are excluded. Completed new JPEGs are automatically queued; the selected capture-time filter still applies. As with manual scans, missing EXIF capture times fall back to the file date. Edited or replaced files at an already handled path do not create another automatic upload. SHA-256 receipts still skip identical bytes at new paths.
+
+**Stop watching** ends discovery and lets queued uploads finish. **Pause uploads** leaves discovery running and saves new arrivals for later. Finish or clear the queue after stopping before selecting another folder, gallery, or capture-time filter. Wi-Fi preference changes require stopping watching and pausing any scheduled transfer.
+
+The session and baseline survive process death and reboot. Reopen the app and tap **Resume watching** to catch up on missed arrivals; this preserves the original baseline. Starting a new session establishes a new baseline. Folder-access loss pauses discovery and offers **Restore folder access**, which must select the same folder. Files that remain unreadable or incomplete are listed for retry while other arrivals continue.
+
+Discovery checks provider metadata every five seconds and waits for stable metadata and a complete JPEG before queueing. It checks the source again before upload; the server verifies SHA-256 against the received bytes. Unchanged handled files are not repeatedly hashed. The target is discovery within 15 seconds of a completed copy, but folder size, provider speed, Android power management, and device conditions can extend this. Test the actual LUMIX/SD provider and screen-locked behavior on the intended phone.
+
+Watching uses a visible foreground service with a Stop action and a renewable wake lock for the user-started session. It consumes battery while active. Network transfers use separate network-constrained jobs; Android may delay them. No boot receiver automatically starts watching. See [the design and verification notes](../docs/android-watched-folder-design.md).
 
 ## GitHub builds and signing
 
