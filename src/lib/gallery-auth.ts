@@ -1,3 +1,5 @@
+import { pbkdf2 } from 'node:crypto'
+
 const encoder = new TextEncoder()
 
 const PASSWORD_ITERATIONS = 210_000
@@ -22,25 +24,14 @@ function fromBase64Url(value: string) {
 }
 
 async function derivePassword(password: string, salt: Uint8Array<ArrayBuffer>) {
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(password),
-    'PBKDF2',
-    false,
-    ['deriveBits'],
-  )
-  return new Uint8Array(
-    await crypto.subtle.deriveBits(
-      {
-        name: 'PBKDF2',
-        hash: 'SHA-256',
-        salt,
-        iterations: PASSWORD_ITERATIONS,
-      },
-      key,
-      256,
-    ),
-  )
+  // Workers Web Crypto caps PBKDF2 at 100,000 iterations. Node crypto keeps
+  // the existing 210,000-iteration verifier format without resetting passwords.
+  return new Promise<Uint8Array<ArrayBuffer>>((resolve, reject) => {
+    pbkdf2(password, salt, PASSWORD_ITERATIONS, 32, 'sha256', (error, key) => {
+      if (error) reject(error)
+      else resolve(new Uint8Array(key))
+    })
+  })
 }
 
 async function passwordKey(password: string, salt: Uint8Array<ArrayBuffer>) {

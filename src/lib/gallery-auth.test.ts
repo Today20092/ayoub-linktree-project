@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { createHmac, pbkdf2Sync } from 'node:crypto'
 
 import {
   createGallerySession,
@@ -28,6 +29,44 @@ test('hashes and verifies gallery passwords', async () => {
   )
   assert.equal(validGalleryPassword('short'), false)
   assert.equal(validGalleryPassword('eight888'), true)
+})
+
+test('passwords work with Workers Web Crypto limits and preserve existing hashes', async (t) => {
+  t.mock.method(crypto.subtle, 'deriveBits', () => {
+    throw new DOMException(
+      'Pbkdf2 iteration counts above 100000 are not supported',
+      'NotSupportedError',
+    )
+  })
+  const password = 'correct horse battery staple'
+  const stored = await hashGalleryPassword(password)
+  assert.equal(
+    await verifyGalleryPassword(password, stored.salt, stored.hash),
+    true,
+  )
+  const salt = Buffer.from('0123456789abcdef')
+  const legacyHash = createHmac(
+    'sha256',
+    pbkdf2Sync(password, salt, 210_000, 32, 'sha256'),
+  )
+    .update('gallery-password-verifier')
+    .digest('base64url')
+  assert.equal(
+    await verifyGalleryPassword(
+      password,
+      salt.toString('base64url'),
+      legacyHash,
+    ),
+    true,
+  )
+  assert.equal(
+    await verifyGalleryPassword(
+      'wrong-password',
+      salt.toString('base64url'),
+      legacyHash,
+    ),
+    false,
+  )
 })
 
 test('signs event-scoped expiring sessions', async () => {
