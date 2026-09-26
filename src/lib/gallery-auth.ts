@@ -1,4 +1,5 @@
-import { pbkdf2 } from 'node:crypto'
+import { pbkdf2Async } from '@noble/hashes/pbkdf2.js'
+import { sha256 } from '@noble/hashes/sha2.js'
 
 const encoder = new TextEncoder()
 
@@ -24,14 +25,14 @@ function fromBase64Url(value: string) {
 }
 
 async function derivePassword(password: string, salt: Uint8Array<ArrayBuffer>) {
-  // Workers Web Crypto caps PBKDF2 at 100,000 iterations. Node crypto keeps
-  // the existing 210,000-iteration verifier format without resetting passwords.
-  return new Promise<Uint8Array<ArrayBuffer>>((resolve, reject) => {
-    pbkdf2(password, salt, PASSWORD_ITERATIONS, 32, 'sha256', (error, key) => {
-      if (error) reject(error)
-      else resolve(new Uint8Array(key))
-    })
-  })
+  // Workers caps both native PBKDF2 APIs at 100,000 iterations. Keep the
+  // existing verifier format with a portable implementation of the same KDF.
+  return new Uint8Array(
+    await pbkdf2Async(sha256, encoder.encode(password), salt, {
+      c: PASSWORD_ITERATIONS,
+      dkLen: 32,
+    }),
+  )
 }
 
 async function passwordKey(password: string, salt: Uint8Array<ArrayBuffer>) {
