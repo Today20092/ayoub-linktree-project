@@ -2,7 +2,7 @@ export const GALLERY_MEDIA_PATH = '/api/gallery-media'
 const LEGACY_ORIGIN = 'https://photos.ayoubabed.xyz'
 
 export function galleryObjectUrl(key: string) {
-  return `${GALLERY_MEDIA_PATH}/${key}`
+  return `${GALLERY_MEDIA_PATH}/${key}/`
 }
 
 export function galleryMediaKey(path: string) {

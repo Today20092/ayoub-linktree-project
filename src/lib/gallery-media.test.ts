@@ -59,7 +59,7 @@ test('uploaded photos and saved covers resolve against their own environment', a
     id: 'photo',
     object_key: key,
   } as GalleryPhoto)
-  assert.equal(photo.src, `/api/gallery-media/${key}`)
+  assert.equal(photo.src, `/api/gallery-media/${key}/`)
   const cover = publicEventCover({
     cover_src: `https://photos.ayoubabed.xyz/${key}`,
     cover_width: 1200,
