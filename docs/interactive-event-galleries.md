@@ -5,20 +5,16 @@ R2, Cloudflare Images, and Cloudflare Access. Gallery pages read moderation
 state at request time, so publishing or hiding a photo does not rebuild the
 site.
 
-## Provisioned resources
+## Storage and environments
 
 - D1 database: `ayoub-gallery-data`
 - Public R2 bucket: `alphabravomedia-galleries`
 - Private pending R2 bucket: `alphabravomedia-gallery-uploads`
 - Worker secret: `GALLERY_SESSION_SECRET`
 
-The initial D1 migration has been applied locally and remotely. For future
-migrations:
+These names describe production. Preview uses its own D1 database and R2 buckets, configured by `scripts/deploy-preview-worker.mjs`. Check those bindings before any upload or moderation test. Pairing keys and gallery data stay in the environment where they were created.
 
-```powershell
-npx wrangler d1 migrations apply GALLERY_DB --local
-npx wrangler d1 migrations apply GALLERY_DB --remote
-```
+Schema changes live in `migrations/`. Check outstanding migrations for the intended database before rollout, apply and test them in preview first, then follow the authorized production procedure in [AGENTS.md](../AGENTS.md). Avoid treating a past deployment's migration status as the state of a new environment.
 
 Cloudflare Images Paid must be active for HEIC decoding, resizing, and JPEG
 output. Do not attach a public domain to the pending bucket.
@@ -49,6 +45,8 @@ The application verifies the Access JWT signature, issuer, audience, expiry,
 and authenticated email. It returns `403` when any value is missing or invalid.
 Localhost is allowed for development.
 
+Android's `/api/companion/*` routes use device bearer keys and must remain outside interactive Access redirects. Create keys at `/admin/galleries/devices/`; gallery creation and management require the management permission. See [native gallery management](native-gallery-management.md).
+
 ## Local development
 
 Create an ignored `.dev.vars` file:
@@ -69,7 +67,7 @@ this setting is enabled.
 
 ## Moderation behavior
 
-- New files are validated, converted to a maximum 2400-pixel progressive JPEG,
+- Password-based guest submissions are validated, converted to a maximum 2400-pixel progressive JPEG,
   and stored only in the private pending bucket.
 - Approval copies the optimized JPEG to
   `events/{event-slug}/guest/{photo-id}.jpg`, updates D1, and removes the
@@ -85,11 +83,13 @@ Guest photos are shown in a separate community section and participate in
 individual and selection downloads. They are not added to the professional ZIP
 or face-search index.
 
+Photographer uploads from the dashboard or Android app and trusted guest-invite uploads enter the direct gallery-photo flow. They do not wait in the password-based guest moderation queue. Uploaded public media is served through `/api/gallery-media/` from that environment's R2 bucket. Pending media requires authenticated access. Hidden and coming-soon statuses control gallery pages, not secrecy of previously published image URLs.
+
 ## Verification
 
 ```powershell
 npm run verify
-npx wrangler deploy --dry-run
+npm run deploy:dry-run
 ```
 
 Pilot one event before opening uploads broadly. Confirm password throttling,

@@ -1,747 +1,113 @@
-# Ayoub Abedrabbo Portfolio
+# Ayoub's website and gallery app
 
-Personal portfolio and link hub for Ayoub Abedrabbo, a Tampa-based
-photographer, videographer, field producer, colorist, audio technician, and web
-developer.
+This repository contains Ayoub Abedrabbo's personal website, portfolio, event galleries, gallery dashboard, and native Android companion. The homepage is also the link hub for social profiles, contact details, channels, and payment links.
 
-The live website is [ayoubabed.xyz](https://ayoubabed.xyz).
+[Website](https://ayoubabed.xyz) · [Gallery dashboard](https://ayoubabed.xyz/admin/galleries/) · [Download Android](https://github.com/Today20092/ayoub-linktree-project/releases/latest) · [Android setup](android/README.md)
 
-## Android gallery uploader
+## Project map
 
-[Download the Android APK](https://github.com/Today20092/ayoub-linktree-project/releases) · [Setup and Obtainium guide](android/README.md) · [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22xyz.ayoubabed.gallery%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FToday20092%2Fayoub-linktree-project%22%2C%22author%22%3A%22Today20092%22%2C%22name%22%3A%22Ayoub%20Gallery%22%7D)
+| Part                     | Purpose                                               | Source                                                          |
+| ------------------------ | ----------------------------------------------------- | --------------------------------------------------------------- |
+| Homepage and link hub    | Introduction, links, channels, and portfolio cards    | `src/pages/index.astro`, `src/data/site.yaml`                   |
+| Portfolio                | Curated projects and case studies                     | `src/content/portfolio/`, `src/pages/portfolio/[slug].astro`    |
+| Services and information | Services, About, Contact, and Privacy                 | Their named Astro files in `src/pages/`                         |
+| Public galleries         | Event photos, viewing, downloads, and guest uploads   | `src/pages/galleries/`, `src/pages/galleries.astro`             |
+| Gallery dashboard        | Gallery creation, settings, uploads, and moderation   | `src/pages/admin/galleries/`, `src/components/AdminGallery.tsx` |
+| Android app              | Upload camera JPEGs and manage galleries from a phone | `android/`                                                      |
+| Payments                 | Payment destinations and QR sharing                   | `src/pages/payments.astro`, [payment guide](docs/payments.md)   |
 
-Ayoub Gallery is a native Material 3 companion for selecting a camera-transfer folder and publishing JPEG batches directly to an event gallery. It supports a capture-time cutoff, duplicate skipping, and a persistent upload queue. Android 14 or newer is required.
+A portfolio piece is curated work used to explain a project. A gallery is a photo collection for delivery, browsing, and uploads. Create galleries in the dashboard or Android app. Use MDX for portfolio case studies. Older manifest-based galleries remain supported.
 
-GitHub Actions builds the APK. For updates through Obtainium or ObtainX, add this repository as a source and enable prereleases during beta testing. Full installation, pairing, signing, and testing notes are in the [Android README](android/README.md). The website companion API must be deployed separately before pairing works; an APK release does not deploy the website.
+## Android app
 
-This README describes the project as it exists in June 2026. It is intended to
-help Ayoub, collaborators, and AI coding agents understand where content lives,
-how pages are generated, and how to update the website safely.
+Install `ayoub-gallery.apk` from the latest stable Android release. Android 14 or newer is required.
 
-## What the website does
+1. Open Settings and enter `https://ayoubabed.xyz` as the website address.
+2. Tap **Get a pairing key** and sign in to the website dashboard.
+3. Create a key with **Allow gallery management** enabled.
+4. Paste the key into the app and connect.
+5. Create or select a gallery. Edit its details, visibility, guest access, and photos through the native management screens.
+6. Select a camera-transfer folder, review the photos, and start an upload batch.
 
-The homepage combines:
+The app keeps its queue on the phone and skips identical files already uploaded through the companion API to that gallery. It sends photos to the website's storage without a desktop server. Date and time pickers follow the phone's theme.
 
-- A short personal introduction
-- Contact and social links
-- YouTube channel links
-- Portfolio project cards
-- Support and payment links
+The [Android README](android/README.md) covers folder access, retries, Obtainium/ObtainX updates, local builds, and signing. [Release notes](android/RELEASE_NOTES.md) describe the release's capabilities and testing limits.
 
-Each portfolio project has its own URL and editable MDX file. Portfolio pages
-share one design template, so project content can be updated without rebuilding
-the page layout each time.
+### Watched-folder release status
 
-The site supports light and dark modes based on the visitor's system
-preference.
+Watched-folder uploads are included starting with Android 0.4.0. Physical-phone and LUMIX-provider testing remains; see the release notes for testing limits.
 
-## Technology
+The feature watches for new JPEG arrivals after a session starts, then queues them for upload. Existing files form the starting baseline. It does not mirror phone edits or deletions to the website. See [implementation and verification notes](docs/android-watched-folder-design.md).
 
-- [Astro](https://astro.build/) for pages, routing, and static generation
-- Astro Content Collections for structured portfolio content
-- MDX for individually editable case studies
-- Tailwind CSS v4 for styling
-- shadcn/ui and Radix-based UI components
-- React for the small number of React components
-- astro-icon and Lucide for icons
-- Prettier for formatting
-- Cloudflare Workers with static assets for hosting
+## Gallery visibility and storage
 
-The production site is built from the linked GitHub repository and deployed to
-Cloudflare.
+- **Published** shows the gallery and its photos publicly.
+- **Coming soon** shows event information while withholding photos.
+- **Hidden** removes the gallery from public pages. Its public page returns 404.
 
-## How the architecture works
+Uploading does not change visibility. A hidden gallery can receive photos before publication. Visibility controls gallery pages; it is not private-file access control for images already in the public bucket.
 
-The website separates three concerns:
+The website runs on an Astro Cloudflare Worker. D1 stores gallery metadata, moderation state, device permissions, and upload receipts. R2 stores images. Cloudflare Images processes uploads. Password-based guest submissions wait in a private bucket until approved. Photographer and trusted-invite uploads use the direct upload flow.
 
-```text
-Content              Page templates             Styling
-MDX and YAML         Astro files                Tailwind and CSS
-```
+New uploaded images use `/api/gallery-media/` on the selected website, so preview reads preview storage and production reads production storage. Legacy manifest photos may still use `photos.ayoubabed.xyz`.
 
-For portfolio projects:
+## Production and preview
 
-```text
-src/content/portfolio/ya-hala.mdx
-                |
-                | loaded and validated by
-                v
-src/content.config.ts
-                |
-                | rendered through
-                v
-src/pages/portfolio/[slug].astro
-                |
-                v
-/portfolio/ya-hala
-```
+| Environment | Website                                                                               | Use                                     |
+| ----------- | ------------------------------------------------------------------------------------- | --------------------------------------- |
+| Production  | [ayoubabed.xyz](https://ayoubabed.xyz)                                                | Live galleries and normal app use       |
+| Preview     | [Preview website](https://ayoub-linktree-project-preview.ayoub-abedrabbo.workers.dev) | Upload, moderation, and release testing |
 
-This means a normal portfolio project does not need its own `.astro` page.
-Each project gets its own `.mdx` content file, while all projects reuse the same
-page layout.
+Each environment has separate gallery data, image buckets, and pairing keys. Switching the app's website does not move photos or galleries. Finish or clear a pending batch before switching, then create a key on the destination website.
 
-## Project structure
+The web dashboard uses Cloudflare Access. The Android API uses revocable device keys. Upload-only keys cannot manage galleries; management permission must be explicitly enabled. Keep keys and signing credentials out of source control.
 
-```text
-/
-├── public/
-│   ├── _redirects
-│   ├── _headers
-│   ├── previews/
-│   └── contact card, favicon, manifest, and crawler files
-├── scripts/
-│   ├── generate-favicons.js
-│   └── update-latest-youtube-video.mjs
-├── src/
-│   ├── assets/
-│   │   ├── client-work/
-│   │   └── portraits/
-│   ├── components/
-│   │   ├── PortfolioIndex.astro
-│   │   └── ui/
-│   ├── content/
-│   │   └── portfolio/
-│   │       ├── PROJECT_TEMPLATE.mdx.example
-│   │       └── other project MDX files
-│   ├── data/
-│   │   ├── site.yaml
-│   │   ├── youtube-channels.json
-│   │   └── latest-youtube-videos.json
-│   ├── image/
-│   │   └── imported logos and interface images
-│   ├── lib/
-│   ├── pages/
-│   │   ├── index.astro
-│   │   └── portfolio/
-│   ├── content.config.ts
-│   └── styles.css
-├── .agents/, .claude/, and .vscode/
-│   └── agent and editor configuration
-├── astro.config.mjs
-├── components.json
-├── package.json
-├── tsconfig.json
-└── wrangler.jsonc
-```
+## Development
 
-## Where to edit common things
+Use the Node and pnpm versions specified in `package.json`, then run:
 
-| What you want to change                       | File or folder                           |
-| --------------------------------------------- | ---------------------------------------- |
-| A portfolio project's writing or details      | `src/content/portfolio/project-name.mdx` |
-| Portfolio field rules and validation          | `src/content.config.ts`                  |
-| Layout shared by every portfolio page         | `src/pages/portfolio/[slug].astro`       |
-| Homepage portfolio card layout                | `src/components/PortfolioIndex.astro`    |
-| Homepage metadata and data loading            | `src/pages/index.astro`                  |
-| Social, contact, payment, and channel links   | `src/data/site.yaml`                     |
-| Portfolio images                              | `src/assets/client-work/`                |
-| General logos and imported images             | `src/image/`                             |
-| Colors, typography, dark mode, and MDX styles | `src/styles.css`                         |
-| Astro integrations and production URL         | `astro.config.mjs`                       |
-| Cloudflare redirects                          | `public/_redirects`                      |
-| Contact card                                  | `public/AyoubA-Contact-Card.vcf`         |
-
-## Portfolio system
-
-Portfolio projects live here:
-
-```text
-src/content/portfolio/
-```
-
-Current projects include:
-
-```text
-ya-hala.mdx
-omar-erchid-law-firm.mdx
-lavena-health.mdx
-konan-bbq-podcast.mdx
-bayaan-academy.mdx
-aya-academy.mdx
-maan-academy.mdx
-arqam-academy.mdx
-```
-
-### How filenames become URLs
-
-The MDX filename is the project's slug:
-
-```text
-ya-hala.mdx
-→ /portfolio/ya-hala
-
-omar-erchid-law-firm.mdx
-→ /portfolio/omar-erchid-law-firm
-```
-
-Renaming an MDX file changes its public URL. Do not rename an existing project
-without also considering redirects and existing links.
-
-### Anatomy of a project file
-
-Each MDX file has two parts.
-
-#### 1. Frontmatter
-
-Frontmatter is the structured information between the opening and closing
-`---` markers:
-
-```mdx
----
-order: 1
-title: Example Project
-status: complete
-category: Video production
-summary: A short summary of the project.
-thumbnail: ../../assets/client-work/example-project.webp
-heroImage: ../../assets/client-work/example-project.webp
-imageAlt: Description of the project image
-imageWidth: 1280
-imageHeight: 720
-services:
-  - Videography
-  - Lighting
-links:
-  - label: Visit website
-    url: https://example.com
----
-```
-
-Frontmatter controls:
-
-- Homepage order
-- Card title and image
-- Project metadata and SEO
-- Hero image
-- Services
-- Role and collaborators
-- Duration
-- Tools
-- Outcomes
-- Gallery images
-- Project links
-- YouTube videos
-
-#### 2. MDX body
-
-Everything after the closing `---` is the written case study:
-
-```md
-## Overview
-
-Write normal paragraphs here.
-
-## Production process
-
-- Describe the recording
-- Describe the lighting
-- Describe the final delivery
-```
-
-The MDX body supports headings, paragraphs, lists, links, images, and MDX
-components. If a project has no written body, the shared template does not
-render an empty section.
-
-## Portfolio frontmatter reference
-
-### Required fields
-
-| Field         | Purpose                                         |
-| ------------- | ----------------------------------------------- |
-| `order`       | Controls the project's position on the homepage |
-| `title`       | Visible project name                            |
-| `status`      | Either `complete` or `placeholder`              |
-| `category`    | Short project category                          |
-| `summary`     | Homepage and SEO description                    |
-| `thumbnail`   | Image used on the homepage card                 |
-| `heroImage`   | Large image at the top of the project page      |
-| `imageAlt`    | Accessible description of the image             |
-| `imageWidth`  | Source image width                              |
-| `imageHeight` | Source image height                             |
-
-The schema automatically supplies empty arrays for `services`, `links`,
-`collaborators`, `tools`, `outcomes`, `gallery`, and `videos` when they are
-omitted.
-
-### Optional detail fields
-
-```yaml
-role: Videographer and colorist
-collaborators:
-  - Client name
-  - Editing team
-duration: January 2026-present
-tools:
-  - DaVinci Resolve
-  - Lumix S5IIX
-outcomes:
-  - Cleaner dialogue
-  - More consistent color
-```
-
-### Gallery images
-
-```yaml
-gallery:
-  - src: ../../assets/client-work/example-behind-the-scenes.webp
-    alt: Ayoub adjusting a light before recording
-    caption: Optional visible caption
-```
-
-### Videos
-
-```yaml
-videos:
-  - youtubeId: VIDEO_ID
-    label: Finished production
-    title: Accessible video title
-    publishedAt: '2026-01-01'
-    description: What this video demonstrates.
-```
-
-Use only the YouTube video ID:
-
-```text
-https://www.youtube.com/watch?v=Aml_gBJ06ms
-                                      └─────────┘
-                                      video ID
-```
-
-### Before and after videos
-
-Use `comparisonRole` to place a video in the comparison section:
-
-```yaml
-videos:
-  - youtubeId: BEFORE_VIDEO_ID
-    label: Before working together
-    title: Earlier production
-    publishedAt: '2025-04-14'
-    description: The production before my involvement.
-    comparisonRole: before
-
-  - youtubeId: AFTER_VIDEO_ID
-    label: After production improvements
-    title: Current production
-    publishedAt: '2026-03-30'
-    description: The result after improving the workflow.
-    comparisonRole: after
-```
-
-Videos without a `comparisonRole` appear as milestone cards under the first
-collaborations section.
-
-## Adding a new portfolio project
-
-1. Copy:
-
-   ```text
-   src/content/portfolio/PROJECT_TEMPLATE.mdx.example
-   ```
-
-2. Rename the copy using lowercase words separated by hyphens:
-
-   ```text
-   new-client.mdx
-   ```
-
-3. Fill in the frontmatter.
-
-4. Write the project story below the frontmatter.
-
-5. Add local images to:
-
-   ```text
-   src/assets/client-work/
-   ```
-
-6. Reference them relative to the portfolio MDX file:
-
-   ```yaml
-   thumbnail: ../../assets/client-work/new-client.webp
-   ```
-
-7. Choose an unused `order` number.
-
-8. Format and build the project:
-
-   ```bash
-   npx prettier --write src/content/portfolio/new-client.mdx
-   npm run build
-   ```
-
-9. Open the generated page:
-
-   ```text
-   http://localhost:4321/portfolio/new-client
-   ```
-
-The homepage card and project route are generated automatically.
-
-## Content validation
-
-The portfolio collection schema is defined in:
-
-```text
-src/content.config.ts
-```
-
-Astro validates every MDX file during development and builds. For example,
-this is invalid:
-
-```yaml
-order: first
-```
-
-The correct value is numeric:
-
-```yaml
-order: 1
-```
-
-When content does not match the schema, Astro reports the project and field
-that need attention.
-
-If a new type of portfolio information is needed, such as a testimonial or
-client location, update the schema first and then update the shared page
-template to render it.
-
-## Homepage configuration
-
-Most homepage links and profile information live in:
-
-```text
-src/data/site.yaml
-```
-
-This file contains:
-
-- Page title and description
-- Profile image and social sharing image
-- Social links
-- Contact actions
-- YouTube channel information
-- Support and payment links
-
-The file is parsed and typed by:
-
-```text
-src/lib/site-config.ts
-```
-
-The homepage itself is:
-
-```text
-src/pages/index.astro
-```
-
-It loads the site configuration and portfolio collection. Projects are sorted
-by their `order` value before being passed to `PortfolioIndex.astro`.
-
-## Shared portfolio page
-
-The shared portfolio template is:
-
-```text
-src/pages/portfolio/[slug].astro
-```
-
-It is responsible for:
-
-- Generating every portfolio route
-- Page titles and SEO metadata
-- Hero images
-- Rendering the MDX body
-- Services and project details
-- Before and after video comparisons
-- Collaboration milestone videos
-- Outcomes
-- Image galleries
-- External project links
-
-Edit an individual `.mdx` file to change one project. Edit `[slug].astro` only
-when changing the design or behavior of every portfolio page.
-
-Portfolio frontmatter can also include an optional `location` object with an
-address, latitude, longitude, Plus Code, and Google Maps URL. When present, the
-shared page renders a lazy-loaded OpenStreetMap preview and a Google Maps link.
-
-## Images
-
-### Portfolio and content images
-
-Store local content images in `src/assets/`. Portfolio thumbnails, hero images,
-and gallery images normally belong in:
-
-```text
-src/assets/client-work/
-```
-
-The portfolio collection uses Astro's `image()` schema helper, so MDX
-frontmatter resolves these paths to image metadata. Pass that metadata to
-Astro's `Image` component from `astro:assets`; do not add raw HTML `<img>` tags.
-
-Paths in a portfolio MDX file are relative to
-`src/content/portfolio/project-name.mdx`:
-
-```yaml
-thumbnail: ../../assets/client-work/example.webp
-heroImage: ../../assets/client-work/example.webp
-gallery:
-  - src: ../../assets/client-work/example-detail.webp
-    alt: Description of the image
-```
-
-Astro optimizes these source images and generates responsive output during the
-build.
-
-### Other imported images
-
-The `src/image/` folder contains imported logos and other images used by the
-application. These assets are resolved through the site configuration and
-Astro's build process.
-
-### Public files
-
-Use `public/` only for files that must be copied and served as-is, such as
-favicons, the web manifest, contact-card downloads, crawler files, redirects,
-headers, and the legacy AlphaBravoMedia preview. Reference public files from the
-site root.
-
-## YouTube data updater
-
-The script:
-
-```text
-scripts/update-latest-youtube-video.mjs
-```
-
-reads channel information from `src/data/site.yaml`, fetches recent YouTube
-metadata, and updates:
-
-```text
-src/data/latest-youtube-videos.json
-```
-
-Run it with:
-
-```bash
-npm run update:youtube
-```
-
-The script uses cached data when YouTube cannot be reached.
-
-Portfolio videos are separate from this updater. Videos attached to a
-portfolio case study are entered manually in that project's MDX frontmatter.
-
-## AlphaBravoMedia redirect
-
-AlphaBravoMedia is linked as Ayoub's business website, but it is not displayed
-as a portfolio project.
-
-The previous portfolio URL is preserved:
-
-```text
-/portfolio/alphabravomedia
-→ https://alphabravomedia.co
-```
-
-The Astro redirect page is:
-
-```text
-src/pages/portfolio/alphabravomedia.astro
-```
-
-The Cloudflare-compatible redirect rules are:
-
-```text
-public/_redirects
-```
-
-## Styling
-
-Global styles are in:
-
-```text
-src/styles.css
-```
-
-This file defines:
-
-- Light and dark color tokens
-- Typography
-- Tailwind theme values
-- Base styles
-- MDX case-study styles under `.typeset-portfolio`
-- Reduced-motion behavior
-
-The site follows the visitor's operating-system light or dark preference.
-
-Portfolio heading and paragraph spacing is controlled by `.typeset-portfolio`,
-not by the number of blank lines in an MDX file. Markdown blank lines separate
-content in the source, but they do not create extra visual space in the rendered
-HTML. Adjust the shared prose rules when vertical rhythm needs to change so
-every case study remains consistent.
-
-## Development commands
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Start the local development server:
-
-```bash
+```sh
+pnpm install --frozen-lockfile
 npm run dev
 ```
 
-The site will normally be available at:
+Use the server URL reported by Astro. The gallery backend also needs Cloudflare bindings and local configuration; see [gallery infrastructure](docs/interactive-event-galleries.md).
 
-```text
-http://localhost:4321
-```
+For website changes:
 
-Create a production build:
-
-```bash
-npm run build
-```
-
-Preview the production build:
-
-```bash
-npm run preview
-```
-
-Update cached YouTube data:
-
-```bash
-npm run update:youtube
-```
-
-Format the repository:
-
-```bash
-npx prettier --write .
-```
-
-Run Astro CLI commands:
-
-```bash
-npm run astro -- --help
-```
-
-Use Astro's integration command when adding an Astro integration:
-
-```bash
-npm run astro -- add integration-name
-```
-
-## Before deploying
-
-For a documentation-only change that affects only files excluded by
-Cloudflare's Build watch paths, format and review the changed documentation.
-Do not run the Astro build solely for those files.
-
-For changes that can affect the website or deployment, run at minimum:
-
-```bash
+```sh
 npm run verify
 npm run audit:prod
 ```
 
-Then check:
+`verify` checks formatting, face-search and gallery tests, Astro types, and the website build. Android has separate Gradle checks and a GitHub Actions workflow, documented in its README. See `package.json` for the full website command list.
 
-- Homepage cards are in the intended order
-- New and edited portfolio URLs work
-- Images load and have useful alternative text
-- External links open the correct destination
-- Mobile layout does not overflow horizontally
-- Light and dark modes remain readable
-- No browser console errors appear
+For documentation-only edits, format the changed Markdown and check its links. A website build is not needed solely for documentation changes.
 
-## Deployment
+## Releases and deployment
 
-- Domain: [ayoubabed.xyz](https://ayoubabed.xyz)
-- Hosting: Cloudflare Workers with static assets
-- Source: GitHub repository connected to Cloudflare
-- Required Node version: 22 or newer
-- Build command: `npm run build`
-- Deploy command: `npm run deploy`
-- Build output directory: `dist`
-- Production builds use the commands and dependencies in `package.json`
+GitHub is the source of truth. Website changes go through a feature branch, verification, preview, review, and merge to `master`. Production deploys from clean `master`.
 
-Pushing changes to the connected GitHub branch triggers the Cloudflare build
-and deployment workflow. The repository does not deploy a second copy through
-GitHub Pages.
+- `npm run deploy` and `npm run deploy:preview` deploy the isolated preview website.
+- `npm run deploy:prod` deploys production.
+- Android release tags build and publish an APK through `.github/workflows/android.yml`.
 
-### Cloudflare Build watch paths
+Publishing an APK does not deploy the website. Deploy required backend changes and database migrations before distributing an app that depends on them. Preview upload testing must use the isolated bindings in `scripts/deploy-preview-worker.mjs`.
 
-Cloudflare normally builds after any tracked file changes. In the Cloudflare
-dashboard, maintain the exclusions under:
+Follow [AGENTS.md](AGENTS.md) for deployment authorization and the repository's release procedure. Android signing and versioning instructions live in the [Android build guide](android/README.md#github-builds-and-signing).
 
-```text
-Workers project → Settings → Build → Build watch paths
-```
+## Documentation map
 
-The exclusion list for this repository is:
+| When you need to…                                                  | Read                                                                          |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| Edit links, portfolio content, images, or shared styles            | [Website content](docs/website-content.md)                                    |
+| Change native gallery controls or companion permissions            | [Native gallery management](docs/native-gallery-management.md)                |
+| Configure storage, Access, guest uploads, or moderation            | [Gallery infrastructure](docs/interactive-event-galleries.md)                 |
+| Maintain legacy manifests, ZIPs, pruning, or face-search workflows | [Legacy event galleries](docs/event-galleries.md)                             |
+| Install, pair, build, or release Android                           | [Android README](android/README.md)                                           |
+| Understand watched-folder behavior and verification                | [Watched-folder notes](docs/android-watched-folder-design.md)                 |
+| Change payment destinations or payment-host routing                | [Payments](docs/payments.md)                                                  |
+| Work as a coding agent                                             | [AGENTS.md](AGENTS.md)                                                        |
+| Understand domain terms and recorded decisions                     | [CONTEXT.md](CONTEXT.md), [domain documentation rules](docs/agents/domain.md) |
 
-```text
-README.md
-AGENTS.md
-CLAUDE.md
-CLAUDE.MD
-.agents/*
-.claude/*
-.vscode/*
-skills-lock.json
-.gitignore
-.prettierignore
-prettier.config.cjs
-components.json
-```
-
-These files contain documentation, agent instructions, editor settings, skill
-metadata, formatting configuration, or component-generator configuration.
-When a push changes only excluded paths, Cloudflare should skip the build.
-
-Do not exclude `*.md`: Astro Content Collections can use Markdown files for
-real website content. Builds must continue to run for `src/*`, `public/*`,
-`scripts/*`, dependency manifests, and Astro, TypeScript, or Wrangler
-configuration.
-
-Build watch paths are Cloudflare dashboard settings and are not stored in
-`wrangler.jsonc`. Recheck this list when repository tooling or directory roles
-change.
-
-## Accepted audit warnings
-
-The site intentionally keeps its About and Contact information on the homepage
-instead of creating separate routes. Squirrel may therefore report missing
-dedicated About, Contact, and Privacy pages. These are accepted warnings for the
-current release. The `sms:` contact action and LinkedIn's crawler response can
-also appear as broken external links even when they work correctly for visitors.
-
-## Notes for AI coding agents
-
-Before changing the project:
-
-1. Read `AGENTS.md`.
-2. Read this README.
-3. Preserve existing route slugs unless the user explicitly requests a URL
-   change.
-4. Treat `src/content/portfolio/*.mdx` as the source of truth for portfolio
-   content.
-5. Treat `src/content.config.ts` as the source of truth for valid portfolio
-   fields.
-6. Preserve user changes already present in the working tree.
-7. Use the official Astro documentation for Astro APIs and Content Collection
-   behavior.
-8. Run formatting and `npm run build` after structural changes.
-9. Verify affected pages in a browser at desktop and mobile widths.
-
-Do not recreate `src/data/portfolio.ts`. The portfolio was intentionally
-migrated from one TypeScript array to individual MDX Content Collection
-entries.
+Research documents record investigations and proposals. Check implementation and release notes before treating a proposal as shipped behavior.

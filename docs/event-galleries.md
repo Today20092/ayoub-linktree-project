@@ -1,4 +1,6 @@
-# Event gallery workflow
+# Legacy event gallery workflow
+
+Use this guide for existing local exports, R2 manifests, prebuilt ZIPs, pruning, and face-search indexes. Create new managed galleries through `/admin/galleries/` or the Android app. See the [project overview](../README.md) and [gallery infrastructure](interactive-event-galleries.md) for that workflow.
 
 ## One-time R2 setup
 
