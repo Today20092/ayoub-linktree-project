@@ -1,3 +1,6 @@
+import { pbkdf2Async } from '@noble/hashes/pbkdf2.js'
+import { sha256 } from '@noble/hashes/sha2.js'
+
 const encoder = new TextEncoder()
 
 const PASSWORD_ITERATIONS = 210_000
@@ -22,24 +25,13 @@ function fromBase64Url(value: string) {
 }
 
 async function derivePassword(password: string, salt: Uint8Array<ArrayBuffer>) {
-  const key = await crypto.subtle.importKey(
-    'raw',
-    encoder.encode(password),
-    'PBKDF2',
-    false,
-    ['deriveBits'],
-  )
+  // Workers caps both native PBKDF2 APIs at 100,000 iterations. Keep the
+  // existing verifier format with a portable implementation of the same KDF.
   return new Uint8Array(
-    await crypto.subtle.deriveBits(
-      {
-        name: 'PBKDF2',
-        hash: 'SHA-256',
-        salt,
-        iterations: PASSWORD_ITERATIONS,
-      },
-      key,
-      256,
-    ),
+    await pbkdf2Async(sha256, encoder.encode(password), salt, {
+      c: PASSWORD_ITERATIONS,
+      dkLen: 32,
+    }),
   )
 }
 

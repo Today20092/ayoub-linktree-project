@@ -141,6 +141,23 @@ test('invite context only resolves for the requested event', async () => {
   )
 })
 
+test('companion admin reads accept every visibility without publishing the gallery', async () => {
+  for (const status of ['hidden', 'coming_soon', 'published'] as const) {
+    const record = {
+      ...dynamicEvent,
+      status,
+      coming_soon: status === 'coming_soon' ? 1 : 0,
+    }
+    const galleries = reader({ dynamicValue: record })
+    assert.equal((await galleries.getAdmin('event-one'))?.visibility, status)
+    assert.equal(record.status, status)
+    if (status === 'hidden')
+      assert.equal(await galleries.get('event-one'), undefined)
+    if (status === 'coming_soon')
+      assert.equal((await galleries.get('event-one'))?.comingSoon, true)
+  }
+})
+
 test('public detail projects related rows and suppresses photos while coming soon', async () => {
   const photo: GalleryPhoto = {
     id: 'admin-photo',

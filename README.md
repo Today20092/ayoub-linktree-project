@@ -6,6 +6,14 @@ developer.
 
 The live website is [ayoubabed.xyz](https://ayoubabed.xyz).
 
+## Android gallery uploader
+
+[Download the Android APK](https://github.com/Today20092/ayoub-linktree-project/releases) · [Setup and Obtainium guide](android/README.md) · [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22xyz.ayoubabed.gallery%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FToday20092%2Fayoub-linktree-project%22%2C%22author%22%3A%22Today20092%22%2C%22name%22%3A%22Ayoub%20Gallery%22%7D)
+
+Ayoub Gallery is a native Material 3 companion for selecting a camera-transfer folder and publishing JPEG batches directly to an event gallery. It supports a capture-time cutoff, duplicate skipping, and a persistent upload queue. Android 14 or newer is required.
+
+GitHub Actions builds the APK. For updates through Obtainium or ObtainX, add this repository as a source and enable prereleases during beta testing. Full installation, pairing, signing, and testing notes are in the [Android README](android/README.md). The website companion API must be deployed separately before pairing works; an APK release does not deploy the website.
+
 This README describes the project as it exists in June 2026. It is intended to
 help Ayoub, collaborators, and AI coding agents understand where content lives,
 how pages are generated, and how to update the website safely.
