@@ -1,10 +1,10 @@
-# Ayoub Gallery 0.2.1 beta 1
+# Ayoub Gallery 0.2.2 beta 1
 
-Create galleries directly from Android. Uploaded photo links now use the connected website's storage, fixing missing preview photos without re-uploading.
+Compact headers leave more room for your galleries.
 
-- Tap **New gallery**, enter its name and description, and choose visibility. New galleries default to hidden.
-- Continue straight into native management to set dates, covers, guest access, and photos.
-- Creation requires a pairing key with gallery management enabled. Failed requests preserve entered details.
+- Galleries, Uploads, Settings, and New gallery use a compact, single-row toolbar.
+- The duplicate “Your galleries” banner is hidden once your website is connected.
+- Existing native gallery creation, management, uploads, and dark-theme pickers remain available.
 
 - Search galleries and open their management controls directly from the gallery list.
 - Edit event details and visibility, manage guest upload passwords, and create or share guest invites.
@@ -17,7 +17,7 @@ Create galleries directly from Android. Uploaded photo links now use the connect
 
 Install over the previous beta. Pairing and queued photos are preserved. Existing pairing keys remain upload-only. To manage galleries, create a new key at your website's `/admin/galleries/devices/` page with **Allow gallery management** enabled, then reconnect in Settings. Do not uninstall or clear app data.
 
-Download `ayoub-gallery.apk`. Requires Android 14+. Use this signed release for future updates; debug artifacts have a different signing key. Obtainium/ObtainX setup is in [the Android README](https://github.com/Today20092/ayoub-linktree-project/blob/codex/android-gallery-uploader/android/README.md).
+Download `ayoub-gallery.apk`. Requires Android 14+. Use this signed release for future updates; debug artifacts have a different signing key. Obtainium/ObtainX setup is in [the Android README](https://github.com/Today20092/ayoub-linktree-project/blob/master/android/README.md).
 
 ## Testing status and limitations
 

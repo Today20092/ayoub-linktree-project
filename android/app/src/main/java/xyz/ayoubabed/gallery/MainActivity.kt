@@ -174,7 +174,7 @@ private fun GalleryApp(activity: MainActivity) {
     val titles = listOf("Galleries", "Uploads", "Settings")
     val icons = listOf(Icons.Outlined.PhotoLibrary, Icons.Outlined.CloudUpload, Icons.Outlined.Settings)
     Scaffold(
-        topBar = { LargeTopAppBar(title = { Text(titles[tab], fontWeight = FontWeight.Bold) }, actions = {
+        topBar = { TopAppBar(title = { Text(titles[tab], fontWeight = FontWeight.SemiBold) }, actions = {
             if(tab == 0 && connected) IconButton(onClick = { refresh() }, enabled = !busy) { Icon(Icons.Outlined.Refresh, "Refresh galleries") }
         }) },
         bottomBar = {
@@ -188,13 +188,13 @@ private fun GalleryApp(activity: MainActivity) {
                 if (problem != null) item { Message(problem!!, true) }
                 when(tab) {
                     0 -> {
-                        item {
+                        if (!connected) item {
                             Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer), shape = RoundedCornerShape(32.dp)) {
                                 Column(Modifier.fillMaxWidth().padding(28.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     Icon(Icons.Outlined.CameraAlt, null, Modifier.size(32.dp))
                                     Text("Your galleries", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
                                     Text("Publish photos, edit events, and manage guest access.", style = MaterialTheme.typography.bodyLarge)
-                                    if(!connected) Button(onClick = { tab = 2 }, modifier = Modifier.padding(top = 8.dp)) { Text("Connect your website") }
+                                    Button(onClick = { tab = 2 }, modifier = Modifier.padding(top = 8.dp)) { Text("Connect your website") }
                                 }
                             }
                         }
