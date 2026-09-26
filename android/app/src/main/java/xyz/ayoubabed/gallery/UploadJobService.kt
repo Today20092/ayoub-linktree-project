@@ -39,6 +39,10 @@ class UploadJobService : JobService() {
                     store.message("Reconnect this website in Settings, then resume."); return@launch
                 }
                 store.message("Uploading to ${batch.third}")
+                val queued = store.items().filter { it.state == "queued" }
+                val known = GalleryApi.known(batch.first, batch.second, token, queued.map { it.hash }, params.network)
+                ensureActive()
+                queued.filter { it.hash in known }.forEach { store.state(it.id, "skipped") }
                 for (item in store.items().filter { it.state == "queued" }) {
                     ensureActive()
                     var attempt = item.attempts
@@ -70,7 +74,7 @@ class UploadJobService : JobService() {
                 }
                 store.message(if (store.items().any { it.state == "failed" }) "Some photos need attention. Tap Retry." else "Batch complete. Sync again when new photos arrive.")
             } catch (_: CancellationException) { /* onStopJob owns rescheduling. */ }
-            catch (_: Exception) { store.message("Upload interrupted. Your queue is saved. Tap Resume.") }
+            catch (error: Exception) { store.message(error.message ?: "Upload interrupted. Your queue is saved. Tap Resume.") }
             finally { if (currentCoroutineContext().isActive) jobFinished(params, false) }
         }
         return true

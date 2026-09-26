@@ -47,6 +47,27 @@ export type CompanionBindings = {
   IMAGES: ImagesBinding
 }
 
+export async function knownCompanionHashes(
+  db: D1Database,
+  gallery: string,
+  hashes: string[],
+) {
+  if (!hashes.length) return []
+  // Stay below D1's bound-parameter limit, including the gallery parameter.
+  const known: string[] = []
+  for (let offset = 0; offset < hashes.length; offset += 80) {
+    const chunk = hashes.slice(offset, offset + 80)
+    const result = await db
+      .prepare(
+        `SELECT sha256 FROM gallery_upload_receipts WHERE event_slug = ? AND state = 'complete' AND sha256 IN (${chunk.map(() => '?').join(',')})`,
+      )
+      .bind(gallery, ...chunk)
+      .all<{ sha256: string }>()
+    known.push(...result.results.map((row) => row.sha256))
+  }
+  return known
+}
+
 // A lease prevents two requests from publishing the same bytes. Each attempt has
 // its own object key so an expired attempt cannot overwrite a later upload.
 export async function receiveCompanionPhoto(

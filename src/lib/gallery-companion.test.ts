@@ -6,6 +6,7 @@ import {
   companionAuthorized,
   contentHash,
   createDevice,
+  knownCompanionHashes,
   receiveCompanionPhoto,
 } from './gallery-companion'
 
@@ -35,6 +36,9 @@ function fixture() {
     }
     async first() {
       return sqlite.prepare(this.sql).get(...this.values) ?? null
+    }
+    async all() {
+      return { results: sqlite.prepare(this.sql).all(...this.values) }
     }
     async run() {
       return {
@@ -206,4 +210,14 @@ test('sha256 follows known test vector', async () => {
     await contentHash(new TextEncoder().encode('abc').buffer),
     'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
   )
+})
+
+test('preflight skips known bytes without transferring photos again', async () => {
+  const { db, bindings, optimize } = fixture()
+  await receiveCompanionPhoto(bindings, event, file, hash, optimize)
+  assert.deepEqual(
+    await knownCompanionHashes(db, event.id, [hash, 'b'.repeat(64)]),
+    [hash],
+  )
+  assert.deepEqual(await knownCompanionHashes(db, 'other', [hash]), [])
 })

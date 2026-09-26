@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Network
 import android.net.Uri
 import org.json.JSONObject
+import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -51,5 +52,21 @@ object GalleryApi {
             if (status !in listOf("uploaded", "skipped")) throw ApiException(502, "Unexpected server response. Try again.")
             status
         } finally { conn.disconnect() }
+    }
+    fun known(site: String, gallery: String, token: String, hashes: List<String>, network: Network?): Set<String> {
+        val known = mutableSetOf<String>()
+        for (chunk in hashes.chunked(400)) {
+            val conn = connection(site, "/api/companion/known/", token, network)
+            try {
+                val bytes = JSONObject().put("gallery", gallery).put("hashes", JSONArray(chunk)).toString().toByteArray()
+                conn.requestMethod = "POST"; conn.doOutput = true
+                conn.setRequestProperty("Content-Type", "application/json")
+                conn.setFixedLengthStreamingMode(bytes.size)
+                conn.outputStream.use { it.write(bytes) }
+                val values = result(conn).getJSONArray("known")
+                for(i in 0 until values.length()) known.add(values.getString(i))
+            } finally { conn.disconnect() }
+        }
+        return known
     }
 }
