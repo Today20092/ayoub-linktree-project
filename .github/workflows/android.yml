@@ -34,7 +34,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           working-directory: android
-          script: ./gradlew connectedDebugAndroidTest && adb pull /sdcard/Android/data/xyz.ayoubabed.gallery/files/screenshots ../screenshots
+          script: ./gradlew connectedDebugAndroidTest && adb pull /sdcard/Pictures/AyoubGalleryChecks ../screenshots
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -83,6 +83,7 @@ jobs:
         run: |
           mkdir -p apk
           if [ "$IS_RELEASE" = true ]; then
+            "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs android/app/build/outputs/apk/release/app-release.apk
             cp android/app/build/outputs/apk/release/app-release.apk apk/ayoub-gallery.apk
           else
             cp android/app/build/outputs/apk/debug/app-debug.apk apk/ayoub-gallery-debug.apk

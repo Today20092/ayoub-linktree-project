@@ -6,7 +6,7 @@ The interface takes design direction from [ImageToolbox](https://github.com/T8RI
 
 ## Download and updates
 
-[Download from GitHub Releases](https://github.com/Today20092/ayoub-linktree-project/releases) · [Obtainium](https://obtainium.imranr.dev/)
+[Download from GitHub Releases](https://github.com/Today20092/ayoub-linktree-project/releases) · [Add to Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22xyz.ayoubabed.gallery%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FToday20092%2Fayoub-linktree-project%22%2C%22author%22%3A%22Today20092%22%2C%22name%22%3A%22Ayoub%20Gallery%22%7D)
 
 Install `ayoub-gallery.apk` from an **Android** release. Android 14 or newer is required. The app ID is `xyz.ayoubabed.gallery`. The first releases are prereleases for device testing, not claims of completed field testing.
 
@@ -36,7 +36,7 @@ Device keys allow listing galleries and uploading photos only, expire in 90 days
 
 - A sync captures a fixed batch; new arrivals wait for the next scan.
 - JPEG files up to 20 MB are supported. The server keeps the existing 2400px, quality-90 web processing.
-- SHA-256 identifies identical original bytes within each gallery, including renamed files. Server receipts survive later photo removal. Edited/recompressed files count as new photos. Previously uploaded website photos without companion receipts cannot be recognized retroactively.
+- SHA-256 identifies identical original bytes within each gallery, including renamed files. A small checksum check skips known files before transferring their bytes. Server receipts survive later photo removal. Edited/recompressed files count as new photos. Previously uploaded website photos without companion receipts cannot be recognized retroactively.
 - EXIF capture time is preferred. Without a usable capture date, file modification time is used and disclosed before upload. EXIF without an offset uses the phone's timezone; set the camera clock correctly.
 - Failed uploads retry with backoff. The queue survives process death; **Resume/Retry** recovers unfinished files. After a reboot or force-stop, reopen the app and resume. No promise of unattended auto-resume is made.
 - Pausing/clearing a batch does not remove website photos. Phone deletions never propagate. Keep source files until upload finishes.
