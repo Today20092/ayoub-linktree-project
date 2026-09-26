@@ -67,9 +67,18 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
       </p>
     </header>
 
-    <section class="mt-10" aria-label="Create an event gallery">
-      <AdminEventCreator client:only="react" />
-    </section>
+    <div class="mt-8 flex flex-wrap items-start gap-4">
+      <a
+        href="/admin/galleries/devices/"
+        class="bg-primary text-primary-foreground rounded-full px-6 py-3 font-semibold"
+      >
+        Connect Android app
+      </a>
+      <details class="grow rounded-2xl border p-4">
+        <summary class="cursor-pointer font-semibold">New gallery</summary>
+        <div class="mt-4"><AdminEventCreator client:only="react" /></div>
+      </details>
+    </div>
 
     <section
       class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"

@@ -1,0 +1,167 @@
+---
+import '../../../styles.css'
+import { env } from 'cloudflare:workers'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
+
+export const prerender = false
+if (
+  !(await galleryAdminAuthorized(
+    Astro.request,
+    env.GALLERY_ADMIN_EMAIL,
+    env.GALLERY_ACCESS_TEAM_DOMAIN,
+    env.GALLERY_ACCESS_AUDS,
+  ))
+)
+  return new Response('Forbidden', { status: 403 })
+const devices = await env.GALLERY_DB.prepare(
+  'SELECT id, name, expires_at FROM gallery_devices ORDER BY created_at DESC',
+).all<{ id: string; name: string; expires_at: number }>()
+Astro.response.headers.set('Cache-Control', 'no-store')
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+---
+
+<BaseLayout
+  title="Connect your phone"
+  description="Pair the Ayoub Gallery Android app."
+  canonicalUrl={Astro.url.toString()}
+  ogImage="/og-ayoub-digital-media.jpg"
+>
+  <main id="main-content" class="mx-auto max-w-2xl px-5 py-12">
+    <a href="/admin/galleries/" class="text-primary">← Galleries</a>
+    <h1 class="font-heading mt-6 text-4xl font-bold">Connect your phone</h1>
+    <p class="text-muted-foreground mt-4">
+      Create a key here, then paste it into Ayoub Gallery on your phone. Keys
+      expire after 90 days and can be revoked below.
+    </p>
+    <form id="pair-form" class="bg-muted/40 mt-8 space-y-4 rounded-3xl p-6">
+      <label class="block" for="device-name">Device name</label>
+      <input
+        id="device-name"
+        name="name"
+        value="Galaxy S25 Ultra"
+        maxlength="80"
+        required
+        class="border-input bg-background w-full rounded-xl border p-3"
+      />
+      <button
+        class="bg-primary text-primary-foreground rounded-full px-6 py-3 font-semibold"
+        type="submit"
+      >
+        Create pairing key
+      </button>
+    </form>
+    <p id="message" role="status" class="mt-4"></p>
+    <section id="pair-result" hidden class="bg-muted mt-6 rounded-3xl p-6">
+      <p>Website address</p><code>{Astro.url.origin}</code>
+      <label class="mt-4 block" for="pair-key">
+        Pairing key · shown only once
+      </label>
+      <textarea
+        id="pair-key"
+        readonly
+        class="bg-background mt-2 w-full rounded-xl p-3"
+        rows="3"
+      >
+      </textarea>
+      <button id="copy-key" class="text-primary mt-3 rounded-full px-4 py-3">
+        Copy key
+      </button>
+      <p class="text-muted-foreground mt-2 text-sm">
+        This key allows gallery listing and photo uploads. Keep it private.
+      </p>
+    </section>
+    <h2 class="mt-10 text-2xl font-semibold">Connected devices</h2>
+    <div class="mt-4 space-y-3">
+      {
+        devices.results.map((device) => (
+          <div class="bg-muted/40 flex items-center justify-between gap-4 rounded-2xl p-4">
+            <div>
+              <>
+                <p>{device.name}</p>
+                <p class="text-muted-foreground text-sm">
+                  Expires{' '}
+                  {new Date(device.expires_at * 1000).toLocaleDateString(
+                    'en-US',
+                  )}
+                </p>
+              </>
+            </div>
+            <button
+              data-revoke={device.id}
+              class="text-destructive rounded-full px-4 py-3"
+            >
+              Revoke
+            </button>
+          </div>
+        ))
+      }
+      {
+        devices.results.length === 0 && (
+          <p class="text-muted-foreground">No paired devices yet.</p>
+        )
+      }
+    </div>
+  </main>
+</BaseLayout>
+<script>
+  const message = document.querySelector<HTMLParagraphElement>('#message')!
+  async function send(body: unknown) {
+    const response = await fetch('/api/admin/galleries/devices/', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    const data = (await response.json()) as { error?: string; token?: string }
+    if (!response.ok) throw new Error(data.error || 'Could not update devices.')
+    return data
+  }
+  document
+    .querySelector<HTMLFormElement>('#pair-form')!
+    .addEventListener('submit', async (event) => {
+      event.preventDefault()
+      const button =
+        document.querySelector<HTMLButtonElement>('#pair-form button')!
+      button.disabled = true
+      try {
+        const data = await send({
+          name: document.querySelector<HTMLInputElement>('#device-name')!.value,
+        })
+        document.querySelector<HTMLTextAreaElement>('#pair-key')!.value =
+          data.token ?? ''
+        document.querySelector<HTMLElement>('#pair-result')!.hidden = false
+        message.textContent =
+          'Key created. Copy it before leaving this page. Reload to see it in the device list.'
+      } catch (error) {
+        message.textContent =
+          error instanceof Error ? error.message : 'Could not create key.'
+      } finally {
+        button.disabled = false
+      }
+    })
+  document.querySelector('#copy-key')!.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(
+        document.querySelector<HTMLTextAreaElement>('#pair-key')!.value,
+      )
+      message.textContent = 'Key copied.'
+    } catch {
+      message.textContent = 'Select the key and copy it manually.'
+    }
+  })
+  document
+    .querySelectorAll<HTMLButtonElement>('[data-revoke]')
+    .forEach((button) =>
+      button.addEventListener('click', async () => {
+        button.disabled = true
+        try {
+          await send({ revoke: button.dataset.revoke })
+          button.parentElement?.remove()
+          message.textContent = 'Device revoked.'
+        } catch {
+          message.textContent = 'Could not revoke device. Try again.'
+          button.disabled = false
+        }
+      }),
+    )
+</script>

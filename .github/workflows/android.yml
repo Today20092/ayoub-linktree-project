@@ -1,0 +1,103 @@
+name: Android APK
+
+on:
+  push:
+    branches: ['codex/android-gallery-uploader']
+    tags: ['android-v*']
+    paths: ['android/**', '.github/workflows/android.yml']
+  pull_request:
+    paths: ['android/**', '.github/workflows/android.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  device-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          working-directory: android
+          script: ./gradlew connectedDebugAndroidTest && adb pull /sdcard/Android/data/xyz.ayoubabed.gallery/files/screenshots ../screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-device-checks
+          path: |
+            screenshots/
+            android/app/build/reports/androidTests/
+  build:
+    needs: device-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Unit tests and lint
+        working-directory: android
+        run: ./gradlew testDebugUnitTest lintDebug
+      - name: Build debug APK for branch testing
+        if: "!startsWith(github.ref, 'refs/tags/android-v')"
+        working-directory: android
+        run: ./gradlew assembleDebug
+      - name: Restore release signing key
+        if: startsWith(github.ref, 'refs/tags/android-v')
+        env:
+          SIGNING_KEY: ${{ secrets.GALLERY_ANDROID_KEYSTORE }}
+        run: |
+          test -n "$SIGNING_KEY" || { echo 'Release signing key is missing'; exit 1; }
+          printf '%s' "$SIGNING_KEY" | base64 --decode > "$RUNNER_TEMP/gallery.jks"
+      - name: Build signed release APK
+        if: startsWith(github.ref, 'refs/tags/android-v')
+        working-directory: android
+        env:
+          GALLERY_KEYSTORE_PATH: ${{ runner.temp }}/gallery.jks
+          GALLERY_KEYSTORE_PASSWORD: ${{ secrets.GALLERY_ANDROID_KEYSTORE_PASSWORD }}
+        run: ./gradlew assembleRelease
+      - name: Collect APK
+        env:
+          IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/android-v') }}
+        run: |
+          mkdir -p apk
+          if [ "$IS_RELEASE" = true ]; then
+            cp android/app/build/outputs/apk/release/app-release.apk apk/ayoub-gallery.apk
+          else
+            cp android/app/build/outputs/apk/debug/app-debug.apk apk/ayoub-gallery-debug.apk
+          fi
+          cd apk
+          sha256sum *.apk > SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ayoub-gallery-apk
+          path: apk/
+      - name: Publish beta release
+        if: startsWith(github.ref, 'refs/tags/android-v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" apk/* --verify-tag --prerelease --title "Ayoub Gallery ${GITHUB_REF_NAME#android-v}" --notes-file android/RELEASE_NOTES.md
+      - name: Remove temporary signing key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/gallery.jks"
