@@ -21,6 +21,7 @@ type Props = {
   preconnectHints?: string[]
   structuredData?: Record<string, unknown>
   activeNav?: 'home' | 'services' | 'galleries' | 'about' | 'contact'
+  minimal?: boolean
 }
 
 const {
@@ -41,6 +42,7 @@ const {
   preconnectHints = ['https://api.fontshare.com'],
   structuredData,
   activeNav,
+  minimal = false,
 } = Astro.props as Props
 
 const pageCacheControl = cacheControlForPage(
@@ -153,15 +155,23 @@ if (Astro.csp) {
     >
       Skip to content
     </a>
-    <Header activeNav={activeNav} />
+    {!minimal && <Header activeNav={activeNav} />}
     <slot />
-    <footer
-      class="text-muted-foreground mx-auto flex w-full max-w-screen-2xl justify-center gap-4 px-4 py-8 text-xs sm:px-6 lg:px-8"
-    >
-      <a class="underline underline-offset-4" href="/about/">About</a>
-      <a class="underline underline-offset-4" href="/contact/">Contact</a>
-      <a class="underline underline-offset-4" href="/privacy/">Privacy</a>
-    </footer>
+    {
+      !minimal && (
+        <footer class="text-muted-foreground mx-auto flex w-full max-w-screen-2xl justify-center gap-4 px-4 py-8 text-xs sm:px-6 lg:px-8">
+          <a class="underline underline-offset-4" href="/about/">
+            About
+          </a>
+          <a class="underline underline-offset-4" href="/contact/">
+            Contact
+          </a>
+          <a class="underline underline-offset-4" href="/privacy/">
+            Privacy
+          </a>
+        </footer>
+      )
+    }
     <script>
       const revealItems = Array.from(
         document.querySelectorAll<HTMLElement>('[data-reveal]'),
