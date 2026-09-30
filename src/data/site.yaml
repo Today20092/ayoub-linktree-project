@@ -15,7 +15,14 @@ site:
   ogImageType: image/jpeg
 
 payments:
-  stripePaymentLink: ''
+  stripePaymentLink: https://buy.stripe.com/dRmcN5cLn0WdejccBUcjS00
+  stripeTipLinks:
+    - amount: 10
+      url: https://buy.stripe.com/eVqcN526J34ldf86dwcjS01
+    - amount: 20
+      url: https://buy.stripe.com/dRmcN5cLn0WdejccBUcjS00
+    - amount: 30
+      url: https://buy.stripe.com/bJe28r8v7cEVb706dwcjS02
 
 features:
   showTampaWork: false

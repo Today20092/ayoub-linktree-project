@@ -94,7 +94,10 @@ export type ActionLink = {
 }
 
 export type SiteConfig = {
-  payments?: { stripePaymentLink?: string }
+  payments?: {
+    stripePaymentLink?: string
+    stripeTipLinks?: { amount: number; url: string }[]
+  }
   site: SiteInfo
   features: SiteFeatures
   socialLinks: SocialLink[]
