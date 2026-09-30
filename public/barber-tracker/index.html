@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta
+      name="description"
+      content="Barbershop photography shift tracker. Time, tallies, payments, and notes saved on this device."
+    />
+    <meta name="theme-color" content="#1c1917" />
+    <title>Barber field tracker · Ayoub</title>
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="stylesheet" href="./tracker.css" />
+    <script type="module" src="./app.mjs"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to tracker</a>
+    <header class="page-head">
+      <div>
+        <p class="eyebrow">Photography / field research</p>
+        <h1>Barber tracker</h1>
+      </div>
+      <a
+        class="payment-link"
+        href="https://payments.ayoubabed.xyz/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Payment page ↗
+      </a>
+    </header>
+    <main id="main">
+      <p id="message" role="status" aria-live="polite"></p>
+      <p id="storage-warning" class="warning" role="alert" hidden></p>
+      <div class="day-picker">
+        <label for="day-select">
+          Work day
+          <select id="day-select"></select>
+        </label>
+        <button id="new-day" type="button">New day</button>
+      </div>
+
+      <section class="panel clock-panel" aria-labelledby="clock-title">
+        <div class="section-head">
+          <h2 id="clock-title">On the clock</h2>
+          <span id="phase" class="badge">Not started</span>
+        </div>
+        <div class="clock">
+          <strong id="work-time">0h 00m</strong>
+          <span>Total work · breaks excluded</span>
+        </div>
+        <p id="time-breakdown" class="muted">Travel 0m · Shop 0m</p>
+        <div class="timer-actions">
+          <button id="start" class="primary" type="button">
+            Start work / travel
+          </button>
+          <button id="arrive" type="button">Arrived at shop</button>
+          <button id="leave" type="button">Leave shop / travel</button>
+          <button id="finish" type="button">Finish work</button>
+        </div>
+        <div class="row">
+          <button id="pause" class="quiet" type="button">
+            Pause for a break
+          </button>
+          <button id="undo" class="quiet" type="button" disabled>
+            Undo last change
+          </button>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="visit-title">
+        <div class="section-head">
+          <h2 id="visit-title">At the shop</h2>
+          <button id="edit-shop" class="quiet" type="button">Edit shop</button>
+        </div>
+        <label for="visit-select" class="sr-only">Shop visit</label>
+        <select id="visit-select"></select>
+        <p id="shop-address" class="muted"></p>
+        <a
+          id="shop-map"
+          class="text-link"
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+        >
+          Open saved location ↗
+        </a>
+        <p id="visit-hint" class="muted">
+          Tap “Arrived at shop” to start your first visit.
+        </p>
+        <div id="counters" class="tallies">
+          <div class="tally">
+            <div>
+              <span>Customers entered</span>
+              <strong id="count-entered">0</strong>
+            </div>
+            <button
+              type="button"
+              data-counter="entered"
+              data-delta="-1"
+              aria-label="Subtract one customer entered"
+            >
+              −
+            </button>
+            <button
+              type="button"
+              class="add"
+              data-counter="entered"
+              data-delta="1"
+              aria-label="Add one customer entered"
+            >
+              +
+            </button>
+          </div>
+          <div class="tally">
+            <div>
+              <span>People approached</span>
+              <strong id="count-approached">0</strong>
+            </div>
+            <button
+              type="button"
+              data-counter="approached"
+              data-delta="-1"
+              aria-label="Subtract one person approached"
+            >
+              −
+            </button>
+            <button
+              type="button"
+              class="add"
+              data-counter="approached"
+              data-delta="1"
+              aria-label="Add one person approached"
+            >
+              +
+            </button>
+          </div>
+          <div class="tally">
+            <div>
+              <span>People given photos</span>
+              <strong id="count-delivered">0</strong>
+            </div>
+            <button
+              type="button"
+              data-counter="delivered"
+              data-delta="-1"
+              aria-label="Subtract one person given photos"
+            >
+              −
+            </button>
+            <button
+              type="button"
+              class="add"
+              data-counter="delivered"
+              data-delta="1"
+              aria-label="Add one person given photos"
+            >
+              +
+            </button>
+          </div>
+        </div>
+        <label for="visit-notes">
+          Visit notes
+          <textarea
+            id="visit-notes"
+            rows="3"
+            maxlength="20000"
+            placeholder="What worked? Anything to remember about this shop?"
+          ></textarea>
+        </label>
+      </section>
+
+      <section class="panel" aria-labelledby="payments-title">
+        <div class="section-head">
+          <h2 id="payments-title">Money received</h2>
+          <span id="pricing-label" class="muted">Suggested $20</span>
+        </div>
+        <div class="price-buttons">
+          <button type="button" data-price="10">$10</button>
+          <button type="button" class="suggested" data-price="20">$20</button>
+          <button type="button" data-price="30">$30</button>
+          <button id="custom-payment" type="button">Custom</button>
+        </div>
+        <button id="stripe" class="wide" type="button">
+          Stripe purchase +1
+        </button>
+        <p class="muted small">
+          Stripe amounts stay in Stripe. The counter is optional.
+        </p>
+        <div class="row">
+          <button id="owner-payment" type="button">Shop owner paid</button>
+          <button id="expense" type="button">Add expense</button>
+        </div>
+        <p id="payment-totals" class="muted"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="day-title">
+        <h2 id="day-title">Day summary</h2>
+        <div class="summary-grid">
+          <div>
+            <span>Recorded receipts</span>
+            <strong id="receipts">$0.00</strong>
+          </div>
+          <div>
+            <span>After recorded costs</span>
+            <strong id="net">$0.00</strong>
+          </div>
+          <div>
+            <span>Recorded net / hour</span>
+            <strong id="hourly">—</strong>
+          </div>
+          <div>
+            <span>Purchases counted</span>
+            <strong id="purchases">0</strong>
+          </div>
+        </div>
+        <p class="muted small">
+          Excludes Stripe amounts, unrecorded costs, and taxes. Goals: $200/day
+          and $30–$40 per total work hour.
+        </p>
+        <label for="day-notes">
+          Day notes
+          <textarea
+            id="day-notes"
+            rows="3"
+            maxlength="20000"
+            placeholder="Notes for later analysis, editing time, owner feedback, anything unusual…"
+          ></textarea>
+        </label>
+        <details>
+          <summary>Pricing tested</summary>
+          <label for="suggested-price">
+            Suggested portrait price ($)
+            <input
+              id="suggested-price"
+              type="number"
+              min="0.01"
+              max="9999999"
+              step="0.01"
+              inputmode="decimal"
+              value="20"
+            />
+          </label>
+          <p class="muted small">
+            Describe a minimum price, fixed-price offer, or package change in
+            the day notes.
+          </p>
+        </details>
+      </section>
+
+      <details class="panel">
+        <summary>Records &amp; corrections</summary>
+        <p class="muted small">
+          Tap a timer record to correct its time or add a note.
+        </p>
+        <div id="timeline" class="records"></div>
+        <h3>Payments &amp; expenses</h3>
+        <div id="payment-records" class="records"></div>
+      </details>
+
+      <section class="panel export-panel" aria-labelledby="export-title">
+        <h2 id="export-title">Take your records with you</h2>
+        <p class="muted">
+          Export after work. Put the file in your Syncthing folder and send it
+          back here for analysis.
+        </p>
+        <button id="export-json" class="primary wide" type="button">
+          Export JSON backup
+        </button>
+        <div class="row">
+          <button id="export-csv" type="button">Export CSV</button>
+          <button id="restore" type="button">Restore JSON</button>
+        </div>
+        <input
+          id="restore-file"
+          type="file"
+          accept=".json,application/json"
+          hidden
+        />
+        <p id="export-status" class="muted small">
+          Exports include every saved work day, visit, note, and payment.
+        </p>
+      </section>
+      <noscript>
+        <p class="warning">Enable JavaScript to use the tracker.</p>
+      </noscript>
+    </main>
+    <footer>
+      <span id="save-status">Loading records…</span>
+      <span id="offline-status">Checking offline readiness…</span>
+      <p>
+        Records stay on this device. Use the same browser and website address
+        each time.
+      </p>
+    </footer>
+
+    <dialog id="shop-dialog">
+      <form id="shop-form">
+        <div class="section-head">
+          <h2 id="shop-dialog-title">Arrived at shop</h2>
+          <button
+            class="quiet"
+            type="button"
+            data-close="shop-dialog"
+            aria-label="Close shop form"
+          >
+            Close
+          </button>
+        </div>
+        <label for="shop-name">
+          Shop name
+          <input
+            id="shop-name"
+            required
+            maxlength="200"
+            autocomplete="off"
+            list="saved-shops"
+            placeholder="Choose or type a shop"
+          />
+        </label>
+        <datalist id="saved-shops"></datalist>
+        <label for="shop-street">
+          Address
+          <input
+            id="shop-street"
+            maxlength="1000"
+            autocomplete="street-address"
+            placeholder="Street address, Tampa"
+          />
+        </label>
+        <button id="locate" type="button">Use current location</button>
+        <p id="location-status" class="muted small" role="status">
+          Optional. Saves GPS coordinates, not the shop name.
+        </p>
+        <button class="primary wide" type="submit">Save shop</button>
+      </form>
+    </dialog>
+
+    <dialog id="payment-dialog">
+      <form id="payment-form">
+        <div class="section-head">
+          <h2 id="payment-dialog-title">Record payment</h2>
+          <button class="quiet" type="button" data-close="payment-dialog">
+            Close
+          </button>
+        </div>
+        <label for="payment-amount">
+          <span id="amount-label">Amount received ($)</span>
+          <input
+            id="payment-amount"
+            type="number"
+            required
+            min="0.01"
+            max="9999999"
+            step="0.01"
+            inputmode="decimal"
+          />
+        </label>
+        <label for="payment-method">
+          Payment method
+          <select id="payment-method">
+            <option>Cash</option>
+            <option>Zelle</option>
+            <option>Venmo</option>
+            <option>PayPal</option>
+            <option>Cash App</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label for="payment-visit">
+          Shop visit
+          <select id="payment-visit"></select>
+        </label>
+        <label for="payment-note">
+          Note
+          <textarea
+            id="payment-note"
+            rows="2"
+            maxlength="20000"
+            placeholder="Optional. Owner payment covers which visits or month?"
+          ></textarea>
+        </label>
+        <p id="payment-error" class="error" role="alert"></p>
+        <button class="primary wide" type="submit">Save payment</button>
+      </form>
+    </dialog>
+
+    <dialog id="event-dialog">
+      <form id="event-form">
+        <div class="section-head">
+          <h2>Correct timer record</h2>
+          <button class="quiet" type="button" data-close="event-dialog">
+            Close
+          </button>
+        </div>
+        <label for="event-time">
+          Device local date &amp; time
+          <input id="event-time" type="datetime-local" step="1" required />
+        </label>
+        <label for="event-note">
+          Note
+          <textarea id="event-note" rows="3" maxlength="20000"></textarea>
+        </label>
+        <p id="event-error" class="error" role="alert"></p>
+        <button class="primary wide" type="submit">Save correction</button>
+      </form>
+    </dialog>
+  </body>
+</html>
