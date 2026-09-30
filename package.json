@@ -30,7 +30,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "audit:prod": "pnpm audit --omit=dev",
-    "verify": "pnpm run format:check && pnpm run test:faces && pnpm run test:galleries && pnpm run check && pnpm run build",
+    "test:barber-tracker": "node --test scripts/barber-tracker.test.mjs",
+    "verify": "pnpm run format:check && pnpm run test:barber-tracker && pnpm run test:faces && pnpm run test:galleries && pnpm run check && pnpm run build",
     "astro": "astro",
     "generate-types": "wrangler types"
   },

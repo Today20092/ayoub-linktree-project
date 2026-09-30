@@ -6,15 +6,16 @@ This repository contains Ayoub Abedrabbo's personal website, portfolio, event ga
 
 ## Project map
 
-| Part                     | Purpose                                               | Source                                                          |
-| ------------------------ | ----------------------------------------------------- | --------------------------------------------------------------- |
-| Homepage and link hub    | Introduction, links, channels, and portfolio cards    | `src/pages/index.astro`, `src/data/site.yaml`                   |
-| Portfolio                | Curated projects and case studies                     | `src/content/portfolio/`, `src/pages/portfolio/[slug].astro`    |
-| Services and information | Services, About, Contact, and Privacy                 | Their named Astro files in `src/pages/`                         |
-| Public galleries         | Event photos, viewing, downloads, and guest uploads   | `src/pages/galleries/`, `src/pages/galleries.astro`             |
-| Gallery dashboard        | Gallery creation, settings, uploads, and moderation   | `src/pages/admin/galleries/`, `src/components/AdminGallery.tsx` |
-| Android app              | Upload camera JPEGs and manage galleries from a phone | `android/`                                                      |
-| Payments                 | Payment destinations and QR sharing                   | `src/pages/payments.astro`, [payment guide](docs/payments.md)   |
+| Part                     | Purpose                                                   | Source                                                             |
+| ------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------ |
+| Homepage and link hub    | Introduction, links, channels, and portfolio cards        | `src/pages/index.astro`, `src/data/site.yaml`                      |
+| Portfolio                | Curated projects and case studies                         | `src/content/portfolio/`, `src/pages/portfolio/[slug].astro`       |
+| Services and information | Services, About, Contact, and Privacy                     | Their named Astro files in `src/pages/`                            |
+| Public galleries         | Event photos, viewing, downloads, and guest uploads       | `src/pages/galleries/`, `src/pages/galleries.astro`                |
+| Gallery dashboard        | Gallery creation, settings, uploads, and moderation       | `src/pages/admin/galleries/`, `src/components/AdminGallery.tsx`    |
+| Android app              | Upload camera JPEGs and manage galleries from a phone     | `android/`                                                         |
+| Payments                 | Payment destinations and QR sharing                       | `src/pages/payments.astro`, [payment guide](docs/payments.md)      |
+| Barber field tracker     | Local shift timers, tallies, payments, notes, and exports | `public/barber-tracker/`, [tracking guide](docs/barber-tracker.md) |
 
 A portfolio piece is curated work used to explain a project. A gallery is a photo collection for delivery, browsing, and uploads. Create galleries in the dashboard or Android app. Use MDX for portfolio case studies. Older manifest-based galleries remain supported.
 
