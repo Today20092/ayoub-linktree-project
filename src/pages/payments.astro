@@ -44,7 +44,7 @@ const zellePhone = '+18134240606'
         aria-haspopup="dialog"
       >
         <QrCode size={20} aria-hidden="true" />
-        <span>Scan</span>
+        <span>Show QR</span>
       </button>
     </header>
 
@@ -56,7 +56,7 @@ const zellePhone = '+18134240606'
           <div class="card-tips" aria-label="Tip by card or mobile wallet">
             <div class="card-heading">
               <CreditCard size={20} aria-hidden="true" />
-              <strong>Card or mobile wallet</strong>
+              <strong>Tip by card</strong>
             </div>
             <div class="tip-amounts">
               {stripeTipLinks.map((tip) => (
@@ -65,19 +65,21 @@ const zellePhone = '+18134240606'
                   class:list={['tip-amount', { suggested: tip.amount === 20 }]}
                   aria-label={`Tip $${tip.amount} by card or mobile wallet`}
                 >
-                  ${tip.amount}
+                  <span>${tip.amount}</span>
+                  {tip.amount === 20 && (
+                    <span class="suggested-label">Suggested</span>
+                  )}
                 </a>
               ))}
               <a class="tip-amount" href={stripePaymentLink}>
                 Other
               </a>
             </div>
-            <p class="tip-note">
-              Choose an amount. You can change it at checkout.
-            </p>
+            <p class="tip-note">Cards & mobile wallets. Any amount welcome.</p>
           </div>
         )
       }
+      <p class="apps-heading">Or use your favorite app</p>
       <div class="payment-options" aria-label="Payment apps">
         {
           paymentLinks.map((link) => {
@@ -136,7 +138,7 @@ const zellePhone = '+18134240606'
               id="copy-label"
               class="copy-label"
             >
-              Copy
+              Copy number
             </span>
           </span>
           <Check
@@ -252,16 +254,16 @@ const zellePhone = '+18134240606'
     cursor: pointer;
   }
   .qr-trigger {
-    background: var(--primary);
-    color: var(--primary-foreground);
+    background: var(--background);
+    color: var(--foreground);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
   }
   .payment-content {
-    margin-block: auto;
-    padding-block: 1.5rem 0.5rem;
+    margin-block: 2.25rem auto;
+    padding-bottom: 0.5rem;
   }
   h1 {
     font-size: clamp(2.5rem, 10vw, 3.5rem);
@@ -279,7 +281,7 @@ const zellePhone = '+18134240606'
     gap: 0.75rem;
   }
   .card-tips {
-    margin-bottom: 0.875rem;
+    margin-bottom: 1.25rem;
   }
   .card-heading {
     display: flex;
@@ -295,21 +297,36 @@ const zellePhone = '+18134240606'
   }
   .tip-amount {
     display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
     justify-content: center;
     align-items: center;
-    min-height: 44px;
+    min-height: 64px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    font-size: 1rem;
+    font-size: 1.25rem;
     font-weight: 600;
   }
   .tip-amount.suggested {
     background: var(--primary);
     color: var(--primary-foreground);
   }
+  .suggested-label {
+    font-size: 0.625rem;
+    line-height: 1.2;
+    font-weight: 500;
+  }
+  .tip-amount:last-child {
+    font-size: 0.875rem;
+  }
+  .apps-heading {
+    margin-bottom: 0.625rem;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+  }
   .tip-note {
     margin-top: 0.5rem;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     color: var(--muted-foreground);
   }
   .payment-option {
@@ -343,8 +360,8 @@ const zellePhone = '+18134240606'
   }
   .venmo .brand-logo {
     grid-column: 1 / -1;
-    width: 96px;
-    height: 32px;
+    width: 88px;
+    height: 30px;
     max-width: 100%;
   }
   .payment-option :global(.app-arrow) {
@@ -371,18 +388,19 @@ const zellePhone = '+18134240606'
   }
   .zelle-detail {
     grid-column: 1 / -1;
-    display: flex;
-    justify-content: space-between;
+    display: grid;
     align-items: center;
     gap: 0.25rem;
-    flex-wrap: wrap;
+    line-height: 1.25;
   }
   .phone {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     white-space: nowrap;
   }
   .copy-label {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
   .zelle-option :global(#copy-check) {
     position: absolute;
@@ -390,7 +408,7 @@ const zellePhone = '+18134240606'
     top: 0.5rem;
   }
   .copy-status {
-    min-height: 2.5rem;
+    min-height: 2.25rem;
     margin-top: 0.875rem;
     font-size: 0.75rem;
     line-height: 1.5;
@@ -453,24 +471,39 @@ const zellePhone = '+18134240606'
       font-size: 0.875rem;
       padding-inline: 0.75rem;
     }
-    .phone,
-    .copy-label {
-      font-size: 0.625rem;
-    }
   }
   @media (max-height: 650px) {
+    .payment-page {
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
     .payment-content {
-      padding-block: 0;
+      margin-top: 0.75rem;
+      padding-bottom: 0;
+    }
+    h1 {
+      font-size: 2.25rem;
+      line-height: 1.1;
+    }
+    .tip-amount {
+      min-height: 52px;
+    }
+    .card-tips {
+      margin-bottom: 0.625rem;
     }
     .intro {
-      margin-block: 0.5rem 0.75rem;
+      margin-block: 0.375rem 0.5rem;
     }
     .payment-options {
       gap: 0.5rem;
     }
     .payment-option {
-      min-height: 72px;
-      padding-block: 0.75rem;
+      min-height: 64px;
+      padding-block: 0.5rem;
+    }
+    .copy-status {
+      min-height: 2rem;
+      margin-top: 0.5rem;
+      line-height: 1.3;
     }
   }
 </style>
