@@ -22,22 +22,23 @@ scanning device to have tailnet access.
 
 ## Stripe checkout
 
-Set `payments.stripePaymentLink` in `src/data/site.yaml` to the verified Stripe
-Payment Link. Until it is configured, the card/mobile-wallet button stays hidden.
-The existing payment apps continue to work.
+Live tip links were created in the Alpha Bravo Media account
+`acct_1U2j8kIlyeigpagV` through the logged-in dashboard on September 30, 2026.
+`payments.stripeTipLinks` in `src/data/site.yaml` supplies $10, $20, and $30 USD
+suggestions. Each link is titled "Photography tip" and lets customers edit the
+amount. `payments.stripePaymentLink` supplies the Other option, which opens the
+$20 link with an editable amount. The $20 choice is highlighted on the page.
 
-Create a one-time Payment Link titled "Photography tip" with customers choosing
-what to pay and a suggested amount of $20 USD. Keep the amount editable and the tip
-optional. Use Stripe-hosted checkout with cards and eligible Apple Pay/Google Pay
-wallets. Avoid additional phone, shipping, or custom fields. Use Stripe's hosted
-thank-you confirmation; this site does not claim to verify a completed payment.
+The links use Stripe-hosted checkout and a hosted thank-you message. No additional
+phone, shipping, custom fields, automatic tax, paid invoice PDF, or Managed
+Payments option is enabled. They are not added to the public Stripe profile.
+Stripe controls available payment methods and wallet eligibility; the page labels
+the choices "Card or mobile wallet" without promising a wallet on every device.
+The site does not process or confirm payments. No real payment is made during QA.
 
-The Stripe account is awaiting review, and the connector requires reauthentication.
-After approval and reconnecting,
-confirm the account, check that it can accept payments, and create or reuse the
-appropriate product, variable price, and Payment Link. Verify the checkout's
-amount and payment methods without making a real payment. Wallets appear only on
-eligible devices and browsers with the relevant wallet configured.
+The connector still requires reauthentication; browser dashboard access was used
+instead. Future edits should confirm the account and live mode before changing
+links. Clearing `stripePaymentLink` hides the card section.
 
 ## Activation
 
@@ -50,13 +51,15 @@ production deployment is performed by local development.
 
 ## Checks
 
-- `pnpm exec tsx --test src/middleware.test.ts`
+- The standalone middleware test currently needs a Workers-aware runner because
+  gallery middleware imports `cloudflare:workers`; plain `tsx` cannot load it.
 - `npm run verify`
 - At `/payments/`, check small phone, desktop, light/dark, and enlarged text.
 - Open Scan, close with Escape, and confirm focus returns to Scan.
 - Copy Zelle and verify the clipboard contains `+18134240606`.
 - Check all three payment links without sending money.
-- Check the configured Stripe link opens "Photography tip" with $20 editable.
+- Check the three Stripe choices open "Photography tip" with $10/$20/$30 editable.
+- Check Other opens an editable amount.
 - Open a URL with a query/fragment and verify Scan encodes only its origin/path.
 
 Local validation covered a 320 x 568 phone viewport, a 390 x 844 phone viewport,

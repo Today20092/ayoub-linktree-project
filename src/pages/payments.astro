@@ -22,6 +22,7 @@ const paymentLinks = ['cash-app', 'venmo', 'paypal'].map((id) => {
   }
 })
 const stripePaymentLink = siteConfig.payments?.stripePaymentLink
+const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
 const zellePhone = '+18134240606'
 ---
 
@@ -52,16 +53,29 @@ const zellePhone = '+18134240606'
       <p class="intro">Your photos are free. Tips are always appreciated.</p>
       {
         stripePaymentLink && (
-          <a class="card-option" href={stripePaymentLink}>
-            <CreditCard size={24} aria-hidden="true" />
-            <span>
-              <>
-                <strong>Card or mobile wallet</strong>
-                <small>Apple Pay · Google Pay</small>
-              </>
-            </span>
-            <ArrowUpRight size={20} aria-hidden="true" />
-          </a>
+          <div class="card-tips" aria-label="Tip by card or mobile wallet">
+            <div class="card-heading">
+              <CreditCard size={20} aria-hidden="true" />
+              <strong>Card or mobile wallet</strong>
+            </div>
+            <div class="tip-amounts">
+              {stripeTipLinks.map((tip) => (
+                <a
+                  href={tip.url}
+                  class:list={['tip-amount', { suggested: tip.amount === 20 }]}
+                  aria-label={`Tip $${tip.amount} by card or mobile wallet`}
+                >
+                  ${tip.amount}
+                </a>
+              ))}
+              <a class="tip-amount" href={stripePaymentLink}>
+                Other
+              </a>
+            </div>
+            <p class="tip-note">
+              Choose an amount. You can change it at checkout.
+            </p>
+          </div>
         )
       }
       <div class="payment-options" aria-label="Payment apps">
@@ -264,29 +278,39 @@ const zellePhone = '+18134240606'
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
   }
-  .card-option {
+  .card-tips {
+    margin-bottom: 0.875rem;
+  }
+  .card-heading {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    min-height: 68px;
-    margin-bottom: 0.75rem;
-    padding: 0.875rem 1rem;
-    border-radius: var(--radius);
-    background: var(--foreground);
-    color: var(--background);
-  }
-  .card-option > span {
-    flex: 1;
-    min-width: 0;
-  }
-  .card-option strong {
-    display: block;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
     font-size: 0.875rem;
   }
-  .card-option small {
-    display: block;
-    margin-top: 0.25rem;
-    font-size: 0.75rem;
+  .tip-amounts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .tip-amount {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .tip-amount.suggested {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+  .tip-note {
+    margin-top: 0.5rem;
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
   }
   .payment-option {
     position: relative;
@@ -329,7 +353,7 @@ const zellePhone = '+18134240606'
     top: 0.5rem;
   }
   .payment-option:hover,
-  .card-option:hover {
+  .tip-amount:hover {
     box-shadow: inset 0 0 0 2px currentColor;
   }
   .zelle-option {
@@ -436,16 +460,16 @@ const zellePhone = '+18134240606'
   }
   @media (max-height: 650px) {
     .payment-content {
-      padding-block: 0.5rem;
+      padding-block: 0;
     }
     .intro {
-      margin-bottom: 1rem;
+      margin-block: 0.5rem 0.75rem;
     }
     .payment-options {
       gap: 0.5rem;
     }
     .payment-option {
-      min-height: 84px;
+      min-height: 72px;
       padding-block: 0.75rem;
     }
   }
