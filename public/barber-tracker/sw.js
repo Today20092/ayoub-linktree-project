@@ -1,4 +1,4 @@
-const cacheName = 'ayoub-barber-tracker-v2'
+const cacheName = 'ayoub-barber-tracker-v3'
 const root = new URL('./', self.location.href).pathname
 const files = [
   root,

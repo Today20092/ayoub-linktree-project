@@ -38,12 +38,19 @@
       <p id="message" role="status" aria-live="polite"></p>
       <p id="storage-warning" class="warning" role="alert" hidden></p>
       <div class="day-picker">
-        <label for="day-select">
+        <label for="work-date">
           Work day
-          <select id="day-select"></select>
+          <input id="work-date" type="date" required />
         </label>
         <button id="new-day" type="button">New day</button>
       </div>
+      <div class="day-picker">
+        <label for="day-select">
+          Saved days
+          <select id="day-select"></select>
+        </label>
+      </div>
+      <p id="active-day-hint" class="muted" role="status"></p>
 
       <section class="panel clock-panel" aria-labelledby="clock-title">
         <div class="section-head">
@@ -71,6 +78,10 @@
             Undo last change
           </button>
         </div>
+        <p class="muted small">
+          Timers continue through refreshes. To adjust your start or shop
+          arrival time, open Records &amp; corrections and tap the timer record.
+        </p>
       </section>
 
       <section class="panel" aria-labelledby="visit-title">
@@ -256,7 +267,8 @@
       <details class="panel">
         <summary>Records &amp; corrections</summary>
         <p class="muted small">
-          Tap a timer record to correct its time or add a note.
+          Tap a start, arrival, departure, break, or finish record to correct
+          its time or add a note. Corrections must stay in chronological order.
         </p>
         <div id="timeline" class="records"></div>
         <h3>Payments &amp; expenses</h3>
