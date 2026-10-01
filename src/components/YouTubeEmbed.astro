@@ -5,7 +5,6 @@ import type { ImageMetadata } from 'astro'
 type Props = {
   youtubeId: string
   title: string
-  autoplay?: boolean
   poster?: ImageMetadata | string
   posterAlt?: string
   class?: string
@@ -14,7 +13,6 @@ type Props = {
 const {
   youtubeId,
   title,
-  autoplay = true,
   poster,
   posterAlt = '',
   class: className,
@@ -31,7 +29,6 @@ const localPoster = typeof poster === 'string' ? undefined : poster
   data-youtube-embed
   data-youtube-id={youtubeId}
   data-youtube-title={title}
-  data-youtube-autoplay={autoplay ? 'true' : 'false'}
 >
   {
     remotePoster ? (
@@ -68,16 +65,30 @@ const localPoster = typeof poster === 'string' ? undefined : poster
     class="absolute inset-0 flex items-center justify-center"
     data-youtube-player
   >
-    <span class="sr-only">Loading video player</span>
+    <button
+      type="button"
+      aria-label={`Play ${title}`}
+      class="absolute inset-0 flex cursor-pointer items-center justify-center focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-white"
+      data-youtube-play
+    >
+      <span
+        class="rounded-full bg-black/80 px-6 py-4 text-lg font-bold text-white"
+      >
+        ▶ Play
+      </span>
+    </button>
   </div>
 </div>
+<a
+  href={`https://www.youtube.com/watch?v=${youtubeId}`}
+  class="text-primary mt-2 inline-block text-sm underline underline-offset-4"
+  aria-label={`Watch ${title} on YouTube`}
+>
+  Watch on YouTube
+</a>
 
 <script>
   const initializeYouTubeEmbeds = () => {
-    const reducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)',
-    ).matches
-
     const loadEmbed = (embed: HTMLElement) => {
       if (embed.dataset.youtubeLoaded === 'true') return
 
@@ -88,11 +99,8 @@ const localPoster = typeof poster === 'string' ? undefined : poster
 
       if (!youtubeId || !title || !player) return
 
-      const shouldAutoplay =
-        embed.dataset.youtubeAutoplay === 'true' && !reducedMotion
       const params = new URLSearchParams({
-        autoplay: shouldAutoplay ? '1' : '0',
-        mute: '1',
+        autoplay: '1',
         playsinline: '1',
         controls: '1',
         rel: '0',
@@ -117,29 +125,18 @@ const localPoster = typeof poster === 'string' ? undefined : poster
 
       player.replaceChildren(iframe)
       embed.dataset.youtubeLoaded = 'true'
+      iframe.focus()
     }
 
     const embeds = document.querySelectorAll<HTMLElement>(
       '[data-youtube-embed]:not([data-youtube-loaded="true"])',
     )
 
-    if (!('IntersectionObserver' in window)) {
-      embeds.forEach(loadEmbed)
-      return
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return
-          loadEmbed(entry.target as HTMLElement)
-          observer.unobserve(entry.target)
-        })
-      },
-      { rootMargin: '400px 0px' },
-    )
-
-    embeds.forEach((embed) => observer.observe(embed))
+    embeds.forEach((embed) => {
+      embed
+        .querySelector<HTMLButtonElement>('[data-youtube-play]')
+        ?.addEventListener('click', () => loadEmbed(embed), { once: true })
+    })
   }
 
   initializeYouTubeEmbeds()
