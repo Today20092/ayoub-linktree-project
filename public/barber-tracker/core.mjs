@@ -20,10 +20,27 @@ export function moneyCents(value) {
   return cents
 }
 
+export function localDate(now = new Date()) {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
+export function selectDate(store, date = localDate()) {
+  const now = new Date(`${date}T12:00:00`)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || localDate(now) !== date)
+    throw new Error('Choose a valid work date.')
+  let selected = store.days.find((d) => d.date === date)
+  if (!selected) {
+    selected = newDay(now)
+    store.days.push(selected)
+  }
+  store.selectedDayId = selected.id
+  return selected
+}
+
 export function newDay(now = new Date()) {
   return {
     id: crypto.randomUUID(),
-    date: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`,
+    date: localDate(now),
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     suggestedPriceCents: 2000,
     notes: '',

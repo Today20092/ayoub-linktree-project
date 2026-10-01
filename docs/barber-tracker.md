@@ -55,6 +55,10 @@ The four timer buttons are coarse boundaries, not second-by-second reporting req
 
 Source: `public/barber-tracker/index.html` with plain CSS and JavaScript modules. Served by the existing site's static assets at `/barber-tracker/`. No new dependencies or server database were added.
 
+Opening or refreshing the tracker selects today using the phone's local date. Use **Work day** or **New day** to choose any past or future date, even when the selected day is empty. Skipped dates do not need entries. Selecting a date reopens its existing record or creates an empty day. **Saved days** keeps every previous record accessible, including older backups with multiple records for one date. Notes and tallies save as you enter them.
+
+Changing dates does not stop a running timer. If another day has an active timer, select it under **Saved days** and finish work before starting a timer on the selected date. Timer and payment timestamps still use the actual device time; choosing a different work date changes which day's records you edit.
+
 1. Open the hosted tracker in the same Android browser each time.
 2. Use the browser's **Add to home screen** or **Install app** option if available.
 3. Wait for **Ready to reopen offline** before relying on offline reopening.

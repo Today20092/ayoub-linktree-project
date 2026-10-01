@@ -1,6 +1,7 @@
 import {
   counters,
   newDay,
+  selectDate,
   totals,
   moneyCents,
   validateStore,
@@ -57,6 +58,7 @@ if (!store) {
     days: [first],
   }
 }
+if (!blocked) selectDate(store)
 
 const day = () => store.days.find((d) => d.id === store.selectedDayId)
 const current = () => day().timeline.at(-1)
@@ -143,6 +145,8 @@ function updateClock() {
 
 function render() {
   const d = day()
+  $('work-date').value = d.date
+  $('work-date').disabled = blocked
   if (!visit()) visitId = current()?.visitId ?? d.visits.at(-1)?.id ?? null
   const v = visit()
   options(
@@ -202,7 +206,10 @@ function render() {
   $('pause').textContent =
     phase === 'break' ? 'Resume work' : 'Pause for a break'
   $('pause').disabled = blocked || !phase || phase === 'finished'
-  $('new-day').disabled = blocked || Boolean(activeDay())
+  $('new-day').disabled = blocked
+  $('active-day-hint').textContent = otherActive
+    ? `A timer is still running on ${activeDay().date}. Select that saved day and finish work before starting another timer.`
+    : ''
   $('undo').disabled = blocked || !undo.length
   document
     .querySelectorAll(
@@ -327,19 +334,20 @@ $('undo').addEventListener('click', () => {
   say('Last change undone.')
 })
 $('new-day').addEventListener('click', () => {
+  const input = $('work-date')
+  input.focus()
+  try {
+    input.showPicker?.()
+  } catch {
+    // Browsers without picker support can still edit the focused date field.
+  }
+})
+$('work-date').addEventListener('change', () => {
   change(() => {
-    if (activeDay()) throw new Error('Finish the active work day first.')
-    if (
-      !day().timeline.length &&
-      !day().visits.length &&
-      !day().payments.length
-    )
-      throw new Error('This day has not started yet. Tap Start work / travel.')
-    const next = newDay()
-    store.days.push(next)
-    store.selectedDayId = next.id
+    selectDate(store, $('work-date').value)
     visitId = null
   })
+  render()
 })
 $('day-select').addEventListener('change', () => {
   change(() => {
