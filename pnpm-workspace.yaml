@@ -5,5 +5,8 @@ allowBuilds:
 patchedDependencies:
   '@astrojs/cloudflare@14.3.0': patches/@astrojs__cloudflare@14.3.0.patch
 overrides:
+  # Preserve each Undici major while applying GHSA-w293-vg96-wgc3 fixes.
+  'undici@>=7.24.1 <7.29.1': 7.29.1
+  'undici@>=8.0.0 <8.10.2': 8.10.2
   # Miniflare pins an older Sharp; this patch includes the libheif security fixes.
   'miniflare>sharp': 0.35.4
