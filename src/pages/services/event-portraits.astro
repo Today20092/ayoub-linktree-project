@@ -1,0 +1,252 @@
+---
+import '../../styles.css'
+import type { ImageMetadata } from 'astro'
+import { Image } from 'astro:assets'
+import { buttonVariants } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { siteConfig } from '../../lib/site-config'
+
+const portraitAssets = import.meta.glob<{ default: ImageMetadata }>(
+  '../../assets/portraits/P1210300.JPG',
+  { eager: true },
+)
+const eventPortrait =
+  portraitAssets['../../assets/portraits/P1210300.JPG'].default
+
+const title = 'Instant event photography experience | Ayoub Abedrabbo'
+const description =
+  'Give your guests professional headshots, family photos, and portraits delivered to their phones during your event. Tampa event experiences starting at $300.'
+const canonicalUrl = new URL(
+  '/services/event-portraits/',
+  Astro.site,
+).toString()
+const ogImage = new URL(siteConfig.site.ogImage, Astro.site).toString()
+const packages = [
+  { hours: '1 hour', price: '$300', sessions: 'About 20' },
+  { hours: '2 hours', price: '$400', sessions: 'About 40' },
+  { hours: '3 hours', price: '$500', sessions: 'About 60' },
+  { hours: '4 hours', price: '$600', sessions: 'About 80' },
+]
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  ogImageAlt={siteConfig.site.ogImageAlt}
+  twitterHandle={siteConfig.site.twitterHandle}
+  robots="noindex,follow"
+>
+  <main id="main-content" class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+    <section
+      aria-labelledby="experience-title"
+      class="grid items-center gap-8 py-10 sm:py-14 lg:grid-cols-2 lg:gap-12 lg:py-20"
+    >
+      <div>
+        <p class="text-primary text-sm font-semibold">
+          Instant event photography · Tampa, Florida
+        </p>
+        <h1
+          id="experience-title"
+          class="mt-5 text-4xl leading-[1.08] font-extrabold tracking-tight text-balance sm:text-5xl"
+        >
+          A gift your guests can take home.
+        </h1>
+        <p class="text-muted-foreground mt-6 max-w-lg text-lg leading-8">
+          Professional photos, on their phones in minutes. An experience they
+          can enjoy, keep, and share before the event ends.
+        </p>
+        <a
+          href="#pricing"
+          class={`${buttonVariants({ variant: 'outline', size: 'lg' })} mt-7 min-h-11 px-5`}
+        >
+          View pricing
+        </a>
+      </div>
+      <figure>
+        <Image
+          src={eventPortrait}
+          alt="Two guests smiling together for a professional portrait at an event"
+          layout="full-width"
+          widths={[480, 720, 1080]}
+          sizes="(min-width: 1024px) 520px, (min-width: 640px) 90vw, 100vw"
+          loading="eager"
+          fetchpriority="high"
+          quality={82}
+          class="aspect-[4/3] rounded-2xl object-cover"
+        />
+        <figcaption class="text-muted-foreground mt-3 text-sm">
+          Event portraits by Ayoub Abedrabbo
+        </figcaption>
+      </figure>
+    </section>
+
+    <Separator />
+
+    <section aria-labelledby="guest-experience-title" class="py-10 sm:py-14">
+      <div class="max-w-2xl">
+        <h2
+          id="guest-experience-title"
+          class="text-2xl font-bold tracking-tight sm:text-3xl"
+        >
+          They're already dressed for the occasion.
+        </h2>
+        <p class="text-muted-foreground mt-4 text-base leading-7">
+          Give them a reason to remember it. A fresh LinkedIn headshot, a photo
+          with their family, or a portrait with a friend. You host the
+          experience; your guests receive their photos at no charge.
+        </p>
+      </div>
+      <ol class="mt-8 grid gap-7 sm:grid-cols-3 sm:gap-8">
+        <li>
+          <h3 class="font-semibold">A quick portrait</h3>
+          <p class="text-muted-foreground mt-2 text-sm leading-6">
+            I bring a professional camera and lighting, and help guests feel
+            comfortable in front of the camera. Individuals, couples, families,
+            and small groups are welcome.
+          </p>
+        </li>
+        <li>
+          <h3 class="font-semibold">Photos on their phone</h3>
+          <p class="text-muted-foreground mt-2 text-sm leading-6">
+            Guests can receive their photos directly on iPhone or Android,
+            typically within a few minutes, using Quick Share or a compatible
+            phone transfer.
+          </p>
+        </li>
+        <li>
+          <h3 class="font-semibold">Ready to use and share</h3>
+          <p class="text-muted-foreground mt-2 text-sm leading-6">
+            High-quality photos ready for a profile, a post, or a family album.
+            A shareable gallery updates during the event, usually within an
+            hour, depending on connectivity.
+          </p>
+        </li>
+      </ol>
+    </section>
+
+    <Separator />
+
+    <section
+      id="pricing"
+      aria-labelledby="pricing-title"
+      class="scroll-mt-24 py-10 sm:py-14"
+    >
+      <h2
+        id="pricing-title"
+        class="text-2xl font-bold tracking-tight sm:text-3xl"
+      >
+        One booking. An experience for your guests.
+      </h2>
+      <p class="text-muted-foreground mt-4 max-w-2xl leading-7">
+        Choose the time that fits your event. Every booking includes the
+        photographer, professional camera and lighting, direct photo delivery,
+        and an event gallery for guests and the organizer.
+      </p>
+      <div
+        class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-12"
+      >
+        <div>
+          <table class="w-full text-left">
+            <caption class="sr-only">
+              Starting prices in US dollars and approximate portrait sessions by
+              coverage time
+            </caption>
+            <thead class="text-muted-foreground text-xs">
+              <tr>
+                <th scope="col" class="pb-4 font-medium">Coverage</th>
+                <th scope="col" class="pb-4 font-medium">Portrait sessions</th>
+                <th scope="col" class="pb-4 text-right font-medium">
+                  Starting at
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                packages.map((option) => (
+                  <tr class="odd:bg-muted/50">
+                    <th
+                      scope="row"
+                      class="rounded-l-lg px-3 py-5 text-sm font-semibold sm:text-base"
+                    >
+                      {option.hours}
+                    </th>
+                    <td class="text-muted-foreground px-2 py-5 text-sm">
+                      {option.sessions}
+                    </td>
+                    <td class="rounded-r-lg px-3 py-5 text-right text-xl font-bold tracking-tight tabular-nums sm:text-2xl">
+                      {option.price}
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+          <p class="text-muted-foreground mt-4 text-sm leading-6">
+            All prices in USD. Allow approximately 20 portrait sessions per
+            hour, depending on group size and event flow. A session may include
+            one person, a couple, or a small group. This is a planning estimate,
+            not a guarantee that every attendee will be photographed.
+          </p>
+        </div>
+        <div class="bg-muted/50 rounded-2xl p-6 sm:p-8">
+          <h3 class="text-lg font-semibold">Plan around your event</h3>
+          <dl class="mt-5 flex flex-col gap-5 text-sm leading-6">
+            <div>
+              <dt class="font-semibold">Travel included</dt>
+              <dd class="text-muted-foreground">
+                Within 30 miles of Tampa, Florida. Travel beyond that is quoted
+                separately.
+              </dd>
+            </div>
+            <div>
+              <dt class="font-semibold">Larger or busier events</dt>
+              <dd class="text-muted-foreground">
+                Bookings up to 8 hours are available. Your final quote considers
+                attendance, expected portrait demand, and coverage time.
+              </dd>
+            </div>
+            <div>
+              <dt class="font-semibold">Portraits come first</dt>
+              <dd class="text-muted-foreground">
+                I can capture event moments between portraits when time allows.
+                Dedicated event coverage can be discussed with your quote.
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <Separator />
+
+    <section aria-labelledby="inquiry-title" class="py-10 sm:py-14">
+      <h2
+        id="inquiry-title"
+        class="text-2xl font-bold tracking-tight sm:text-3xl"
+      >
+        Give your guests something to keep.
+      </h2>
+      <p class="text-muted-foreground mt-4 max-w-xl leading-7">
+        Send me your date, venue, approximate guest count, and desired coverage
+        time. I'll help you choose the right fit and confirm your quote.
+      </p>
+      <div class="mt-6 flex flex-wrap items-center gap-5">
+        <a
+          href="/contact/"
+          class={buttonVariants({ size: 'lg', className: 'min-h-11 px-5' })}
+        >
+          Ask about your event
+        </a>
+        <a
+          href="/portfolio/portraits/"
+          class="text-primary rounded-sm text-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+        >
+          See more portraits
+        </a>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

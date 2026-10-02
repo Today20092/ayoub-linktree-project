@@ -8,6 +8,8 @@ Run `npm run update:youtube` to refresh `src/data/latest-youtube-videos.json`. T
 
 Services, About, Contact, and Privacy have their own Astro pages under `src/pages/`. Payment configuration and hostname routing are covered in [payments.md](payments.md).
 
+The instant event photography rate page lives at `/services/event-portraits/`, with its content in `src/pages/services/event-portraits.astro`. It is shared directly, omitted from navigation and the sitemap, and marked `noindex`. Starting prices cover 1–4 hours; larger or high-demand events receive a custom quote. The parent `/services/` draft continues to redirect to the homepage.
+
 ## Portfolio case studies
 
 Each project has an MDX file in `src/content/portfolio/`. `src/content.config.ts` validates the fields, and `src/pages/portfolio/[slug].astro` renders the shared layout. Consult the schema and template for supported fields.
