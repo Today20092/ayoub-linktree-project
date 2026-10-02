@@ -53,6 +53,7 @@ export default defineConfig({
         return (
           !pathname.startsWith('/admin/') &&
           pathname !== '/services' &&
+          pathname !== '/services/event-portraits' &&
           pathname !== '/payments' &&
           pathname !== '/portfolio/alphabravomedia' &&
           !pathname.includes('/photo/')
