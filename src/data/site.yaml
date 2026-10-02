@@ -195,6 +195,11 @@ actionLinks:
     darkColor: '#d9c56c'
     darkColor2: '#776a32'
     darkColor3: '#1d1b12'
+  - id: payments
+    label: Payments
+    url: https://payments.ayoubabed.xyz/
+    icon: lucide:credit-card
+    group: support
   - id: kofi
     label: Ko-fi
     url: https://ko-fi.com/ayoubab1/10
