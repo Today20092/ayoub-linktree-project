@@ -2,6 +2,9 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { DatabaseSync } from 'node:sqlite'
 import { test } from 'node:test'
+import { companionUpload, companionKnown } from './gallery-companion-request'
+import { Effect } from 'effect'
+import { companionLayer, receivePhoto } from './gallery-companion-workflow'
 import { createCompanionGallery } from './gallery-create'
 import {
   companionAuthorized,
@@ -321,6 +324,285 @@ test('sha256 follows known test vector', async () => {
     await contentHash(new TextEncoder().encode('abc').buffer),
     'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
   )
+})
+
+test('cleanup failure preserves the original upload failure and allows lease recovery', async () => {
+  const { bindings, optimize, sqlite } = fixture()
+  bindings.GALLERY_PUBLIC.delete = async () => {
+    throw new Error('cleanup failed')
+  }
+  await assert.rejects(
+    receiveCompanionPhoto(bindings, event, file, hash, async () => {
+      throw new Error('bad image')
+    }),
+    /bad image/,
+  )
+  bindings.GALLERY_PUBLIC.delete = async () => {}
+  sqlite.exec('UPDATE gallery_upload_receipts SET lease_until = 0')
+  assert.equal(
+    (await receiveCompanionPhoto(bindings, event, file, hash, optimize)).status,
+    201,
+  )
+})
+
+test('lost commit response reconciles completed receipt without deleting the photo', async () => {
+  const { bindings, db, optimize, objects } = fixture()
+  const batch = db.batch.bind(db)
+  db.batch = async (...args) => {
+    await batch(...args)
+    throw new Error('lost response')
+  }
+  const response = await receiveCompanionPhoto(
+    bindings,
+    event,
+    file,
+    hash,
+    optimize,
+  )
+  assert.deepEqual(await response.json(), { status: 'skipped' })
+  assert.equal(objects.size, 1)
+  assert.deepEqual(await knownCompanionHashes(db, event.id, [hash]), [hash])
+})
+
+test('unresolved commit status retains uploaded bytes and complete receipt', async () => {
+  const { bindings, db, optimize, objects, sqlite } = fixture()
+  const batch = db.batch.bind(db)
+  const prepare = db.prepare.bind(db)
+  let uncertain = false
+  db.batch = async (...args) => {
+    await batch(...args)
+    uncertain = true
+    throw new Error('lost response')
+  }
+  db.prepare = (sql) => {
+    if (uncertain && sql.startsWith('SELECT state'))
+      throw new Error('database unavailable')
+    return prepare(sql)
+  }
+  await assert.rejects(
+    receiveCompanionPhoto(bindings, event, file, hash, optimize),
+  )
+  assert.equal(objects.size, 1)
+  assert.equal(
+    sqlite.prepare('SELECT state FROM gallery_upload_receipts').get()?.state,
+    'complete',
+  )
+})
+
+test('companion HTTP seam preserves auth, JPEG validation, checksum, repeats, and preflight', async () => {
+  const { bindings, db, optimize } = fixture()
+  const device = await createDevice(db, 'Phone')
+  const jpeg = new Uint8Array([0xff, 0xd8, 1, 2])
+  const checksum = await contentHash(jpeg.buffer)
+  const reader = { getAdmin: async () => ({ title: 'Event' }) }
+  const request = (
+    headers: Record<string, string> = {},
+    body: BodyInit = jpeg,
+  ) =>
+    new Request('https://example.com/api/companion/upload/?gallery=event', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${device.token}`,
+        'content-type': 'image/jpeg',
+        'x-content-sha256': checksum,
+        ...headers,
+      },
+      body,
+    })
+  assert.equal(
+    (
+      await companionUpload(request({ authorization: '' }), bindings, reader, {
+        optimize,
+      })
+    ).status,
+    401,
+  )
+  assert.equal(
+    (
+      await companionUpload(
+        request({ 'content-type': 'image/png' }),
+        bindings,
+        reader,
+        { optimize },
+      )
+    ).status,
+    415,
+  )
+  assert.equal(
+    (
+      await companionUpload(request({}, 'not jpeg'), bindings, reader, {
+        optimize,
+      })
+    ).status,
+    400,
+  )
+  assert.equal(
+    (
+      await companionUpload(
+        request({ 'x-content-sha256': 'b'.repeat(64) }),
+        bindings,
+        reader,
+        { optimize },
+      )
+    ).status,
+    400,
+  )
+  const uploaded = await companionUpload(request(), bindings, reader, {
+    optimize,
+    now: () => 1000,
+    createId: () => 'fixed-attempt',
+  })
+  assert.equal(uploaded.status, 201)
+  assert.equal(uploaded.headers.get('cache-control'), 'no-store')
+  assert.deepEqual(await uploaded.json(), {
+    status: 'uploaded',
+    id: 'fixed-attempt',
+  })
+  assert.deepEqual(
+    await (
+      await companionUpload(request(), bindings, reader, { optimize })
+    ).json(),
+    { status: 'skipped' },
+  )
+  const known = await companionKnown(
+    new Request('https://example.com/api/companion/known/', {
+      method: 'POST',
+      headers: { authorization: `Bearer ${device.token}` },
+      body: JSON.stringify({ gallery: 'event', hashes: [checksum] }),
+    }),
+    bindings,
+  )
+  assert.deepEqual(await known.json(), { known: [checksum] })
+})
+
+test('companion rejects oversized streams without trusting Content-Length', async () => {
+  const { bindings, db, optimize, objects } = fixture()
+  const device = await createDevice(db, 'Phone')
+  const request = new Request(
+    'https://example.com/api/companion/upload/?gallery=event',
+    {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${device.token}`,
+        'content-type': 'image/jpeg',
+        'content-length': '1',
+        'x-content-sha256': hash,
+      },
+      body: new Uint8Array(20 * 1024 * 1024 + 1),
+    },
+  )
+  assert.equal(
+    (
+      await companionUpload(
+        request,
+        bindings,
+        { getAdmin: async () => ({ title: 'Event' }) },
+        { optimize },
+      )
+    ).status,
+    413,
+  )
+  assert.equal(objects.size, 0)
+})
+
+test('interruption during an external upload waits for publication and leaves a deduplicated receipt', async () => {
+  const { bindings, db, optimize, objects } = fixture()
+  const controller = new AbortController()
+  let started!: () => void
+  let release!: () => void
+  const ready = new Promise<void>((resolve) => {
+    started = resolve
+  })
+  const held = new Promise<void>((resolve) => {
+    release = resolve
+  })
+  const upload = Effect.runPromiseExit(
+    receivePhoto(event, file, hash).pipe(
+      Effect.provide(
+        companionLayer(bindings, {
+          now: () => 1000,
+          createId: () => 'interrupted-owner',
+          optimize: async () => {
+            started()
+            await held
+            return optimize()
+          },
+          log: () => {},
+        }),
+      ),
+    ),
+    { signal: controller.signal },
+  )
+  await ready
+  controller.abort()
+  release()
+  await upload
+  assert.equal(objects.size, 1)
+  assert.deepEqual(await knownCompanionHashes(db, event.id, [hash]), [hash])
+  assert.deepEqual(
+    await (
+      await receiveCompanionPhoto(bindings, event, file, hash, optimize)
+    ).json(),
+    { status: 'skipped' },
+  )
+})
+
+test('partial R2 writes and failed D1 publication compensate and permit a fresh upload', async () => {
+  for (const failurePoint of ['object', 'metadata']) {
+    const { bindings, db, optimize, objects } = fixture()
+    const put = bindings.GALLERY_PUBLIC.put.bind(bindings.GALLERY_PUBLIC)
+    const batch = db.batch.bind(db)
+    if (failurePoint === 'object')
+      bindings.GALLERY_PUBLIC.put = async (
+        ...args: Parameters<R2Bucket['put']>
+      ) => {
+        await put(...args)
+        throw new Error('object response failed')
+      }
+    else
+      db.batch = async () => {
+        throw new Error('metadata failed')
+      }
+    await assert.rejects(
+      receiveCompanionPhoto(bindings, event, file, hash, optimize),
+    )
+    assert.equal(objects.size, 0)
+    assert.deepEqual(await knownCompanionHashes(db, event.id, [hash]), [])
+    bindings.GALLERY_PUBLIC.put = put
+    db.batch = batch
+    assert.equal(
+      (await receiveCompanionPhoto(bindings, event, file, hash, optimize))
+        .status,
+      201,
+    )
+  }
+})
+
+test('unexpected dependency details cannot expose secrets through HTTP errors', async () => {
+  const { bindings, db, optimize } = fixture()
+  const device = await createDevice(db, 'Phone')
+  db.prepare = () => {
+    throw new Error(`credential=${device.token}`)
+  }
+  const response = await companionUpload(
+    new Request('https://example.com/?gallery=event', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${device.token}`,
+        'content-type': 'image/jpeg',
+        'x-content-sha256': hash,
+      },
+      body: 'photo',
+    }),
+    bindings,
+    { getAdmin: async () => ({ title: 'Event' }) },
+    { optimize },
+  )
+  assert.equal(response.status, 503)
+  const body = await response.text()
+  assert.equal(body.includes(device.token), false)
+  assert.equal(body.includes('credential='), false)
+  assert.equal(response.headers.get('cache-control'), 'no-store')
 })
 
 test('preflight skips known bytes without transferring photos again', async () => {

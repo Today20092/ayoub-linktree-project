@@ -1,6 +1,7 @@
 import type { MiddlewareHandler } from 'astro'
 import { env } from 'cloudflare:workers'
-import { galleryMediaKey, transformGalleryMedia } from './lib/gallery-media'
+import { galleryMediaKey } from './lib/gallery-media'
+import { transformGalleryMedia } from './lib/gallery-media-server'
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
   // Astro's default optimizer reads relative URLs from ASSETS, but uploads live in R2.

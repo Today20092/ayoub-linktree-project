@@ -104,6 +104,7 @@ Follow [AGENTS.md](AGENTS.md) for deployment authorization and the repository's 
 | Edit links, portfolio content, images, or shared styles            | [Website content](docs/website-content.md)                                    |
 | Change native gallery controls or companion permissions            | [Native gallery management](docs/native-gallery-management.md)                |
 | Configure storage, Access, guest uploads, or moderation            | [Gallery infrastructure](docs/interactive-event-galleries.md)                 |
+| Extend typed gallery workflows and handle publication failures     | [Effect service and runtime guide](docs/gallery-effect-workflows.md)          |
 | Maintain legacy manifests, ZIPs, pruning, or face-search workflows | [Legacy event galleries](docs/event-galleries.md)                             |
 | Install, pair, build, or release Android                           | [Android README](android/README.md)                                           |
 | Understand watched-folder behavior and verification                | [Watched-folder notes](docs/android-watched-folder-design.md)                 |

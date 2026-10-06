@@ -1,3 +1,14 @@
+import { Context, Effect, Layer } from 'effect'
+import {
+  database,
+  storage,
+  imageProcessing,
+  validation,
+  GalleryFailure,
+  galleryFailure,
+  quietCleanup,
+  runGalleryUseCase,
+} from './gallery-effect'
 import { hashGalleryPassword, validGalleryPassword } from './gallery-auth'
 import { galleryMediaUrl, galleryObjectUrl } from './gallery-media'
 import {
@@ -7,6 +18,7 @@ import {
   galleryStatus,
   getGallerySettings,
   getGuestPhoto,
+  getEventGallery,
   hideProfessionalPhoto,
   insertGalleryPhoto,
   listGalleryPhotos,
@@ -22,6 +34,7 @@ import {
   type GallerySettings,
   type GalleryStatus,
   type GuestPhoto,
+  type EventGallery,
   type SaveEventGalleryInput,
 } from './gallery-data'
 import {
@@ -29,15 +42,21 @@ import {
   optimizedGalleryImage,
   safeGalleryFilename,
 } from './gallery-upload'
-
 type GalleryAdminObjectBody = Parameters<R2Bucket['put']>[1]
-
-type GalleryAdminPassword = { salt: string; hash: string }
-
+type GalleryAdminPassword = {
+  salt: string
+  hash: string
+}
 type GuestModerationAction =
-  | { action: 'approveGuest'; photoId: string; alt?: string }
-  | { action: 'rejectGuest' | 'removeGuest'; photoId: string }
-
+  | {
+      action: 'approveGuest'
+      photoId: string
+      alt?: string
+    }
+  | {
+      action: 'rejectGuest' | 'removeGuest'
+      photoId: string
+    }
 export type GalleryAdminEventContext = {
   id: string
   title: string
@@ -58,9 +77,9 @@ export type GalleryAdminEventContext = {
     filename: string
   }>
 }
-
 export type GalleryAdminCommandDependencies = {
   data: {
+    getEvent(eventSlug: string): Promise<EventGallery | undefined>
     getSettings(eventSlug: string): Promise<GallerySettings | null | undefined>
     saveSettings(
       eventSlug: string,
@@ -90,15 +109,19 @@ export type GalleryAdminCommandDependencies = {
     ): Promise<unknown>
   }
   objects: {
-    getPending(
-      key: string,
-    ): Promise<
-      { body: GalleryAdminObjectBody; metadata?: R2HTTPMetadata } | undefined
+    getPending(key: string): Promise<
+      | {
+          body: GalleryAdminObjectBody
+          metadata?: R2HTTPMetadata
+        }
+      | undefined
     >
-    getPublic(
-      key: string,
-    ): Promise<
-      { body: GalleryAdminObjectBody; metadata?: R2HTTPMetadata } | undefined
+    getPublic(key: string): Promise<
+      | {
+          body: GalleryAdminObjectBody
+          metadata?: R2HTTPMetadata
+        }
+      | undefined
     >
     publicExists(key: string): Promise<boolean>
     putPublic(
@@ -128,26 +151,19 @@ export type GalleryAdminCommandDependencies = {
   createId(): string
   log(entry: Record<string, unknown>): void
 }
-
 export type GalleryAdminCommandContext = {
   event: GalleryAdminEventContext
   requestUrl: string
 }
-
 export type GalleryAdminCommandResult = {
   status: number
   body: Record<string, unknown>
 }
-
-export class GalleryAdminCommandError extends Error {
-  constructor(
-    message: string,
-    readonly status: number,
-  ) {
-    super(message)
+export class GalleryAdminCommandError extends GalleryFailure {
+  constructor(message: string, status: number) {
+    super(galleryFailure(status, message).kind, message, status)
   }
 }
-
 export function createGalleryAdminCommandDependencies(bindings: {
   database: D1Database
   pendingBucket: R2Bucket
@@ -156,6 +172,7 @@ export function createGalleryAdminCommandDependencies(bindings: {
 }): GalleryAdminCommandDependencies {
   return {
     data: {
+      getEvent: (eventSlug) => getEventGallery(bindings.database, eventSlug),
       getSettings: (eventSlug) =>
         getGallerySettings(bindings.database, eventSlug),
       saveSettings: (eventSlug, uploadsEnabled, password) =>
@@ -218,12 +235,10 @@ export function createGalleryAdminCommandDependencies(bindings: {
     log: (entry) => console.log(JSON.stringify(entry)),
   }
 }
-
 const ok = (body: Record<string, unknown> = { ok: true }) => ({
   status: 200,
   body,
 })
-
 function currentEventInput(
   event: GalleryAdminEventContext,
 ): SaveEventGalleryInput {
@@ -239,53 +254,176 @@ function currentEventInput(
     status: event.status,
   }
 }
-
-async function moderateGuestPhoto(
+function moderateGuestPhoto(
   context: GalleryAdminCommandContext,
   action: GuestModerationAction,
   dependencies: GalleryAdminCommandDependencies,
-): Promise<GalleryAdminCommandResult> {
-  const photo = await dependencies.data.getGuestPhoto(action.photoId)
-  if (!photo || photo.event_slug !== context.event.id) {
-    throw new GalleryAdminCommandError('Photo not found.', 404)
-  }
-
-  if (action.action !== 'approveGuest') {
-    if (action.action === 'rejectGuest' && photo.status !== 'pending') {
-      throw new GalleryAdminCommandError(
-        'Published photos must be removed instead.',
-        409,
+) {
+  return Effect.gen(function* () {
+    const photo = yield* database(() =>
+      dependencies.data.getGuestPhoto(action.photoId),
+    )
+    if (!photo || photo.event_slug !== context.event.id) {
+      return yield* Effect.fail(
+        new GalleryAdminCommandError('Photo not found.', 404),
       )
     }
-    const storedObject =
-      photo.status === 'pending'
-        ? await dependencies.objects.getPending(photo.object_key)
-        : await dependencies.objects.getPublic(photo.object_key)
-    if (photo.status === 'pending') {
-      await dependencies.objects.deletePending(photo.object_key)
-    } else {
-      await dependencies.objects.deletePublic(photo.object_key)
+    if (action.action !== 'approveGuest') {
+      if (action.action === 'rejectGuest' && photo.status !== 'pending') {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError(
+            'Published photos must be removed instead.',
+            409,
+          ),
+        )
+      }
+      const storedObject =
+        photo.status === 'pending'
+          ? yield* storage(() =>
+              dependencies.objects.getPending(photo.object_key),
+            )
+          : yield* storage(() =>
+              dependencies.objects.getPublic(photo.object_key),
+            )
+      if (photo.status === 'pending') {
+        yield* storage(() =>
+          dependencies.objects.deletePending(photo.object_key),
+        )
+      } else {
+        yield* storage(() =>
+          dependencies.objects.deletePublic(photo.object_key),
+        )
+      }
+      yield* Effect.catch(
+        Effect.gen(function* () {
+          yield* database(() => dependencies.data.deleteGuestPhoto(photo.id))
+        }),
+        (error) =>
+          Effect.gen(function* () {
+            if (storedObject) {
+              if (photo.status === 'pending') {
+                yield* quietCleanup(
+                  storage(() =>
+                    dependencies.objects.putPending(
+                      photo.object_key,
+                      storedObject.body,
+                      storedObject.metadata,
+                    ),
+                  ),
+                  dependencies.log,
+                )
+              } else {
+                yield* quietCleanup(
+                  storage(() =>
+                    dependencies.objects.putPublic(
+                      photo.object_key,
+                      storedObject.body,
+                      storedObject.metadata,
+                    ),
+                  ),
+                  dependencies.log,
+                )
+              }
+            }
+            return yield* Effect.fail(error)
+          }),
+      )
+      dependencies.log({
+        message: 'gallery guest moderation completed',
+        eventSlug: context.event.id,
+        action: action.action,
+        photoId: photo.id,
+      })
+      return ok()
     }
-    try {
-      await dependencies.data.deleteGuestPhoto(photo.id)
-    } catch (error) {
-      if (storedObject) {
-        if (photo.status === 'pending') {
-          await dependencies.objects.putPending(
-            photo.object_key,
-            storedObject.body,
-            storedObject.metadata,
+    if (photo.status === 'published') {
+      const stalePendingKey = pendingGuestKey(context.event.id, photo.id)
+      yield* Effect.catch(
+        Effect.gen(function* () {
+          yield* storage(() =>
+            dependencies.objects.deletePending(stalePendingKey),
           )
-        } else {
-          await dependencies.objects.putPublic(
-            photo.object_key,
-            storedObject.body,
-            storedObject.metadata,
+        }),
+        () =>
+          Effect.gen(function* () {
+            dependencies.log({
+              message: 'gallery guest cleanup failed',
+              eventSlug: context.event.id,
+              action: action.action,
+              photoId: photo.id,
+              objectKey: stalePendingKey,
+              kind: 'Storage',
+            })
+          }),
+      )
+      return ok()
+    }
+    const publicKey = publishedGuestKey(context.event.id, photo.id)
+    const pending = yield* storage(() =>
+      dependencies.objects.getPending(photo.object_key),
+    )
+    let copied = false
+    if (
+      !pending &&
+      !(yield* storage(() => dependencies.objects.publicExists(publicKey)))
+    ) {
+      return yield* Effect.fail(
+        new GalleryAdminCommandError('Pending image is missing.', 409),
+      )
+    }
+    const alt = action.alt?.trim().slice(0, 240) || photo.alt
+    yield* Effect.catch(
+      Effect.gen(function* () {
+        if (pending) {
+          // A rejected R2 response can follow a persisted write.
+          copied = true
+          yield* storage(() =>
+            dependencies.objects.putPublic(
+              publicKey,
+              pending.body,
+              pending.metadata ?? {
+                contentType: 'image/jpeg',
+                cacheControl: 'public, max-age=300',
+              },
+            ),
           )
         }
-      }
-      throw error
-    }
+        yield* database(() =>
+          dependencies.data.publishGuestPhoto(photo.id, publicKey, alt),
+        )
+      }),
+      (error) =>
+        Effect.gen(function* () {
+          const current = yield* database(() =>
+            dependencies.data.getGuestPhoto(photo.id),
+          )
+          if (current?.status === 'published') return ok()
+          if (copied)
+            yield* quietCleanup(
+              storage(() => dependencies.objects.deletePublic(publicKey)),
+              dependencies.log,
+            )
+          return yield* Effect.fail(error)
+        }),
+    )
+    yield* Effect.catch(
+      Effect.gen(function* () {
+        yield* storage(() =>
+          dependencies.objects.deletePending(photo.object_key),
+        )
+      }),
+      () =>
+        Effect.gen(function* () {
+          dependencies.log({
+            message: 'gallery guest cleanup failed',
+            eventSlug: context.event.id,
+            action: action.action,
+            photoId: photo.id,
+            objectKey: photo.object_key,
+            kind: 'Storage',
+          })
+        }),
+    )
     dependencies.log({
       message: 'gallery guest moderation completed',
       eventSlug: context.event.id,
@@ -293,340 +431,375 @@ async function moderateGuestPhoto(
       photoId: photo.id,
     })
     return ok()
-  }
-
-  if (photo.status === 'published') {
-    const stalePendingKey = pendingGuestKey(context.event.id, photo.id)
-    try {
-      await dependencies.objects.deletePending(stalePendingKey)
-    } catch (error) {
-      dependencies.log({
-        message: 'gallery guest cleanup failed',
-        eventSlug: context.event.id,
-        action: action.action,
-        photoId: photo.id,
-        objectKey: stalePendingKey,
-        error: error instanceof Error ? error.message : 'Unknown error',
+  })
+}
+export function galleryAdminCommand(
+  context: GalleryAdminCommandContext,
+  value: unknown,
+) {
+  return Effect.gen(function* () {
+    const dependencies = yield* GalleryAdmin
+    const input =
+      value && typeof value === 'object'
+        ? (value as Record<string, unknown>)
+        : {}
+    if (input.action === 'updateEvent') {
+      const title = typeof input.title === 'string' ? input.title.trim() : ''
+      const summary =
+        typeof input.summary === 'string' ? input.summary.trim() : ''
+      if (!title || !summary) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError(
+            'Name and about information are required.',
+            400,
+          ),
+        )
+      }
+      yield* database(() =>
+        dependencies.data.saveEventGallery({
+          event_slug: context.event.id,
+          title,
+          event_date:
+            typeof input.eventDate === 'string' && input.eventDate
+              ? input.eventDate
+              : null,
+          event_time:
+            typeof input.eventTime === 'string' && input.eventTime
+              ? input.eventTime
+              : null,
+          event_venue:
+            typeof input.eventVenue === 'string' && input.eventVenue
+              ? input.eventVenue
+              : null,
+          summary,
+          category:
+            typeof input.category === 'string' && input.category.trim()
+              ? input.category.trim()
+              : 'Event Photography',
+          coming_soon: Boolean(input.comingSoon),
+          status:
+            galleryStatus(input.visibilityStatus) ??
+            (input.comingSoon ? 'coming_soon' : 'published'),
+        }),
+      )
+      return ok()
+    }
+    if (input.action === 'createInvite') {
+      const guestName =
+        typeof input.guestName === 'string' ? input.guestName.trim() : ''
+      if (!guestName) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError('Guest name is required.', 400),
+        )
+      }
+      const token = dependencies.createId()
+      yield* database(() =>
+        dependencies.data.createInvite({
+          token,
+          event_slug: context.event.id,
+          guest_name: guestName.slice(0, 120),
+        }),
+      )
+      return ok({
+        ok: true,
+        token,
+        url: new URL(
+          `/galleries/${context.event.id}/upload/${token}/`,
+          context.requestUrl,
+        ).toString(),
       })
     }
-    return ok()
-  }
-
-  const publicKey = publishedGuestKey(context.event.id, photo.id)
-  const pending = await dependencies.objects.getPending(photo.object_key)
-  let copied = false
-  if (pending) {
-    await dependencies.objects.putPublic(
-      publicKey,
-      pending.body,
-      pending.metadata ?? {
-        contentType: 'image/jpeg',
-        cacheControl: 'public, max-age=300',
-      },
-    )
-    copied = true
-  } else if (!(await dependencies.objects.publicExists(publicKey))) {
-    throw new GalleryAdminCommandError('Pending image is missing.', 409)
-  }
-
-  const alt = action.alt?.trim().slice(0, 240) || photo.alt
-  try {
-    await dependencies.data.publishGuestPhoto(photo.id, publicKey, alt)
-  } catch (error) {
-    if (copied) await dependencies.objects.deletePublic(publicKey)
-    throw error
-  }
-  try {
-    await dependencies.objects.deletePending(photo.object_key)
-  } catch (error) {
-    dependencies.log({
-      message: 'gallery guest cleanup failed',
-      eventSlug: context.event.id,
-      action: action.action,
-      photoId: photo.id,
-      objectKey: photo.object_key,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    })
-  }
-  dependencies.log({
-    message: 'gallery guest moderation completed',
-    eventSlug: context.event.id,
-    action: action.action,
-    photoId: photo.id,
+    if (input.action === 'setCover') {
+      const src =
+        typeof input.src === 'string'
+          ? galleryMediaUrl(input.src.trim(), context.requestUrl)
+          : ''
+      const alt = typeof input.alt === 'string' ? input.alt.trim() : ''
+      const width = typeof input.width === 'number' ? input.width : 0
+      const height = typeof input.height === 'number' ? input.height : 0
+      if (!src || !alt || width <= 0 || height <= 0) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError('Cover photo is invalid.', 400),
+        )
+      }
+      const [photos, guests] = yield* Effect.all(
+        [
+          database(() => dependencies.data.listGalleryPhotos(context.event.id)),
+          database(() => dependencies.data.listGuestPhotos(context.event.id)),
+        ],
+        { concurrency: 'unbounded' },
+      )
+      const allowed = new Set([
+        ...photos.map((photo) => galleryObjectUrl(photo.object_key)),
+        ...guests
+          .filter(({ status }) => status === 'published')
+          .map((photo) => galleryObjectUrl(photo.object_key)),
+        ...context.event.staticPhotos.map(({ src: photoSrc }) => photoSrc),
+        ...(context.event.flyerSrc ? [context.event.flyerSrc] : []),
+        ...(context.event.coverSrc ? [context.event.coverSrc] : []),
+      ])
+      if (!allowed.has(src)) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError('Cover photo is not available.', 404),
+        )
+      }
+      if (!context.event.title || !context.event.summary) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError(
+            'Save event details before setting a cover.',
+            409,
+          ),
+        )
+      }
+      yield* database(() =>
+        dependencies.data.saveEventGallery({
+          ...currentEventInput(context.event),
+          cover: { src, width, height, alt: alt.slice(0, 240) },
+        }),
+      )
+      return ok()
+    }
+    if (input.action === 'uploadAdminPhoto') {
+      const { file } = input
+      if (!(file instanceof File) || !acceptedGalleryImage(file)) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError(
+            'Choose a JPEG, PNG, WebP, or HEIC photo under 20 MB.',
+            415,
+          ),
+        )
+      }
+      const optimized = yield* imageProcessing(() =>
+        dependencies.images.optimize(file),
+      )
+      const id = dependencies.createId()
+      const objectKey = adminPhotoKey(context.event.id, id)
+      yield* Effect.catch(
+        Effect.gen(function* () {
+          yield* storage(() =>
+            dependencies.objects.putPublic(objectKey, optimized.buffer, {
+              contentType: 'image/jpeg',
+              cacheControl: 'public, max-age=300',
+            }),
+          )
+          yield* database(() =>
+            dependencies.data.insertGalleryPhoto({
+              id,
+              event_slug: context.event.id,
+              object_key: objectKey,
+              original_filename: safeGalleryFilename(file.name),
+              width: optimized.width,
+              height: optimized.height,
+              alt:
+                (typeof input.alt === 'string'
+                  ? input.alt.trim().slice(0, 240)
+                  : '') || `Photo from ${context.event.title}`,
+              uploader_name: null,
+              source: 'admin',
+            }),
+          )
+        }),
+        (error) =>
+          Effect.gen(function* () {
+            const photos = yield* database(() =>
+              dependencies.data.listGalleryPhotos(context.event.id),
+            )
+            if (
+              photos.some(
+                (photo) => photo.id === id && photo.object_key === objectKey,
+              )
+            )
+              return
+            yield* quietCleanup(
+              storage(() => dependencies.objects.deletePublic(objectKey)),
+              dependencies.log,
+            )
+            return yield* Effect.fail(error)
+          }),
+      )
+      return { status: 201, body: { ok: true, id } }
+    }
+    if (input.action === 'updateFlyer') {
+      const { file } = input
+      if (!(file instanceof File) || !acceptedGalleryImage(file)) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError(
+            'Choose a JPEG, PNG, WebP, or HEIC image under 20 MB.',
+            415,
+          ),
+        )
+      }
+      if (!context.event.title || !context.event.summary) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError(
+            'Save event details before replacing the flyer.',
+            409,
+          ),
+        )
+      }
+      const optimized = yield* imageProcessing(() =>
+        dependencies.images.optimize(file),
+      )
+      const objectKey = `events/${context.event.id}/flyer-${dependencies.createId()}.jpg`
+      const flyer = {
+        object_key: objectKey,
+        width: optimized.width,
+        height: optimized.height,
+        alt: `${context.event.title} flyer`,
+      }
+      yield* Effect.catch(
+        Effect.gen(function* () {
+          yield* storage(() =>
+            dependencies.objects.putPublic(objectKey, optimized.buffer, {
+              contentType: 'image/jpeg',
+              cacheControl: 'public, max-age=300',
+            }),
+          )
+          yield* database(() =>
+            dependencies.data.saveEventGallery({
+              ...currentEventInput(context.event),
+              flyer,
+              cover: {
+                src: galleryObjectUrl(objectKey),
+                width: optimized.width,
+                height: optimized.height,
+                alt: flyer.alt,
+              },
+            }),
+          )
+        }),
+        (error) =>
+          Effect.gen(function* () {
+            const event = yield* database(() =>
+              dependencies.data.getEvent(context.event.id),
+            )
+            if (event?.flyer_object_key === objectKey) return
+            yield* quietCleanup(
+              storage(() => dependencies.objects.deletePublic(objectKey)),
+              dependencies.log,
+            )
+            return yield* Effect.fail(error)
+          }),
+      )
+      return { status: 201, body: { ok: true, flyer } }
+    }
+    if (input.action === 'settings') {
+      if (
+        typeof input.uploadsEnabled !== 'boolean' ||
+        (input.password !== undefined && typeof input.password !== 'string')
+      ) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError('Invalid action.', 400),
+        )
+      }
+      const existing = yield* database(() =>
+        dependencies.data.getSettings(context.event.id),
+      )
+      const newPassword =
+        typeof input.password === 'string' ? input.password.trim() : undefined
+      if (newPassword && !dependencies.passwords.valid(newPassword)) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError(
+            'Password must be 8 to 128 characters.',
+            400,
+          ),
+        )
+      }
+      if (
+        input.uploadsEnabled &&
+        !newPassword &&
+        (!existing?.password_hash || !existing.password_salt)
+      ) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError(
+            'Set a password before enabling uploads.',
+            400,
+          ),
+        )
+      }
+      const password = newPassword
+        ? yield* validation(
+            () => dependencies.passwords.hash(newPassword),
+            'Invalid password.',
+          )
+        : undefined
+      yield* database(() =>
+        dependencies.data.saveSettings(
+          context.event.id,
+          input.uploadsEnabled as boolean,
+          password,
+        ),
+      )
+      return ok()
+    }
+    if (
+      (input.action === 'hideProfessional' ||
+        input.action === 'restoreProfessional') &&
+      typeof input.filename === 'string'
+    ) {
+      const available = new Set(
+        context.event.staticPhotos.map(({ filename }) => filename),
+      )
+      if (!available.has(input.filename)) {
+        return yield* Effect.fail(
+          new GalleryAdminCommandError('Professional photo not found.', 404),
+        )
+      }
+      if (input.action === 'hideProfessional') {
+        yield* database(() =>
+          dependencies.data.hideProfessionalPhoto(
+            context.event.id,
+            input.filename as string,
+          ),
+        )
+      } else {
+        yield* database(() =>
+          dependencies.data.restoreProfessionalPhoto(
+            context.event.id,
+            input.filename as string,
+          ),
+        )
+      }
+      return ok()
+    }
+    let guestAction: GuestModerationAction
+    if (
+      input.action === 'approveGuest' &&
+      typeof input.photoId === 'string' &&
+      (input.alt === undefined || typeof input.alt === 'string')
+    ) {
+      guestAction = {
+        action: input.action,
+        photoId: input.photoId,
+        alt: typeof input.alt === 'string' ? input.alt : undefined,
+      }
+    } else if (
+      (input.action === 'rejectGuest' || input.action === 'removeGuest') &&
+      typeof input.photoId === 'string'
+    ) {
+      guestAction = { action: input.action, photoId: input.photoId }
+    } else {
+      return yield* Effect.fail(
+        new GalleryAdminCommandError('Invalid action.', 400),
+      )
+    }
+    return yield* moderateGuestPhoto(context, guestAction, dependencies)
   })
-  return ok()
 }
 
-export async function executeGalleryAdminCommand(
+export const GalleryAdmin =
+  Context.Service<GalleryAdminCommandDependencies>('gallery/Admin')
+export const galleryAdminLayer = (
+  dependencies: GalleryAdminCommandDependencies,
+) => Layer.succeed(GalleryAdmin, dependencies)
+export function executeGalleryAdminCommand(
   context: GalleryAdminCommandContext,
   value: unknown,
   dependencies: GalleryAdminCommandDependencies,
-): Promise<GalleryAdminCommandResult> {
-  const input =
-    value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
-
-  if (input.action === 'updateEvent') {
-    const title = typeof input.title === 'string' ? input.title.trim() : ''
-    const summary =
-      typeof input.summary === 'string' ? input.summary.trim() : ''
-    if (!title || !summary) {
-      throw new GalleryAdminCommandError(
-        'Name and about information are required.',
-        400,
-      )
-    }
-    await dependencies.data.saveEventGallery({
-      event_slug: context.event.id,
-      title,
-      event_date:
-        typeof input.eventDate === 'string' && input.eventDate
-          ? input.eventDate
-          : null,
-      event_time:
-        typeof input.eventTime === 'string' && input.eventTime
-          ? input.eventTime
-          : null,
-      event_venue:
-        typeof input.eventVenue === 'string' && input.eventVenue
-          ? input.eventVenue
-          : null,
-      summary,
-      category:
-        typeof input.category === 'string' && input.category.trim()
-          ? input.category.trim()
-          : 'Event Photography',
-      coming_soon: Boolean(input.comingSoon),
-      status:
-        galleryStatus(input.visibilityStatus) ??
-        (input.comingSoon ? 'coming_soon' : 'published'),
-    })
-    return ok()
-  }
-
-  if (input.action === 'createInvite') {
-    const guestName =
-      typeof input.guestName === 'string' ? input.guestName.trim() : ''
-    if (!guestName) {
-      throw new GalleryAdminCommandError('Guest name is required.', 400)
-    }
-    const token = dependencies.createId()
-    await dependencies.data.createInvite({
-      token,
-      event_slug: context.event.id,
-      guest_name: guestName.slice(0, 120),
-    })
-    return ok({
-      ok: true,
-      token,
-      url: new URL(
-        `/galleries/${context.event.id}/upload/${token}/`,
-        context.requestUrl,
-      ).toString(),
-    })
-  }
-
-  if (input.action === 'setCover') {
-    const src =
-      typeof input.src === 'string'
-        ? galleryMediaUrl(input.src.trim(), context.requestUrl)
-        : ''
-    const alt = typeof input.alt === 'string' ? input.alt.trim() : ''
-    const width = typeof input.width === 'number' ? input.width : 0
-    const height = typeof input.height === 'number' ? input.height : 0
-    if (!src || !alt || width <= 0 || height <= 0) {
-      throw new GalleryAdminCommandError('Cover photo is invalid.', 400)
-    }
-
-    const [photos, guests] = await Promise.all([
-      dependencies.data.listGalleryPhotos(context.event.id),
-      dependencies.data.listGuestPhotos(context.event.id),
-    ])
-    const allowed = new Set([
-      ...photos.map((photo) => galleryObjectUrl(photo.object_key)),
-      ...guests
-        .filter(({ status }) => status === 'published')
-        .map((photo) => galleryObjectUrl(photo.object_key)),
-      ...context.event.staticPhotos.map(({ src: photoSrc }) => photoSrc),
-      ...(context.event.flyerSrc ? [context.event.flyerSrc] : []),
-      ...(context.event.coverSrc ? [context.event.coverSrc] : []),
-    ])
-    if (!allowed.has(src)) {
-      throw new GalleryAdminCommandError('Cover photo is not available.', 404)
-    }
-    if (!context.event.title || !context.event.summary) {
-      throw new GalleryAdminCommandError(
-        'Save event details before setting a cover.',
-        409,
-      )
-    }
-    await dependencies.data.saveEventGallery({
-      ...currentEventInput(context.event),
-      cover: { src, width, height, alt: alt.slice(0, 240) },
-    })
-    return ok()
-  }
-
-  if (input.action === 'uploadAdminPhoto') {
-    const { file } = input
-    if (!(file instanceof File) || !acceptedGalleryImage(file)) {
-      throw new GalleryAdminCommandError(
-        'Choose a JPEG, PNG, WebP, or HEIC photo under 20 MB.',
-        415,
-      )
-    }
-    const optimized = await dependencies.images.optimize(file)
-    const id = dependencies.createId()
-    const objectKey = adminPhotoKey(context.event.id, id)
-    await dependencies.objects.putPublic(objectKey, optimized.buffer, {
-      contentType: 'image/jpeg',
-      cacheControl: 'public, max-age=300',
-    })
-    try {
-      await dependencies.data.insertGalleryPhoto({
-        id,
-        event_slug: context.event.id,
-        object_key: objectKey,
-        original_filename: safeGalleryFilename(file.name),
-        width: optimized.width,
-        height: optimized.height,
-        alt:
-          (typeof input.alt === 'string'
-            ? input.alt.trim().slice(0, 240)
-            : '') || `Photo from ${context.event.title}`,
-        uploader_name: null,
-        source: 'admin',
-      })
-    } catch (error) {
-      await dependencies.objects.deletePublic(objectKey)
-      throw error
-    }
-    return { status: 201, body: { ok: true, id } }
-  }
-
-  if (input.action === 'updateFlyer') {
-    const { file } = input
-    if (!(file instanceof File) || !acceptedGalleryImage(file)) {
-      throw new GalleryAdminCommandError(
-        'Choose a JPEG, PNG, WebP, or HEIC image under 20 MB.',
-        415,
-      )
-    }
-    if (!context.event.title || !context.event.summary) {
-      throw new GalleryAdminCommandError(
-        'Save event details before replacing the flyer.',
-        409,
-      )
-    }
-    const optimized = await dependencies.images.optimize(file)
-    const objectKey = `events/${context.event.id}/flyer-${dependencies.createId()}.jpg`
-    await dependencies.objects.putPublic(objectKey, optimized.buffer, {
-      contentType: 'image/jpeg',
-      cacheControl: 'public, max-age=300',
-    })
-    const flyer = {
-      object_key: objectKey,
-      width: optimized.width,
-      height: optimized.height,
-      alt: `${context.event.title} flyer`,
-    }
-    try {
-      await dependencies.data.saveEventGallery({
-        ...currentEventInput(context.event),
-        flyer,
-        cover: {
-          src: galleryObjectUrl(objectKey),
-          width: optimized.width,
-          height: optimized.height,
-          alt: flyer.alt,
-        },
-      })
-    } catch (error) {
-      await dependencies.objects.deletePublic(objectKey)
-      throw error
-    }
-    return { status: 201, body: { ok: true, flyer } }
-  }
-
-  if (input.action === 'settings') {
-    if (
-      typeof input.uploadsEnabled !== 'boolean' ||
-      (input.password !== undefined && typeof input.password !== 'string')
-    ) {
-      throw new GalleryAdminCommandError('Invalid action.', 400)
-    }
-    const existing = await dependencies.data.getSettings(context.event.id)
-    const newPassword =
-      typeof input.password === 'string' ? input.password.trim() : undefined
-    if (newPassword && !dependencies.passwords.valid(newPassword)) {
-      throw new GalleryAdminCommandError(
-        'Password must be 8 to 128 characters.',
-        400,
-      )
-    }
-    if (
-      input.uploadsEnabled &&
-      !newPassword &&
-      (!existing?.password_hash || !existing.password_salt)
-    ) {
-      throw new GalleryAdminCommandError(
-        'Set a password before enabling uploads.',
-        400,
-      )
-    }
-    const password = newPassword
-      ? await dependencies.passwords.hash(newPassword)
-      : undefined
-    await dependencies.data.saveSettings(
-      context.event.id,
-      input.uploadsEnabled,
-      password,
-    )
-    return ok()
-  }
-
-  if (
-    (input.action === 'hideProfessional' ||
-      input.action === 'restoreProfessional') &&
-    typeof input.filename === 'string'
-  ) {
-    const available = new Set(
-      context.event.staticPhotos.map(({ filename }) => filename),
-    )
-    if (!available.has(input.filename)) {
-      throw new GalleryAdminCommandError('Professional photo not found.', 404)
-    }
-    if (input.action === 'hideProfessional') {
-      await dependencies.data.hideProfessionalPhoto(
-        context.event.id,
-        input.filename,
-      )
-    } else {
-      await dependencies.data.restoreProfessionalPhoto(
-        context.event.id,
-        input.filename,
-      )
-    }
-    return ok()
-  }
-
-  let guestAction: GuestModerationAction
-  if (
-    input.action === 'approveGuest' &&
-    typeof input.photoId === 'string' &&
-    (input.alt === undefined || typeof input.alt === 'string')
-  ) {
-    guestAction = {
-      action: input.action,
-      photoId: input.photoId,
-      alt: typeof input.alt === 'string' ? input.alt : undefined,
-    }
-  } else if (
-    (input.action === 'rejectGuest' || input.action === 'removeGuest') &&
-    typeof input.photoId === 'string'
-  ) {
-    guestAction = { action: input.action, photoId: input.photoId }
-  } else {
-    throw new GalleryAdminCommandError('Invalid action.', 400)
-  }
-  return moderateGuestPhoto(context, guestAction, dependencies)
+) {
+  return runGalleryUseCase(
+    Effect.uninterruptible(galleryAdminCommand(context, value)).pipe(
+      Effect.provide(galleryAdminLayer(dependencies)),
+    ),
+  )
 }

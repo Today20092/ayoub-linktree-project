@@ -1,5 +1,6 @@
+import { Effect } from 'effect'
+import { database, runGalleryUseCase } from './gallery-effect'
 import type { CollectionEntry } from 'astro:content'
-
 import { eventGalleries } from '../data/event-galleries'
 import {
   getEventGallery,
@@ -21,14 +22,11 @@ import {
   type GallerySettings,
   type GuestPhoto,
 } from './gallery-data'
-
 type StaticEvent = CollectionEntry<'portfolio'>
-
 type StaticContentAdapter = {
   get(eventSlug: string): Promise<StaticEvent | undefined>
   list(): Promise<StaticEvent[]>
 }
-
 type GalleryRecordAdapter = {
   getEvent(eventSlug: string): Promise<EventGallery | undefined>
   listEvents(): Promise<EventGallery[]>
@@ -40,16 +38,13 @@ type GalleryRecordAdapter = {
   listInvites(eventSlug: string): Promise<GalleryInvite[]>
   getInvite(token: string): Promise<GalleryInvite | null>
 }
-
 type GalleryReaderDependencies = {
   staticContent: StaticContentAdapter
   records: GalleryRecordAdapter
 }
-
 function validStaticEvent(event: StaticEvent | undefined) {
   return event?.data.eventGallery ? event : undefined
 }
-
 function metadata(
   staticEvent: StaticEvent | undefined,
   dynamicEvent: EventGallery | undefined,
@@ -72,41 +67,40 @@ function metadata(
     eventVenue: dynamicEvent?.event_venue ?? staticEvent?.data.eventVenue,
   }
 }
-
-export function createGalleryReader({
+export function createGalleryReaderEffects({
   staticContent,
   records,
 }: GalleryReaderDependencies) {
-  async function resolve(eventSlug: string, includeHidden: boolean) {
-    const [staticRow, dynamicEvent] = await Promise.all([
-      staticContent.get(eventSlug),
-      records.getEvent(eventSlug),
-    ])
-    const staticEvent = validStaticEvent(staticRow)
-    if (!staticEvent && !dynamicEvent) return
-    if (!includeHidden && dynamicEvent?.status === 'hidden') return
-
-    return {
-      eventSlug,
-      staticEvent,
-      dynamicEvent,
-      visibility: dynamicEvent?.status ?? ('published' as const),
-      comingSoon:
-        dynamicEvent?.status === 'coming_soon' ||
-        Boolean(dynamicEvent?.coming_soon),
-      ...metadata(staticEvent, dynamicEvent),
-      flyer: dynamicEvent ? publicEventFlyer(dynamicEvent) : undefined,
-      cover: dynamicEvent ? publicEventCover(dynamicEvent) : undefined,
-      featuredImage: staticEvent?.data.featuredImage,
-      featuredImageSrc: staticEvent
-        ? typeof staticEvent.data.featuredImage === 'string'
-          ? staticEvent.data.featuredImage
-          : staticEvent.data.featuredImage.src
-        : undefined,
-      imageAlt: staticEvent?.data.imageAlt,
-    }
+  function resolve(eventSlug: string, includeHidden: boolean) {
+    return Effect.gen(function* () {
+      const [staticRow, dynamicEvent] = yield* Effect.all([
+        Effect.promise(() => staticContent.get(eventSlug)),
+        database(() => records.getEvent(eventSlug)),
+      ])
+      const staticEvent = validStaticEvent(staticRow)
+      if (!staticEvent && !dynamicEvent) return
+      if (!includeHidden && dynamicEvent?.status === 'hidden') return
+      return {
+        eventSlug,
+        staticEvent,
+        dynamicEvent,
+        visibility: dynamicEvent?.status ?? ('published' as const),
+        comingSoon:
+          dynamicEvent?.status === 'coming_soon' ||
+          Boolean(dynamicEvent?.coming_soon),
+        ...metadata(staticEvent, dynamicEvent),
+        flyer: dynamicEvent ? publicEventFlyer(dynamicEvent) : undefined,
+        cover: dynamicEvent ? publicEventCover(dynamicEvent) : undefined,
+        featuredImage: staticEvent?.data.featuredImage,
+        featuredImageSrc: staticEvent
+          ? typeof staticEvent.data.featuredImage === 'string'
+            ? staticEvent.data.featuredImage
+            : staticEvent.data.featuredImage.src
+          : undefined,
+        imageAlt: staticEvent?.data.imageAlt,
+      }
+    })
   }
-
   function gallerySlugs(
     staticEvents: StaticEvent[],
     dynamicEvents: EventGallery[],
@@ -120,205 +114,235 @@ export function createGalleryReader({
       ]),
     ]
   }
-
   function staticProfessionalImages(
-    gallery: NonNullable<Awaited<ReturnType<typeof resolve>>>,
+    gallery: NonNullable<Effect.Success<ReturnType<typeof resolve>>>,
   ) {
     const inlineImages = gallery.staticEvent
       ? gallery.staticEvent.data.gallery.filter(
-          (image): image is Extract<typeof image, { filename: string }> =>
-            'filename' in image,
+          (
+            image,
+          ): image is Extract<
+            typeof image,
+            {
+              filename: string
+            }
+          > => 'filename' in image,
         )
       : []
     return inlineImages.length > 0
       ? inlineImages
       : (eventGalleries[gallery.eventSlug] ?? [])
   }
-
-  async function publicDetail(eventSlug: string) {
-    const gallery = await resolve(eventSlug, false)
-    if (!gallery) return
-    const [settings, hiddenFilenames, publishedGuests, uploadedPhotos] =
-      await Promise.all([
-        records.getSettings(eventSlug),
-        records.getHiddenFilenames(eventSlug),
-        records.listPublishedGuests(eventSlug),
-        records.listPhotos(eventSlug),
-      ])
-    const staticImages = staticProfessionalImages(gallery)
-    const uploadedImages = gallery.comingSoon
-      ? []
-      : uploadedPhotos.map(publicGalleryPhoto)
-    const professionalImages = [
-      ...staticImages.filter((image) => !hiddenFilenames.has(image.filename)),
-      ...uploadedImages.filter((image) => image.source === 'admin'),
-    ]
-    const guestImages = gallery.comingSoon
-      ? []
-      : [
-          ...publishedGuests.map(publicGuestPhoto),
-          ...uploadedImages.filter((image) => image.source === 'guest'),
-        ]
-    const staticFlyer =
-      typeof gallery.featuredImage === 'object' &&
-      gallery.featuredImage !== null &&
-      !('filename' in gallery.featuredImage)
-        ? gallery.featuredImage
-        : undefined
-    const remoteFeaturedImage =
-      typeof gallery.featuredImage === 'object' &&
-      gallery.featuredImage !== null &&
-      'filename' in gallery.featuredImage &&
-      !hiddenFilenames.has(gallery.featuredImage.filename)
-        ? gallery.featuredImage
-        : undefined
-    const allImages = [...professionalImages, ...guestImages]
-
-    return {
-      ...gallery,
-      settings,
-      hiddenFilenames,
-      professionalImages,
-      guestImages,
-      allImages,
-      ogImage:
-        gallery.cover?.src ??
-        allImages[0]?.src ??
-        gallery.flyer?.src ??
-        gallery.featuredImageSrc ??
-        '/og.jpg',
-      flyerImage: staticFlyer ?? gallery.flyer,
-      heroImage: gallery.cover ?? remoteFeaturedImage ?? professionalImages[0],
-    }
-  }
-
-  async function adminDetail(eventSlug: string) {
-    const gallery = await resolve(eventSlug, true)
-    if (!gallery) return
-    const [settings, guests, hiddenFilenames, uploadedPhotos, invites] =
-      await Promise.all([
-        records.getSettings(eventSlug),
-        records.listGuests(eventSlug),
-        records.getHiddenFilenames(eventSlug),
-        records.listPhotos(eventSlug),
-        records.listInvites(eventSlug),
-      ])
-    const professionalImages = staticProfessionalImages(gallery)
-
-    return {
-      ...gallery,
-      settings,
-      guests,
-      uploadedPhotos,
-      invites,
-      professional: professionalImages.map((image) => ({
-        src: image.src,
-        alt: image.alt,
-        filename: image.filename,
-        width: image.width,
-        height: image.height,
-        hidden: hiddenFilenames.has(image.filename),
-      })),
-    }
-  }
-
-  async function listPublic() {
-    const [staticEvents, dynamicEvents] = await Promise.all([
-      staticContent.list(),
-      records.listEvents(),
-    ])
-    const slugs = gallerySlugs(staticEvents, dynamicEvents)
-    const galleries = await Promise.all(
-      slugs.map(async (eventSlug) => {
-        const detail = await publicDetail(eventSlug)
-        if (!detail) return
-        const staticEvent = detail.staticEvent
-        const requestedCover =
-          detail.cover ??
-          staticEvent?.data.thumbnail ??
-          staticEvent?.data.featuredImage ??
-          detail.flyer
-        const requestedCoverIsHidden =
-          typeof requestedCover === 'object' &&
-          requestedCover !== null &&
-          'filename' in requestedCover &&
-          detail.hiddenFilenames.has(requestedCover.filename)
-        const coverAsset = requestedCoverIsHidden
-          ? detail.allImages[0]
-          : (requestedCover ?? detail.allImages[0])
-        const isRemote =
-          typeof coverAsset === 'object' &&
-          coverAsset !== null &&
-          'filename' in coverAsset
-        return {
-          id: eventSlug,
-          title: detail.title,
-          category: detail.category,
-          eventDate: detail.eventDate,
-          photoCount: detail.comingSoon ? 0 : detail.allImages.length,
-          isRemote,
-          cover: isRemote ? (coverAsset as { src: string }).src : coverAsset,
-          coverAlt: isRemote
-            ? (coverAsset as { alt: string }).alt
-            : coverAsset
-              ? (staticEvent?.data.imageAlt ?? `${detail.title} gallery`)
-              : 'No published photographs',
-          coverWidth: isRemote
-            ? (coverAsset as { width: number }).width
-            : (staticEvent?.data.imageWidth ?? 1200),
-          coverHeight: isRemote
-            ? (coverAsset as { height: number }).height
-            : (staticEvent?.data.imageHeight ?? 800),
-        }
-      }),
-    )
-    return galleries
-      .filter((gallery) => gallery)
-      .sort((a, b) => {
-        const aTime = a.eventDate?.getTime() ?? 0
-        const bTime = b.eventDate?.getTime() ?? 0
-        return bTime - aTime
-      })
-  }
-
-  async function listAdmin() {
-    const [staticEvents, dynamicEvents] = await Promise.all([
-      staticContent.list(),
-      records.listEvents(),
-    ])
-    const slugs = gallerySlugs(staticEvents, dynamicEvents)
-    return Promise.all(
-      slugs.map(async (eventSlug) => {
-        const [gallery, settings, guests, photos] = await Promise.all([
-          resolve(eventSlug, true),
-          records.getSettings(eventSlug),
-          records.listGuests(eventSlug),
-          records.listPhotos(eventSlug),
+  function publicDetail(eventSlug: string) {
+    return Effect.gen(function* () {
+      const gallery = yield* resolve(eventSlug, false)
+      if (!gallery) return
+      const [settings, hiddenFilenames, publishedGuests, uploadedPhotos] =
+        yield* Effect.all([
+          database(() => records.getSettings(eventSlug)),
+          database(() => records.getHiddenFilenames(eventSlug)),
+          database(() => records.listPublishedGuests(eventSlug)),
+          database(() => records.listPhotos(eventSlug)),
         ])
-        if (!gallery) throw new Error(`Gallery disappeared: ${eventSlug}`)
-        const cover =
-          gallery.staticEvent?.data.thumbnail ??
-          gallery.staticEvent?.data.featuredImage ??
-          gallery.flyer
-        return {
-          event: gallery.staticEvent ?? { id: eventSlug },
-          settings,
-          pending: guests.filter(({ status }) => status === 'pending').length,
-          published:
-            guests.filter(({ status }) => status === 'published').length +
-            (gallery.staticEvent ? 0 : photos.length),
-          cover,
-          coverAlt:
-            gallery.staticEvent?.data.imageAlt ?? `${gallery.title} flyer`,
-          category: gallery.category,
-          title: gallery.title,
-          eventDate: gallery.eventDate,
-          visibilityStatus: gallery.visibility,
-        }
-      }),
-    )
+      const staticImages = staticProfessionalImages(gallery)
+      const uploadedImages = gallery.comingSoon
+        ? []
+        : uploadedPhotos.map(publicGalleryPhoto)
+      const professionalImages = [
+        ...staticImages.filter((image) => !hiddenFilenames.has(image.filename)),
+        ...uploadedImages.filter((image) => image.source === 'admin'),
+      ]
+      const guestImages = gallery.comingSoon
+        ? []
+        : [
+            ...publishedGuests.map(publicGuestPhoto),
+            ...uploadedImages.filter((image) => image.source === 'guest'),
+          ]
+      const staticFlyer =
+        typeof gallery.featuredImage === 'object' &&
+        gallery.featuredImage !== null &&
+        !('filename' in gallery.featuredImage)
+          ? gallery.featuredImage
+          : undefined
+      const remoteFeaturedImage =
+        typeof gallery.featuredImage === 'object' &&
+        gallery.featuredImage !== null &&
+        'filename' in gallery.featuredImage &&
+        !hiddenFilenames.has(gallery.featuredImage.filename)
+          ? gallery.featuredImage
+          : undefined
+      const allImages = [...professionalImages, ...guestImages]
+      return {
+        ...gallery,
+        settings,
+        hiddenFilenames,
+        professionalImages,
+        guestImages,
+        allImages,
+        ogImage:
+          gallery.cover?.src ??
+          allImages[0]?.src ??
+          gallery.flyer?.src ??
+          gallery.featuredImageSrc ??
+          '/og.jpg',
+        flyerImage: staticFlyer ?? gallery.flyer,
+        heroImage:
+          gallery.cover ?? remoteFeaturedImage ?? professionalImages[0],
+      }
+    })
   }
-
+  function adminDetail(eventSlug: string) {
+    return Effect.gen(function* () {
+      const gallery = yield* resolve(eventSlug, true)
+      if (!gallery) return
+      const [settings, guests, hiddenFilenames, uploadedPhotos, invites] =
+        yield* Effect.all([
+          database(() => records.getSettings(eventSlug)),
+          database(() => records.listGuests(eventSlug)),
+          database(() => records.getHiddenFilenames(eventSlug)),
+          database(() => records.listPhotos(eventSlug)),
+          database(() => records.listInvites(eventSlug)),
+        ])
+      const professionalImages = staticProfessionalImages(gallery)
+      return {
+        ...gallery,
+        settings,
+        guests,
+        uploadedPhotos,
+        invites,
+        professional: professionalImages.map((image) => ({
+          src: image.src,
+          alt: image.alt,
+          filename: image.filename,
+          width: image.width,
+          height: image.height,
+          hidden: hiddenFilenames.has(image.filename),
+        })),
+      }
+    })
+  }
+  function listPublic() {
+    return Effect.gen(function* () {
+      const [staticEvents, dynamicEvents] = yield* Effect.all([
+        Effect.promise(() => staticContent.list()),
+        database(() => records.listEvents()),
+      ])
+      const slugs = gallerySlugs(staticEvents, dynamicEvents)
+      const galleries = yield* Effect.all(
+        slugs.map((eventSlug) => {
+          return Effect.gen(function* () {
+            const detail = yield* publicDetail(eventSlug)
+            if (!detail) return
+            const staticEvent = detail.staticEvent
+            const requestedCover =
+              detail.cover ??
+              staticEvent?.data.thumbnail ??
+              staticEvent?.data.featuredImage ??
+              detail.flyer
+            const requestedCoverIsHidden =
+              typeof requestedCover === 'object' &&
+              requestedCover !== null &&
+              'filename' in requestedCover &&
+              detail.hiddenFilenames.has(requestedCover.filename)
+            const coverAsset = requestedCoverIsHidden
+              ? detail.allImages[0]
+              : (requestedCover ?? detail.allImages[0])
+            const isRemote =
+              typeof coverAsset === 'object' &&
+              coverAsset !== null &&
+              'filename' in coverAsset
+            return {
+              id: eventSlug,
+              title: detail.title,
+              category: detail.category,
+              eventDate: detail.eventDate,
+              photoCount: detail.comingSoon ? 0 : detail.allImages.length,
+              isRemote,
+              cover: isRemote
+                ? (
+                    coverAsset as {
+                      src: string
+                    }
+                  ).src
+                : coverAsset,
+              coverAlt: isRemote
+                ? (
+                    coverAsset as {
+                      alt: string
+                    }
+                  ).alt
+                : coverAsset
+                  ? (staticEvent?.data.imageAlt ?? `${detail.title} gallery`)
+                  : 'No published photographs',
+              coverWidth: isRemote
+                ? (
+                    coverAsset as {
+                      width: number
+                    }
+                  ).width
+                : (staticEvent?.data.imageWidth ?? 1200),
+              coverHeight: isRemote
+                ? (
+                    coverAsset as {
+                      height: number
+                    }
+                  ).height
+                : (staticEvent?.data.imageHeight ?? 800),
+            }
+          })
+        }),
+      )
+      return galleries
+        .filter((gallery) => gallery)
+        .sort((a, b) => {
+          const aTime = a.eventDate?.getTime() ?? 0
+          const bTime = b.eventDate?.getTime() ?? 0
+          return bTime - aTime
+        })
+    })
+  }
+  function listAdmin() {
+    return Effect.gen(function* () {
+      const [staticEvents, dynamicEvents] = yield* Effect.all([
+        Effect.promise(() => staticContent.list()),
+        database(() => records.listEvents()),
+      ])
+      const slugs = gallerySlugs(staticEvents, dynamicEvents)
+      return yield* Effect.all(
+        slugs.map((eventSlug) => {
+          return Effect.gen(function* () {
+            const [gallery, settings, guests, photos] = yield* Effect.all([
+              resolve(eventSlug, true),
+              database(() => records.getSettings(eventSlug)),
+              database(() => records.listGuests(eventSlug)),
+              database(() => records.listPhotos(eventSlug)),
+            ])
+            if (!gallery) throw new Error(`Gallery disappeared: ${eventSlug}`)
+            const cover =
+              gallery.staticEvent?.data.thumbnail ??
+              gallery.staticEvent?.data.featuredImage ??
+              gallery.flyer
+            return {
+              event: gallery.staticEvent ?? { id: eventSlug },
+              settings,
+              pending: guests.filter(({ status }) => status === 'pending')
+                .length,
+              published:
+                guests.filter(({ status }) => status === 'published').length +
+                (gallery.staticEvent ? 0 : photos.length),
+              cover,
+              coverAlt:
+                gallery.staticEvent?.data.imageAlt ?? `${gallery.title} flyer`,
+              category: gallery.category,
+              title: gallery.title,
+              eventDate: gallery.eventDate,
+              visibilityStatus: gallery.visibility,
+            }
+          })
+        }),
+      )
+    })
+  }
   return {
     get(eventSlug: string) {
       return resolve(eventSlug, false)
@@ -330,25 +354,28 @@ export function createGalleryReader({
     getAdminDetail: adminDetail,
     listPublic,
     listAdmin,
-    async getUploadContext(eventSlug: string) {
-      const [gallery, settings] = await Promise.all([
-        resolve(eventSlug, false),
-        records.getSettings(eventSlug),
-      ])
-      if (!gallery) return
-      return { gallery, settings }
+    getUploadContext(eventSlug: string) {
+      return Effect.gen(function* () {
+        const [gallery, settings] = yield* Effect.all([
+          resolve(eventSlug, false),
+          database(() => records.getSettings(eventSlug)),
+        ])
+        if (!gallery) return
+        return { gallery, settings }
+      })
     },
-    async getInviteContext(eventSlug: string, token: string) {
-      const [gallery, invite] = await Promise.all([
-        resolve(eventSlug, false),
-        records.getInvite(token),
-      ])
-      if (!gallery || invite?.event_slug !== eventSlug) return
-      return { gallery, invite }
+    getInviteContext(eventSlug: string, token: string) {
+      return Effect.gen(function* () {
+        const [gallery, invite] = yield* Effect.all([
+          resolve(eventSlug, false),
+          database(() => records.getInvite(token)),
+        ])
+        if (!gallery || invite?.event_slug !== eventSlug) return
+        return { gallery, invite }
+      })
     },
   }
 }
-
 function databaseRecords(database: D1Database): GalleryRecordAdapter {
   return {
     getEvent: (eventSlug) => getEventGallery(database, eventSlug),
@@ -363,9 +390,10 @@ function databaseRecords(database: D1Database): GalleryRecordAdapter {
     getInvite: (token) => getGalleryInvite(database, token),
   }
 }
-
-export function galleryReader(database: D1Database) {
-  return createGalleryReader({
+function galleryReaderDependencies(
+  database: D1Database,
+): GalleryReaderDependencies {
+  return {
     staticContent: {
       async get(eventSlug) {
         const { getEntry } = await import('astro:content')
@@ -377,5 +405,30 @@ export function galleryReader(database: D1Database) {
       },
     },
     records: databaseRecords(database),
-  })
+  }
+}
+
+export function galleryReaderEffects(database: D1Database) {
+  return createGalleryReaderEffects(galleryReaderDependencies(database))
+}
+export function galleryReader(database: D1Database) {
+  return createGalleryReader(galleryReaderDependencies(database))
+}
+
+export function createGalleryReader(dependencies: GalleryReaderDependencies) {
+  const effects = createGalleryReaderEffects(dependencies)
+  return {
+    get: (slug: string) => runGalleryUseCase(effects.get(slug)),
+    getAdmin: (slug: string) => runGalleryUseCase(effects.getAdmin(slug)),
+    getPublicDetail: (slug: string) =>
+      runGalleryUseCase(effects.getPublicDetail(slug)),
+    getAdminDetail: (slug: string) =>
+      runGalleryUseCase(effects.getAdminDetail(slug)),
+    listPublic: () => runGalleryUseCase(effects.listPublic()),
+    listAdmin: () => runGalleryUseCase(effects.listAdmin()),
+    getUploadContext: (slug: string) =>
+      runGalleryUseCase(effects.getUploadContext(slug)),
+    getInviteContext: (slug: string, token: string) =>
+      runGalleryUseCase(effects.getInviteContext(slug, token)),
+  }
 }

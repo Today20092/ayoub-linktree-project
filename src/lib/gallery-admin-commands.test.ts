@@ -1,5 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { Effect } from 'effect'
+import { createWebGallery } from './gallery-create-web'
+import { galleryAdminLayer } from './gallery-admin-commands'
+import { runGalleryUseCase } from './gallery-effect'
 
 import {
   executeGalleryAdminCommand,
@@ -93,6 +97,7 @@ function createHarness(
 
   const dependencies: GalleryAdminCommandDependencies = {
     data: {
+      getEvent: async () => undefined,
       getSettings: async () => options.settings,
       saveSettings: async (_slug, uploadsEnabled, password) => {
         savedSettings = { uploadsEnabled, password }
@@ -222,6 +227,73 @@ test('rolls back a copied image when guest publishing fails', async () => {
   )
   assert.equal(state.pending.size, 1)
   assert.equal(state.published.size, 0)
+})
+
+test('lost approval response retains published bytes and supports an approval retry', async () => {
+  const state = createHarness()
+  const publish = state.dependencies.data.publishGuestPhoto
+  state.dependencies.data.publishGuestPhoto = async (...args) => {
+    await publish(...args)
+    throw new Error('lost commit response')
+  }
+  await run({ action: 'approveGuest', photoId: 'guest-photo' }, state)
+  assert.equal(state.photo().status, 'published')
+  assert.equal(state.published.size, 1)
+  assert.equal(state.pending.size, 0)
+  await run({ action: 'approveGuest', photoId: 'guest-photo' }, state)
+  assert.equal(state.published.size, 1)
+})
+
+test('unknown approval outcome retains both copies until reconciliation is possible', async () => {
+  const state = createHarness()
+  const publish = state.dependencies.data.publishGuestPhoto
+  const get = state.dependencies.data.getGuestPhoto
+  let unavailable = false
+  state.dependencies.data.publishGuestPhoto = async (...args) => {
+    await publish(...args)
+    unavailable = true
+    throw new Error('lost commit response')
+  }
+  state.dependencies.data.getGuestPhoto = async (...args) => {
+    if (unavailable) throw new Error('read failed')
+    return get(...args)
+  }
+  await assert.rejects(
+    run({ action: 'approveGuest', photoId: 'guest-photo' }, state),
+    /read failed/,
+  )
+  assert.equal(state.published.size, 1)
+  assert.equal(state.pending.size, 1)
+  unavailable = false
+  await run({ action: 'approveGuest', photoId: 'guest-photo' }, state)
+  assert.equal(state.pending.size, 0)
+})
+
+test('delete rollback restores bytes and HTTP metadata', async () => {
+  const state = createHarness({
+    errors: { deleteGuest: new Error('delete failed') },
+  })
+  const metadata = {
+    contentType: 'image/jpeg',
+    cacheControl: 'private, no-store',
+    contentDisposition: 'inline',
+  }
+  state.dependencies.objects.getPending = async () => ({
+    body: bytes(),
+    metadata,
+  })
+  let restored: R2HTTPMetadata | undefined
+  const put = state.dependencies.objects.putPending
+  state.dependencies.objects.putPending = async (key, body, httpMetadata) => {
+    restored = httpMetadata
+    return put(key, body, httpMetadata)
+  }
+  await assert.rejects(
+    run({ action: 'rejectGuest', photoId: 'guest-photo' }, state),
+    /delete failed/,
+  )
+  assert.deepEqual(restored, metadata)
+  assert.deepEqual([...state.pending.values()], [bytes()])
 })
 
 test('retries deterministic cleanup after approval succeeds', async () => {
@@ -485,4 +557,116 @@ test('rejects unsupported commands', async () => {
     (error) =>
       error instanceof GalleryAdminCommandError && error.status === 400,
   )
+})
+
+test('web gallery creation validates flyers before publishing metadata and compensates save failure', async () => {
+  const form = new FormData()
+  form.set('title', 'New event')
+  form.set('summary', 'About the event')
+  form.set('slug', 'new-event')
+  form.set('flyer', new File(['bad'], 'flyer.gif', { type: 'image/gif' }))
+  const invalid = createHarness()
+  await assert.rejects(
+    runGalleryUseCase(
+      createWebGallery(form).pipe(
+        Effect.provide(galleryAdminLayer(invalid.dependencies)),
+      ),
+    ),
+  )
+  assert.equal(invalid.savedEvent(), undefined)
+  form.set('flyer', new File(['image'], 'flyer.png', { type: 'image/png' }))
+  const saved = createHarness({
+    optimized: { buffer: bytes(), width: 100, height: 80 },
+  })
+  const response = await runGalleryUseCase(
+    createWebGallery(form).pipe(
+      Effect.provide(galleryAdminLayer(saved.dependencies)),
+    ),
+  )
+  assert.equal(response.status, 201)
+  assert.deepEqual(await response.json(), { ok: true, eventSlug: 'new-event' })
+  assert.equal(saved.savedEvent()?.status, 'coming_soon')
+  assert.equal(saved.published.size, 1)
+  const failed = createHarness({
+    errors: { saveEvent: new Error('save failed') },
+    optimized: { buffer: bytes(), width: 100, height: 80 },
+  })
+  await assert.rejects(
+    runGalleryUseCase(
+      createWebGallery(form).pipe(
+        Effect.provide(galleryAdminLayer(failed.dependencies)),
+      ),
+    ),
+    /save failed/,
+  )
+  assert.equal(failed.published.size, 0)
+})
+
+test('lost admin photo publication response retains the object', async () => {
+  const state = createHarness({
+    optimized: { buffer: bytes(), width: 100, height: 80 },
+  })
+  const insert = state.dependencies.data.insertGalleryPhoto
+  state.dependencies.data.insertGalleryPhoto = async (photo) => {
+    await insert(photo)
+    throw new Error('lost commit response')
+  }
+  state.dependencies.data.listGalleryPhotos = async () =>
+    state.insertedPhoto() ? [{ ...state.insertedPhoto()!, created_at: 1 }] : []
+  const result = await run(
+    {
+      action: 'uploadAdminPhoto',
+      file: new File(['photo'], 'photo.png', { type: 'image/png' }),
+    },
+    state,
+  )
+  assert.equal(result.status, 201)
+  assert.equal(state.published.size, 1)
+})
+
+test('partial R2 response failures compensate both admin photos and replacement flyers', async () => {
+  for (const action of ['uploadAdminPhoto', 'updateFlyer']) {
+    const state = createHarness({
+      optimized: { buffer: bytes(), width: 100, height: 80 },
+    })
+    const put = state.dependencies.objects.putPublic
+    state.dependencies.objects.putPublic = async (...args) => {
+      await put(...args)
+      throw new Error('R2 response lost')
+    }
+    await assert.rejects(
+      run(
+        {
+          action,
+          file: new File(['photo'], 'photo.png', { type: 'image/png' }),
+        },
+        state,
+      ),
+      /R2 response lost/,
+    )
+    assert.equal(state.published.size, 0)
+    assert.equal(state.insertedPhoto(), undefined)
+    assert.equal(state.savedEvent(), undefined)
+  }
+})
+
+test('partial R2 approval copies compensate before retrying moderation', async () => {
+  const state = createHarness()
+  const put = state.dependencies.objects.putPublic
+  state.dependencies.objects.putPublic = async (...args) => {
+    await put(...args)
+    throw new Error('R2 approval response lost')
+  }
+  await assert.rejects(
+    run({ action: 'approveGuest', photoId: 'guest-photo' }, state),
+    /R2 approval response lost/,
+  )
+  assert.equal(state.published.size, 0)
+  assert.equal(state.pending.size, 1)
+  assert.equal(state.photo().status, 'pending')
+  state.dependencies.objects.putPublic = put
+  await run({ action: 'approveGuest', photoId: 'guest-photo' }, state)
+  assert.equal(state.published.size, 1)
+  assert.equal(state.pending.size, 0)
+  assert.equal(state.photo().status, 'published')
 })

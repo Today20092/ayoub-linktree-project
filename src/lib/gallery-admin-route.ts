@@ -1,10 +1,19 @@
+import { Effect } from 'effect'
+import {
+  galleryJson,
+  runGalleryHttp,
+  database,
+  storage,
+  validation,
+  galleryFailure,
+} from './gallery-effect'
 import { getEntry } from 'astro:content'
 import { env } from 'cloudflare:workers'
 
 import {
   createGalleryAdminCommandDependencies,
-  executeGalleryAdminCommand,
-  GalleryAdminCommandError,
+  galleryAdminCommand,
+  galleryAdminLayer,
   type GalleryAdminEventContext,
 } from '@/lib/gallery-admin-commands'
 import {
@@ -19,27 +28,26 @@ import {
   publicEventFlyer,
 } from '@/lib/gallery-data'
 
-const json = (body: unknown, status = 200) =>
-  Response.json(body, {
-    status,
-    headers: { 'cache-control': 'no-store' },
+const json = galleryJson
+function eventGallery(eventSlug: string | undefined) {
+  return Effect.gen(function* () {
+    if (!eventSlug) return
+    const [event, dynamicEvent] = yield* Effect.all([
+      Effect.promise(() => getEntry('portfolio', eventSlug)),
+      database(() => getEventGallery(env.GALLERY_DB, eventSlug)),
+    ])
+    return event?.data.eventGallery || dynamicEvent
+      ? {
+          id: eventSlug,
+          staticEvent: event?.data.eventGallery ? event : undefined,
+          dynamicEvent,
+        }
+      : undefined
   })
-
-async function eventGallery(eventSlug: string | undefined) {
-  if (!eventSlug) return
-  const event = await getEntry('portfolio', eventSlug)
-  const dynamicEvent = await getEventGallery(env.GALLERY_DB, eventSlug)
-  return event?.data.eventGallery || dynamicEvent
-    ? {
-        id: eventSlug,
-        staticEvent: event?.data.eventGallery ? event : undefined,
-        dynamicEvent,
-      }
-    : undefined
 }
 
 function commandEvent(
-  event: NonNullable<Awaited<ReturnType<typeof eventGallery>>>,
+  event: NonNullable<Effect.Success<ReturnType<typeof eventGallery>>>,
 ): GalleryAdminEventContext {
   const staticPhotos =
     event.staticEvent?.data.gallery
@@ -92,101 +100,99 @@ function commandEvent(
 }
 
 // Call only after the route has authenticated its web or device credentials.
-export async function readGalleryAdmin(
+export function readGalleryAdminEffect(
   request: Request,
   slug: string | undefined,
 ) {
-  const event = await eventGallery(slug)
-  if (!event) return json({ error: 'Gallery not found.' }, 404)
-
-  const photoId = new URL(request.url).searchParams.get('photo')
-  if (photoId) {
-    const photo = await getGuestPhoto(env.GALLERY_DB, photoId)
-    if (!photo || photo.event_slug !== event.id) {
-      return json({ error: 'Photo not found.' }, 404)
+  return Effect.gen(function* () {
+    const event = yield* eventGallery(slug)
+    if (!event)
+      return yield* Effect.fail(galleryFailure(404, 'Gallery not found.'))
+    const photoId = new URL(request.url).searchParams.get('photo')
+    if (photoId) {
+      const photo = yield* database(() =>
+        getGuestPhoto(env.GALLERY_DB, photoId),
+      )
+      if (!photo || photo.event_slug !== event.id)
+        return yield* Effect.fail(galleryFailure(404, 'Photo not found.'))
+      const bucket =
+        photo.status === 'pending' ? env.GALLERY_PENDING : env.GALLERY_PUBLIC
+      const object = yield* storage(() => bucket.get(photo.object_key))
+      if (!object)
+        return yield* Effect.fail(galleryFailure(404, 'Photo not found.'))
+      return new Response(object.body, {
+        headers: {
+          'content-type': 'image/jpeg',
+          'cache-control': 'private, no-store',
+          'content-length': String(object.size),
+        },
+      })
     }
-    const bucket =
-      photo.status === 'pending' ? env.GALLERY_PENDING : env.GALLERY_PUBLIC
-    const object = await bucket.get(photo.object_key)
-    if (!object) return json({ error: 'Photo not found.' }, 404)
-    return new Response(object.body, {
-      headers: {
-        'content-type': 'image/jpeg',
-        'cache-control': 'private, no-store',
-        'content-length': String(object.size),
-      },
-    })
-  }
-
-  const [settings, guests, hidden] = await Promise.all([
-    getGallerySettings(env.GALLERY_DB, event.id),
-    listGuestPhotos(env.GALLERY_DB, event.id),
-    listHiddenPhotos(env.GALLERY_DB, event.id),
-  ])
-  const [photos, invites] = await Promise.all([
-    listGalleryPhotos(env.GALLERY_DB, event.id),
-    listGalleryInvites(env.GALLERY_DB, event.id),
-  ])
-  return json({ settings, guests, hidden, photos, invites })
+    const [settings, guests, hidden, photos, invites] = yield* Effect.all([
+      database(() => getGallerySettings(env.GALLERY_DB, event.id)),
+      database(() => listGuestPhotos(env.GALLERY_DB, event.id)),
+      database(() => listHiddenPhotos(env.GALLERY_DB, event.id)),
+      database(() => listGalleryPhotos(env.GALLERY_DB, event.id)),
+      database(() => listGalleryInvites(env.GALLERY_DB, event.id)),
+    ])
+    return json({ settings, guests, hidden, photos, invites })
+  })
 }
-
-export async function writeGalleryAdmin(
+export function readGalleryAdmin(request: Request, slug: string | undefined) {
+  return runGalleryHttp(readGalleryAdminEffect(request, slug), request.signal)
+}
+export function writeGalleryAdminEffect(
   request: Request,
   slug: string | undefined,
 ) {
-  const event = await eventGallery(slug)
-  if (!event) return json({ error: 'Gallery not found.' }, 404)
-
-  let command: unknown
-  const contentType = request.headers.get('content-type') ?? ''
-  if (contentType.includes('multipart/form-data')) {
-    let formData: FormData
-    try {
-      formData = await request.formData()
-    } catch {
-      return json({ error: 'Invalid form submission.' }, 400)
-    }
-    const action = formData.get('action')
-    command = {
-      action,
-      file:
-        action === 'uploadAdminPhoto'
-          ? formData.get('photo')
-          : formData.get('flyer'),
-      alt: formData.get('alt'),
-    }
-  } else {
-    const contentLength = Number(request.headers.get('content-length') ?? 0)
-    if (contentLength > 4096) {
-      return json({ error: 'Request is too large.' }, 413)
-    }
-    try {
-      const text = await request.text()
-      if (new TextEncoder().encode(text).byteLength > 4096) {
-        return json({ error: 'Request is too large.' }, 413)
+  return Effect.gen(function* () {
+    const event = yield* eventGallery(slug)
+    if (!event)
+      return yield* Effect.fail(galleryFailure(404, 'Gallery not found.'))
+    let command: unknown
+    if (
+      (request.headers.get('content-type') ?? '').includes(
+        'multipart/form-data',
+      )
+    ) {
+      const form = yield* validation(
+        () => request.formData(),
+        'Invalid form submission.',
+      )
+      const action = form.get('action')
+      command = {
+        action,
+        file: form.get(action === 'uploadAdminPhoto' ? 'photo' : 'flyer'),
+        alt: form.get('alt'),
       }
-      command = JSON.parse(text)
-    } catch {
-      return json({ error: 'Invalid JSON.' }, 400)
+    } else {
+      if (Number(request.headers.get('content-length') ?? 0) > 4096)
+        return yield* Effect.fail(galleryFailure(413, 'Request is too large.'))
+      const text = yield* validation(() => request.text(), 'Invalid JSON.')
+      if (new TextEncoder().encode(text).byteLength > 4096)
+        return yield* Effect.fail(galleryFailure(413, 'Request is too large.'))
+      command = yield* validation(async () => JSON.parse(text), 'Invalid JSON.')
     }
-  }
-
-  try {
-    const result = await executeGalleryAdminCommand(
-      { event: commandEvent(event), requestUrl: request.url },
-      command,
-      createGalleryAdminCommandDependencies({
-        database: env.GALLERY_DB,
-        pendingBucket: env.GALLERY_PENDING,
-        publicBucket: env.GALLERY_PUBLIC,
-        images: env.IMAGES,
-      }),
+    const result = yield* Effect.uninterruptible(
+      galleryAdminCommand(
+        { event: commandEvent(event), requestUrl: request.url },
+        command,
+      ),
     )
     return json(result.body, result.status)
-  } catch (error) {
-    if (error instanceof GalleryAdminCommandError) {
-      return json({ error: error.message }, error.status)
-    }
-    throw error
-  }
+  }).pipe(
+    Effect.provide(
+      galleryAdminLayer(
+        createGalleryAdminCommandDependencies({
+          database: env.GALLERY_DB,
+          pendingBucket: env.GALLERY_PENDING,
+          publicBucket: env.GALLERY_PUBLIC,
+          images: env.IMAGES,
+        }),
+      ),
+    ),
+  )
+}
+export function writeGalleryAdmin(request: Request, slug: string | undefined) {
+  return runGalleryHttp(writeGalleryAdminEffect(request, slug), request.signal)
 }
