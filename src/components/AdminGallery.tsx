@@ -55,6 +55,7 @@ type AdminGalleryProps = {
     visibilityStatus: GalleryStatus
     coverSrc?: string
   }
+  sharing: { unlisted: boolean; token?: string | null; portfolio: boolean }
   settings: GallerySettings | null
   guests: GuestPhoto[]
   uploadedPhotos: GalleryPhoto[]
@@ -77,8 +78,9 @@ type Action =
   | {
       action: 'settings'
       uploadsEnabled: boolean
-      password?: string
+      rotateLink?: boolean
     }
+  | { action: 'sharing'; unlisted: boolean; rotateLink?: boolean }
   | {
       action: 'approveGuest' | 'rejectGuest' | 'removeGuest'
       photoId: string
@@ -236,6 +238,7 @@ function parseTimeRange(value: string) {
 export default function AdminGallery({
   eventSlug,
   eventMeta,
+  sharing,
   settings,
   guests,
   uploadedPhotos,
@@ -246,7 +249,7 @@ export default function AdminGallery({
   const [uploadsEnabled, setUploadsEnabled] = React.useState(
     Boolean(settings?.uploads_enabled),
   )
-  const [password, setPassword] = React.useState('')
+  const [unlisted, setUnlisted] = React.useState(sharing.unlisted)
   const [meta, setMeta] = React.useState(eventMeta)
   const [[startTime, endTime], setTimes] = React.useState(() =>
     parseTimeRange(eventMeta.eventTime),
@@ -879,7 +882,8 @@ export default function AdminGallery({
             <CardHeader>
               <CardTitle>Guest invite links</CardTitle>
               <CardDescription>
-                Each link uploads without a password and tracks the guest name.
+                Anyone with a trusted invite link can publish photos directly.
+                Share these links only with trusted contributors.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
@@ -927,11 +931,84 @@ export default function AdminGallery({
       </div>
 
       <div hidden={activeSection !== 'Guest access'}>
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Gallery sharing</CardTitle>
+            <CardDescription>
+              Unlisted galleries stay out of public listings and search
+              indexing. Anyone with the link can view and forward it. This does
+              not make shared image URLs private.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {sharing.portfolio ? (
+              <p>
+                Curated portfolio galleries remain public. Use a standalone
+                event gallery for unlisted sharing.
+              </p>
+            ) : (
+              <>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={unlisted}
+                    onChange={(event) => setUnlisted(event.target.checked)}
+                  />
+                  Unlisted viewing link
+                </label>
+                <Button
+                  disabled={pending}
+                  onClick={() =>
+                    void run(
+                      [{ action: 'sharing', unlisted }],
+                      'Sharing saved.',
+                    )
+                  }
+                >
+                  Save sharing
+                </Button>
+                {sharing.token && sharing.unlisted && (
+                  <>
+                    <Input
+                      aria-label="Unlisted viewing link"
+                      readOnly
+                      value={
+                        origin +
+                        '/galleries/' +
+                        eventSlug +
+                        '/?share=' +
+                        sharing.token
+                      }
+                    />
+                    <Button
+                      disabled={pending}
+                      onClick={() =>
+                        void run(
+                          [
+                            {
+                              action: 'sharing',
+                              unlisted: true,
+                              rotateLink: true,
+                            },
+                          ],
+                          'Viewing link replaced.',
+                        )
+                      }
+                    >
+                      Replace viewing link
+                    </Button>
+                  </>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Guest upload access</CardTitle>
             <CardDescription>
-              Enable submissions and set or rotate the shared event password.
+              Anyone with the submission link can send photos for approval.
+              Viewing links do not allow uploads.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -944,7 +1021,6 @@ export default function AdminGallery({
                     {
                       action: 'settings',
                       uploadsEnabled,
-                      password: password || undefined,
                     },
                   ],
                   'Upload settings saved.',
@@ -952,19 +1028,40 @@ export default function AdminGallery({
               }}
             >
               <div className="space-y-2">
-                <Label htmlFor="new-gallery-password">
-                  {settings?.password_hash
-                    ? 'New password (leave blank to keep current)'
-                    : 'Upload password'}
-                </Label>
-                <Input
-                  id="new-gallery-password"
-                  type="password"
-                  minLength={8}
-                  maxLength={128}
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
+                {settings?.upload_token && (
+                  <div className="space-y-2">
+                    <Label htmlFor="submission-link">Submission link</Label>
+                    <Input
+                      id="submission-link"
+                      readOnly
+                      value={
+                        origin +
+                        '/galleries/' +
+                        eventSlug +
+                        '/upload/?upload=' +
+                        settings.upload_token
+                      }
+                    />
+                    <Button
+                      type="button"
+                      disabled={pending}
+                      onClick={() =>
+                        void run(
+                          [
+                            {
+                              action: 'settings',
+                              uploadsEnabled,
+                              rotateLink: true,
+                            },
+                          ],
+                          'Submission link replaced.',
+                        )
+                      }
+                    >
+                      Replace submission link
+                    </Button>
+                  </div>
+                )}
                 <label className="flex items-center gap-2 text-sm font-medium">
                   <input
                     type="checkbox"

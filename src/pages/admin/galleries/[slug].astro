@@ -77,8 +77,11 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         </a>
       </Button>
       <Button variant="outline" size="sm" asChild>
-        <a href={`/galleries/${eventSlug}/`} target="_blank">
-          View public gallery
+        <a
+          href={`/galleries/${eventSlug}/${gallery.dynamicEvent?.is_unlisted ? '?share=' + gallery.dynamicEvent.share_token : ''}`}
+          target="_blank"
+        >
+          View gallery
           <ExternalLink data-icon="inline-end" aria-hidden="true" />
         </a>
       </Button>
@@ -104,6 +107,11 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         client:only="react"
         eventSlug={eventSlug}
         eventMeta={eventMeta}
+        sharing={{
+          unlisted: Boolean(gallery.dynamicEvent?.is_unlisted),
+          token: gallery.dynamicEvent?.share_token,
+          portfolio: Boolean(event),
+        }}
         settings={settings}
         guests={guests}
         uploadedPhotos={uploadedPhotos}

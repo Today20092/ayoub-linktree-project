@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro'
 import { env } from 'cloudflare:workers'
 
 import { faceManifests } from '@/lib/face-manifests'
+import { galleryReader } from '@/lib/gallery-read'
 import { getHiddenFilenames } from '@/lib/gallery-data'
 import {
   MAX_FACE_SEARCH_BODY_BYTES,
@@ -48,6 +49,12 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'Invalid or unavailable face-search index.' }, 400)
   }
 
+  if (
+    !(await galleryReader(env.GALLERY_DB).getPublicDetail(
+      input.manifest.eventSlug,
+    ))
+  )
+    return json({ error: 'Gallery not found.' }, 404)
   const result = await env.VECTORIZE.query(input.embedding, {
     topK: 50,
     namespace: input.manifest.namespace,

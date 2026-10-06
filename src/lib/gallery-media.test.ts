@@ -1,3 +1,4 @@
+import { readGalleryMedia, transformGalleryMedia } from './gallery-media-server'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
@@ -6,12 +7,7 @@ import {
   type GalleryPhoto,
   type EventGallery,
 } from './gallery-data'
-import {
-  galleryMediaKey,
-  galleryMediaUrl,
-  readGalleryMedia,
-  transformGalleryMedia,
-} from './gallery-media'
+import { galleryMediaKey, galleryMediaUrl } from './gallery-media'
 
 test('uploaded thumbnails transform R2 bytes without looking in static assets', async () => {
   let options: unknown
@@ -113,5 +109,24 @@ test('public media never reads pending files or arbitrary object keys', async ()
       )
     ).status,
     404,
+  )
+})
+
+test('attempt-specific replacement flyers can be read through the public media route', async () => {
+  const response = await readGalleryMedia(
+    {
+      get: async () => ({
+        body: new Uint8Array([255, 216]),
+        size: 2,
+        httpEtag: '"flyer"',
+      }),
+    } as unknown as R2Bucket,
+    '/api/gallery-media/events/test/flyer-fixed-attempt.jpg/',
+  )
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get('cache-control'), 'public, max-age=300')
+  assert.deepEqual(
+    new Uint8Array(await response.arrayBuffer()),
+    new Uint8Array([255, 216]),
   )
 })

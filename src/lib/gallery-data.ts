@@ -3,6 +3,7 @@ import { galleryMediaUrl, galleryObjectUrl } from './gallery-media'
 export type GallerySettings = {
   event_slug: string
   uploads_enabled: number
+  upload_token?: string | null
   password_salt: string | null
   password_hash: string | null
   updated_at: number
@@ -50,6 +51,8 @@ export type EventGallery = {
   cover_alt: string | null
   coming_soon: number
   status: GalleryStatus
+  is_unlisted?: number
+  share_token?: string | null
   created_at: number
   updated_at: number
 }
@@ -513,5 +516,32 @@ export async function restoreProfessionalPhoto(
   await database
     .prepare('DELETE FROM hidden_photos WHERE event_slug = ? AND filename = ?')
     .bind(eventSlug, filename)
+    .run()
+}
+
+export async function saveGallerySharing(
+  database: D1Database,
+  slug: string,
+  unlisted: boolean,
+  token: string,
+) {
+  await database
+    .prepare(
+      'UPDATE event_galleries SET is_unlisted = ?, share_token = ?, updated_at = unixepoch() WHERE event_slug = ?',
+    )
+    .bind(unlisted ? 1 : 0, token, slug)
+    .run()
+}
+export async function saveGalleryUploadLink(
+  database: D1Database,
+  slug: string,
+  enabled: boolean,
+  token: string,
+) {
+  await database
+    .prepare(
+      `INSERT INTO gallery_settings (event_slug, uploads_enabled, upload_token, updated_at) VALUES (?, ?, ?, unixepoch()) ON CONFLICT(event_slug) DO UPDATE SET uploads_enabled = excluded.uploads_enabled, upload_token = excluded.upload_token, updated_at = unixepoch()`,
+    )
+    .bind(slug, enabled ? 1 : 0, token)
     .run()
 }

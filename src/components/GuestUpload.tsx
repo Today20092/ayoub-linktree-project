@@ -1,11 +1,5 @@
 import * as React from 'react'
-import {
-  CheckCircle2,
-  CircleAlert,
-  ImagePlus,
-  LockKeyhole,
-  Upload,
-} from 'lucide-react'
+import { CheckCircle2, CircleAlert, ImagePlus, Upload } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -32,6 +26,7 @@ type GuestUploadProps = {
   eventSlug: string
   eventTitle: string
   enabled: boolean
+  submissionToken?: string
   inviteToken?: string
   guestName?: string
 }
@@ -57,13 +52,10 @@ export default function GuestUpload({
   eventSlug,
   eventTitle,
   enabled,
+  submissionToken,
   inviteToken,
   guestName,
 }: GuestUploadProps) {
-  const [password, setPassword] = React.useState('')
-  const [unlocked, setUnlocked] = React.useState(Boolean(inviteToken))
-  const [accessPending, setAccessPending] = React.useState(false)
-  const [accessError, setAccessError] = React.useState('')
   const [items, setItems] = React.useState<UploadItem[]>([])
   const [uploading, setUploading] = React.useState(false)
   const previews = React.useRef<string[]>([])
@@ -78,28 +70,6 @@ export default function GuestUpload({
     ({ status }) => status === 'complete' || status === 'error',
   ).length
   const progress = items.length ? Math.round((settled / items.length) * 100) : 0
-
-  async function unlock(event: React.SubmitEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setAccessPending(true)
-    setAccessError('')
-    try {
-      const response = await fetch(`/api/galleries/${eventSlug}/session`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ password }),
-      })
-      if (!response.ok) throw new Error(await responseError(response))
-      setPassword('')
-      setUnlocked(true)
-    } catch (error) {
-      setAccessError(
-        error instanceof Error ? error.message : 'Unable to unlock uploads.',
-      )
-    } finally {
-      setAccessPending(false)
-    }
-  }
 
   function chooseFiles(event: React.ChangeEvent<HTMLInputElement>) {
     const files = [...(event.target.files ?? [])].slice(0, 20)
@@ -133,7 +103,7 @@ export default function GuestUpload({
       try {
         const uploadUrl = inviteToken
           ? `/api/galleries/${eventSlug}/uploads?invite=${encodeURIComponent(inviteToken)}`
-          : `/api/galleries/${eventSlug}/uploads`
+          : `/api/galleries/${eventSlug}/uploads?upload=${encodeURIComponent(submissionToken ?? '')}`
         const response = await fetch(uploadUrl, {
           method: 'POST',
           body: formData,
@@ -145,13 +115,6 @@ export default function GuestUpload({
           status: 'error',
           error: error instanceof Error ? error.message : 'The upload failed.',
         })
-        if (
-          error instanceof Error &&
-          error.message.includes('password again')
-        ) {
-          setUnlocked(false)
-          break
-        }
       }
     }
     setUploading(false)
@@ -171,48 +134,18 @@ export default function GuestUpload({
     )
   }
 
-  if (!inviteToken && !unlocked) {
+  if (!inviteToken && !submissionToken)
     return (
       <Card>
         <CardHeader>
-          <LockKeyhole
-            className="text-primary mb-2 size-8"
-            aria-hidden="true"
-          />
-          <CardTitle>Enter the event upload password</CardTitle>
+          <CardTitle>Ask the host for a submission link</CardTitle>
           <CardDescription>
-            Use the password shared by the photographer or event organizer.
+            Anyone with the submission link can send photos for approval. A
+            gallery viewing link does not allow uploads.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={unlock}>
-            <div className="space-y-2">
-              <Label htmlFor="gallery-password">Upload password</Label>
-              <Input
-                id="gallery-password"
-                type="password"
-                autoComplete="current-password"
-                minLength={8}
-                maxLength={128}
-                required
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-              />
-            </div>
-            {accessError && (
-              <p className="text-destructive text-sm" role="alert">
-                {accessError}
-              </p>
-            )}
-            <Button type="submit" disabled={accessPending}>
-              <LockKeyhole data-icon="inline-start" aria-hidden="true" />
-              {accessPending ? 'Checking…' : 'Continue'}
-            </Button>
-          </form>
-        </CardContent>
       </Card>
     )
-  }
 
   return (
     <div className="space-y-6">

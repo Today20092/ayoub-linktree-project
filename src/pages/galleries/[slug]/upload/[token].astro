@@ -30,13 +30,17 @@ const summary = gallery.summary
 const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc ?? '/og.jpg'
 
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+Astro.response.headers.set('Cache-Control', 'no-store')
+Astro.response.headers.set('Referrer-Policy', 'no-referrer')
 ---
 
 <BaseLayout
+  disableAnalytics
+  robots="noindex,nofollow"
   title={`Upload photos for ${eventTitle}`}
   description={`Upload photos for ${eventTitle}.`}
   canonicalUrl={new URL(
-    `/galleries/${eventSlug}/upload/${token}/`,
+    `/galleries/${eventSlug}/upload/`,
     Astro.site,
   ).toString()}
   ogImage={ogImage}
@@ -48,9 +52,9 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     class="mx-auto w-full max-w-2xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14"
   >
     <Button variant="ghost" size="sm" asChild>
-      <a href={`/galleries/${eventSlug}/`}>
+      <a href="/galleries/">
         <ArrowLeft data-icon="inline-start" aria-hidden="true" />
-        Back to gallery
+        Gallery listing
       </a>
     </Button>
 
