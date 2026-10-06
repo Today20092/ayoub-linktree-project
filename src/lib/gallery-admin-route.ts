@@ -95,6 +95,7 @@ function commandEvent(
     status: event.dynamicEvent?.status ?? 'published',
     flyerSrc: flyer?.src,
     coverSrc: cover?.src,
+    isPortfolio: Boolean(event.staticEvent),
     staticPhotos,
   }
 }

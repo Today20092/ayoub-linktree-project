@@ -1,5 +1,7 @@
 # Gallery backend Effect workflows
 
+Guest access now uses separate unlisted viewing and moderated submission links. Guest passwords are retired; see [Gallery sharing links](gallery-sharing-links.md) for current behavior, compatibility, and rollback limitations. Historical password setup below does not apply to the current backend.
+
 The backend pins Effect 4.0.1. This migration changes orchestration, without a
 database migration or a native/client runtime. Pure filename, URL, image-size,
 password, checksum, and session cryptography functions remain ordinary functions.

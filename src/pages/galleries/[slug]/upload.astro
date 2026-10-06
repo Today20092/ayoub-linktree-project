@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 import GuestUpload from '../../../components/GuestUpload'
 import { Button } from '../../../components/ui/button'
 import { galleryReader } from '../../../lib/gallery-read'
+import { matchesSharingToken } from '../../../lib/gallery-sharing'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 
 export const prerender = false
@@ -19,6 +20,14 @@ if (!context || !eventSlug) {
   return new Response(null, { status: 404 })
 }
 const { gallery, settings } = context
+const submissionToken = Astro.url.searchParams.get('upload')
+if (gallery.dynamicEvent?.is_unlisted && !submissionToken)
+  return new Response(null, { status: 404 })
+if (
+  submissionToken &&
+  !matchesSharingToken(submissionToken, settings?.upload_token)
+)
+  return new Response(null, { status: 404 })
 const canonicalUrl = new URL(
   `/galleries/${eventSlug}/upload/`,
   Astro.site,
@@ -28,9 +37,13 @@ const description = `Submit guest photos from ${gallery.title} for review and in
 const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc ?? '/og.jpg'
 
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+Astro.response.headers.set('Cache-Control', 'no-store')
+Astro.response.headers.set('Referrer-Policy', 'no-referrer')
 ---
 
 <BaseLayout
+  disableAnalytics
+  robots="noindex,nofollow"
   title={title}
   description={description}
   canonicalUrl={canonicalUrl}
@@ -43,9 +56,9 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     class="mx-auto w-full max-w-2xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14"
   >
     <Button variant="ghost" size="sm" asChild>
-      <a href={`/galleries/${eventSlug}/`}>
+      <a href="/galleries/">
         <ArrowLeft data-icon="inline-start" aria-hidden="true" />
-        Back to gallery
+        Gallery listing
       </a>
     </Button>
 
@@ -70,6 +83,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         eventSlug={eventSlug}
         eventTitle={gallery.title}
         enabled={Boolean(settings?.uploads_enabled)}
+        submissionToken={submissionToken ?? undefined}
       />
     </div>
   </main>

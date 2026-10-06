@@ -200,3 +200,25 @@ test('public detail projects related rows and suppresses photos while coming soo
   }).getPublicDetail('event-one')
   assert.deepEqual(comingSoon?.allImages, [])
 })
+
+test('unlisted galleries require their sharing token and never appear in public listings', async () => {
+  const token = 'a'.repeat(64)
+  const unlisted = { ...dynamicEvent, is_unlisted: 1, share_token: token }
+  const galleries = reader({ staticValue: undefined, dynamicValue: unlisted })
+  assert.equal(await galleries.getPublicDetail('event-one'), undefined)
+  assert.equal(
+    await galleries.getPublicDetail('event-one', 'b'.repeat(64)),
+    undefined,
+  )
+  assert.equal(
+    (await galleries.getPublicDetail('event-one', token))?.title,
+    'Dynamic title',
+  )
+  assert.deepEqual(await galleries.listPublic(), [])
+  assert.ok(await galleries.getAdminDetail('event-one'))
+  const hidden = reader({
+    staticValue: undefined,
+    dynamicValue: { ...unlisted, status: 'hidden' },
+  })
+  assert.equal(await hidden.getPublicDetail('event-one', token), undefined)
+})

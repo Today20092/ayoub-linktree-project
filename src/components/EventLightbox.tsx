@@ -45,6 +45,7 @@ type GalleryImage = {
 type EventLightboxProps = {
   galleryId: string
   heading: string
+  shareToken?: string
   projectSlug: string
   projectTitle: string
   images: GalleryImage[]
@@ -94,6 +95,7 @@ function buildTipUrl(baseUrl: string, amount: number) {
 export default function EventLightbox({
   galleryId,
   heading,
+  shareToken,
   projectSlug,
   projectTitle,
   images,
@@ -440,6 +442,7 @@ export default function EventLightbox({
     )
     const title = `${projectTitle} — Photograph ${currentIndex + 1} of ${images.length}`
     const text = `${currentImage.alt}. View this photograph from ${projectTitle}.`
+    if (shareToken) url.searchParams.set('share', shareToken)
     const shareData = { title, text, url: url.toString() }
 
     if (navigator.share) {

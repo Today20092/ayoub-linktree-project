@@ -21,6 +21,7 @@ type Props = {
   preconnectHints?: string[]
   structuredData?: Record<string, unknown>
   activeNav?: 'home' | 'services' | 'galleries' | 'about' | 'contact'
+  disableAnalytics?: boolean
   minimal?: boolean
 }
 
@@ -42,6 +43,7 @@ const {
   preconnectHints = ['https://api.fontshare.com'],
   structuredData,
   activeNav,
+  disableAnalytics = false,
   minimal = false,
 } = Astro.props as Props
 
@@ -144,7 +146,7 @@ if (Astro.csp) {
         />
       )
     }
-    <CloudflareWebAnalytics />
+    {!disableAnalytics && <CloudflareWebAnalytics />}
   </head>
   <body
     class="bg-background text-foreground flex min-h-[100dvh] flex-col subpixel-antialiased"

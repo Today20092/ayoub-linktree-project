@@ -1,5 +1,7 @@
 # Native gallery management
 
+Guest access now uses separate unlisted viewing and moderated submission links. Guest passwords are retired; see [Gallery sharing links](gallery-sharing-links.md) for current behavior, compatibility, and rollback limitations. Historical password setup below does not apply to the current backend.
+
 The Android app opens native management screens from **Galleries → select a gallery → Manage**. The website dashboard groups the same controls into Details, Sharing & uploads, Guest access, and Photos. Date selection on the website uses a compact date field.
 
 ## Android controls

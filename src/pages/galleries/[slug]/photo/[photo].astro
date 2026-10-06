@@ -16,7 +16,10 @@ type ShareImage = {
 const eventSlug = Astro.params.slug
 const photoNumber = Number(Astro.params.photo)
 const gallery = eventSlug
-  ? await galleryReader(env.GALLERY_DB).getPublicDetail(eventSlug)
+  ? await galleryReader(env.GALLERY_DB).getPublicDetail(
+      eventSlug,
+      Astro.url.searchParams.get('share') ?? undefined,
+    )
   : undefined
 if (
   !gallery ||
@@ -25,6 +28,11 @@ if (
   photoNumber < 1
 ) {
   return new Response(null, { status: 404 })
+}
+if (gallery.isUnlisted) {
+  Astro.response.headers.set('Cache-Control', 'no-store')
+  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  Astro.response.headers.set('Referrer-Policy', 'no-referrer')
 }
 const images: ShareImage[] = gallery.allImages
 const image = images[photoNumber - 1]
@@ -36,7 +44,7 @@ const shareUrl = new URL(
   `/galleries/${gallery.eventSlug}/photo/${photoNumber}/`,
   Astro.site,
 ).toString()
-const destinationPath = `/galleries/${gallery.eventSlug}/?photo=${photoNumber}`
+const destinationPath = `/galleries/${gallery.eventSlug}/?photo=${photoNumber}${gallery.isUnlisted ? '&share=' + encodeURIComponent(Astro.url.searchParams.get('share')!) : ''}`
 
 const title = `${gallery.title} | Photograph ${photoNumber} of ${photoCount}`
 const description = `${image.alt}. View this photograph from ${gallery.title}.`
@@ -61,16 +69,19 @@ const description = `${image.alt}. View this photograph from ${gallery.title}.`
     <meta property="og:image:width" content={String(image.width)} />
     <meta property="og:image:height" content={String(image.height)} />
     <meta property="og:type" content="article" />
-    <meta property="og:url" content={shareUrl} />
+    <meta
+      property="og:url"
+      content={gallery.isUnlisted ? Astro.url.toString() : shareUrl}
+    />
     <meta property="og:site_name" content="Ayoub Abedrabbo" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={imageUrl} />
     <meta name="twitter:image:alt" content={image.alt} />
-    <link rel="canonical" href={shareUrl} />
+    {!gallery.isUnlisted && <link rel="canonical" href={shareUrl} />}
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <CloudflareWebAnalytics />
+    {!gallery.isUnlisted && <CloudflareWebAnalytics />}
     <script is:inline define:vars={{ destinationPath }}>
       window.location.replace(destinationPath)
     </script>

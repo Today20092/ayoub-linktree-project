@@ -1,4 +1,5 @@
 import { Effect } from 'effect'
+import { matchesSharingToken } from './gallery-sharing'
 import { database, runGalleryUseCase } from './gallery-effect'
 import type { CollectionEntry } from 'astro:content'
 import { eventGalleries } from '../data/event-galleries'
@@ -133,10 +134,15 @@ export function createGalleryReaderEffects({
       ? inlineImages
       : (eventGalleries[gallery.eventSlug] ?? [])
   }
-  function publicDetail(eventSlug: string) {
+  function publicDetail(eventSlug: string, shareToken?: string) {
     return Effect.gen(function* () {
       const gallery = yield* resolve(eventSlug, false)
-      if (!gallery) return
+      if (
+        !gallery ||
+        (gallery.dynamicEvent?.is_unlisted &&
+          !matchesSharingToken(shareToken, gallery.dynamicEvent.share_token))
+      )
+        return
       const [settings, hiddenFilenames, publishedGuests, uploadedPhotos] =
         yield* Effect.all([
           database(() => records.getSettings(eventSlug)),
@@ -174,6 +180,7 @@ export function createGalleryReaderEffects({
       const allImages = [...professionalImages, ...guestImages]
       return {
         ...gallery,
+        isUnlisted: Boolean(gallery.dynamicEvent?.is_unlisted),
         settings,
         hiddenFilenames,
         professionalImages,
@@ -420,8 +427,8 @@ export function createGalleryReader(dependencies: GalleryReaderDependencies) {
   return {
     get: (slug: string) => runGalleryUseCase(effects.get(slug)),
     getAdmin: (slug: string) => runGalleryUseCase(effects.getAdmin(slug)),
-    getPublicDetail: (slug: string) =>
-      runGalleryUseCase(effects.getPublicDetail(slug)),
+    getPublicDetail: (slug: string, shareToken?: string) =>
+      runGalleryUseCase(effects.getPublicDetail(slug, shareToken)),
     getAdminDetail: (slug: string) =>
       runGalleryUseCase(effects.getAdminDetail(slug)),
     listPublic: () => runGalleryUseCase(effects.listPublic()),

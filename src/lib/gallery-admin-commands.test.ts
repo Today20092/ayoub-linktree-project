@@ -13,6 +13,7 @@ import {
   type GalleryAdminEventContext,
 } from './gallery-admin-commands'
 import type {
+  EventGallery,
   GalleryInvite,
   GalleryPhoto,
   GallerySettings,
@@ -97,6 +98,9 @@ function createHarness(
 
   const dependencies: GalleryAdminCommandDependencies = {
     data: {
+      saveUploadLink: async (_slug, uploadsEnabled) => {
+        savedSettings = { uploadsEnabled }
+      },
       getEvent: async () => undefined,
       getSettings: async () => options.settings,
       saveSettings: async (_slug, uploadsEnabled, password) => {
@@ -175,6 +179,7 @@ function createHarness(
       valid: () => true,
       hash: async () => ({ salt: 'salt', hash: 'hash' }),
     },
+    createSharingToken: () => 'a'.repeat(64),
     createId: () => 'generated-id',
     log: (entry) => logs.push(entry),
   }
@@ -382,31 +387,19 @@ test('keeps the record when public deletion fails', async () => {
   assert.equal(state.published.size, 1)
 })
 
-test('requires a password before enabling uploads', async () => {
+test('rejects legacy password settings and enables submissions using a separate link', async () => {
   const state = createHarness()
   await assert.rejects(
-    run({ action: 'settings', uploadsEnabled: true }, state),
+    run(
+      { action: 'settings', uploadsEnabled: true, password: 'test-password' },
+      state,
+    ),
     (error) =>
-      error instanceof GalleryAdminCommandError &&
-      error.message === 'Set a password before enabling uploads.',
+      error instanceof GalleryAdminCommandError && error.status === 400,
   )
-})
-
-test('reuses an existing upload password', async () => {
-  const state = createHarness({
-    settings: {
-      event_slug: 'event-one',
-      uploads_enabled: 0,
-      password_salt: 'salt',
-      password_hash: 'hash',
-      updated_at: 1,
-    },
-  })
+  assert.equal(state.savedSettings(), undefined)
   await run({ action: 'settings', uploadsEnabled: true }, state)
-  assert.deepEqual(state.savedSettings(), {
-    uploadsEnabled: true,
-    password: undefined,
-  })
+  assert.deepEqual(state.savedSettings(), { uploadsEnabled: true })
 })
 
 test('hides and restores a professional photo', async () => {
@@ -669,4 +662,28 @@ test('partial R2 approval copies compensate before retrying moderation', async (
   assert.equal(state.published.size, 1)
   assert.equal(state.pending.size, 0)
   assert.equal(state.photo().status, 'published')
+})
+
+test('sharing is management-scoped, keeps its token until rotation, and protects curated portfolio galleries', async () => {
+  const state = createHarness()
+  let saved: { unlisted: boolean; token: string } | undefined
+  state.dependencies.data.getEvent = async () =>
+    ({ share_token: 'b'.repeat(64) }) as EventGallery
+  state.dependencies.data.saveSharing = async (_slug, unlisted, token) => {
+    saved = { unlisted, token }
+  }
+  await run({ action: 'sharing', unlisted: true }, state)
+  assert.deepEqual(saved, { unlisted: true, token: 'b'.repeat(64) })
+  await run({ action: 'sharing', unlisted: true, rotateLink: true }, state)
+  assert.deepEqual(saved, { unlisted: true, token: 'a'.repeat(64) })
+  saved = undefined
+  await assert.rejects(
+    run({ action: 'sharing', unlisted: true }, state, {
+      ...commandContext(),
+      event: { ...commandContext().event, isPortfolio: true },
+    }),
+    (error) =>
+      error instanceof GalleryAdminCommandError && error.status === 409,
+  )
+  assert.equal(saved, undefined)
 })

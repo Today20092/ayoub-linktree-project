@@ -51,7 +51,7 @@ function harness(invite = false) {
   return { services, input, run, objects, rows }
 }
 
-test('password guests remain private and pending; trusted invite guests publish directly', async () => {
+test('submission-link guests remain private and pending; trusted invite guests publish directly', async () => {
   const password = harness()
   assert.deepEqual(await (await password.run()).json(), {
     id: 'fixed-guest',

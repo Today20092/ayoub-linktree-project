@@ -6,11 +6,7 @@ import {
   type GuestUploadRequestDependencies,
 } from './gallery-guest-request'
 import { guestSessionRequest } from './gallery-guest-session'
-import {
-  createGallerySession,
-  hashGalleryPassword,
-  verifyGallerySession,
-} from './gallery-auth'
+import { createGallerySession } from './gallery-auth'
 
 function fixture() {
   const objects = new Map<
@@ -20,7 +16,12 @@ function fixture() {
   const pending = new Set<string>()
   const published = new Set<string>()
   const state = { visible: true, enabled: true, allowed: true }
-  const settings = { uploads_enabled: 1, password_salt: '', password_hash: '' }
+  const settings = {
+    uploads_enabled: 1,
+    upload_token: 'a'.repeat(64),
+    password_salt: '',
+    password_hash: '',
+  }
   let counter = 0
   const dependencies: GuestUploadRequestDependencies = {
     reader: {
@@ -81,7 +82,7 @@ function fixture() {
     const form = new FormData()
     form.set('photo', new File(['photo'], 'photo.png', { type: 'image/png' }))
     return new Request(
-      `https://example.com/api/galleries/event/uploads/${invite ? `?invite=${invite}` : ''}`,
+      `https://example.com/api/galleries/event/uploads/${invite ? `?invite=${invite}` : cookie ? `?upload=${encodeURIComponent(cookie)}` : ''}`,
       {
         method: 'POST',
         headers: {
@@ -95,14 +96,10 @@ function fixture() {
   return { dependencies, request, state, settings, objects, pending, published }
 }
 
-test('guest upload boundary preserves session scope, visibility, settings, invitations and throttling', async () => {
+test('guest upload boundary preserves submission-link scope, visibility, settings, invitations and throttling', async () => {
   const { dependencies, request, state, objects, pending, published } =
     fixture()
-  const valid = await createGallerySession(
-    'event',
-    dependencies.sessionSecret!,
-    1000,
-  )
+  const valid = 'a'.repeat(64)
   const otherEvent = await createGallerySession(
     'other-event',
     dependencies.sessionSecret!,
@@ -140,11 +137,7 @@ test('guest upload boundary preserves session scope, visibility, settings, invit
 
 test('guest upload boundary rejects malformed forms and oversize headers without publishing', async () => {
   const { dependencies, request, objects } = fixture()
-  const token = await createGallerySession(
-    'event',
-    dependencies.sessionSecret!,
-    1000,
-  )
+  const token = 'a'.repeat(64)
   assert.equal(
     (
       await guestUploadRequest(
@@ -214,76 +207,55 @@ test('uncertain guest publication retains bytes, reports a safe response, and lo
   )
 })
 
-test('password session boundary retains response contracts and creates an event-scoped cookie', async () => {
-  const { dependencies, state, settings } = fixture()
-  const password = await hashGalleryPassword('test-password')
-  settings.password_salt = password.salt
-  settings.password_hash = password.hash
-  const request = (body = JSON.stringify({ password: 'test-password' })) =>
+test('legacy password sessions are retired without creating an upload cookie', async () => {
+  const { dependencies, state } = fixture()
+  const request = () =>
     new Request('https://example.com/api/galleries/event/session/', {
       method: 'POST',
-      body,
+      body: JSON.stringify({ password: 'test-password' }),
     })
+  const response = await guestSessionRequest(request(), 'event', dependencies)
+  assert.equal(response.status, 410)
+  assert.equal(response.headers.get('set-cookie'), null)
+  assert.equal(response.headers.get('cache-control'), 'no-store')
+  state.visible = false
   assert.equal(
-    (await guestSessionRequest(request('bad json'), 'event', dependencies))
-      .status,
-    400,
+    (await guestSessionRequest(request(), 'event', dependencies)).status,
+    404,
+  )
+})
+
+test('a legacy session cookie cannot replace the separate submission link, and rotation revokes old links', async () => {
+  const { dependencies, request, settings, pending } = fixture()
+  const legacy = await createGallerySession(
+    'event',
+    dependencies.sessionSecret!,
+    1000,
+  )
+  const form = new FormData()
+  form.set('photo', new File(['photo'], 'photo.png', { type: 'image/png' }))
+  const cookieRequest = new Request(
+    'https://example.com/api/galleries/event/uploads/',
+    {
+      method: 'POST',
+      headers: { cookie: 'gallery_upload_session=' + legacy },
+      body: form,
+    },
   )
   assert.equal(
-    (
-      await guestSessionRequest(
-        request(JSON.stringify({ password: 'wrong-password' })),
-        'event',
-        dependencies,
-      )
-    ).status,
+    (await guestUploadRequest(cookieRequest, 'event', dependencies)).status,
     401,
   )
-  state.enabled = false
+  settings.upload_token = 'b'.repeat(64)
   assert.equal(
-    (await guestSessionRequest(request(), 'event', dependencies)).status,
-    403,
-  )
-  state.enabled = true
-  state.allowed = false
-  assert.equal(
-    (await guestSessionRequest(request(), 'event', dependencies)).status,
-    429,
-  )
-  state.allowed = true
-  assert.equal(
-    (
-      await guestSessionRequest(request(), 'event', {
-        ...dependencies,
-        sessionSecret: undefined,
-      })
-    ).status,
-    503,
-  )
-  const response = await guestSessionRequest(request(), 'event', dependencies)
-  assert.equal(response.status, 200)
-  assert.deepEqual(await response.json(), { ok: true })
-  const cookie = response.headers.get('set-cookie')!
-  assert.equal(cookie.includes('Path=/api/galleries/event'), true)
-  assert.equal(cookie.includes('HttpOnly'), true)
-  assert.equal(cookie.includes('Secure'), true)
-  const token = decodeURIComponent(cookie.split(';')[0].split('=')[1])
-  assert.equal(
-    await verifyGallerySession(
-      token,
-      'event',
-      dependencies.sessionSecret!,
-      1000,
-    ),
-    true,
+    (await guestUploadRequest(request('a'.repeat(64)), 'event', dependencies))
+      .status,
+    401,
   )
   assert.equal(
-    await verifyGallerySession(
-      token,
-      'other-event',
-      dependencies.sessionSecret!,
-      1000,
-    ),
-    false,
+    (await guestUploadRequest(request('b'.repeat(64)), 'event', dependencies))
+      .status,
+    201,
   )
+  assert.equal(pending.size, 1)
 })

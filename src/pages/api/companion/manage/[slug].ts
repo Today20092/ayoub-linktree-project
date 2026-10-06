@@ -46,12 +46,21 @@ export const GET: APIRoute = ({ request, params }) =>
           eventTime: gallery.eventTime ?? '',
           eventVenue: gallery.eventVenue ?? '',
           visibilityStatus: gallery.visibility,
+          isUnlisted: Boolean(gallery.dynamicEvent?.is_unlisted),
+          shareUrl: absolute(
+            `/galleries/${gallery.eventSlug}/${gallery.dynamicEvent?.is_unlisted ? '?share=' + gallery.dynamicEvent.share_token : ''}`,
+          ),
           comingSoon: gallery.comingSoon,
           coverSrc: gallery.cover ? absolute(gallery.cover.src) : '',
         },
         settings: {
           uploadsEnabled: Boolean(gallery.settings?.uploads_enabled),
-          hasPassword: Boolean(gallery.settings?.password_hash),
+          submissionUrl: gallery.settings?.upload_token
+            ? absolute(
+                `/galleries/${gallery.eventSlug}/upload/?upload=${gallery.settings.upload_token}`,
+              )
+            : null,
+          hasPassword: false,
         },
         invites: gallery.invites,
         photos: [

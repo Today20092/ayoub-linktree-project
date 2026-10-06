@@ -27,10 +27,18 @@ export const prerender = false
 
 const eventSlug = Astro.params.slug
 const gallery = eventSlug
-  ? await galleryReader(env.GALLERY_DB).getPublicDetail(eventSlug)
+  ? await galleryReader(env.GALLERY_DB).getPublicDetail(
+      eventSlug,
+      Astro.url.searchParams.get('share') ?? undefined,
+    )
   : undefined
 if (!gallery || !eventSlug) {
   return new Response(null, { status: 404 })
+}
+if (gallery.isUnlisted) {
+  Astro.response.headers.set('Cache-Control', 'no-store')
+  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  Astro.response.headers.set('Referrer-Policy', 'no-referrer')
 }
 const project = gallery.staticEvent
 const data = project?.data
@@ -51,7 +59,7 @@ const title = `${galleryTitle} - Event Gallery`
 const ogImage = new URL(gallery.ogImage, Astro.url).toString()
 const eventDate = gallery.eventDate
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
-const faceManifest = faceManifests[eventSlug]
+const faceManifest = gallery.isUnlisted ? undefined : faceManifests[eventSlug]
 const flyer = gallery.flyerImage
 const galleryHeroImage = gallery.heroImage
 
@@ -86,7 +94,10 @@ const formatDate = (date: Date) =>
   ogImageWidth={ogImageWidth}
   ogImageHeight={ogImageHeight}
   ogType="article"
-  robots="index,follow,max-image-preview:large"
+  disableAnalytics={gallery.isUnlisted}
+  robots={gallery.isUnlisted
+    ? 'noindex,nofollow'
+    : 'index,follow,max-image-preview:large'}
   activeNav="galleries"
 >
   <main
@@ -121,6 +132,14 @@ const formatDate = (date: Date) =>
       </Breadcrumb>
     </div>
 
+    {
+      gallery.isUnlisted && (
+        <p class="text-muted-foreground mt-6 text-sm">
+          Unlisted gallery. Anyone with this link can view and forward it.
+          Shared image URLs remain accessible.
+        </p>
+      )
+    }
     <header class="mx-auto max-w-4xl pt-6 sm:pt-8" data-reveal="up">
       <div class="flex flex-wrap items-center gap-2">
         {
@@ -157,6 +176,11 @@ const formatDate = (date: Date) =>
                 galleryId={galleryId}
                 heading={galleryTitle}
                 projectSlug={eventSlug}
+                shareToken={
+                  gallery.isUnlisted
+                    ? (Astro.url.searchParams.get('share') ?? undefined)
+                    : undefined
+                }
                 projectTitle={galleryTitle}
                 downloadAllUrl={data?.downloadAllUrl}
                 tipUrl={tipUrl}
@@ -203,11 +227,11 @@ const formatDate = (date: Date) =>
                 ))}
               </EventLightbox>
             )}
-            {gallerySettings?.uploads_enabled ? (
+            {gallerySettings?.uploads_enabled && !gallery.isUnlisted ? (
               <Button variant="outline" size="lg" asChild>
                 <a href={`/galleries/${eventSlug}/upload/`}>
                   <ImageUp data-icon="inline-start" aria-hidden="true" />
-                  Share your photos
+                  Ask for a submission link
                 </a>
               </Button>
             ) : null}

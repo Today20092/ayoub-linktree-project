@@ -113,3 +113,5 @@ Follow [AGENTS.md](AGENTS.md) for deployment authorization and the repository's 
 | Understand domain terms and recorded decisions                     | [CONTEXT.md](CONTEXT.md), [domain documentation rules](docs/agents/domain.md) |
 
 Research documents record investigations and proposals. Check implementation and release notes before treating a proposal as shipped behavior.
+
+For unlisted viewing and moderated guest submission links, see [Gallery sharing links](docs/gallery-sharing-links.md).

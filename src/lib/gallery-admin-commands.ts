@@ -3,13 +3,16 @@ import {
   database,
   storage,
   imageProcessing,
-  validation,
   GalleryFailure,
   galleryFailure,
   quietCleanup,
   runGalleryUseCase,
 } from './gallery-effect'
-import { hashGalleryPassword, validGalleryPassword } from './gallery-auth'
+import {
+  createGallerySharingToken,
+  gallerySharingPath,
+  gallerySubmissionPath,
+} from './gallery-sharing'
 import { galleryMediaUrl, galleryObjectUrl } from './gallery-media'
 import {
   adminPhotoKey,
@@ -29,6 +32,8 @@ import {
   restoreProfessionalPhoto,
   saveEventGallery,
   saveGallerySettings,
+  saveGallerySharing,
+  saveGalleryUploadLink,
   type GalleryInvite,
   type GalleryPhoto,
   type GallerySettings,
@@ -69,6 +74,7 @@ export type GalleryAdminEventContext = {
   status: GalleryStatus
   flyerSrc?: string
   coverSrc?: string
+  isPortfolio?: boolean
   staticPhotos: Array<{
     src: unknown
     width?: number
@@ -79,6 +85,16 @@ export type GalleryAdminEventContext = {
 }
 export type GalleryAdminCommandDependencies = {
   data: {
+    saveSharing?(
+      eventSlug: string,
+      unlisted: boolean,
+      token: string,
+    ): Promise<unknown>
+    saveUploadLink?(
+      eventSlug: string,
+      enabled: boolean,
+      token: string,
+    ): Promise<unknown>
     getEvent(eventSlug: string): Promise<EventGallery | undefined>
     getSettings(eventSlug: string): Promise<GallerySettings | null | undefined>
     saveSettings(
@@ -148,6 +164,7 @@ export type GalleryAdminCommandDependencies = {
     valid(password: string): boolean
     hash(password: string): Promise<GalleryAdminPassword>
   }
+  createSharingToken?(): string
   createId(): string
   log(entry: Record<string, unknown>): void
 }
@@ -172,6 +189,10 @@ export function createGalleryAdminCommandDependencies(bindings: {
 }): GalleryAdminCommandDependencies {
   return {
     data: {
+      saveSharing: (slug, unlisted, token) =>
+        saveGallerySharing(bindings.database, slug, unlisted, token),
+      saveUploadLink: (slug, enabled, token) =>
+        saveGalleryUploadLink(bindings.database, slug, enabled, token),
       getEvent: (eventSlug) => getEventGallery(bindings.database, eventSlug),
       getSettings: (eventSlug) =>
         getGallerySettings(bindings.database, eventSlug),
@@ -228,9 +249,12 @@ export function createGalleryAdminCommandDependencies(bindings: {
       optimize: (file) => optimizedGalleryImage(file, bindings.images),
     },
     passwords: {
-      valid: validGalleryPassword,
-      hash: hashGalleryPassword,
+      valid: () => false,
+      hash: async () => {
+        throw new Error('Password uploads retired')
+      },
     },
+    createSharingToken: createGallerySharingToken,
     createId: () => crypto.randomUUID(),
     log: (entry) => console.log(JSON.stringify(entry)),
   }
@@ -692,45 +716,78 @@ export function galleryAdminCommand(
           new GalleryAdminCommandError('Invalid action.', 400),
         )
       }
+      if (typeof input.password === 'string' && input.password.trim())
+        return yield* Effect.fail(
+          new GalleryAdminCommandError(
+            'Guest passwords have been replaced by links. Use the web dashboard to manage submission links.',
+            400,
+          ),
+        )
       const existing = yield* database(() =>
         dependencies.data.getSettings(context.event.id),
       )
-      const newPassword =
-        typeof input.password === 'string' ? input.password.trim() : undefined
-      if (newPassword && !dependencies.passwords.valid(newPassword)) {
+      if (!dependencies.data.saveUploadLink)
         return yield* Effect.fail(
           new GalleryAdminCommandError(
-            'Password must be 8 to 128 characters.',
-            400,
+            'Submission links are unavailable.',
+            503,
           ),
         )
-      }
-      if (
-        input.uploadsEnabled &&
-        !newPassword &&
-        (!existing?.password_hash || !existing.password_salt)
-      ) {
-        return yield* Effect.fail(
-          new GalleryAdminCommandError(
-            'Set a password before enabling uploads.',
-            400,
-          ),
-        )
-      }
-      const password = newPassword
-        ? yield* validation(
-            () => dependencies.passwords.hash(newPassword),
-            'Invalid password.',
-          )
-        : undefined
+      const token =
+        input.rotateLink === true || !existing?.upload_token
+          ? (dependencies.createSharingToken ?? createGallerySharingToken)()
+          : existing.upload_token
       yield* database(() =>
-        dependencies.data.saveSettings(
+        dependencies.data.saveUploadLink!(
           context.event.id,
           input.uploadsEnabled as boolean,
-          password,
+          token,
         ),
       )
-      return ok()
+      return ok({
+        ok: true,
+        url: new URL(
+          gallerySubmissionPath(context.event.id, token),
+          context.requestUrl,
+        ).toString(),
+      })
+    }
+    if (input.action === 'sharing' && typeof input.unlisted === 'boolean') {
+      if (!dependencies.data.saveSharing)
+        return yield* Effect.fail(
+          new GalleryAdminCommandError('Sharing links are unavailable.', 503),
+        )
+      const event = yield* database(() =>
+        dependencies.data.getEvent(context.event.id),
+      )
+      if (!event || context.event.isPortfolio)
+        return yield* Effect.fail(
+          new GalleryAdminCommandError(
+            'Curated portfolio galleries remain public. Manage unlisted sharing on a standalone event gallery.',
+            409,
+          ),
+        )
+      const token =
+        input.rotateLink === true || !event.share_token
+          ? (dependencies.createSharingToken ?? createGallerySharingToken)()
+          : event.share_token
+      yield* database(() =>
+        dependencies.data.saveSharing!(
+          context.event.id,
+          input.unlisted as boolean,
+          token,
+        ),
+      )
+      return ok({
+        ok: true,
+        url: new URL(
+          gallerySharingPath(
+            context.event.id,
+            input.unlisted ? token : undefined,
+          ),
+          context.requestUrl,
+        ).toString(),
+      })
     }
     if (
       (input.action === 'hideProfessional' ||

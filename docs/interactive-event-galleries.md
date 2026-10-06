@@ -1,5 +1,7 @@
 # Interactive event galleries
 
+Guest access now uses separate unlisted viewing and moderated submission links. Guest passwords are retired; see [Gallery sharing links](gallery-sharing-links.md) for current behavior, compatibility, and rollback limitations. Historical password setup below does not apply to the current backend.
+
 Guest uploads and browser-based culling use the existing Astro Worker plus D1,
 R2, Cloudflare Images, and Cloudflare Access. Gallery pages read moderation
 state at request time, so publishing or hiding a photo does not rebuild the

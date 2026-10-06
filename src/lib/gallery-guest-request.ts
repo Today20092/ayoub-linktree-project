@@ -1,5 +1,5 @@
 import { Effect } from 'effect'
-import { gallerySessionCookie, verifyGallerySession } from './gallery-auth'
+import { matchesSharingToken } from './gallery-sharing'
 import {
   acceptedGalleryImage,
   MAX_GALLERY_UPLOAD_BYTES,
@@ -22,6 +22,7 @@ export type GuestRequestReader = {
   getUploadContext(slug: string): Effect.Effect<
     | {
         settings?: {
+          upload_token?: string | null
           uploads_enabled: number | boolean
           password_salt?: string | null
           password_hash?: string | null
@@ -68,42 +69,38 @@ export function guestUploadRequest(
       return yield* Effect.fail(
         galleryFailure(403, 'This upload link is not valid.'),
       )
-    const sessionToken = yield* validation(
-      async () => gallerySessionCookie(request),
-      'Enter the event upload password again.',
-      401,
-    )
+    const uploadToken = new URL(request.url).searchParams.get('upload')
     if (!invite) {
       const settings = (yield* reader.getUploadContext(eventSlug))?.settings
       if (!settings?.uploads_enabled)
         return yield* Effect.fail(
           galleryFailure(403, 'Uploads are not open for this gallery.'),
         )
-      if (
-        !sessionToken ||
-        !dependencies.sessionSecret ||
-        !(yield* validation(
-          () =>
-            verifyGallerySession(
-              sessionToken,
-              eventSlug,
-              dependencies.sessionSecret!,
-              dependencies.now(),
-            ),
-          'Enter the event upload password again.',
-          401,
-        ))
-      )
+      if (!matchesSharingToken(uploadToken, settings.upload_token))
         return yield* Effect.fail(
-          galleryFailure(401, 'Enter the event upload password again.'),
+          galleryFailure(401, 'Ask the host for a valid submission link.'),
         )
     }
     const clientAddress =
       request.headers.get('cf-connecting-ip') ?? 'local-development'
+    const rateToken = yield* validation(
+      async () =>
+        Array.from(
+          new Uint8Array(
+            await crypto.subtle.digest(
+              'SHA-256',
+              new TextEncoder().encode(inviteToken || uploadToken || ''),
+            ),
+          ),
+          (byte) => byte.toString(16).padStart(2, '0'),
+        ).join(''),
+      'Uploads are temporarily unavailable.',
+      503,
+    )
     const rateLimit = yield* validation(
       () =>
         dependencies.limit({
-          key: `${clientAddress}:${eventSlug}:${(inviteToken || sessionToken || '').slice(-16)}`,
+          key: `${clientAddress}:${eventSlug}:${rateToken}`,
         }),
       'Uploads are temporarily unavailable.',
       503,
