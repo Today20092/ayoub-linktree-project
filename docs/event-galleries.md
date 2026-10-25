@@ -109,7 +109,12 @@ If failure happens before R2 changes, local changes roll back. If failure
 happens during R2, local changes still roll back and the command prints the
 exact rerun command; rerunning safely converges the ZIP and image objects.
 
-## Face finder pilot
+## Face finder
+
+New event indexes use quantized SFace and local GPU recognition. Follow the
+[SFace gallery workflow](sface-gallery-workflow.md) for the default indexer,
+assets, calibration, preview resources, migration, and release verification.
+The commands below describe the retained **legacy Human model** workflow.
 
 Face indexing runs locally. Cloudflare stores one anonymous vector for each
 detected event face. An attendee’s selfie is analyzed in their browser, then
@@ -120,7 +125,7 @@ Create the Vectorize index once:
 
 ```powershell
 npx wrangler vectorize create face-search --dimensions=1024 --metric=cosine
-npx wrangler vectorize create-metadata-index face-search --propertyName faceOrder --type number
+npx wrangler vectorize create-metadata-index face-search --property-name faceOrder --type number
 ```
 
 Wait for metadata-index creation to finish before publishing vectors. Check
@@ -133,7 +138,7 @@ republished.
 Index an exported event folder:
 
 ```powershell
-npm run faces:index -- --event muslim-business-chamber-2026 --photos "C:\event\exports"
+node scripts/face-index-human.mjs --event muslim-business-chamber-2026 --photos "C:\event\exports"
 ```
 
 The command writes `.face-index/{event-slug}/faces.json`. It does not group,
@@ -150,7 +155,7 @@ pairs:
 ```
 
 ```powershell
-npm run faces:index -- --event muslim-business-chamber-2026 --photos "C:\event\exports" --labels "C:\event\face-pairs.json"
+node scripts/face-index-human.mjs --event muslim-business-chamber-2026 --photos "C:\event\exports" --labels "C:\event\face-pairs.json"
 ```
 
 Publish every detected face:

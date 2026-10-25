@@ -43,6 +43,11 @@
       "index_name": "face-search",
       "remote": true,
     },
+    {
+      "binding": "VECTORIZE_SFACE",
+      "index_name": "face-search-sface-int8",
+      "remote": true,
+    },
   ],
   "ratelimits": [
     {
@@ -113,6 +118,11 @@
         "index_name": "face-search",
         "remote": true,
       },
+      {
+        "binding": "VECTORIZE_SFACE",
+        "index_name": "face-search-sface-int8-preview",
+        "remote": true,
+      },
     ],
     "ratelimits": [
       {
@@ -173,6 +183,11 @@
         {
           "binding": "VECTORIZE",
           "index_name": "face-search",
+          "remote": true,
+        },
+        {
+          "binding": "VECTORIZE_SFACE",
+          "index_name": "face-search-sface-int8-preview",
           "remote": true,
         },
       ],

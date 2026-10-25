@@ -16,6 +16,11 @@ export function productionGalleryConfig(generated) {
     ...generated,
     name: 'ayoub-linktree-project',
     topLevelName: 'ayoub-linktree-project',
+    vectorize: generated.vectorize?.map((index) =>
+      index.binding === 'VECTORIZE_SFACE'
+        ? { ...index, index_name: 'face-search-sface-int8' }
+        : index,
+    ),
     d1_databases: [
       {
         binding: 'GALLERY_DB',

@@ -23,6 +23,35 @@ const manifest: FaceManifest = {
 }
 const manifests = { event: manifest }
 
+test('requires the descriptor dimensions of the selected model', () => {
+  const sface: FaceManifest = {
+    ...manifest,
+    model: 'opencv/sface-2021dec-int8',
+    dimensions: 128,
+  }
+  const input = {
+    eventSlug: 'event',
+    indexVersion: manifest.version,
+    embedding: Array(128).fill(0.1),
+  }
+  assert.equal(parseFaceSearchRequest(input, { event: sface })?.manifest, sface)
+  assert.equal(parseFaceSearchRequest(input, manifests), null)
+  assert.equal(
+    parseFaceSearchRequest(
+      { ...input, embedding: Array(1024).fill(0.1) },
+      { event: sface },
+    ),
+    null,
+  )
+  assert.equal(
+    parseFaceSearchRequest(
+      { ...input, embedding: [Infinity, ...Array(127).fill(0)] },
+      { event: sface },
+    ),
+    null,
+  )
+})
+
 test('rejects malformed embeddings and unavailable versions', () => {
   assert.equal(parseFaceSearchRequest({}, manifests), null)
   assert.equal(

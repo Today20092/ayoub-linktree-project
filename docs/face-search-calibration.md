@@ -1,5 +1,10 @@
 # Angel's face-search calibration
 
+This first section records the historical Human model calibration. Angel's
+replacement SFace index uses the separate model-specific evaluation described
+in the [SFace gallery workflow](sface-gallery-workflow.md#calibrate-and-check).
+Its threshold is 0.5580291381871154, not the old Human threshold of 0.62.
+
 Event: `angels-birthday-party-2026`, October 24, 2026. The index contains 1,476
 face descriptors from 494 of the 517 delivered photographs.
 
