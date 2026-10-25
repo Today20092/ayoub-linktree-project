@@ -5,6 +5,7 @@ export type FaceManifest = {
   model: string
   dimensions: 1024
   threshold: number
+  searchMode?: 'range-v1'
   vectorIds: string[]
   staleVectorIds?: string[]
   faceCount: number
