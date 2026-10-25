@@ -24,6 +24,10 @@ To add a case study:
 
 The filename determines the route slug. Preserve existing slugs, or add redirects when a URL change is intended. Edit the MDX file for one project's content; edit the shared template when the change applies to every case study.
 
+Project pages introduce the title, summary, and role before the main media, followed by selected visuals or a link to the separate event gallery. Process, deliverables, credits, equipment, and supporting videos follow. Long stories with at least four level-two headings receive links to the work, results (when the story has a results heading) or delivery, and process. These anchors are generated from the content and shared sections; no per-project navigation configuration is needed.
+
+Write past engagements in the past tense and bound channel-wide or "every episode" claims to the period actually covered. Analytics need a reporting window and scope; do not imply that channel-wide results are attributable only to Ayoub's work. Use each video's actual label, distinguish production roles from collaborators' editorial work, and keep runtime in the story rather than treating it as a project duration.
+
 The portfolio was migrated from a TypeScript array to content collections. Keep MDX as its content source. AlphaBravoMedia links to the business website, and its old portfolio URL redirects through `src/pages/portfolio/alphabravomedia.astro` and `public/_redirects`.
 
 ## Images and styles
