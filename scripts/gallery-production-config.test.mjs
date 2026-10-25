@@ -5,6 +5,12 @@ import { productionGalleryConfig } from './gallery-production-config.mjs'
 test('production release replaces generated preview bindings without changing source config', () => {
   const source = {
     name: 'preview',
+    vectorize: [
+      {
+        binding: 'VECTORIZE_SFACE',
+        index_name: 'face-search-sface-int8-preview',
+      },
+    ],
     d1_databases: [
       {
         binding: 'GALLERY_DB',
@@ -37,6 +43,8 @@ test('production release replaces generated preview bindings without changing so
     ['alphabravomedia-galleries', 'alphabravomedia-gallery-uploads'],
   )
   assert.equal(config.env, undefined)
+  assert.equal(config.vectorize[0].index_name, 'face-search-sface-int8')
+  assert.equal(source.vectorize[0].index_name, 'face-search-sface-int8-preview')
   assert.equal(config.previews, undefined)
   assert.deepEqual(config.assets, source.assets)
   assert.equal(

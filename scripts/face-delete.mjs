@@ -20,21 +20,30 @@ const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
 const vectorIds = [
   ...new Set([...manifest.vectorIds, ...(manifest.staleVectorIds ?? [])]),
 ]
+const indexName =
+  manifest.dimensions === 128 ? 'face-search-sface-int8' : 'face-search'
+const groups = [
+  { indexName, vectorIds },
+  { indexName: 'face-search', vectorIds: manifest.legacyVectorIds ?? [] },
+]
 
-for (let index = 0; index < vectorIds.length; index += 100) {
-  execFileSync(
-    process.execPath,
-    [
-      resolve(root, 'node_modules/wrangler/bin/wrangler.js'),
-      'vectorize',
-      'delete-vectors',
-      'face-search',
-      '--ids',
-      ...vectorIds.slice(index, index + 100),
-    ],
-    { cwd: root, stdio: 'inherit' },
-  )
-}
+for (const group of groups)
+  for (let index = 0; index < group.vectorIds.length; index += 100) {
+    execFileSync(
+      process.execPath,
+      [
+        resolve(root, 'node_modules/wrangler/bin/wrangler.js'),
+        'vectorize',
+        'delete-vectors',
+        group.indexName,
+        '--ids',
+        ...group.vectorIds.slice(index, index + 100),
+      ],
+      { cwd: root, stdio: 'inherit' },
+    )
+  }
 
 await rm(manifestPath)
-console.log(`Deleted ${vectorIds.length} vectors and ${manifestPath}`)
+console.log(
+  `Deleted ${groups.reduce((total, group) => total + group.vectorIds.length, 0)} vectors and ${manifestPath}`,
+)

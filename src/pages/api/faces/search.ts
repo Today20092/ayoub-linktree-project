@@ -54,7 +54,9 @@ export const POST: APIRoute = async ({ request }) => {
   )
   if (!gallery) return json({ error: 'Gallery not found.' }, 404)
   const matches = await queryFaceMatches(
-    env.VECTORIZE,
+    input.manifest.model === 'opencv/sface-2021dec-int8'
+      ? env.VECTORIZE_SFACE
+      : env.VECTORIZE,
     input.manifest,
     input.embedding,
   )

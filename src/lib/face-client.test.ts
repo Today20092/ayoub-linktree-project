@@ -20,6 +20,29 @@ function detector(
   }
 }
 
+test('accepts SFace descriptors and rejects other model dimensions', async () => {
+  const analyzer = createFaceAnalyzer({
+    dimensions: 128,
+    decode: async () => ({ width: 10, height: 10, close() {} }) as ImageBitmap,
+    backends: [
+      {
+        name: 'sface',
+        create: async () =>
+          detector(async () => ({
+            face: [
+              { embedding: Array(128).fill(0.1), box: [0, 0, 10, 10] },
+              { embedding: Array(1024).fill(0.1), box: [0, 0, 10, 10] },
+            ],
+          })),
+      },
+    ],
+  })
+  assert.equal(
+    (await analyzer.analyze(new File(['test'], 'test.jpg')))?.faces.length,
+    1,
+  )
+})
+
 test('falls back to WASM when WebGL cannot prepare', async () => {
   const attempted: string[] = []
   const analyzer = createFaceAnalyzer({

@@ -34,6 +34,7 @@ type FaceFinderProps = {
   eventSlug: string
   indexVersion: string
   galleryId: string
+  model: string
 }
 
 type PhotoMatch = {
@@ -85,11 +86,12 @@ export default function FaceFinder({
   eventSlug,
   indexVersion,
   galleryId,
+  model,
 }: FaceFinderProps) {
   const cameraInput = React.useRef<HTMLInputElement>(null)
   const uploadInput = React.useRef<HTMLInputElement>(null)
   const originalFigures = React.useRef<HTMLElement[]>([])
-  const [analyzer] = React.useState(createBrowserFaceAnalyzer)
+  const [analyzer] = React.useState(() => createBrowserFaceAnalyzer(model))
   const selectionRef = React.useRef<FaceAnalysis | undefined>(undefined)
   const searchAttempt = React.useRef(0)
   const [consent, setConsent] = React.useState(false)
