@@ -69,6 +69,29 @@ await writeFile(
 )
 
 if (upload) {
+  const metadataIndexes = JSON.parse(
+    execFileSync(
+      process.execPath,
+      [
+        resolve(root, 'node_modules/wrangler/bin/wrangler.js'),
+        'vectorize',
+        'list-metadata-index',
+        'face-search',
+        '--json',
+      ],
+      { cwd: root, encoding: 'utf8' },
+    ),
+  )
+  if (
+    !metadataIndexes.some(
+      (entry) =>
+        entry.propertyName === 'faceOrder' && entry.indexType === 'Number',
+    )
+  ) {
+    throw new Error(
+      'Create and wait for the faceOrder numeric metadata index before publishing; see docs/event-galleries.md.',
+    )
+  }
   execFileSync(
     process.execPath,
     [

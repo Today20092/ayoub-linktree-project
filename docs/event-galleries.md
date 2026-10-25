@@ -120,7 +120,15 @@ Create the Vectorize index once:
 
 ```powershell
 npx wrangler vectorize create face-search --dimensions=1024 --metric=cosine
+npx wrangler vectorize create-metadata-index face-search --propertyName faceOrder --type number
 ```
+
+Wait for metadata-index creation to finish before publishing vectors. Check
+`npx wrangler vectorize list-metadata-index face-search --json` for the numeric
+`faceOrder` field and `npx wrangler vectorize info face-search --json` for the
+creation mutation to be processed. `faces:publish` checks the metadata field
+before uploading. Existing event vectors are unchanged until that event is
+republished.
 
 Index an exported event folder:
 
@@ -155,6 +163,28 @@ Use `--no-upload` to prepare the manifest and NDJSON without changing
 Vectorize. Commit and deploy the generated
 `src/data/face-galleries/{event-slug}.json`; the previous versioned namespace
 continues serving until the new deployment is live.
+
+New manifests use `range-v1` search. Each face has an event-local numeric order.
+Search queries at most 50 faces at once, then subdivides an order range when
+all 50 returned faces exceed the event threshold. Up to four queries run at a
+time. Results retain the strongest score for each photo and have no fixed
+50-photo cutoff. This preserves Cloudflare's query limit without discarding
+additional likely photographs. The underlying nearest-neighbor search remains
+approximate.
+
+Older manifests retain their existing single-query behavior. Republish their
+existing local face index and deploy the new manifest to enable range search;
+face detection does not need to run again. The new format changes the namespace,
+so the old deployed version continues working while the new vectors finish
+indexing. Wait for the final insertion mutation and test both early and late
+face orders before deploying. Old vector IDs are retained for eventual event
+deletion; republishing temporarily adds vectors instead of replacing the live
+namespace.
+
+For event-specific calibration, compare a training-selected threshold against
+the unchanged default on held-out photographs before changing it. The default
+can be retained when it performs better. [Angel's calibration report](face-search-calibration.md)
+records this decision and the scope of its evaluation.
 
 The attendee uploads or takes a selfie, selects their face if several are
 detected, and receives matching gallery photographs ordered by strongest

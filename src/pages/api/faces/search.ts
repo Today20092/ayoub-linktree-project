@@ -7,7 +7,7 @@ import { getHiddenFilenames } from '@/lib/gallery-data'
 import {
   MAX_FACE_SEARCH_BODY_BYTES,
   parseFaceSearchRequest,
-  photoMatches,
+  queryFaceMatches,
   readFaceSearchBody,
 } from '@/lib/face-search'
 
@@ -49,25 +49,27 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'Invalid or unavailable face-search index.' }, 400)
   }
 
-  if (
-    !(await galleryReader(env.GALLERY_DB).getPublicDetail(
-      input.manifest.eventSlug,
-    ))
+  const gallery = await galleryReader(env.GALLERY_DB).getPublicDetail(
+    input.manifest.eventSlug,
   )
-    return json({ error: 'Gallery not found.' }, 404)
-  const result = await env.VECTORIZE.query(input.embedding, {
-    topK: 50,
-    namespace: input.manifest.namespace,
-    returnMetadata: 'all',
-  })
+  if (!gallery) return json({ error: 'Gallery not found.' }, 404)
+  const matches = await queryFaceMatches(
+    env.VECTORIZE,
+    input.manifest,
+    input.embedding,
+  )
   const hiddenFilenames = await getHiddenFilenames(
     env.GALLERY_DB,
     input.manifest.eventSlug,
   )
 
+  const visibleFilenames = new Set(
+    gallery.allImages.map(({ filename }) => filename),
+  )
   return json({
-    matches: photoMatches(result.matches, input.manifest.threshold).filter(
-      ({ filename }) => !hiddenFilenames.has(filename),
+    matches: matches.filter(
+      ({ filename }) =>
+        visibleFilenames.has(filename) && !hiddenFilenames.has(filename),
     ),
   })
 }

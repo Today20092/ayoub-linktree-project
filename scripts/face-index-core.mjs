@@ -82,15 +82,15 @@ export function buildPublishedData(index) {
     detections.map(({ id, filename }) => [id, filename]),
   )
   const version = createHash('sha256')
-    .update(`${index.eventSlug}:${index.threshold}:${fingerprint}`)
+    .update(`range-v1:${index.eventSlug}:${index.threshold}:${fingerprint}`)
     .digest('hex')
     .slice(0, 12)
   const namespace = `${index.eventSlug}:${version}`
-  const vectors = detections.map((detection) => ({
+  const vectors = detections.map((detection, faceOrder) => ({
     id: `${namespace}:${detection.id}`,
     values: detection.embedding,
     namespace,
-    metadata: { filename: detection.filename },
+    metadata: { filename: detection.filename, faceOrder },
   }))
 
   if (vectors.length * EMBEDDING_DIMENSIONS > MAX_VECTOR_DIMENSIONS) {
@@ -107,6 +107,7 @@ export function buildPublishedData(index) {
       model: '@vladmandic/human:faceres',
       dimensions: EMBEDDING_DIMENSIONS,
       threshold: index.threshold,
+      searchMode: 'range-v1',
       vectorIds: vectors.map((vector) => vector.id),
       faceCount: vectors.length,
       photoCount: new Set(detections.map(({ filename }) => filename)).size,

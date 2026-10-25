@@ -63,5 +63,50 @@ export function photoMatches(
   return [...scores]
     .map(([filename, score]) => ({ filename, score }))
     .sort((left, right) => right.score - left.score)
-    .slice(0, 50)
+}
+
+export async function queryFaceMatches(
+  index: Pick<VectorizeIndex, 'query'>,
+  manifest: FaceManifest,
+  embedding: number[],
+) {
+  const querySize = 50
+  if (manifest.searchMode !== 'range-v1') {
+    const result = await index.query(embedding, {
+      namespace: manifest.namespace,
+      topK: querySize,
+      returnMetadata: 'all',
+    })
+    return photoMatches(result.matches, manifest.threshold)
+  }
+
+  const pending = [{ start: 0, end: manifest.faceCount }]
+  const matches: VectorizeMatches['matches'] = []
+  while (pending.length > 0) {
+    const ranges = pending.splice(0, 4)
+    const results = await Promise.all(
+      ranges.map(({ start, end }) =>
+        index.query(embedding, {
+          namespace: manifest.namespace,
+          topK: querySize,
+          returnMetadata: 'all',
+          filter: { faceOrder: { $gte: start, $lt: end } },
+        }),
+      ),
+    )
+    for (const [i, result] of results.entries()) {
+      matches.push(...result.matches)
+      const { start, end } = ranges[i]
+      // A full page of likely matches may hide more; smaller ranges expose them.
+      if (
+        end - start > querySize &&
+        result.matches.length === querySize &&
+        result.matches.every(({ score }) => score >= manifest.threshold)
+      ) {
+        const middle = Math.floor((start + end) / 2)
+        pending.push({ start, end: middle }, { start: middle, end })
+      }
+    }
+  }
+  return photoMatches(matches, manifest.threshold)
 }

@@ -6,6 +6,7 @@ import {
   MAX_FACE_SEARCH_BODY_BYTES,
   parseFaceSearchRequest,
   photoMatches,
+  queryFaceMatches,
   readFaceSearchBody,
 } from './face-search'
 
@@ -91,5 +92,103 @@ test('bounds the actual request body even without content-length', async () => {
       new Request('https://example.test', { method: 'POST', body: '{' }),
     ),
     { error: 'invalid-json' },
+  )
+})
+
+test('retrieves more than 50 photos despite duplicate face hits and bounds concurrency', async () => {
+  const faces = Array.from({ length: 360 }, (_, i) => ({
+    id: String(i),
+    score: 0.99 - Math.floor(i / 3) * 0.001,
+    metadata: { filename: `photo-${Math.floor(i / 3)}.jpg`, faceOrder: i },
+  }))
+  let active = 0
+  let maximumActive = 0
+  let queries = 0
+  const index: Pick<VectorizeIndex, 'query'> = {
+    async query(_embedding, options) {
+      assert.equal(options?.namespace, manifest.namespace)
+      assert.equal(options?.topK, 50)
+      const range = options?.filter?.faceOrder
+      assert(
+        range && typeof range === 'object' && '$gte' in range && '$lt' in range,
+      )
+      assert.equal(typeof range.$gte, 'number')
+      assert.equal(typeof range.$lt, 'number')
+      const start = Number(range.$gte)
+      const end = Number(range.$lt)
+      active++
+      queries++
+      maximumActive = Math.max(maximumActive, active)
+      await new Promise((resolve) => setTimeout(resolve, 1))
+      active--
+      const matches = faces
+        .filter(
+          (face) =>
+            face.metadata.faceOrder >= start && face.metadata.faceOrder < end,
+        )
+        .slice(0, options.topK)
+      return { count: matches.length, matches }
+    },
+  }
+  const result = await queryFaceMatches(
+    index,
+    { ...manifest, faceCount: 360, searchMode: 'range-v1' },
+    Array(1024).fill(0.1),
+  )
+  assert.equal(result.length, 120)
+  assert.deepEqual(
+    result.map(({ filename }) => filename),
+    Array.from({ length: 120 }, (_, i) => `photo-${i}.jpg`),
+  )
+  assert(maximumActive <= 4)
+  assert(queries > 1 && queries <= 15)
+})
+
+test('stops subdividing when the returned scores fall below threshold', async () => {
+  let queries = 0
+  const result = await queryFaceMatches(
+    {
+      async query() {
+        queries++
+        const matches = Array.from({ length: 50 }, (_, i) => ({
+          id: String(i),
+          score: i === 0 ? 0.9 : 0.4,
+          metadata: { filename: `${i}.jpg` },
+        }))
+        return { count: 50, matches }
+      },
+    },
+    { ...manifest, faceCount: 2000, searchMode: 'range-v1' },
+    Array(1024).fill(0.1),
+  )
+  assert.equal(queries, 1)
+  assert.deepEqual(result, [{ filename: '0.jpg', score: 0.9 }])
+})
+
+test('keeps existing manifests searchable and fails instead of returning incomplete results', async () => {
+  const index: Pick<VectorizeIndex, 'query'> = {
+    async query(_embedding, options) {
+      assert.equal(options?.filter, undefined)
+      return {
+        count: 1,
+        matches: [{ id: 'one', score: 0.9, metadata: { filename: 'one.jpg' } }],
+      }
+    },
+  }
+  assert.deepEqual(
+    await queryFaceMatches(index, manifest, Array(1024).fill(0.1)),
+    [{ filename: 'one.jpg', score: 0.9 }],
+  )
+  await assert.rejects(
+    queryFaceMatches(
+      {
+        async query() {
+          throw new Error('Vectorize unavailable')
+        },
+      },
+      { ...manifest, searchMode: 'range-v1' },
+      Array(1024).fill(0.1),
+    ),
+    /Vectorize unavailable/,
   )
 })

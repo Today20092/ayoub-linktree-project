@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { createHash } from 'node:crypto'
 import test from 'node:test'
 
 import {
@@ -38,7 +39,20 @@ test('publishes every detected face without identity clusters', () => {
   })
 
   assert.equal(vectors.length, 2)
-  assert.deepEqual(vectors[0].metadata, { filename: 'one.jpg' })
+  assert.deepEqual(vectors[0].metadata, { filename: 'one.jpg', faceOrder: 0 })
+  assert.deepEqual(vectors[1].metadata, { filename: 'two.jpg', faceOrder: 1 })
+  assert.equal(manifest.searchMode, 'range-v1')
+  const legacyVersion = createHash('sha256')
+    .update(
+      'event:0.62:' +
+        JSON.stringify([
+          ['one-1', 'one.jpg'],
+          ['two-1', 'two.jpg'],
+        ]),
+    )
+    .digest('hex')
+    .slice(0, 12)
+  assert.notEqual(manifest.version, legacyVersion)
   assert.equal(manifest.faceCount, 2)
   assert.equal(manifest.photoCount, 2)
   assert.equal(JSON.stringify(manifest).includes('embedding'), false)
