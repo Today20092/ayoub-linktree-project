@@ -2,12 +2,13 @@
 import '../../../styles.css'
 
 import { Image } from 'astro:assets'
-import { ArrowRight, Heart, ImageUp } from 'lucide-react'
+import { ArrowRight, ChevronDown, Heart, ImageUp, Search } from 'lucide-react'
 import { env } from 'cloudflare:workers'
 
 import EventLightbox from '../../../components/EventLightbox'
 import EventComingSoon from '../../../components/EventComingSoon.astro'
 import FaceFinder from '../../../components/FaceFinder'
+import GalleryGridControls from '../../../components/GalleryGridControls.astro'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -169,7 +170,7 @@ const formatDate = (date: Date) =>
       </p>
       {
         (totalPhotoCount > 0 || gallerySettings?.uploads_enabled) && (
-          <div class="mt-6 flex flex-wrap items-center gap-3">
+          <div class="mt-3 flex flex-wrap items-center gap-3 empty:hidden sm:mt-6">
             {totalPhotoCount > 0 && (
               <EventLightbox
                 client:load
@@ -243,7 +244,7 @@ const formatDate = (date: Date) =>
     {
       images.length > 0 && (
         <figure
-          class="mx-auto mt-8 max-w-4xl overflow-hidden rounded-2xl"
+          class="gallery-cover mx-auto mt-4 max-w-4xl overflow-hidden rounded-xl sm:mt-8 sm:rounded-2xl"
           data-reveal="up"
         >
           {galleryHeroImage
@@ -260,7 +261,7 @@ const formatDate = (date: Date) =>
                     width={dimensions.width}
                     height={dimensions.height}
                     layout="constrained"
-                    widths={[720, 960, 1280]}
+                    widths={[360, 720, 960, 1280]}
                     sizes="(min-width: 1024px) 56rem, 100vw"
                     quality={85}
                     priority
@@ -285,13 +286,26 @@ const formatDate = (date: Date) =>
 
     {
       faceManifest && (
-        <FaceFinder
-          client:only="react"
-          eventSlug={eventSlug}
-          indexVersion={faceManifest.version}
-          model={faceManifest.model}
-          galleryId={galleryId}
-        />
+        <details class="gallery-search border-border group mx-auto mt-4 max-w-4xl border-y">
+          <summary class="focus-visible:ring-ring flex min-h-14 cursor-pointer list-none items-center gap-2 rounded-sm py-3 text-sm font-bold focus-visible:ring-2 focus-visible:outline-none">
+            <Search className="size-4" aria-hidden="true" />
+            Find your photos
+            <span class="text-muted-foreground ml-auto text-xs font-normal">
+              Use a selfie
+            </span>
+            <ChevronDown
+              className="size-4 transition-transform group-open:rotate-180"
+              aria-hidden="true"
+            />
+          </summary>
+          <FaceFinder
+            client:only="react"
+            eventSlug={eventSlug}
+            indexVersion={faceManifest.version}
+            model={faceManifest.model}
+            galleryId={galleryId}
+          />
+        </details>
       )
     }
 
@@ -308,14 +322,15 @@ const formatDate = (date: Date) =>
       ) : (
         <section
           id={galleryId}
-          class="mt-10"
+          class="mt-4"
+          data-gallery-browser
           aria-label={`${galleryTitle} photographs`}
         >
+          {totalPhotoCount > 0 && (
+            <GalleryGridControls count={totalPhotoCount} />
+          )}
           {images.length > 0 && (
-            <div
-              class="columns-1 gap-1 sm:columns-2 lg:columns-3"
-              data-gallery-grid
-            >
+            <div data-gallery-grid data-photo-grid>
               {images.map((image, index) => {
                 const dimensions = imageDimensions(
                   image.width,
@@ -347,8 +362,8 @@ const formatDate = (date: Date) =>
                         width={dimensions.width}
                         height={dimensions.height}
                         layout="full-width"
-                        widths={[480, 960]}
-                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        widths={[80, 160, 240, 480, 960]}
+                        sizes="(min-width: 768px) 20vw, 33vw"
                         quality={85}
                         loading="lazy"
                         decoding="async"
@@ -392,7 +407,7 @@ const formatDate = (date: Date) =>
                   event.
                 </p>
               </div>
-              <div class="columns-1 gap-1 sm:columns-2 lg:columns-3">
+              <div data-photo-grid>
                 {guestImages.map((image, index) => {
                   const dimensions = imageDimensions(
                     image.width,
@@ -417,8 +432,8 @@ const formatDate = (date: Date) =>
                           width={dimensions.width}
                           height={dimensions.height}
                           layout="full-width"
-                          widths={[480, 960]}
-                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                          widths={[80, 160, 240, 480, 960]}
+                          sizes="(min-width: 768px) 20vw, 33vw"
                           quality={85}
                           loading="lazy"
                           decoding="async"
@@ -459,3 +474,25 @@ const formatDate = (date: Date) =>
     </footer>
   </main>
 </BaseLayout>
+
+<style>
+  .gallery-cover :global(img) {
+    max-height: 8rem;
+    object-position: center 20%;
+  }
+  .gallery-search :global(summary::-webkit-details-marker) {
+    display: none;
+  }
+  .gallery-search :global(section) {
+    margin-top: 0;
+    border: 0;
+    padding-top: 0.5rem;
+    padding-bottom: 1.5rem;
+  }
+  @media (min-width: 640px) {
+    .gallery-cover :global(img) {
+      max-height: none;
+      object-position: center;
+    }
+  }
+</style>
