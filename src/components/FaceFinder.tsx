@@ -121,6 +121,8 @@ export default function FaceFinder({
       const grid = gallery?.querySelector<HTMLElement>('[data-gallery-grid]')
       if (!gallery || !grid) return
 
+      gallery.dispatchEvent(new Event('gallery:search-results'))
+
       const figures = [
         ...gallery.querySelectorAll<HTMLElement>('[data-gallery-filename]'),
       ]
@@ -165,6 +167,20 @@ export default function FaceFinder({
     consent.current = true
     input.click()
   }
+
+  React.useEffect(() => {
+    const gallery = document.getElementById(galleryId)
+    const resetSearch = () => {
+      searchAttempt.current += 1
+      clearSelection()
+      setStatus('idle')
+      setError(undefined)
+      resetGallery()
+    }
+    gallery?.addEventListener('gallery:reset-search', resetSearch)
+    return () =>
+      gallery?.removeEventListener('gallery:reset-search', resetSearch)
+  }, [galleryId, clearSelection, resetGallery])
 
   async function analyze(file?: File) {
     if (!file || !consent.current) return

@@ -28,6 +28,16 @@ The portfolio was migrated from a TypeScript array to content collections. Keep 
 
 ## Images and styles
 
+### Gallery browsing
+
+Public event galleries offer Grid/Masonry views and photo-size controls that scroll with the page. Layout and density are remembered per gallery in the current browser. Favorites are also stored in that browser; they are not synchronized between devices. **View favorites** filters the collection and viewer navigation, and **Show all photos** returns to the full collection. Starting a selfie search leaves the favorites view; opening favorites clears the selfie search.
+
+The photo viewer exposes **Save photo** directly. Favorites can be downloaded as a ZIP with progress and retry feedback; successful preparation closes the progress dialog and shows a short confirmation. Support remains an optional link rather than a tipping dialog.
+
+Uploaded-photo thumbnails use responsive WebP candidates through the existing `/_image/` endpoint. The shared gallery template still uses Astro's `Image` component; the surrounding `picture` source supplies distinct thumbnail sizes for dynamic R2 URLs. The viewer and downloads retain the original gallery image URL. Legacy remote images keep the established Astro optimization path.
+
+### Content assets
+
 Local content images belong in `src/assets/`, with portfolio media under `client-work/`. Content collection images use Astro's `image()` schema helper and the `Image` component. Imported logos and interface images also exist in `src/image/`.
 
 Use `public/` for files served unchanged, such as favicons, the web manifest, contact cards, redirects, and crawler files. Event photos uploaded through the dashboard or app belong in R2; see [gallery infrastructure](interactive-event-galleries.md).

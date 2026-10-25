@@ -7,7 +7,52 @@ import {
   type GalleryPhoto,
   type EventGallery,
 } from './gallery-data'
-import { galleryMediaKey, galleryMediaUrl } from './gallery-media'
+import {
+  galleryMediaKey,
+  galleryMediaUrl,
+  galleryImageUrl,
+  galleryThumbnailSrcset,
+} from './gallery-media'
+
+test('responsive gallery image URLs have distinct widths and preserve originals', () => {
+  const src = '/api/gallery-media/events/test/photos/photo.jpg/'
+  const candidates = galleryThumbnailSrcset(src, 2400, 1600)!.split(', ')
+  assert.equal(candidates.length, 5)
+  assert.equal(new Set(candidates.map((value) => value.split(' ')[0])).size, 5)
+  assert.equal(
+    new URL(
+      candidates[0].split(' ')[0],
+      'https://example.com',
+    ).searchParams.get('w'),
+    '80',
+  )
+  assert.equal(
+    galleryThumbnailSrcset('https://example.com/photo.jpg', 2400, 1600),
+    undefined,
+  )
+  const small = new URL(
+    galleryImageUrl(src, 160, 240, 75, 'cover')!,
+    'https://example.com',
+  )
+  assert.equal(small.pathname, '/_image/')
+  assert.equal(small.searchParams.get('href'), src)
+  assert.equal(small.searchParams.get('w'), '160')
+  assert.equal(small.searchParams.get('h'), '240')
+  assert.equal(small.searchParams.get('q'), '75')
+  assert.equal(small.searchParams.get('fit'), 'cover')
+  assert.notEqual(
+    galleryImageUrl(src, 160, 240),
+    galleryImageUrl(src, 480, 720),
+  )
+  assert.equal(
+    galleryImageUrl('https://example.com/private.jpg', 160),
+    undefined,
+  )
+  assert.equal(
+    galleryImageUrl('/api/gallery-media/pending/test/photo.jpg', 160),
+    undefined,
+  )
+})
 
 test('uploaded thumbnails transform R2 bytes without looking in static assets', async () => {
   let options: unknown
