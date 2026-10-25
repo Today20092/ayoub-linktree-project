@@ -437,6 +437,7 @@ export default function EventLightbox({
       }
     }
 
+    // shortcut: ZIPs use browser memory; prebuild archives when galleries outgrow device memory.
     const blob = await downloadZip(files()).blob()
     setDownloadProgress(100)
     saveBlob(blob, request.filename)
@@ -453,7 +454,7 @@ export default function EventLightbox({
     setDownloadStatus('preparing')
     setDownloadProgress(0)
     setDownloadError('')
-    setDownloadLabel(`Preparing ${request.images.length} selected photos`)
+    setDownloadLabel(`Preparing ${request.images.length} photos`)
     setOpen(false)
 
     try {
@@ -525,15 +526,23 @@ export default function EventLightbox({
           </Button>
         </>
       )}
-      {downloadAllUrl && (
+      {images.length > 0 && (
         <Button
           size="lg"
           onClick={() =>
-            startDownload({
-              kind: 'file',
-              url: downloadAllUrl,
-              filename: `${projectSlug}.zip`,
-            })
+            startDownload(
+              downloadAllUrl
+                ? {
+                    kind: 'file',
+                    url: downloadAllUrl,
+                    filename: `${projectSlug}.zip`,
+                  }
+                : {
+                    kind: 'selection',
+                    images,
+                    filename: `${projectSlug}.zip`,
+                  },
+            )
           }
         >
           <Download data-icon="inline-start" aria-hidden="true" />
@@ -715,6 +724,9 @@ export default function EventLightbox({
               />
               <p className="text-muted-foreground text-center text-sm">
                 {downloadProgress}% complete
+              </p>
+              <p className="text-muted-foreground text-center text-sm">
+                Keep this page open. Large galleries can take several minutes.
               </p>
             </>
           )}
