@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { galleryColumns, masonryRowSpan } from './gallery-grid'
+import {
+  galleryColumns,
+  masonryRowSpan,
+  parseGalleryPreferences,
+  nextGalleryPhoto,
+} from './gallery-grid'
 
 test('grid density keeps phone thumbnails tappable at every supported size', () => {
   assert.deepEqual(galleryColumns(288), [2, 3, 5])
@@ -11,6 +16,35 @@ test('grid density keeps phone thumbnails tappable at every supported size', () 
       assert.ok((width - (columns - 1) * 2) / columns >= 44)
     }
   }
+})
+
+test('gallery preferences accept supported settings and ignore invalid storage', () => {
+  assert.deepEqual(parseGalleryPreferences('{"view":"masonry","columns":7}'), {
+    view: 'masonry',
+    columns: 7,
+  })
+  for (const value of [
+    null,
+    '',
+    '{',
+    'null',
+    '[]',
+    '{}',
+    '{"view":"other","columns":3}',
+    '{"view":"grid","columns":"3"}',
+    '{"view":"grid","columns":99}',
+  ])
+    assert.equal(parseGalleryPreferences(value), undefined)
+})
+
+test('favorite navigation wraps and handles removing the current favorite', () => {
+  assert.equal(nextGalleryPhoto(1, 1, [1, 4, 8]), 4)
+  assert.equal(nextGalleryPhoto(8, 1, [1, 4, 8]), 1)
+  assert.equal(nextGalleryPhoto(1, -1, [1, 4, 8]), 8)
+  assert.equal(nextGalleryPhoto(4, -1, [1, 4, 8]), 1)
+  assert.equal(nextGalleryPhoto(4, 1, [1, 8]), 8)
+  assert.equal(nextGalleryPhoto(4, -1, [1, 8]), 1)
+  assert.equal(nextGalleryPhoto(4, 1, []), undefined)
 })
 
 test('masonry reserves natural photo heights with less than one grid step of rounding', () => {

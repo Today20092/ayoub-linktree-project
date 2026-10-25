@@ -2,6 +2,10 @@
 import '../../../styles.css'
 
 import { Image } from 'astro:assets'
+import {
+  galleryImageUrl,
+  galleryThumbnailSrcset,
+} from '../../../lib/gallery-media'
 import { ArrowRight, ChevronDown, Heart, ImageUp, Search } from 'lucide-react'
 import { env } from 'cloudflare:workers'
 
@@ -337,25 +341,46 @@ const formatDate = (date: Date) =>
                     aria-label={`Open photograph ${index + 1}: ${image.alt}`}
                     class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                   >
-                    <Image
-                      src={image.src}
-                      alt={image.alt}
-                      width={dimensions.width}
-                      height={dimensions.height}
-                      layout="full-width"
-                      widths={[80, 160, 240, 480, 960]}
-                      sizes="(min-width: 768px) 20vw, 33vw"
-                      quality={85}
-                      loading="lazy"
-                      decoding="async"
-                      class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
-                    />
+                    <picture>
+                      <source
+                        srcset={galleryThumbnailSrcset(
+                          image.src,
+                          dimensions.width,
+                          dimensions.height,
+                        )}
+                        sizes="(min-width: 768px) 20vw, 33vw"
+                        type="image/webp"
+                      />
+                      <Image
+                        src={
+                          galleryImageUrl(
+                            image.src,
+                            480,
+                            Math.round(
+                              (dimensions.height * 480) / dimensions.width,
+                            ),
+                            75,
+                          ) ?? image.src
+                        }
+                        alt={image.alt}
+                        width={dimensions.width}
+                        height={dimensions.height}
+                        layout="full-width"
+                        widths={[80, 160, 240, 480, 960]}
+                        sizes="(min-width: 768px) 20vw, 33vw"
+                        quality={85}
+                        loading="lazy"
+                        decoding="async"
+                        class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                      />
+                    </picture>
                   </a>
                   <Button
                     type="button"
                     variant="secondary"
                     size="icon"
                     data-gallery-favorite
+                    disabled
                     data-filename={image.filename}
                     data-selected="false"
                     aria-label={`Add photograph ${index + 1} to favorites`}
@@ -406,25 +431,46 @@ const formatDate = (date: Date) =>
                       aria-label={`Open guest photograph ${index + 1}: ${image.alt}`}
                       class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                     >
-                      <Image
-                        src={image.src}
-                        alt={image.alt}
-                        width={dimensions.width}
-                        height={dimensions.height}
-                        layout="full-width"
-                        widths={[80, 160, 240, 480, 960]}
-                        sizes="(min-width: 768px) 20vw, 33vw"
-                        quality={85}
-                        loading="lazy"
-                        decoding="async"
-                        class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
-                      />
+                      <picture>
+                        <source
+                          srcset={galleryThumbnailSrcset(
+                            image.src,
+                            dimensions.width,
+                            dimensions.height,
+                          )}
+                          sizes="(min-width: 768px) 20vw, 33vw"
+                          type="image/webp"
+                        />
+                        <Image
+                          src={
+                            galleryImageUrl(
+                              image.src,
+                              480,
+                              Math.round(
+                                (dimensions.height * 480) / dimensions.width,
+                              ),
+                              75,
+                            ) ?? image.src
+                          }
+                          alt={image.alt}
+                          width={dimensions.width}
+                          height={dimensions.height}
+                          layout="full-width"
+                          widths={[80, 160, 240, 480, 960]}
+                          sizes="(min-width: 768px) 20vw, 33vw"
+                          quality={85}
+                          loading="lazy"
+                          decoding="async"
+                          class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                        />
+                      </picture>
                     </a>
                     <Button
                       type="button"
                       variant="secondary"
                       size="icon"
                       data-gallery-favorite
+                      disabled
                       data-filename={image.filename}
                       data-selected="false"
                       aria-label={`Add guest photograph ${index + 1} to favorites`}

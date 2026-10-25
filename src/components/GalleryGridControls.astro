@@ -7,7 +7,7 @@ const { count } = Astro.props
 ---
 
 <div
-  class="gallery-toolbar border-border bg-background sticky top-14 z-30 mb-2 grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-b py-2 sm:flex sm:gap-4"
+  class="gallery-toolbar border-border bg-background mb-2 grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-b py-2 sm:flex sm:gap-4"
   data-gallery-controls
 >
   <div class="sm:mr-auto">
@@ -63,11 +63,30 @@ const { count } = Astro.props
       <Plus aria-hidden="true" />
     </Button>
   </div>
+  <div data-gallery-favorites-summary class="col-span-2 sm:col-auto">
+    <span
+      data-gallery-favorites-count
+      role="status"
+      class="mr-3 text-sm font-semibold empty:hidden"
+    ></span>
+    <Button
+      variant="outline"
+      className="min-h-11"
+      data-gallery-toggle-favorites
+      disabled
+    >
+      View favorites (0)
+    </Button>
+  </div>
   <span class="sr-only" role="status" data-gallery-size-status></span>
 </div>
 
 <script>
-  import { galleryColumns, masonryRowSpan } from '../lib/gallery-grid'
+  import {
+    galleryColumns,
+    masonryRowSpan,
+    parseGalleryPreferences,
+  } from '../lib/gallery-grid'
 
   document
     .querySelectorAll<HTMLElement>('[data-gallery-controls]')
@@ -85,6 +104,28 @@ const { count } = Astro.props
       )!
       let columns = window.innerWidth >= 768 ? 5 : 3
       let view: 'grid' | 'masonry' = 'grid'
+      const preferencesKey = `event-gallery:${gallery.id}:layout`
+      try {
+        const saved = parseGalleryPreferences(
+          localStorage.getItem(preferencesKey),
+        )
+        if (saved) {
+          columns = saved.columns
+          view = saved.view
+        }
+      } catch {
+        // Browsing still works when storage is unavailable.
+      }
+      const savePreferences = () => {
+        try {
+          localStorage.setItem(
+            preferencesKey,
+            JSON.stringify({ columns, view }),
+          )
+        } catch {
+          // Keep the current settings for this visit when storage is unavailable.
+        }
+      }
       let position: { element: HTMLElement; top: number } | undefined
       const restorePosition = () => {
         if (!position) return
@@ -121,6 +162,11 @@ const { count } = Astro.props
         const before = anchor?.getBoundingClientRect().top
         view = nextView
         gallery.dataset.galleryView = view
+        toolbar
+          .querySelectorAll<HTMLInputElement>('[name="gallery-view"]')
+          .forEach((input) => {
+            input.checked = input.value === view
+          })
         const levels = galleryColumns(gallery.clientWidth)
         columns = levels.filter((level) => level <= next).at(-1) ?? levels[0]
         gallery.style.setProperty('--gallery-columns', String(columns))
@@ -143,6 +189,8 @@ const { count } = Astro.props
                 ),
               )
             image.sizes = `${Math.ceil(tileWidth)}px`
+            const source = image.closest('picture')?.querySelector('source')
+            if (source) source.sizes = image.sizes
           })
         smaller.disabled = columns === levels.at(-1)
         larger.disabled = columns === levels[0]
@@ -157,13 +205,19 @@ const { count } = Astro.props
         const next = galleryColumns(gallery.clientWidth).find(
           (level) => level > columns,
         )
-        if (next) render(next, true)
+        if (next) {
+          render(next, true)
+          savePreferences()
+        }
       })
       larger.addEventListener('click', () => {
         const next = galleryColumns(gallery.clientWidth)
           .filter((level) => level < columns)
           .at(-1)
-        if (next) render(next, true)
+        if (next) {
+          render(next, true)
+          savePreferences()
+        }
       })
       toolbar
         .querySelectorAll<HTMLInputElement>('[name="gallery-view"]')
@@ -174,6 +228,7 @@ const { count } = Astro.props
               true,
               input.value === 'masonry' ? 'masonry' : 'grid',
             )
+            savePreferences()
           })
         })
       render(columns)
@@ -191,6 +246,10 @@ const { count } = Astro.props
 </script>
 
 <style is:global>
+  [data-gallery-favorites-only='true']
+    [data-gallery-filename]:not([data-favorite='true']) {
+    display: none;
+  }
   [data-gallery-browser] {
     --gallery-columns: 3;
     overflow-anchor: none;

@@ -212,7 +212,7 @@ const simpleIconBody = (name?: string) =>
             type="button"
             data-filter={filter}
             aria-pressed={filter === 'all'}
-            class="border-border hover:bg-muted aria-pressed:bg-foreground aria-pressed:text-background min-h-11 rounded-sm border px-3 text-sm font-semibold capitalize sm:px-4"
+            class="border-border hover:bg-muted focus-visible:ring-ring aria-pressed:bg-foreground aria-pressed:text-background min-h-11 rounded-sm border px-3 text-sm font-semibold capitalize focus-visible:ring-2 focus-visible:outline-none sm:px-4"
           >
             {filter}
           </button>

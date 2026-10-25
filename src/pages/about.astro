@@ -1,6 +1,8 @@
 ---
 import '../styles.css'
 
+import { Image } from 'astro:assets'
+import portrait from '../assets/ayoub-portrait.jpg'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { siteConfig } from '../lib/site-config'
 
@@ -28,18 +30,30 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
     class="mx-auto w-full max-w-3xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-20"
   >
     <header data-reveal="up">
-      <p class="text-primary text-sm font-bold tracking-wide uppercase">
-        About
-      </p>
-      <h1 class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
+      <h1 class="font-heading text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
         Ayoub Abedrabbo
       </h1>
-      <p class="text-muted-foreground mt-5 text-lg leading-8">
-        I'm Ayoub, a husband, father, and digital media producer based in Tampa.
-        I run AlphaBravoMedia, where I work on video, photography, and podcasts
-        for businesses, schools, and community organizations. I also share what
-        I learn through tutorials and personal reflections.
-      </p>
+      <div class="mt-6">
+        <div class="h-80 overflow-hidden rounded-sm sm:h-[28rem]">
+          <Image
+            src={portrait}
+            alt="Ayoub Abedrabbo smiling outdoors"
+            width={960}
+            height={1200}
+            widths={[480, 720, 960]}
+            sizes="(min-width: 768px) 704px, calc(100vw - 48px)"
+            layout="constrained"
+            priority
+            class="h-full w-full object-cover object-[center_25%]"
+          />
+        </div>
+        <p class="text-muted-foreground mt-6 text-lg leading-8">
+          I'm Ayoub, a husband, father, and digital media producer based in
+          Tampa. I run AlphaBravoMedia, where I work on video, photography, and
+          podcasts for businesses, schools, and community organizations. I also
+          share what I learn through tutorials and personal reflections.
+        </p>
+      </div>
     </header>
     <div class="mt-10 space-y-8 text-base leading-8" data-reveal="up">
       <p>
