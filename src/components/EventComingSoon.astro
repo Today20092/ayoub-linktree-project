@@ -33,32 +33,28 @@ const remoteFlyer =
   typeof flyer.src === 'string' && /^https?:\/\//.test(flyer.src)
 ---
 
-<section
-  class="mt-10 grid gap-8 lg:grid-cols-[minmax(18rem,0.72fr)_minmax(0,1.28fr)] lg:items-start"
->
-  {
-    remoteFlyer ? (
-      <Image
-        src={flyer.src}
-        alt={flyerAlt}
-        width={flyer.width}
-        height={flyer.height}
-        widths={[480, 720, 960]}
-        sizes="(min-width: 1024px) 36vw, 100vw"
-        quality={85}
-        class="bg-muted w-full rounded-2xl border object-cover shadow-sm"
-      />
-    ) : (
-      <Image
-        src={flyer as ImageMetadata}
-        alt={flyerAlt}
-        widths={[480, 720, 960]}
-        sizes="(min-width: 1024px) 36vw, 100vw"
-        quality={85}
-        class="bg-muted w-full rounded-2xl border object-cover shadow-sm"
-      />
-    )
-  }
+<section class="mt-10 grid gap-8 lg:grid-cols-[minmax(18rem,0.72fr)_minmax(0,1.28fr)] lg:items-start">
+  {remoteFlyer ? (
+    <Image
+      src={flyer.src}
+      alt={flyerAlt}
+      width={flyer.width}
+      height={flyer.height}
+      widths={[480, 720, 960]}
+      sizes="(min-width: 1024px) 36vw, 100vw"
+      quality={85}
+      class="bg-muted w-full rounded-2xl border object-cover shadow-sm"
+    />
+  ) : (
+    <Image
+      src={flyer as ImageMetadata}
+      alt={flyerAlt}
+      widths={[480, 720, 960]}
+      sizes="(min-width: 1024px) 36vw, 100vw"
+      quality={85}
+      class="bg-muted w-full rounded-2xl border object-cover shadow-sm"
+    />
+  )}
 
   <div class="flex flex-col gap-6">
     <div class="flex flex-wrap gap-2" aria-label="Event details">
@@ -66,22 +62,18 @@ const remoteFlyer =
         <CalendarDays aria-hidden="true" />
         {date}
       </Badge>
-      {
-        time && (
-          <Badge variant="outline">
-            <Clock aria-hidden="true" />
-            {time}
-          </Badge>
-        )
-      }
-      {
-        venue && (
-          <Badge variant="outline">
-            <MapPin aria-hidden="true" />
-            {venue}
-          </Badge>
-        )
-      }
+      {time && (
+        <Badge variant="outline">
+          <Clock aria-hidden="true" />
+          {time}
+        </Badge>
+      )}
+      {venue && (
+        <Badge variant="outline">
+          <MapPin aria-hidden="true" />
+          {venue}
+        </Badge>
+      )}
     </div>
 
     <Empty className="border-border bg-muted/30 min-h-64 border">

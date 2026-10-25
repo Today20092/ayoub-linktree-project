@@ -28,14 +28,18 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
   ogImage="/og-ayoub-digital-media.jpg"
 >
   <main id="main-content" class="mx-auto max-w-2xl px-5 py-12">
-    <a href="/admin/galleries/" class="text-primary">← Galleries</a>
+    <a href="/admin/galleries/" class="text-primary">
+      ← Galleries
+    </a>
     <h1 class="font-heading mt-6 text-4xl font-bold">Connect your phone</h1>
     <p class="text-muted-foreground mt-4">
       Create a key here, then paste it into Ayoub Gallery on your phone. Keys
       expire after 90 days and can be revoked below.
     </p>
     <form id="pair-form" class="bg-muted/40 mt-8 space-y-4 rounded-3xl p-6">
-      <label class="block" for="device-name">Device name</label>
+      <label class="block" for="device-name">
+        Device name
+      </label>
       <input
         id="device-name"
         name="name"
@@ -47,9 +51,8 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
       <label class="flex items-start gap-3">
         <input id="device-management" type="checkbox" class="mt-1 size-5" />
         <span>
-          Allow gallery management<span
-            class="text-muted-foreground block text-sm"
-          >
+          Allow gallery management
+          <span class="text-muted-foreground block text-sm">
             Edit every gallery, manage guest access, and approve or delete guest
             photos.
           </span>
@@ -64,7 +67,8 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     </form>
     <p id="message" role="status" class="mt-4"></p>
     <section id="pair-result" hidden class="bg-muted mt-6 rounded-3xl p-6">
-      <p>Website address</p><code>{Astro.url.origin}</code>
+      <p>Website address</p>
+      <code>{Astro.url.origin}</code>
       <label class="mt-4 block" for="pair-key">
         Pairing key · shown only once
       </label>
@@ -85,39 +89,31 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     </section>
     <h2 class="mt-10 text-2xl font-semibold">Connected devices</h2>
     <div class="mt-4 space-y-3">
-      {
-        devices.results.map((device) => (
-          <div class="bg-muted/40 flex items-center justify-between gap-4 rounded-2xl p-4">
-            <div>
-              <>
-                <p>{device.name}</p>
-                <p class="text-muted-foreground text-sm">
-                  {device.can_manage
-                    ? 'Uploads and management'
-                    : 'Uploads only'}
-                </p>
-                <p class="text-muted-foreground text-sm">
-                  Expires{' '}
-                  {new Date(device.expires_at * 1000).toLocaleDateString(
-                    'en-US',
-                  )}
-                </p>
-              </>
-            </div>
-            <button
-              data-revoke={device.id}
-              class="text-destructive rounded-full px-4 py-3"
-            >
-              Revoke
-            </button>
+      {devices.results.map((device) => (
+        <div class="bg-muted/40 flex items-center justify-between gap-4 rounded-2xl p-4">
+          <div>
+            <>
+              <p>{device.name}</p>
+              <p class="text-muted-foreground text-sm">
+                {device.can_manage ? 'Uploads and management' : 'Uploads only'}
+              </p>
+              <p class="text-muted-foreground text-sm">
+                Expires{' '}
+                {new Date(device.expires_at * 1000).toLocaleDateString('en-US')}
+              </p>
+            </>
           </div>
-        ))
-      }
-      {
-        devices.results.length === 0 && (
-          <p class="text-muted-foreground">No paired devices yet.</p>
-        )
-      }
+          <button
+            data-revoke={device.id}
+            class="text-destructive rounded-full px-4 py-3"
+          >
+            Revoke
+          </button>
+        </div>
+      ))}
+      {devices.results.length === 0 && (
+        <p class="text-muted-foreground">No paired devices yet.</p>
+      )}
     </div>
   </main>
 </BaseLayout>

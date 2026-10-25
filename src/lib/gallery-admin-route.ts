@@ -33,7 +33,7 @@ function eventGallery(eventSlug: string | undefined) {
   return Effect.gen(function* () {
     if (!eventSlug) return
     const [event, dynamicEvent] = yield* Effect.all([
-      Effect.promise(() => getEntry('portfolio', eventSlug)),
+      Effect.promise(async () => getEntry('portfolio', eventSlug)),
       database(() => getEventGallery(env.GALLERY_DB, eventSlug)),
     ])
     return event?.data.eventGallery || dynamicEvent

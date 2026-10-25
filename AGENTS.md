@@ -9,6 +9,8 @@ This repository contains Ayoub Abedrabbo's Astro website and link hub, MDX portf
 - For repository orientation, read `README.md` for the project map and production/preview boundaries.
 - For homepage links, portfolio content, or shared page styles, read `docs/website-content.md`. Use `src/content.config.ts` and the MDX template for current portfolio fields.
 - For gallery storage, guest uploads, moderation, or Access configuration, read `docs/interactive-event-galleries.md`.
+- For gallery viewing/submission links, unlisted access, or sharing migrations and rollback, read `docs/gallery-sharing-links.md`. This guide supersedes historical guest-password instructions in the gallery guides.
+- For gallery backend workflows, request lifecycles, publication failures, or retries, read `docs/gallery-effect-workflows.md`.
 - For native gallery controls or companion API authorization, read `docs/native-gallery-management.md`.
 - For Android pairing, upload behavior, builds, or signing, read `android/README.md`. Check `android/RELEASE_NOTES.md` and the relevant release tag before claiming a feature is available in an installed APK.
 - For watched-folder discovery, session recovery, or background transfer changes, read `docs/android-watched-folder-design.md` and `docs/adr/0001-android-folder-discovery-and-transfer.md`.
@@ -18,6 +20,7 @@ Keep this file focused on working rules and task-specific pointers. Put operator
 
 ## Development Commands
 
+- For dependency installation and toolchain versions, follow [README development setup](README.md#development); `package.json` specifies Node and pnpm requirements.
 - Use `npx astro add <integration>` for official Astro integrations; don't edit `package.json` manually.
 - Check latest Astro docs before newer or changed APIs.
 - Run `npm run dev` normally. Astro 7+ automatically backgrounds the server for coding agents; use `npx astro dev status` to reuse its URL/PID and `npx astro dev logs` for logs.
@@ -38,43 +41,36 @@ Keep this file focused on working rules and task-specific pointers. Put operator
 - Do not turn a gallery into a portfolio piece, or a portfolio piece into a gallery, unless the user explicitly wants both. If the destination is unclear, confirm it before changing content.
 - Work that is neither belongs in its existing route or feature area; inspect the current pattern before adding a new content type.
 
-## Code Formatting
+## Verification and formatting
 
-Project uses Prettier:
+- Website code or content: run `npm run verify` before review. It checks formatting, barber tracker, face and gallery tests, Astro types, and the build; it does not run Android checks or the gallery-prune tests.
+- During development, run the relevant suite: `npm run test:galleries`, `npm run test:faces`, `npm run test:barber-tracker`, or `npm run test:gallery-prune`. For one TypeScript test file, use `pnpm exec tsx --test src/lib/gallery-sharing.test.ts`, substituting the affected file.
+- Android changes: follow [Android build checks](android/README.md#github-builds-and-signing) and `.github/workflows/android.yml` for unit tests, lint, APK builds, and emulator tests. Website verification does not cover Android. Report physical-device checks separately from emulator results.
+- Documentation-only changes: format the changed Markdown and verify referenced paths and heading anchors. A website build is not required solely for documentation edits.
+- Format explicit changed paths with Prettier; use `--check` on the same paths to confirm. For example:
 
 ```bash
-# Format code
-npx prettier --write .
+pnpm exec prettier --write AGENTS.md
+pnpm exec prettier --check AGENTS.md
 ```
+
+Report checks run and any failures or checks left unrun; a focused suite does not replace `verify` for website changes.
 
 ## Agent skills
 
-### Issue tracker
-
-Issues are tracked in GitHub Issues; external PRs are not a triage surface. See `docs/agents/issue-tracker.md`.
-
-### Triage labels
-
-Use the default five-label vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
-
-### Domain docs
-
-This is a single-context repo using root `CONTEXT.md` and `docs/adr/`. See `docs/agents/domain.md`.
+- Issue work: read `docs/agents/issue-tracker.md` for GitHub issue operations and the external-PR triage boundary.
+- Triage: use the label mapping in `docs/agents/triage-labels.md`.
+- Code exploration and domain decisions: read `docs/agents/domain.md`, root `CONTEXT.md`, and relevant ADRs in `docs/adr/`.
 
 ## Deployment Workflow
 
 - GitHub is the source of truth. Local uncommitted code never goes to production.
 - `master` is the production branch. Feature work stays on a feature branch until review and merge.
 - Never commit, push, merge, or deploy unless the user explicitly asks.
-- Site runs as Cloudflare Worker through Astro Cloudflare adapter.
-- Production Worker: `ayoub-linktree-project`. Production URL: `https://ayoubabed.xyz`.
 - Production deploy only from clean `master`: `npm run deploy:prod`.
 - Default deploy is preview-safe: `npm run deploy` (alias of `npm run deploy:preview`).
-- Preview Worker: `ayoub-linktree-project-preview`.
-- Preview URL: `https://ayoub-linktree-project-preview.ayoub-abedrabbo.workers.dev`.
-- Preview D1: `ayoub-gallery-data-preview`.
-- Preview R2: `alphabravomedia-galleries-preview` and `alphabravomedia-gallery-uploads-preview`.
-- Admin/upload testing must use preview only after D1/R2 names above verified in `scripts/deploy-preview-worker.mjs`.
+- Environment URLs and usage are in [README production and preview](README.md#production-and-preview). Deployment scripts are authoritative for Worker and binding selection: `scripts/deploy-preview-worker.mjs`, `scripts/deploy-production-worker.mjs`, and `scripts/gallery-production-config.mjs`.
+- Admin/upload testing must use preview only after verifying the D1 database and both R2 buckets in `scripts/deploy-preview-worker.mjs` are the isolated preview resources. Check outstanding migrations for that database before testing.
 - `npm run deploy:branch-preview` uploads Worker version with preview alias `dev`. Use for branch smoke test only, not admin/upload testing unless bindings checked isolated.
 - Do not run `wrangler deploy` directly unless the user explicitly asks for a direct production deployment.
 - When explicitly authorized, follow this flow:

@@ -95,7 +95,7 @@ export type GalleryAdminCommandDependencies = {
       enabled: boolean,
       token: string,
     ): Promise<unknown>
-    getEvent(eventSlug: string): Promise<EventGallery | undefined>
+    getEvent(eventSlug: string): Promise<EventGallery | null | undefined>
     getSettings(eventSlug: string): Promise<GallerySettings | null | undefined>
     saveSettings(
       eventSlug: string,

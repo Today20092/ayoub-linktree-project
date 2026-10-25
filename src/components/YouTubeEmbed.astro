@@ -30,37 +30,35 @@ const localPoster = typeof poster === 'string' ? undefined : poster
   data-youtube-id={youtubeId}
   data-youtube-title={title}
 >
-  {
-    remotePoster ? (
-      <Image
-        src={remotePoster}
-        alt={posterAlt}
-        width={1280}
-        height={720}
-        layout="full-width"
-        widths={[640, 960, 1280]}
-        sizes="(min-width: 1280px) 1216px, 100vw"
-        quality={80}
-        priority
-        class="absolute inset-0 size-full object-cover"
-        data-youtube-poster
-      />
-    ) : localPoster ? (
-      <Image
-        src={localPoster}
-        alt={posterAlt}
-        width={1280}
-        height={720}
-        layout="full-width"
-        widths={[640, 960, 1280]}
-        sizes="(min-width: 1280px) 1216px, 100vw"
-        quality={80}
-        priority
-        class="absolute inset-0 size-full object-cover"
-        data-youtube-poster
-      />
-    ) : null
-  }
+  {remotePoster ? (
+    <Image
+      src={remotePoster}
+      alt={posterAlt}
+      width={1280}
+      height={720}
+      layout="full-width"
+      widths={[640, 960, 1280]}
+      sizes="(min-width: 1280px) 1216px, 100vw"
+      quality={80}
+      priority
+      class="absolute inset-0 size-full object-cover"
+      data-youtube-poster
+    />
+  ) : localPoster ? (
+    <Image
+      src={localPoster}
+      alt={posterAlt}
+      width={1280}
+      height={720}
+      layout="full-width"
+      widths={[640, 960, 1280]}
+      sizes="(min-width: 1280px) 1216px, 100vw"
+      quality={80}
+      priority
+      class="absolute inset-0 size-full object-cover"
+      data-youtube-poster
+    />
+  ) : null}
   <div
     class="absolute inset-0 flex items-center justify-center"
     data-youtube-player
@@ -71,9 +69,7 @@ const localPoster = typeof poster === 'string' ? undefined : poster
       class="absolute inset-0 flex cursor-pointer items-center justify-center focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-white"
       data-youtube-play
     >
-      <span
-        class="rounded-full bg-black/80 px-6 py-4 text-lg font-bold text-white"
-      >
+      <span class="rounded-full bg-black/80 px-6 py-4 text-lg font-bold text-white">
         ▶ Play
       </span>
     </button>

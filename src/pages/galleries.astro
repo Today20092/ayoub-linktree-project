@@ -71,9 +71,7 @@ const ogImageHeight =
     class="mx-auto w-full max-w-screen-2xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-16"
   >
     <header class="max-w-2xl" data-reveal="fade">
-      <h1
-        class="font-heading text-4xl leading-none font-extrabold tracking-tight sm:text-5xl"
-      >
+      <h1 class="font-heading text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
         Event galleries
       </h1>
       <p class="text-muted-foreground mt-5 max-w-xl text-lg leading-8">
@@ -82,100 +80,96 @@ const ogImageHeight =
       </p>
     </header>
 
-    {
-      sortedGalleries.length === 0 ? (
-        <div class="mt-16" data-reveal="up">
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Images aria-hidden="true" />
-              </EmptyMedia>
-              <EmptyTitle>No galleries yet</EmptyTitle>
-              <EmptyDescription>
-                Event galleries will appear here as soon as one is published.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        </div>
-      ) : (
-        <section
-          class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 xl:grid-cols-3"
-          aria-label="Event galleries"
-          data-reveal="fade"
-        >
-          {sortedGalleries.map((gallery, index) => (
-            <article
-              data-reveal="up"
-              style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}
+    {sortedGalleries.length === 0 ? (
+      <div class="mt-16" data-reveal="up">
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Images aria-hidden="true" />
+            </EmptyMedia>
+            <EmptyTitle>No galleries yet</EmptyTitle>
+            <EmptyDescription>
+              Event galleries will appear here as soon as one is published.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      </div>
+    ) : (
+      <section
+        class="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 xl:grid-cols-3"
+        aria-label="Event galleries"
+        data-reveal="fade"
+      >
+        {sortedGalleries.map((gallery, index) => (
+          <article
+            data-reveal="up"
+            style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}
+          >
+            <a
+              href={`/galleries/${gallery.id}/`}
+              class="group focus-visible:ring-ring block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none"
             >
-              <a
-                href={`/galleries/${gallery.id}/`}
-                class="group focus-visible:ring-ring block rounded-xl focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none"
-              >
-                <div class="bg-muted relative aspect-[4/3] overflow-hidden rounded-xl">
-                  {!gallery.cover ? (
-                    <div class="text-muted-foreground flex size-full items-center justify-center">
-                      <Images className="size-10" aria-hidden="true" />
-                    </div>
-                  ) : gallery.isRemote ? (
-                    <Image
-                      src={gallery.cover as string}
-                      alt={gallery.coverAlt}
-                      width={gallery.coverWidth}
-                      height={gallery.coverHeight}
-                      layout="constrained"
-                      widths={[480, 720, 960]}
-                      sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
-                      quality={80}
-                      priority={index === 0}
-                      class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                    />
-                  ) : (
-                    <Image
-                      src={gallery.cover as ImageMetadata}
-                      alt={gallery.coverAlt}
-                      layout="constrained"
-                      widths={[480, 720, 960]}
-                      sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
-                      quality={80}
-                      priority={index === 0}
-                      class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                    />
+              <div class="bg-muted relative aspect-[4/3] overflow-hidden rounded-xl">
+                {!gallery.cover ? (
+                  <div class="text-muted-foreground flex size-full items-center justify-center">
+                    <Images className="size-10" aria-hidden="true" />
+                  </div>
+                ) : gallery.isRemote ? (
+                  <Image
+                    src={gallery.cover as string}
+                    alt={gallery.coverAlt}
+                    width={gallery.coverWidth}
+                    height={gallery.coverHeight}
+                    layout="constrained"
+                    widths={[480, 720, 960]}
+                    sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
+                    quality={80}
+                    priority={index === 0}
+                    class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                  />
+                ) : (
+                  <Image
+                    src={gallery.cover as ImageMetadata}
+                    alt={gallery.coverAlt}
+                    layout="constrained"
+                    widths={[480, 720, 960]}
+                    sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
+                    quality={80}
+                    priority={index === 0}
+                    class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                  />
+                )}
+                {gallery.eventDate && (
+                  <span class="bg-background/85 text-foreground ring-foreground/10 absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-sm backdrop-blur sm:top-4 sm:right-4">
+                    <Calendar className="size-3" aria-hidden="true" />
+                    {formatDate(gallery.eventDate)}
+                  </span>
+                )}
+              </div>
+              <div class="mt-4 px-1">
+                <h2 class="font-heading text-foreground text-lg leading-snug font-extrabold">
+                  {gallery.title}
+                </h2>
+                <div class="text-muted-foreground mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
+                  <Badge variant="secondary">{gallery.category}</Badge>
+                  {gallery.photoCount === 0 && (
+                    <Badge variant="outline">Coming soon</Badge>
                   )}
-                  {gallery.eventDate && (
-                    <span class="bg-background/85 text-foreground ring-foreground/10 absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold shadow-sm backdrop-blur sm:top-4 sm:right-4">
-                      <Calendar className="size-3" aria-hidden="true" />
-                      {formatDate(gallery.eventDate)}
+                  {gallery.photoCount > 0 && (
+                    <span class="font-semibold">
+                      {gallery.photoCount}{' '}
+                      {gallery.photoCount === 1 ? 'photo' : 'photos'}
                     </span>
                   )}
                 </div>
-                <div class="mt-4 px-1">
-                  <h2 class="font-heading text-foreground text-lg leading-snug font-extrabold">
-                    {gallery.title}
-                  </h2>
-                  <div class="text-muted-foreground mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
-                    <Badge variant="secondary">{gallery.category}</Badge>
-                    {gallery.photoCount === 0 && (
-                      <Badge variant="outline">Coming soon</Badge>
-                    )}
-                    {gallery.photoCount > 0 && (
-                      <span class="font-semibold">
-                        {gallery.photoCount}{' '}
-                        {gallery.photoCount === 1 ? 'photo' : 'photos'}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </a>
-            </article>
-          ))}
-        </section>
-      )
-    }
+              </div>
+            </a>
+          </article>
+        ))}
+      </section>
+    )}
   </main>
-  <footer
-    class="mx-auto flex w-full max-w-screen-2xl justify-center px-4 pt-12 pb-6"
-  >
+  <footer class="mx-auto flex w-full max-w-screen-2xl justify-center px-4 pt-12 pb-6">
     <a
       href="/admin/galleries/"
       class="text-muted-foreground hover:text-foreground focus-visible:ring-ring rounded-sm text-[0.6875rem] underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"

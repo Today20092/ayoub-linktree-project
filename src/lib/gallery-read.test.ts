@@ -44,7 +44,7 @@ const dynamicEvent: EventGallery = {
 function reader(
   options: {
     staticValue?: typeof staticEvent | undefined
-    dynamicValue?: typeof dynamicEvent | undefined
+    dynamicValue?: typeof dynamicEvent | null | undefined
     invite?: {
       token: string
       event_slug: string
@@ -100,6 +100,21 @@ test('static-only event galleries remain publicly readable', async () => {
   assert.equal(gallery?.visibility, 'published')
 })
 
+test('missing database rows keep static galleries readable and unknown galleries absent', async () => {
+  const staticOnly = reader({ dynamicValue: null })
+  assert.equal(
+    (await staticOnly.getPublicDetail('event-one'))?.title,
+    'Static title',
+  )
+  assert.deepEqual(
+    (await staticOnly.listPublic()).map((gallery) => gallery.id),
+    ['event-one'],
+  )
+  const missing = reader({ staticValue: undefined, dynamicValue: null })
+  assert.equal(await missing.getPublicDetail('missing'), undefined)
+  assert.deepEqual(await missing.listPublic(), [])
+})
+
 test('D1-only galleries expose a public detail model for every route', async () => {
   const gallery = await reader({ staticValue: undefined }).getPublicDetail(
     'event-one',
@@ -115,6 +130,7 @@ test('hidden galleries are absent from public reads but available to admin reads
   const galleryReader = reader({ dynamicValue: hidden })
 
   assert.equal(await galleryReader.getPublicDetail('event-one'), undefined)
+  assert.deepEqual(await galleryReader.listPublic(), [])
   assert.equal(
     (await galleryReader.getAdminDetail('event-one'))?.visibility,
     'hidden',

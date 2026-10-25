@@ -98,17 +98,11 @@ socialLinks:
   #   darkColor: 'oklch(0.6 0.13 230)'
   #   darkColor2: 'oklch(0.72 0.12 215)'
   #   darkColor3: 'oklch(0.23 0.07 225)'
-  - id: patreon
-    url: https://www.patreon.com/c/AyoubAbedrabbo
-    icon: simple-icons:patreon
-    label: Support me on Patreon
-    color: 'oklch(0.26 0.012 255)'
-    color2: 'oklch(0.46 0.025 255)'
-    color3: 'oklch(0.14 0.014 255)'
   - id: keet
     url: https://keet.io/download/
     icon: ''
-    label: 'Keet: @ayoubabedrabbo1'
+    label: Download Keet
+    description: 'My handle: @ayoubabedrabbo1'
     color: 'oklch(0.38 0.08 260)'
     color2: 'oklch(0.62 0.12 255)'
     color3: 'oklch(0.22 0.05 260)'
@@ -200,6 +194,14 @@ actionLinks:
     url: https://payments.ayoubabed.xyz/
     icon: lucide:credit-card
     group: support
+  - id: patreon
+    url: https://www.patreon.com/c/AyoubAbedrabbo
+    icon: simple-icons:patreon
+    label: Support me on Patreon
+    group: support
+    color: 'oklch(0.26 0.012 255)'
+    color2: 'oklch(0.46 0.025 255)'
+    color3: 'oklch(0.14 0.014 255)'
   - id: kofi
     label: Ko-fi
     url: https://ko-fi.com/ayoubab1/10
@@ -250,7 +252,7 @@ youtubeChannels:
     channelId: UCVAZXZ90b8aw3i1MQngo_WQ
     videosUrl: https://youtube.com/@alphabravomedia
     name: AlphaBravoMedia
-    description: Videography, editing, DaVinci Resolve, Lumix cameras, exposure, and practical media production tutorials.
+    description: Video production, editing, and camera tutorials.
     branding:
       logoSrc: ABM.webp
       accentColor: '#8f3f37'
@@ -267,7 +269,7 @@ youtubeChannels:
     channelId: UCQ5YfTwU5n_khZx-WJEkZKQ
     videosUrl: https://www.youtube.com/channel/UCQ5YfTwU5n_khZx-WJEkZKQ/videos
     name: Ayoub Abedrabbo
-    description: Personal educational videos, live Quran readings, reflections, books, and useful things I am learning.
+    description: Personal learning, reflections, and Quran readings.
     branding:
       logoSrc: AyoubBayaan.jpg
       accentColor: '#765247'
@@ -284,7 +286,7 @@ youtubeChannels:
     channelId: UCw7ZJOSz1GuYbRGKBu2tFfw
     videosUrl: https://www.youtube.com/@islamicTampaTV
     name: Islamic Tampa TV
-    description: Local Tampa Islamic community coverage, including events, gatherings, announcements, and community news.
+    description: Tampa's Islamic community events and news.
     branding:
       logoSrc: 'IslamicTampaTV Logo.png'
       accentColor: '#776a32'

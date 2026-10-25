@@ -269,6 +269,8 @@ export default function FaceFinder({
 
   const busy = ['loading-model', 'analyzing', 'searching'].includes(status)
   const statusMessage = {
+    idle: undefined,
+    'no-match': undefined,
     'loading-model': 'Preparing face recognition',
     analyzing: 'Analyzing your photo',
     searching: 'Searching the gallery',

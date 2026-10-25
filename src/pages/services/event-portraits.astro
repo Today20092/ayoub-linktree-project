@@ -145,9 +145,7 @@ const packages = [
         photographer, professional camera and lighting, direct photo delivery,
         and an event gallery for guests and the organizer.
       </p>
-      <div
-        class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-12"
-      >
+      <div class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-12">
         <div>
           <table class="w-full text-left">
             <caption class="sr-only">
@@ -156,32 +154,34 @@ const packages = [
             </caption>
             <thead class="text-muted-foreground text-xs">
               <tr>
-                <th scope="col" class="pb-4 font-medium">Coverage</th>
-                <th scope="col" class="pb-4 font-medium">Portrait sessions</th>
+                <th scope="col" class="pb-4 font-medium">
+                  Coverage
+                </th>
+                <th scope="col" class="pb-4 font-medium">
+                  Portrait sessions
+                </th>
                 <th scope="col" class="pb-4 text-right font-medium">
                   Starting at
                 </th>
               </tr>
             </thead>
             <tbody>
-              {
-                packages.map((option) => (
-                  <tr class="odd:bg-muted/50">
-                    <th
-                      scope="row"
-                      class="rounded-l-lg px-3 py-5 text-sm font-semibold sm:text-base"
-                    >
-                      {option.hours}
-                    </th>
-                    <td class="text-muted-foreground px-2 py-5 text-sm">
-                      {option.sessions}
-                    </td>
-                    <td class="rounded-r-lg px-3 py-5 text-right text-xl font-bold tracking-tight tabular-nums sm:text-2xl">
-                      {option.price}
-                    </td>
-                  </tr>
-                ))
-              }
+              {packages.map((option) => (
+                <tr class="odd:bg-muted/50">
+                  <th
+                    scope="row"
+                    class="rounded-l-lg px-3 py-5 text-sm font-semibold sm:text-base"
+                  >
+                    {option.hours}
+                  </th>
+                  <td class="text-muted-foreground px-2 py-5 text-sm">
+                    {option.sessions}
+                  </td>
+                  <td class="rounded-r-lg px-3 py-5 text-right text-xl font-bold tracking-tight tabular-nums sm:text-2xl">
+                    {option.price}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
           <p class="text-muted-foreground mt-4 text-sm leading-6">

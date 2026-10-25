@@ -2,7 +2,7 @@ import { Effect } from 'effect'
 import type { APIRoute } from 'astro'
 import { env } from 'cloudflare:workers'
 import { galleryAdminAuthorized } from '@/lib/gallery-admin'
-import { createDevice } from '@/lib/gallery-companion'
+import { createDevice, parseDeviceCommand } from '@/lib/gallery-companion'
 import {
   database,
   galleryFailure,
@@ -32,13 +32,16 @@ export const POST: APIRoute = ({ request }) =>
         return yield* Effect.fail(galleryFailure(403, 'Invalid origin.'))
       if (Number(request.headers.get('content-length')) > 1024)
         return yield* Effect.fail(galleryFailure(413, 'Request too large.'))
-      const data: { name?: string; revoke?: string; canManage?: boolean } =
-        yield* validation(() => request.json(), 'Invalid request.')
+      const data = yield* validation(
+        async () => parseDeviceCommand(await request.json()),
+        'Invalid request.',
+      )
       if (typeof data?.revoke === 'string') {
+        const id = data.revoke
         yield* Effect.uninterruptible(
           database(() =>
             env.GALLERY_DB.prepare('DELETE FROM gallery_devices WHERE id = ?')
-              .bind(data.revoke!)
+              .bind(id)
               .run(),
           ),
         )

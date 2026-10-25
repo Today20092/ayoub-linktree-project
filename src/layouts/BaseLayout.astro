@@ -97,7 +97,9 @@ if (Astro.csp) {
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     {sitemapUrl && <link rel="sitemap" href={sitemapUrl} />}
-    {preconnectHints.map((href) => <link rel="preconnect" href={href} />)}
+    {preconnectHints.map((href) => (
+      <link rel="preconnect" href={href} />
+    ))}
     <link
       rel="stylesheet"
       href="https://api.fontshare.com/v2/css?f[]=plus-jakarta-sans@1,2&f[]=zodiak@1,2&display=swap"
@@ -136,21 +138,16 @@ if (Astro.csp) {
     <link rel="alternate" type="text/markdown" href="/index.md" />
 
     <script is:inline set:html={themeScript} />
-
-    {
-      structuredData && (
-        <script
-          is:inline
-          type="application/ld+json"
-          set:html={JSON.stringify(structuredData)}
-        />
-      )
-    }
+    {structuredData && (
+      <script
+        is:inline
+        type="application/ld+json"
+        set:html={JSON.stringify(structuredData)}
+      />
+    )}
     {!disableAnalytics && <CloudflareWebAnalytics />}
   </head>
-  <body
-    class="bg-background text-foreground flex min-h-[100dvh] flex-col subpixel-antialiased"
-  >
+  <body class="bg-background text-foreground flex min-h-[100dvh] flex-col subpixel-antialiased">
     <a
       href="#main-content"
       class="bg-background text-foreground focus-visible:ring-ring fixed top-3 left-3 z-50 -translate-y-20 rounded-sm px-4 py-2 font-bold shadow-md focus:translate-y-0 focus-visible:ring-2 focus-visible:outline-none"
@@ -159,27 +156,25 @@ if (Astro.csp) {
     </a>
     {!minimal && <Header activeNav={activeNav} />}
     <slot />
-    {
-      !minimal && (
-        <footer class="text-muted-foreground mx-auto mt-auto flex w-full max-w-screen-2xl shrink-0 flex-wrap justify-center gap-4 px-4 py-8 text-xs sm:px-6 lg:px-8">
-          <a class="underline underline-offset-4" href="/about/">
-            About
-          </a>
-          <a class="underline underline-offset-4" href="/contact/">
-            Contact
-          </a>
-          <a
-            class="underline underline-offset-4"
-            href="/services/event-portraits/"
-          >
-            Event photography
-          </a>
-          <a class="underline underline-offset-4" href="/privacy/">
-            Privacy
-          </a>
-        </footer>
-      )
-    }
+    {!minimal && (
+      <footer class="text-muted-foreground mx-auto mt-auto flex w-full max-w-screen-2xl shrink-0 flex-wrap justify-center gap-4 px-4 py-8 text-xs sm:px-6 lg:px-8">
+        <a class="underline underline-offset-4" href="/about/">
+          About
+        </a>
+        <a class="underline underline-offset-4" href="/contact/">
+          Contact
+        </a>
+        <a
+          class="underline underline-offset-4"
+          href="/services/event-portraits/"
+        >
+          Event photography
+        </a>
+        <a class="underline underline-offset-4" href="/privacy/">
+          Privacy
+        </a>
+      </footer>
+    )}
     <script>
       const revealItems = Array.from(
         document.querySelectorAll<HTMLElement>('[data-reveal]'),

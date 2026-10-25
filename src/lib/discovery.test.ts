@@ -4,8 +4,12 @@ import test from 'node:test'
 import { cacheControlForPage, escapeXml } from './public-delivery'
 
 test('allowlist caches only public page paths', () => {
-  assert.match(cacheControlForPage('/'), /public/)
-  assert.match(cacheControlForPage('/portfolio/portraits/'), /s-maxage=300/)
+  const homepage = cacheControlForPage('/')
+  const portfolio = cacheControlForPage('/portfolio/portraits/')
+  assert.ok(homepage)
+  assert.ok(portfolio)
+  assert.match(homepage, /public/)
+  assert.match(portfolio, /s-maxage=300/)
   assert.equal(cacheControlForPage('/galleries/private-event/'), undefined)
   assert.equal(cacheControlForPage('/admin/galleries/'), undefined)
   assert.equal(cacheControlForPage('/api/faces/search'), undefined)
