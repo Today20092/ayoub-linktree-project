@@ -21,22 +21,20 @@ const { count } = Astro.props
     class="border-border flex rounded-lg border p-0.5"
     aria-label="Gallery view"
   >
-    {
-      ['Grid', 'Masonry'].map((label) => (
-        <label class="relative cursor-pointer">
-          <input
-            class="peer sr-only"
-            type="radio"
-            name="gallery-view"
-            value={label.toLowerCase()}
-            checked={label === 'Grid'}
-          />
-          <span class="peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:ring-ring inline-flex min-h-11 items-center rounded-md px-3 text-xs font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
-            {label}
-          </span>
-        </label>
-      ))
-    }
+    {['Grid', 'Masonry'].map((label) => (
+      <label class="relative cursor-pointer">
+        <input
+          class="peer sr-only"
+          type="radio"
+          name="gallery-view"
+          value={label.toLowerCase()}
+          checked={label === 'Grid'}
+        />
+        <span class="peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:ring-ring inline-flex min-h-11 items-center rounded-md px-3 text-xs font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
+          {label}
+        </span>
+      </label>
+    ))}
   </fieldset>
   <div
     class="col-span-2 flex items-center gap-1"

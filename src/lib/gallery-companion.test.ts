@@ -10,9 +10,41 @@ import {
   companionAuthorized,
   contentHash,
   createDevice,
+  parseDeviceCommand,
   knownCompanionHashes,
   receiveCompanionPhoto,
 } from './gallery-companion'
+
+test('device commands validate unknown JSON and require explicit management permission', () => {
+  for (const value of [
+    null,
+    false,
+    42,
+    'Phone',
+    [],
+    {},
+    { name: 42 },
+    { name: '  ' },
+    { revoke: 42 },
+  ]) {
+    assert.equal(parseDeviceCommand(value), undefined)
+  }
+  assert.deepEqual(parseDeviceCommand({ name: ' Phone ' }), {
+    name: 'Phone',
+    canManage: false,
+  })
+  assert.deepEqual(parseDeviceCommand({ name: 'Phone', canManage: true }), {
+    name: 'Phone',
+    canManage: true,
+  })
+  assert.deepEqual(parseDeviceCommand({ name: 'Phone', canManage: 'true' }), {
+    name: 'Phone',
+    canManage: false,
+  })
+  assert.deepEqual(parseDeviceCommand({ revoke: 'device-id', name: 'Phone' }), {
+    revoke: 'device-id',
+  })
+})
 
 function fixture() {
   const sqlite = new DatabaseSync(':memory:')

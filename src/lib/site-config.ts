@@ -29,6 +29,7 @@ export type SocialLink = {
   icon: string
   iconUrl?: string
   label: string
+  description?: string
   color: string
   color2: string
   color3: string

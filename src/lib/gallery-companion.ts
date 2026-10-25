@@ -33,6 +33,22 @@ export function knownCompanionHashes(
     knownHashes(gallery, hashes).pipe(Effect.provide(databaseLayer(db))),
   )
 }
+export function parseDeviceCommand(value: unknown) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return
+  if ('revoke' in value && typeof value.revoke === 'string')
+    return { revoke: value.revoke }
+  if (
+    !('name' in value) ||
+    typeof value.name !== 'string' ||
+    !value.name.trim()
+  )
+    return
+  return {
+    name: value.name.trim(),
+    canManage: 'canManage' in value && value.canManage === true,
+  }
+}
+
 export async function createDevice(
   db: D1Database,
   name: string,

@@ -43,6 +43,6 @@ The IMAGES binding uses `remote: true` in the default, preview, and version-prev
 
 Adapter 14.3.0 sends an empty POST for remote source images, but its prerender handler treats the empty request stream as image bytes. All 36 remote image transforms fell back to Sharp with the unpatched adapter, using both the local emulator and the remote service.
 
-A one-line pnpm patch excludes requests with `Content-Length: 0` from the raw-image branch so the handler fetches the source URL instead. Local image uploads with nonempty or chunked bodies retain the existing path. The version-scoped patch is stored in `patches/@astrojs__cloudflare@14.3.0.patch`; remove it when an upstream adapter release fixes this behavior.
+A one-line pnpm patch excluded requests with `Content-Length: 0` from the raw-image branch so the handler fetched the source URL instead. Local image uploads with nonempty or chunked bodies retained the existing path. The patch was removed with the October 25, 2026 update to adapter 14.4.2: its image service now always sends the input image bytes, including for remote sources, and its prerender handler no longer has the affected URL-fetch branch.
 
 Check a captured build log with `node scripts/check-cloudflare-image-build.mjs <log-path>`. This rejects unsuccessful builds and image-service fallbacks, since Astro otherwise reports a successful build even when every Cloudflare transform falls back to Sharp.

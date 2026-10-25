@@ -29,7 +29,7 @@ type StaticContentAdapter = {
   list(): Promise<StaticEvent[]>
 }
 type GalleryRecordAdapter = {
-  getEvent(eventSlug: string): Promise<EventGallery | undefined>
+  getEvent(eventSlug: string): Promise<EventGallery | null | undefined>
   listEvents(): Promise<EventGallery[]>
   getSettings(eventSlug: string): Promise<GallerySettings | null>
   getHiddenFilenames(eventSlug: string): Promise<Set<string>>
@@ -48,7 +48,7 @@ function validStaticEvent(event: StaticEvent | undefined) {
 }
 function metadata(
   staticEvent: StaticEvent | undefined,
-  dynamicEvent: EventGallery | undefined,
+  dynamicEvent: EventGallery | null | undefined,
 ) {
   return {
     title: dynamicEvent?.title ?? staticEvent?.data.title ?? 'Event gallery',
@@ -300,7 +300,7 @@ export function createGalleryReaderEffects({
         }),
       )
       return galleries
-        .filter((gallery) => gallery)
+        .filter((gallery) => gallery !== undefined)
         .sort((a, b) => {
           const aTime = a.eventDate?.getTime() ?? 0
           const bTime = b.eventDate?.getTime() ?? 0
