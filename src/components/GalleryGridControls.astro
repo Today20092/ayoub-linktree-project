@@ -1,0 +1,249 @@
+---
+import { Minus, Plus } from 'lucide-react'
+import { Button } from './ui/button'
+
+type Props = { count: number }
+const { count } = Astro.props
+---
+
+<div
+  class="gallery-toolbar border-border bg-background sticky top-14 z-30 mb-2 grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-b py-2 sm:flex sm:gap-4"
+  data-gallery-controls
+>
+  <div class="sm:mr-auto">
+    <h2 class="text-sm font-bold">
+      {count}
+      {count === 1 ? ' photo' : ' photos'}
+    </h2>
+    <p class="text-muted-foreground text-xs">Tap a photo to open</p>
+  </div>
+  <fieldset
+    class="border-border flex rounded-lg border p-0.5"
+    aria-label="Gallery view"
+  >
+    {
+      ['Grid', 'Masonry'].map((label) => (
+        <label class="relative cursor-pointer">
+          <input
+            class="peer sr-only"
+            type="radio"
+            name="gallery-view"
+            value={label.toLowerCase()}
+            checked={label === 'Grid'}
+          />
+          <span class="peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:ring-ring inline-flex min-h-11 items-center rounded-md px-3 text-xs font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
+            {label}
+          </span>
+        </label>
+      ))
+    }
+  </fieldset>
+  <div
+    class="col-span-2 flex items-center gap-1"
+    role="group"
+    aria-label="Photo size"
+  >
+    <span class="mr-auto text-xs font-semibold sm:mr-1">Photo size</span>
+    <Button
+      variant="outline"
+      size="icon"
+      className="size-11"
+      data-gallery-smaller
+      aria-label="Smaller photos"
+      title="Smaller photos"
+    >
+      <Minus aria-hidden="true" />
+    </Button>
+    <Button
+      variant="outline"
+      size="icon"
+      className="size-11"
+      data-gallery-larger
+      aria-label="Larger photos"
+      title="Larger photos"
+    >
+      <Plus aria-hidden="true" />
+    </Button>
+  </div>
+  <span class="sr-only" role="status" data-gallery-size-status></span>
+</div>
+
+<script>
+  import { galleryColumns, masonryRowSpan } from '../lib/gallery-grid'
+
+  document
+    .querySelectorAll<HTMLElement>('[data-gallery-controls]')
+    .forEach((toolbar) => {
+      const gallery = toolbar.parentElement
+      if (!gallery) return
+      const smaller = toolbar.querySelector<HTMLButtonElement>(
+        '[data-gallery-smaller]',
+      )!
+      const larger = toolbar.querySelector<HTMLButtonElement>(
+        '[data-gallery-larger]',
+      )!
+      const status = toolbar.querySelector<HTMLElement>(
+        '[data-gallery-size-status]',
+      )!
+      let columns = window.innerWidth >= 768 ? 5 : 3
+      let view: 'grid' | 'masonry' = 'grid'
+      let position: { element: HTMLElement; top: number } | undefined
+      const restorePosition = () => {
+        if (!position) return
+        window.scrollBy({
+          top: position.element.getBoundingClientRect().top - position.top,
+          behavior: 'instant',
+        })
+      }
+      for (const event of ['pointerdown', 'touchstart', 'wheel', 'keydown']) {
+        document.addEventListener(
+          event,
+          () => {
+            position = undefined
+          },
+          { passive: true },
+        )
+      }
+
+      const render = (next: number, keepPlace = false, nextView = view) => {
+        const figures = [
+          ...gallery.querySelectorAll<HTMLElement>('[data-gallery-filename]'),
+        ]
+        const toolbarBottom = toolbar.getBoundingClientRect().bottom
+        const anchor = keepPlace
+          ? figures.find((figure) => {
+              const bounds = figure.getBoundingClientRect()
+              return (
+                !figure.hidden &&
+                bounds.bottom > toolbarBottom &&
+                bounds.top < window.innerHeight
+              )
+            })
+          : undefined
+        const before = anchor?.getBoundingClientRect().top
+        view = nextView
+        gallery.dataset.galleryView = view
+        const levels = galleryColumns(gallery.clientWidth)
+        columns = levels.filter((level) => level <= next).at(-1) ?? levels[0]
+        gallery.style.setProperty('--gallery-columns', String(columns))
+        gallery.dataset.dense = String(columns >= 5)
+        const tileWidth = (gallery.clientWidth - (columns - 1) * 2) / columns
+        gallery
+          .querySelectorAll<HTMLImageElement>('[data-photo-grid] img')
+          .forEach((image) => {
+            image.style.aspectRatio = `${image.getAttribute('width')} / ${image.getAttribute('height')}`
+            image
+              .closest('figure')
+              ?.style.setProperty(
+                '--masonry-span',
+                String(
+                  masonryRowSpan(
+                    Number(image.getAttribute('width')),
+                    Number(image.getAttribute('height')),
+                    tileWidth,
+                  ),
+                ),
+              )
+            image.sizes = `${Math.ceil(tileWidth)}px`
+          })
+        smaller.disabled = columns === levels.at(-1)
+        larger.disabled = columns === levels[0]
+        status.textContent = `${view === 'grid' ? 'Grid' : 'Masonry'} view, ${columns} columns`
+        if (anchor && before !== undefined) {
+          position = { element: anchor, top: before }
+          requestAnimationFrame(restorePosition)
+        }
+      }
+
+      smaller.addEventListener('click', () => {
+        const next = galleryColumns(gallery.clientWidth).find(
+          (level) => level > columns,
+        )
+        if (next) render(next, true)
+      })
+      larger.addEventListener('click', () => {
+        const next = galleryColumns(gallery.clientWidth)
+          .filter((level) => level < columns)
+          .at(-1)
+        if (next) render(next, true)
+      })
+      toolbar
+        .querySelectorAll<HTMLInputElement>('[name="gallery-view"]')
+        .forEach((input) => {
+          input.addEventListener('change', () => {
+            render(
+              columns,
+              true,
+              input.value === 'masonry' ? 'masonry' : 'grid',
+            )
+          })
+        })
+      render(columns)
+      let width = gallery.clientWidth
+      new ResizeObserver(() => {
+        if (width !== gallery.clientWidth) {
+          width = gallery.clientWidth
+          render(columns, true)
+        } else {
+          // Keep the anchor stable while lazy images finish laying out.
+          requestAnimationFrame(restorePosition)
+        }
+      }).observe(gallery)
+    })
+</script>
+
+<style is:global>
+  [data-gallery-browser] {
+    --gallery-columns: 3;
+    overflow-anchor: none;
+    scroll-margin-top: 12rem;
+  }
+  [data-photo-grid] {
+    display: grid;
+    grid-template-columns: repeat(var(--gallery-columns), minmax(0, 1fr));
+    gap: 2px;
+  }
+  [data-photo-grid] > figure {
+    min-width: 0;
+    margin: 0;
+  }
+  [data-photo-grid] [data-gallery-open] {
+    display: block;
+    aspect-ratio: 1;
+  }
+  [data-photo-grid] img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  [data-gallery-view='masonry'] [data-photo-grid] {
+    grid-auto-rows: 1px;
+    grid-auto-flow: row;
+    align-items: start;
+  }
+  [data-gallery-view='masonry'] [data-photo-grid] > figure {
+    grid-row-end: span var(--masonry-span, 1);
+  }
+  [data-gallery-view='masonry'] [data-gallery-open] {
+    aspect-ratio: auto;
+  }
+  [data-gallery-view='masonry'] [data-photo-grid] img {
+    height: auto;
+  }
+  [data-gallery-browser][data-dense='true'] [data-gallery-favorite] {
+    display: none;
+  }
+  [data-photo-grid] [data-face-rank]:not([hidden]) {
+    top: auto;
+    bottom: 2px;
+    left: 2px;
+    padding: 1px 3px;
+    font-size: 10px;
+    pointer-events: none;
+  }
+  @media (min-width: 768px) {
+    [data-gallery-browser] {
+      --gallery-columns: 5;
+    }
+  }
+</style>
