@@ -20,8 +20,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
 } from '../../components/ui/breadcrumb'
 import { buttonVariants } from '../../components/ui/button'
 import { Separator } from '../../components/ui/separator'
@@ -64,8 +62,13 @@ type Props = {
 }
 
 const { project, previousProject, nextProject } = Astro.props as Props
-const { Content } = await render(project)
+const { Content, headings } = await render(project)
 const projectData = project.data
+const hasLongStory =
+  headings.filter((heading) => heading.depth === 2).length >= 4
+const resultsHeading = headings.find(
+  (heading) => heading.depth === 2 && /results/i.test(heading.text),
+)
 const heroImageAsset = projectData.heroImage ?? projectData.featuredImage
 const heroImage =
   typeof heroImageAsset === 'object' &&
@@ -158,7 +161,6 @@ const formatVideoDate = (date: string) =>
     timeZone: 'UTC',
   }).format(new Date(`${date}T00:00:00Z`))
 const hasDetails = Boolean(
-  projectData.role ||
   projectData.collaborators.length ||
   projectData.duration ||
   projectData.tools.length,
@@ -199,16 +201,67 @@ const galleryHeading =
               Portfolio
             </BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbSeparator>/</BreadcrumbSeparator>
-          <BreadcrumbItem>
-            <BreadcrumbPage>{projectData.title}</BreadcrumbPage>
-          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
     </header>
 
     <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
-      <div class="mx-auto max-w-4xl" data-reveal="up" data-motion-hero>
+      <header class="mx-auto max-w-4xl pb-8 sm:pb-10">
+        <h1 class="font-heading max-w-3xl text-3xl leading-tight font-extrabold tracking-tight text-balance [overflow-wrap:anywhere] sm:text-4xl lg:text-5xl">
+          {projectData.title}
+        </h1>
+        <p class="text-muted-foreground mt-4 max-w-3xl text-lg leading-8">
+          {projectData.summary}
+        </p>
+        {projectData.role && (
+          <p class="mt-4 max-w-3xl text-sm leading-6">
+            <span class="font-bold">My role:</span> {projectData.role}
+          </p>
+        )}
+        {hasLongStory && (
+          <nav
+            aria-label="On this project"
+            class="mt-5 flex flex-wrap gap-x-6 gap-y-1"
+          >
+            <a
+              href="#project-work"
+              class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+            >
+              View work
+            </a>
+            {resultsHeading ? (
+              <a
+                href={`#${resultsHeading.slug}`}
+                class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+              >
+                Results
+              </a>
+            ) : (
+              projectData.outcomes.length > 0 && (
+                <a
+                  href="#project-results"
+                  class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+                >
+                  Delivery
+                </a>
+              )
+            )}
+            <a
+              href="#project-story"
+              class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+            >
+              Process
+            </a>
+          </nav>
+        )}
+      </header>
+
+      <div
+        id="project-work"
+        class="mx-auto max-w-4xl scroll-mt-24"
+        data-reveal="up"
+        data-motion-hero
+      >
         {projectData.heroVideo ? (
           <YouTubeEmbed
             youtubeId={projectData.heroVideo}
@@ -245,304 +298,6 @@ const galleryHeading =
         )}
       </div>
 
-      <div
-        class="mx-auto max-w-4xl py-10 sm:py-14"
-        data-reveal="up"
-        data-motion-group
-      >
-        <p class="text-primary text-xs font-bold tracking-wider uppercase">
-          {projectData.category}
-        </p>
-        <h1 class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-          {projectData.title}
-        </h1>
-        <p class="text-muted-foreground mt-6 max-w-3xl text-lg leading-8 sm:text-xl">
-          {projectData.summary}
-        </p>
-      </div>
-
-      {hasBody && (
-        <section
-          class="typeset typeset-portfolio mx-auto max-w-4xl py-8 sm:py-10"
-          data-reveal="up"
-        >
-          <Content />
-        </section>
-      )}
-
-      {projectData.location && (
-        <PortfolioLocation
-          title={projectData.title}
-          {...projectData.location}
-        />
-      )}
-
-      {projectData.services.length > 0 && (
-        <section
-          class="mx-auto max-w-4xl py-8 sm:py-10"
-          aria-labelledby="services-title"
-          data-reveal="up"
-        >
-          <h2 id="services-title" class="font-heading text-2xl font-bold">
-            Work
-          </h2>
-          <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
-            {projectData.services.map((service) => (
-              <li class="py-1 leading-7">{service}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {hasDetails && (
-        <section
-          class="bg-muted/50 mx-auto my-8 max-w-4xl rounded-sm p-6 sm:my-10 sm:p-8"
-          aria-labelledby="details-title"
-          data-reveal="up"
-        >
-          <h2 id="details-title" class="font-heading text-2xl font-bold">
-            Details
-          </h2>
-          <dl class="mt-5 grid gap-6 sm:grid-cols-2">
-            {projectData.role && (
-              <div>
-                <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
-                  Role
-                </dt>
-                <dd class="mt-2 leading-7">{projectData.role}</dd>
-              </div>
-            )}
-            {projectData.collaborators.length > 0 && (
-              <div>
-                <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
-                  Collaborators
-                </dt>
-                <dd class="mt-2 leading-7">
-                  {projectData.collaborators.join(', ')}
-                </dd>
-              </div>
-            )}
-            {projectData.duration && (
-              <div>
-                <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
-                  Duration
-                </dt>
-                <dd class="mt-2 leading-7">{projectData.duration}</dd>
-              </div>
-            )}
-          </dl>
-          {projectData.tools.length > 0 && (
-            <details class="mt-6">
-              <summary class="text-muted-foreground focus-visible:ring-ring hover:text-foreground cursor-pointer rounded-sm py-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none">
-                Tools and equipment
-              </summary>
-              <Separator className="my-2" />
-              <p class="text-muted-foreground mt-2 text-sm leading-7">
-                {projectData.tools.join(', ')}
-              </p>
-            </details>
-          )}
-        </section>
-      )}
-
-      {comparisonVideos.length > 0 && (
-        <section
-          class="mx-auto max-w-4xl py-8 sm:py-10"
-          aria-labelledby="comparison-title"
-          data-reveal="up"
-        >
-          <p class="text-primary text-xs font-bold tracking-wider uppercase">
-            Production comparison
-          </p>
-          <h2
-            id="comparison-title"
-            class="font-heading mt-2 text-2xl font-bold"
-          >
-            Before and after
-          </h2>
-          <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
-            These episodes show the change in recording, lighting, color, and
-            sound quality from before our partnership to the current production
-            workflow.
-          </p>
-
-          <div
-            data-comparison-controls
-            hidden
-            class="mt-6 flex flex-wrap gap-3"
-            role="group"
-            aria-label="Choose production version"
-          >
-            {comparisonVideos.map((video, index) => (
-              <button
-                type="button"
-                data-comparison-select={index}
-                aria-pressed={index === 0}
-                aria-controls={`comparison-${index}`}
-                class="border-border aria-pressed:bg-foreground aria-pressed:text-background min-h-11 rounded-sm border px-5 font-bold"
-              >
-                {video.comparisonRole === 'before' ? 'Before' : 'After'}
-              </button>
-            ))}
-          </div>
-          <div data-comparison class="mt-7 grid gap-8 lg:grid-cols-2">
-            {comparisonVideos.map((video, index) => (
-              <article
-                id={`comparison-${index}`}
-                data-comparison-panel
-                class="flex flex-col gap-4"
-                data-reveal="up"
-                style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
-              >
-                <div>
-                  <p class="text-primary text-xs font-bold tracking-wider uppercase">
-                    {video.label}
-                  </p>
-                  <p class="text-muted-foreground mt-1 text-sm font-medium">
-                    {formatVideoDate(video.publishedAt)}
-                  </p>
-                </div>
-                <YouTubeEmbed
-                  youtubeId={video.youtubeId}
-                  title={`${video.label}: ${video.title}`}
-                />
-                <p class="text-muted-foreground leading-7">
-                  {video.description}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {milestoneVideos.length > 0 && (
-        <section
-          class="mx-auto max-w-4xl py-8 sm:py-10"
-          aria-labelledby="milestones-title"
-          data-reveal="up"
-        >
-          <h2 id="milestones-title" class="font-heading text-2xl font-bold">
-            {isYaHalaProject
-              ? 'First collaborations'
-              : milestoneVideos.length > 1
-                ? 'Featured videos'
-                : 'Featured video'}
-          </h2>
-          <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
-            {isYaHalaProject
-              ? 'These October 2025 uploads mark the beginning of my production work with Ya Hala.'
-              : 'Watch the finished production directly from the client project.'}
-          </p>
-          {isYaHalaProject ? (
-            <ol class="mt-6 grid gap-6 sm:grid-cols-2">
-              {milestoneVideos.map((video, index) => (
-                <li
-                  data-reveal="up"
-                  style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
-                >
-                  <a
-                    href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    <div class="bg-muted relative aspect-video overflow-hidden">
-                      <Image
-                        src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
-                        alt={`Video thumbnail for ${video.title}`}
-                        width={320}
-                        height={180}
-                        layout="constrained"
-                        widths={[320, 480, 640]}
-                        sizes="(min-width: 640px) 50vw, 100vw"
-                        loading="lazy"
-                        decoding="async"
-                        class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                      />
-                      <span class="bg-background/90 text-foreground absolute inset-0 m-auto inline-flex size-12 items-center justify-center rounded-full shadow-sm">
-                        <Play
-                          className="size-5 fill-current"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </div>
-                    <div class="py-4">
-                      <div class="flex items-start justify-between gap-4">
-                        <div>
-                          <p class="font-bold">{video.label}</p>
-                          <p class="text-muted-foreground mt-1 text-sm">
-                            {formatVideoDate(video.publishedAt)}
-                          </p>
-                        </div>
-                        <ArrowUpRight
-                          className="mt-1 size-4 shrink-0"
-                          aria-hidden="true"
-                        />
-                      </div>
-                      <p class="text-muted-foreground mt-3 text-sm leading-6">
-                        {video.description}
-                      </p>
-                    </div>
-                  </a>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <div class="mt-6 space-y-8">
-              {milestoneVideos.map((video, index) => (
-                <article
-                  data-reveal="up"
-                  style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
-                >
-                  <YouTubeEmbed
-                    youtubeId={video.youtubeId}
-                    title={`${video.label}: ${video.title}`}
-                  />
-                  <div class="py-4">
-                    <p class="font-bold">{video.title}</p>
-                    <p class="text-muted-foreground mt-1 text-sm">
-                      {formatVideoDate(video.publishedAt)}
-                    </p>
-                    <p class="text-muted-foreground mt-3 leading-7">
-                      {video.description}
-                    </p>
-                    <a
-                      href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="text-primary mt-4 inline-flex font-bold underline underline-offset-4"
-                    >
-                      Watch {video.title} on YouTube
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
-
-      {projectData.upcomingVideo && (
-        <UpcomingVideo {...projectData.upcomingVideo} />
-      )}
-
-      {projectData.outcomes.length > 0 && (
-        <section
-          class="border-primary mx-auto my-8 max-w-4xl border-l-2 pl-6 sm:my-10 sm:pl-8"
-          aria-labelledby="outcomes-title"
-          data-reveal="up"
-        >
-          <h2 id="outcomes-title" class="font-heading text-2xl font-bold">
-            Outcomes
-          </h2>
-          <ul class="mt-5 grid gap-x-10 gap-y-5 sm:grid-cols-2">
-            {projectData.outcomes.map((outcome) => (
-              <li class="leading-7">{outcome}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       {projectData.eventGallery && remoteGalleryImages.length > 0 ? (
         <aside
           class="mx-auto max-w-4xl py-8 sm:py-10"
@@ -562,7 +317,7 @@ const galleryHeading =
                 Browse all {remoteGalleryImages.length}{' '}
                 {remoteGalleryImages.length === 1
                   ? 'photograph'
-                  : 'photographs'}
+                  : 'photographs'}{' '}
                 full screen, share individual shots, or download the full set.
               </p>
             </div>
@@ -749,6 +504,281 @@ const galleryHeading =
         </section>
       ) : null}
 
+      {hasBody && (
+        <section
+          id="project-story"
+          class="typeset typeset-portfolio mx-auto max-w-4xl scroll-mt-24 py-8 sm:py-10"
+          data-reveal="up"
+        >
+          <Content />
+        </section>
+      )}
+
+      {projectData.location && (
+        <PortfolioLocation
+          title={projectData.title}
+          {...projectData.location}
+        />
+      )}
+
+      {projectData.services.length > 0 && (
+        <section
+          class="mx-auto max-w-4xl py-8 sm:py-10"
+          aria-labelledby="services-title"
+          data-reveal="up"
+        >
+          <h2 id="services-title" class="font-heading text-2xl font-bold">
+            Deliverables
+          </h2>
+          <ul class="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+            {projectData.services.map((service) => (
+              <li class="py-1 leading-7">{service}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {hasDetails && (
+        <section
+          class="bg-muted/50 mx-auto my-8 max-w-4xl rounded-sm p-6 sm:my-10 sm:p-8"
+          aria-labelledby="details-title"
+          data-reveal="up"
+        >
+          <h2 id="details-title" class="font-heading text-2xl font-bold">
+            Details
+          </h2>
+          <dl class="mt-5 grid gap-6 sm:grid-cols-2">
+            {projectData.collaborators.length > 0 && (
+              <div>
+                <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
+                  Collaborators
+                </dt>
+                <dd class="mt-2 leading-7">
+                  {projectData.collaborators.join(', ')}
+                </dd>
+              </div>
+            )}
+            {projectData.duration && (
+              <div>
+                <dt class="text-foreground/70 text-xs font-semibold tracking-wider uppercase">
+                  Duration
+                </dt>
+                <dd class="mt-2 leading-7">{projectData.duration}</dd>
+              </div>
+            )}
+          </dl>
+          {projectData.tools.length > 0 && (
+            <details class="mt-6">
+              <summary class="text-muted-foreground focus-visible:ring-ring hover:text-foreground cursor-pointer rounded-sm py-3 text-sm font-medium focus-visible:ring-2 focus-visible:outline-none">
+                Tools and equipment
+              </summary>
+              <Separator className="my-2" />
+              <p class="text-muted-foreground mt-2 text-sm leading-7">
+                {projectData.tools.join(', ')}
+              </p>
+            </details>
+          )}
+        </section>
+      )}
+
+      {comparisonVideos.length > 0 && (
+        <section
+          class="mx-auto max-w-4xl py-8 sm:py-10"
+          aria-labelledby="comparison-title"
+          data-reveal="up"
+        >
+          <h2
+            id="comparison-title"
+            class="font-heading mt-2 text-2xl font-bold"
+          >
+            Before and after
+          </h2>
+          <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
+            These are different episodes recorded at different times and
+            locations, rather than a controlled comparison of the same scene.
+            Listen to the dialogue and look at lighting, skin tones, and
+            consistency between camera angles to explore the production
+            approach.
+          </p>
+
+          <div
+            data-comparison-controls
+            hidden
+            class="mt-6 flex flex-wrap gap-3"
+            role="group"
+            aria-label="Choose production version"
+          >
+            {comparisonVideos.map((video, index) => (
+              <button
+                type="button"
+                data-comparison-select={index}
+                aria-pressed={index === 0}
+                aria-controls={`comparison-${index}`}
+                class="border-border aria-pressed:bg-foreground aria-pressed:text-background min-h-11 rounded-sm border px-5 font-bold"
+              >
+                {video.comparisonRole === 'before' ? 'Before' : 'After'}
+              </button>
+            ))}
+          </div>
+          <div data-comparison class="mt-7 grid gap-8 lg:grid-cols-2">
+            {comparisonVideos.map((video, index) => (
+              <article
+                id={`comparison-${index}`}
+                data-comparison-panel
+                class="flex flex-col gap-4"
+                data-reveal="up"
+                style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+              >
+                <div>
+                  <p class="text-primary text-xs font-bold tracking-wider uppercase">
+                    {video.label}
+                  </p>
+                  <p class="text-muted-foreground mt-1 text-sm font-medium">
+                    {formatVideoDate(video.publishedAt)}
+                  </p>
+                </div>
+                <YouTubeEmbed
+                  youtubeId={video.youtubeId}
+                  title={`${video.label}: ${video.title}`}
+                />
+                <p class="text-muted-foreground leading-7">
+                  {video.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {milestoneVideos.length > 0 && (
+        <section
+          class="mx-auto max-w-4xl py-8 sm:py-10"
+          aria-labelledby="milestones-title"
+          data-reveal="up"
+        >
+          <h2 id="milestones-title" class="font-heading text-2xl font-bold">
+            {isYaHalaProject
+              ? 'First collaborations'
+              : milestoneVideos.length > 1
+                ? 'Featured videos'
+                : milestoneVideos[0].label}
+          </h2>
+          <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
+            {isYaHalaProject
+              ? 'These October 2025 uploads mark the beginning of my production work with Ya Hala.'
+              : 'Explore the videos below, with context for each recording.'}
+          </p>
+          {isYaHalaProject ? (
+            <ol class="mt-6 grid gap-6 sm:grid-cols-2">
+              {milestoneVideos.map((video, index) => (
+                <li
+                  data-reveal="up"
+                  style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+                >
+                  <a
+                    href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    <div class="bg-muted relative aspect-video overflow-hidden">
+                      <Image
+                        src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
+                        alt={`Video thumbnail for ${video.title}`}
+                        width={320}
+                        height={180}
+                        layout="constrained"
+                        widths={[320, 480, 640]}
+                        sizes="(min-width: 640px) 50vw, 100vw"
+                        loading="lazy"
+                        decoding="async"
+                        class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                      />
+                      <span class="bg-background/90 text-foreground absolute inset-0 m-auto inline-flex size-12 items-center justify-center rounded-full shadow-sm">
+                        <Play
+                          className="size-5 fill-current"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </div>
+                    <div class="py-4">
+                      <div class="flex items-start justify-between gap-4">
+                        <div>
+                          <p class="font-bold">{video.label}</p>
+                          <p class="text-muted-foreground mt-1 text-sm">
+                            {formatVideoDate(video.publishedAt)}
+                          </p>
+                        </div>
+                        <ArrowUpRight
+                          className="mt-1 size-4 shrink-0"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <p class="text-muted-foreground mt-3 text-sm leading-6">
+                        {video.description}
+                      </p>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <div class="mt-6 space-y-8">
+              {milestoneVideos.map((video, index) => (
+                <article
+                  data-reveal="up"
+                  style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+                >
+                  <YouTubeEmbed
+                    youtubeId={video.youtubeId}
+                    title={`${video.label}: ${video.title}`}
+                  />
+                  <div class="py-4">
+                    <p class="font-bold">{video.title}</p>
+                    <p class="text-muted-foreground mt-1 text-sm">
+                      {formatVideoDate(video.publishedAt)}
+                    </p>
+                    <p class="text-muted-foreground mt-3 leading-7">
+                      {video.description}
+                    </p>
+                    <a
+                      href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-primary mt-4 inline-flex font-bold underline underline-offset-4"
+                    >
+                      Watch {video.title} on YouTube
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {projectData.upcomingVideo && (
+        <UpcomingVideo {...projectData.upcomingVideo} />
+      )}
+
+      {projectData.outcomes.length > 0 && (
+        <section
+          id="project-results"
+          class="mx-auto max-w-4xl scroll-mt-24 py-8 sm:py-10"
+          aria-labelledby="outcomes-title"
+          data-reveal="up"
+        >
+          <h2 id="outcomes-title" class="font-heading text-2xl font-bold">
+            Outcomes
+          </h2>
+          <ul class="mt-5 grid gap-x-10 gap-y-5 sm:grid-cols-2">
+            {projectData.outcomes.map((outcome) => (
+              <li class="leading-7">{outcome}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {projectData.links.length > 0 && (
         <>
           <Separator className="mx-auto max-w-4xl" />
@@ -774,7 +804,7 @@ const galleryHeading =
                     'h-auto min-h-11 max-w-full justify-start gap-3 px-4 py-3 text-left whitespace-normal',
                   )}
                 >
-                  <span>
+                  <span class="min-w-0 [overflow-wrap:anywhere]">
                     {link.label === 'Website'
                       ? `${projectData.title} website`
                       : link.label}

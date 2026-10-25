@@ -3,35 +3,35 @@ order: 12
 title: Building ayoubabed.xyz with AI
 status: complete
 category: Web development
-seoDescription: A case study of ayoubabed.xyz, an AI-directed portfolio built with Astro, Tailwind, shadcn/ui, and Cloudflare from design through deployment.
-summary: The website you're reading is the case study. I designed and shipped ayoubabed.xyz by directing AI — Claude Codex and GLM 5.2 — to build a fast, free, static site on Astro, Tailwind, and shadcn/ui, hosted on Cloudflare.
+seoDescription: How I direct AI development for my personal portfolio, contact hub, and Cloudflare-backed photo galleries using Astro, Tailwind, and shadcn/ui.
+summary: My personal portfolio, contact hub, and photo galleries, built through AI-directed development with Astro, Tailwind, shadcn/ui, and Cloudflare.
 featuredImage: ../../assets/client-work/ayoubabed-xyz-home.png
-imageAlt: Ayoubabed.xyz portfolio homepage
+imageAlt: An earlier version of the ayoubabed.xyz portfolio homepage
 imageWidth: 1280
 imageHeight: 800
 services:
   - AI-directed development
-  - Prompt engineering
-  - Static-site architecture
-  - Self-hosted media delivery
-role: Sole developer (AI-directed)
+  - Interface design and iteration
+  - Portfolio and content architecture
+  - Photo gallery development and delivery
+role: Sole developer and project owner, directing AI-assisted development
 tools:
   - Astro
   - Tailwind CSS
   - shadcn/ui
-  - Cloudflare Workers (static assets)
+  - Cloudflare Workers
   - Cloudflare R2
-  - Claude Codex
-  - GLM 5.2
+  - Claude (earlier development)
+  - Codex (current development)
   - Astro MCP server
   - shadcn MCP server
   - context-mode MCP
   - Caveman
 outcomes:
-  - Shipped a full portfolio and contact site without writing it by hand
-  - Replaced a paid photo-hosting subscription with a free Cloudflare R2 gallery that supports downloads
-  - Kept the entire stack on Cloudflare's free tier
-  - Open-sourced the codebase for others to learn from
+  - Built a personal home for my portfolio, contact exchange, channels, and links
+  - Added event galleries with photo browsing, favorites, and downloads
+  - Kept Cloudflare usage within its free allowances at the current scale
+  - Made the source code public
 links:
   - label: Live site
     url: https://ayoubabed.xyz
@@ -41,57 +41,36 @@ links:
     url: https://yahalausa.net
 ---
 
-## Overview
+## The website is the work
 
-Every other page in this portfolio shows client work I produced with a camera. This one is different — the website you're reading right now is the deliverable. I built ayoubabed.xyz by directing AI to write it for me, mostly Claude Codex with GLM 5.2, and the result is a fast, free, static site I control completely.
+I built ayoubabed.xyz as the website I can share when someone wants to know who I am, see my work, find my channels, or view photographs from an event. I own the direction and review the result while AI writes and revises the implementation.
 
-The point isn't that AI did the work. The point is that knowing what to ask for is the skill. Anyone can open a chat and say "build me a website." The output is only as good as the instructions behind it.
+I used Claude and Codex during development. I now use Codex for the ongoing work. The important part of my role is choosing what the site needs, supplying context, reviewing the output, and checking that the result works for the people using it.
 
-## The stack, and why it matters
+## A portfolio and a working gallery system
 
-The site runs on:
+The site uses Astro for its pages and content, Tailwind CSS for styling, and shadcn/ui components for shared interface controls. Portfolio entries are written in MDX so each project can have its own story and media while sharing a consistent layout.
 
-- **Astro** for routing and static generation
-- **Tailwind CSS v4** for styling
-- **shadcn/ui** for components
-- **MDX content collections** for each portfolio case study
-- **Cloudflare Workers** with static assets for hosting
+The site also includes server-side gallery services through Cloudflare Workers, with event photographs stored in R2. It is more than a static collection of pages: visitors can browse photos, keep favorites in their browser, and download individual images or a collection.
 
-I chose this stack deliberately, and that choice is the whole game. If I didn't know Astro, Tailwind, or shadcn existed, I couldn't tell the AI to use them — and it would reach for whatever it defaults to, which is often heavier, slower, or harder to maintain. Naming the right tools is what turns a generic AI build into a good one.
+I also use a personal Android companion app to upload photographs to the website galleries. It supports my delivery workflow; the website remains the place visitors go to see the work.
 
-## Directing the AI
+## Directing and checking the AI
 
-My main tools were Claude Codex and GLM 5.2. To make them effective, I connected several MCP servers so the AI could read real documentation instead of guessing:
+I connect documentation tools such as Astro MCP and shadcn MCP so the agent can consult references while working. Other tools, including context-mode and Caveman, help manage long development sessions.
 
-- **Astro MCP** so the framework API it cited was current
-- **shadcn MCP** so component usage matched the actual library
-- **context-mode MCP** to keep context windows from filling up over long sessions
-- **Caveman** to cut output tokens and keep responses tight
+The work is iterative. I explain the visitor's needs, review the interface, ask for changes, and check the implementation. A concrete visual reference helps establish the direction; inspecting real pages and interactions helps keep subsequent changes consistent.
 
-I also used [tasteskill.dev](https://www.tasteskill.dev) to sharpen the design direction. The pattern is the same each time: give the AI the right references and the right tools, then review everything it produces.
+## Owning photo delivery
 
-## Replacing paid subscriptions
+The gallery system gives me control over how photographs are presented and delivered. The [Sanad wedding gallery](/galleries/sanad-silwadi-wedding/) is one example of that workflow.
 
-Photo galleries are the obvious example. Services like Pic-Time charge a monthly subscription to host client photos and let people download them. Instead, I had the AI build a gallery that streams images from a **Cloudflare R2** bucket with full-resolution downloads — [like this wedding gallery](/portfolio/sanad-silwadi-wedding/). The whole thing runs on Cloudflare's free tier. No subscription, no per-client cost.
+As of October 2026, my Cloudflare usage remains within the free allowances. That describes the site's current usage rather than a promise that hosting every future feature or volume of photographs will always be free.
 
-## Design inspiration
+## Continuing the work
 
-I had an earlier version of this site, but I rebuilt it to match the portfolio design of [josephz.me](https://josephz.me) — a clean editorial layout, a masonry portfolio grid, and a sharp, minimal type system. Having a concrete reference made the AI prompts far more precise than "make it look modern."
+The recurring challenge is keeping new features consistent with what is already there. I review typography, spacing, interactions, and content as the site grows, alongside checks for errors and regressions.
 
-## Beyond this site
+I apply the same AI-directed development approach to [yahalausa.net](https://yahalausa.net), which I continue to update for Ya Hala with Haithum. Its audience and publishing needs shape that site separately from my own portfolio.
 
-This isn't a one-off. I apply the same stack and AI-directed workflow to client platforms — most notably [yahalausa.net](https://yahalausa.net), the living media hub for Ya Hala with Haithum, a series covering Arab American field stories across the U.S.
-
-Same foundation — Astro, Tailwind, shadcn/ui, an AI-assisted build with Codex CLI — but shaped entirely around Haithum's needs: an auto-updating episode feed, audience reach across YouTube, TikTok, Instagram, and Facebook, a places-visited directory by state, and semantic search across video transcripts so viewers can jump straight to a specific moment. I continue to build and maintain it as the show grows, which is the real test of this approach: it has to keep working as requirements change, not just for a single launch.
-
-## The honest challenges
-
-It isn't all smooth. The recurring problems:
-
-- **Design drift.** Each new prompt can pull the AI toward a fresh idea — a different corner radius, a new accent color, spacing that doesn't match the rest of the site. Keeping everything cohesive takes constant correction.
-- **Tailwind leakage.** Sometimes the AI writes custom CSS instead of using Tailwind utilities, which defeats the purpose of the design system and creates inconsistency.
-- **Usage limits.** Codex and Claude plans reset on a weekly or five-hour cycle, so larger features sometimes have to wait for the limit to refill.
-
-## Open source
-
-The full codebase is [on GitHub](https://github.com/Today20092/ayoub-linktree-project). If you want to see how an AI-directed static site is structured, or build your own, that's the place to start. I add features as I need them, and I teach the process on my [AlphaBravoMedia channel](https://youtube.com/@alphabravomedia).
+The [source code is public on GitHub](https://github.com/Today20092/ayoub-linktree-project). I also share what I learn on my [AlphaBravoMedia channel](https://youtube.com/@alphabravomedia).

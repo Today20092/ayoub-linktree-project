@@ -24,6 +24,10 @@
     --typeset-flow: 1.25em;
   }
 
+  .typeset-portfolio :where(h2, h3, h4, h5, h6) {
+    scroll-margin-block-start: 6rem;
+  }
+
   .dark .typeset {
     --typeset-leading: 1.85;
   }
