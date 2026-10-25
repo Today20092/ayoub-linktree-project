@@ -26,6 +26,7 @@ export type FaceBackend = {
 
 type FaceAnalyzerOptions = {
   backends: FaceBackend[]
+  dimensions?: 128 | 1024
   decode?: (file: File) => Promise<FaceImage>
   modelTimeout?: number
   analysisTimeout?: number
@@ -112,6 +113,7 @@ export async function decodeFaceImage(file: File): Promise<FaceImage> {
 
 export function createFaceAnalyzer({
   backends,
+  dimensions = 1024,
   decode = decodeFaceImage,
   modelTimeout = MODEL_TIMEOUT,
   analysisTimeout = ANALYSIS_TIMEOUT,
@@ -223,7 +225,11 @@ export function createFaceAnalyzer({
         return {
           image,
           faces: result.face
-            .filter((face) => face.embedding?.length === 1024)
+            .filter(
+              (face) =>
+                face.embedding?.length === dimensions &&
+                face.embedding.every(Number.isFinite),
+            )
             .map((face) => ({
               embedding: [...(face.embedding ?? [])],
               box: face.box as [number, number, number, number],
@@ -286,7 +292,21 @@ function humanBackend(name: 'webgl' | 'wasm'): FaceBackend {
 export const webglFaceBackend = humanBackend('webgl')
 export const wasmFaceBackend = humanBackend('wasm')
 
-export function createBrowserFaceAnalyzer() {
+export function createBrowserFaceAnalyzer(model = '@vladmandic/human:faceres') {
+  if (model === 'opencv/sface-2021dec-int8') {
+    return createFaceAnalyzer({
+      dimensions: 128,
+      backends: [
+        {
+          name: 'sface-wasm',
+          async create() {
+            const { createSfaceDetector } = await import('./sface-client')
+            return createSfaceDetector()
+          },
+        },
+      ],
+    })
+  }
   return createFaceAnalyzer({
     backends: [webglFaceBackend, wasmFaceBackend],
   })

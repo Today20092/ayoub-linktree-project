@@ -28,6 +28,11 @@ config.r2_buckets = [
   },
 ]
 config.previews = undefined
+config.vectorize = config.vectorize.map((index) =>
+  index.binding === 'VECTORIZE_SFACE'
+    ? { ...index, index_name: 'face-search-sface-int8-preview' }
+    : index,
+)
 config.env = undefined
 
 await writeFile(previewConfigPath, `${JSON.stringify(config, null, 2)}\n`)

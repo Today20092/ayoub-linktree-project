@@ -1,6 +1,5 @@
 import type { FaceManifest } from './face-manifests'
 
-export const FACE_EMBEDDING_DIMENSIONS = 1024
 export const MAX_FACE_SEARCH_BODY_BYTES = 24_000
 
 export async function readFaceSearchBody(request: Request) {
@@ -26,7 +25,6 @@ export function parseFaceSearchRequest(
     typeof input.eventSlug !== 'string' ||
     typeof input.indexVersion !== 'string' ||
     !Array.isArray(input.embedding) ||
-    input.embedding.length !== FACE_EMBEDDING_DIMENSIONS ||
     !input.embedding.every(
       (number) => typeof number === 'number' && Number.isFinite(number),
     )
@@ -35,7 +33,17 @@ export function parseFaceSearchRequest(
   }
 
   const manifest = manifests[input.eventSlug]
-  if (!manifest || manifest.version !== input.indexVersion) return null
+  if (
+    !manifest ||
+    manifest.version !== input.indexVersion ||
+    input.embedding.length !== manifest.dimensions
+  )
+    return null
+  if (
+    (manifest.model === 'opencv/sface-2021dec-int8') !==
+    (manifest.dimensions === 128)
+  )
+    return null
 
   return {
     embedding: input.embedding as number[],

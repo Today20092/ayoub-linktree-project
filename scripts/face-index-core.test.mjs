@@ -85,3 +85,38 @@ test('retains old vector ids so event deletion remains complete', () => {
     },
   )
 })
+
+test('publishes SFace to a distinct version and separates legacy vector cleanup', () => {
+  const index = {
+    eventSlug: 'event',
+    model: 'opencv/sface-2021dec-int8',
+    threshold: 0.558,
+    detections: [detection('one', Array(128).fill(0.1))],
+  }
+  const first = buildPublishedData(index)
+  const changed = buildPublishedData({
+    ...index,
+    detections: [detection('one', Array(128).fill(0.2))],
+  })
+  assert.equal(first.manifest.dimensions, 128)
+  assert.notEqual(first.manifest.version, changed.manifest.version)
+  const migrated = carryForwardVectorIds(first.manifest, {
+    model: '@vladmandic/human:faceres',
+    vectorIds: ['old'],
+    staleVectorIds: ['older'],
+  })
+  assert.deepEqual(migrated.legacyVectorIds, ['old', 'older'])
+  assert.equal(migrated.staleVectorIds, undefined)
+  assert.deepEqual(
+    carryForwardVectorIds(changed.manifest, migrated).legacyVectorIds,
+    ['old', 'older'],
+  )
+  assert.throws(
+    () =>
+      buildPublishedData({
+        ...index,
+        detections: [detection('one', Array(1024).fill(0.1))],
+      }),
+    /Invalid embedding/,
+  )
+})

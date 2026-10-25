@@ -17,6 +17,7 @@ const option = (name) => {
 const eventSlug = option('--event')
 const indexOption = option('--index')
 const thresholdOption = option('--threshold')
+const vectorIndexOption = option('--vector-index')
 const upload = !args.includes('--no-upload')
 
 if (!eventSlug || !/^[a-z0-9-]+$/.test(eventSlug)) {
@@ -49,6 +50,26 @@ if (thresholdOption !== undefined) {
 }
 
 const published = buildPublishedData(faceIndex)
+const vectorIndex =
+  vectorIndexOption ??
+  (published.manifest.dimensions === 128
+    ? 'face-search-sface-int8'
+    : 'face-search')
+if (
+  ![
+    'face-search',
+    'face-search-sface-int8',
+    'face-search-sface-int8-preview',
+  ].includes(vectorIndex)
+) {
+  throw new Error('Unsupported vector index')
+}
+if (
+  (published.manifest.dimensions === 128) !==
+  vectorIndex.startsWith('face-search-sface-int8')
+) {
+  throw new Error('Model dimensions do not match vector index')
+}
 const vectors = published.vectors
 const workDirectory = resolve(root, '.face-index', eventSlug)
 const manifestDirectory = resolve(root, 'src/data/face-galleries')
@@ -76,7 +97,7 @@ if (upload) {
         resolve(root, 'node_modules/wrangler/bin/wrangler.js'),
         'vectorize',
         'list-metadata-index',
-        'face-search',
+        vectorIndex,
         '--json',
       ],
       { cwd: root, encoding: 'utf8' },
@@ -98,7 +119,7 @@ if (upload) {
       resolve(root, 'node_modules/wrangler/bin/wrangler.js'),
       'vectorize',
       'insert',
-      'face-search',
+      vectorIndex,
       '--file',
       vectorsPath,
     ],

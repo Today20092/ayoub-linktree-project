@@ -66,12 +66,20 @@ function indexedDetections(index) {
 }
 
 export function buildPublishedData(index) {
+  const model = index.model ?? '@vladmandic/human:faceres'
+  const dimensions =
+    model === 'opencv/sface-2021dec-int8' ? 128 : EMBEDDING_DIMENSIONS
+  if (
+    !['opencv/sface-2021dec-int8', '@vladmandic/human:faceres'].includes(model)
+  ) {
+    throw new Error('Unsupported face model')
+  }
   const detections = indexedDetections(index)
   if (detections.length === 0) throw new Error('No detected faces to publish.')
 
   for (const detection of detections) {
     if (
-      detection.embedding?.length !== EMBEDDING_DIMENSIONS ||
+      detection.embedding?.length !== dimensions ||
       !detection.embedding.every(Number.isFinite)
     ) {
       throw new Error(`Invalid embedding for ${detection.id}`)
@@ -82,7 +90,11 @@ export function buildPublishedData(index) {
     detections.map(({ id, filename }) => [id, filename]),
   )
   const version = createHash('sha256')
-    .update(`range-v1:${index.eventSlug}:${index.threshold}:${fingerprint}`)
+    .update(
+      model === 'opencv/sface-2021dec-int8'
+        ? `range-v1:${model}:${index.eventSlug}:${index.threshold}:${JSON.stringify(detections)}`
+        : `range-v1:${index.eventSlug}:${index.threshold}:${fingerprint}`,
+    )
     .digest('hex')
     .slice(0, 12)
   const namespace = `${index.eventSlug}:${version}`
@@ -93,7 +105,7 @@ export function buildPublishedData(index) {
     metadata: { filename: detection.filename, faceOrder },
   }))
 
-  if (vectors.length * EMBEDDING_DIMENSIONS > MAX_VECTOR_DIMENSIONS) {
+  if (vectors.length * dimensions > MAX_VECTOR_DIMENSIONS) {
     throw new Error(
       `Publishing ${vectors.length} faces exceeds the Vectorize free storage allowance.`,
     )
@@ -104,8 +116,8 @@ export function buildPublishedData(index) {
       eventSlug: index.eventSlug,
       version,
       namespace,
-      model: '@vladmandic/human:faceres',
-      dimensions: EMBEDDING_DIMENSIONS,
+      model,
+      dimensions,
       threshold: index.threshold,
       searchMode: 'range-v1',
       vectorIds: vectors.map((vector) => vector.id),
@@ -117,13 +129,28 @@ export function buildPublishedData(index) {
 }
 
 export function carryForwardVectorIds(manifest, previousManifest) {
+  const changedIndex =
+    previousManifest && manifest.model !== previousManifest.model
+  const legacyVectorIds = [
+    ...new Set([
+      ...(previousManifest?.legacyVectorIds ?? []),
+      ...(changedIndex
+        ? [
+            ...previousManifest.vectorIds,
+            ...(previousManifest.staleVectorIds ?? []),
+          ]
+        : []),
+    ]),
+  ]
   const currentIds = new Set(manifest.vectorIds)
   const staleVectorIds = [
-    ...(previousManifest?.staleVectorIds ?? []),
-    ...(previousManifest?.vectorIds ?? []),
+    ...(!changedIndex ? (previousManifest?.staleVectorIds ?? []) : []),
+    ...(!changedIndex ? (previousManifest?.vectorIds ?? []) : []),
   ].filter((id, index, ids) => !currentIds.has(id) && ids.indexOf(id) === index)
 
-  return staleVectorIds.length === 0
-    ? manifest
-    : { ...manifest, staleVectorIds }
+  return {
+    ...manifest,
+    ...(staleVectorIds.length ? { staleVectorIds } : {}),
+    ...(legacyVectorIds.length ? { legacyVectorIds } : {}),
+  }
 }
