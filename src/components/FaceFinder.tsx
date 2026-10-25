@@ -10,7 +10,6 @@ import {
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Empty,
   EmptyDescription,
@@ -18,7 +17,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
-import { Field, FieldLabel } from '@/components/ui/field'
 import { Spinner } from '@/components/ui/spinner'
 import {
   createBrowserFaceAnalyzer,
@@ -94,9 +92,9 @@ export default function FaceFinder({
   const [analyzer] = React.useState(() => createBrowserFaceAnalyzer(model))
   const selectionRef = React.useRef<FaceAnalysis | undefined>(undefined)
   const searchAttempt = React.useRef(0)
-  const [consent, setConsent] = React.useState(false)
+  const consent = React.useRef(false)
   const [status, setStatus] = React.useState<
-    'idle' | 'loading-model' | 'analyzing' | 'searching' | 'no-match'
+    'idle' | 'analyzing' | 'searching' | 'no-match'
   >('idle')
   const [error, setError] = React.useState<string>()
   const [selection, setSelection] = React.useState<FaceAnalysis>()
@@ -162,24 +160,14 @@ export default function FaceFinder({
     setSelection(undefined)
   }, [analyzer])
 
-  async function prepareModel() {
-    setError(undefined)
-    setStatus('loading-model')
-
-    try {
-      if (await analyzer.prepare()) setStatus('idle')
-    } catch (modelError) {
-      setStatus('idle')
-      setError(
-        modelError instanceof FaceTimeoutError
-          ? `${modelError.message} Try again or use another browser.`
-          : 'Face recognition could not start on this device. Try again or use another browser.',
-      )
-    }
+  function choosePhoto(input: HTMLInputElement | null) {
+    if (!input) return
+    consent.current = true
+    input.click()
   }
 
   async function analyze(file?: File) {
-    if (!file || !consent) return
+    if (!file || !consent.current) return
     const currentSearchAttempt = ++searchAttempt.current
     resetGallery()
     setError(undefined)
@@ -269,77 +257,47 @@ export default function FaceFinder({
     [analyzer],
   )
 
-  const busy = ['loading-model', 'analyzing', 'searching'].includes(status)
+  const busy = ['analyzing', 'searching'].includes(status)
   const statusMessage = {
-    'loading-model': 'Preparing face recognition',
     analyzing: 'Analyzing your photo',
     searching: 'Searching the gallery',
   }[status]
 
   return (
-    <section className="border-border mt-10 flex flex-col gap-5 border-y py-8">
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Search aria-hidden="true" />
-          <h2 className="font-heading text-2xl font-bold tracking-tight">
-            Find your photos
-          </h2>
-        </div>
-        <p className="text-muted-foreground max-w-2xl text-sm leading-6">
-          Take or upload a selfie. The closest gallery photos appear below with
-          the strongest matches first.
+    <section
+      aria-label="Find your photos"
+      aria-describedby={`${galleryId}-face-search-privacy`}
+      className="flex flex-col gap-4 py-2"
+    >
+      <div className="text-muted-foreground flex max-w-2xl items-start gap-2 text-sm leading-6">
+        <ShieldCheck aria-hidden="true" className="mt-1 size-4 shrink-0" />
+        <p id={`${galleryId}-face-search-privacy`}>
+          Your selfie is analyzed on your device. A temporary face descriptor is
+          sent to search this event. Your selfie and descriptor aren’t saved.
         </p>
       </div>
 
-      <Field
-        orientation="horizontal"
-        className="min-h-12 cursor-pointer items-start rounded-xl py-2"
-      >
-        <Checkbox
-          id="face-search-consent"
-          className="mt-0.5 size-6"
-          checked={consent}
-          onCheckedChange={(checked) => {
-            const nextConsent = checked === true
-            setConsent(nextConsent)
-            if (nextConsent) {
-              void prepareModel()
-            } else {
-              searchAttempt.current += 1
-              clearSelection()
-              setStatus('idle')
-              setError(undefined)
-            }
-          }}
-        />
-        <FieldLabel
-          htmlFor="face-search-consent"
-          className="cursor-pointer items-start text-sm leading-6"
-        >
-          <ShieldCheck aria-hidden="true" className="mt-0.5 shrink-0" />I
-          consent to local face analysis and sending a temporary numeric
-          descriptor to search this event. My selfie and descriptor are not
-          saved.
-        </FieldLabel>
-      </Field>
-
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <Button
           type="button"
-          disabled={!consent || busy}
-          onClick={() => cameraInput.current?.click()}
+          className="min-h-11 w-full sm:w-auto"
+          aria-describedby={`${galleryId}-face-search-privacy`}
+          disabled={busy}
+          onClick={() => choosePhoto(cameraInput.current)}
         >
           <Camera data-icon="inline-start" />
-          Take a selfie
+          Agree &amp; take a selfie
         </Button>
         <Button
           type="button"
           variant="outline"
-          disabled={!consent || busy}
-          onClick={() => uploadInput.current?.click()}
+          className="min-h-11 w-full sm:w-auto"
+          aria-describedby={`${galleryId}-face-search-privacy`}
+          disabled={busy}
+          onClick={() => choosePhoto(uploadInput.current)}
         >
           <Upload data-icon="inline-start" />
-          Upload a photo
+          Agree &amp; choose a photo
         </Button>
         {matches.length > 0 && (
           <Button type="button" variant="ghost" onClick={resetGallery}>
@@ -364,7 +322,8 @@ export default function FaceFinder({
         type="file"
         accept="image/*"
         capture="user"
-        className="sr-only"
+        className="hidden"
+        aria-label="Take a selfie for this event"
         onChange={(event) => {
           void analyze(event.target.files?.[0])
           event.currentTarget.value = ''
@@ -374,7 +333,8 @@ export default function FaceFinder({
         ref={uploadInput}
         type="file"
         accept="image/*"
-        className="sr-only"
+        className="hidden"
+        aria-label="Choose a photo for this event"
         onChange={(event) => {
           void analyze(event.target.files?.[0])
           event.currentTarget.value = ''
