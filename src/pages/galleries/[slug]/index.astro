@@ -350,58 +350,55 @@ const formatDate = (date: Date) =>
           <div data-gallery-grid data-photo-grid>
             {images.map((image, index) => {
               const dimensions = imageDimensions(image.width, image.height, 960)
+              const srcset = galleryThumbnailSrcset(
+                image.src,
+                dimensions.width,
+                dimensions.height,
+              )
               return (
                 <figure
                   class="relative mb-1 break-inside-avoid"
                   data-gallery-filename={image.filename}
                 >
-                  <Badge
-                    variant="secondary"
-                    data-face-rank
-                    hidden
-                    className="absolute top-2 left-2"
-                  >
-                    Match
-                  </Badge>
+                  {faceManifest && (
+                    <Badge
+                      variant="secondary"
+                      data-face-rank
+                      hidden
+                      className="absolute top-2 left-2"
+                    >
+                      Match
+                    </Badge>
+                  )}
                   <a
                     href={image.src}
                     data-gallery-open={index}
                     aria-label={`Open photograph ${index + 1}: ${image.alt}`}
                     class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                   >
-                    <picture>
-                      <source
-                        srcset={galleryThumbnailSrcset(
+                    <Image
+                      {...(srcset ? { srcset } : {})}
+                      src={
+                        galleryImageUrl(
                           image.src,
-                          dimensions.width,
-                          dimensions.height,
-                        )}
-                        sizes="(min-width: 768px) 20vw, 33vw"
-                        type="image/webp"
-                      />
-                      <Image
-                        src={
-                          galleryImageUrl(
-                            image.src,
-                            480,
-                            Math.round(
-                              (dimensions.height * 480) / dimensions.width,
-                            ),
-                            75,
-                          ) ?? image.src
-                        }
-                        alt={image.alt}
-                        width={dimensions.width}
-                        height={dimensions.height}
-                        layout="full-width"
-                        widths={[80, 160, 240, 480, 960]}
-                        sizes="(min-width: 768px) 20vw, 33vw"
-                        quality={85}
-                        loading="lazy"
-                        decoding="async"
-                        class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
-                      />
-                    </picture>
+                          480,
+                          Math.round(
+                            (dimensions.height * 480) / dimensions.width,
+                          ),
+                          75,
+                        ) ?? image.src
+                      }
+                      alt={image.alt}
+                      width={dimensions.width}
+                      height={dimensions.height}
+                      layout="full-width"
+                      widths={[80, 160, 240, 480, 960]}
+                      sizes="(min-width: 768px) 20vw, 33vw"
+                      quality={85}
+                      loading="lazy"
+                      decoding="async"
+                      class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                    />
                   </a>
                   <Button
                     type="button"
@@ -448,6 +445,11 @@ const formatDate = (date: Date) =>
                   960,
                 )
                 const photoIndex = images.length + index
+                const srcset = galleryThumbnailSrcset(
+                  image.src,
+                  dimensions.width,
+                  dimensions.height,
+                )
                 return (
                   <figure
                     class="relative mb-1 break-inside-avoid"
@@ -459,39 +461,29 @@ const formatDate = (date: Date) =>
                       aria-label={`Open guest photograph ${index + 1}: ${image.alt}`}
                       class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                     >
-                      <picture>
-                        <source
-                          srcset={galleryThumbnailSrcset(
+                      <Image
+                        {...(srcset ? { srcset } : {})}
+                        src={
+                          galleryImageUrl(
                             image.src,
-                            dimensions.width,
-                            dimensions.height,
-                          )}
-                          sizes="(min-width: 768px) 20vw, 33vw"
-                          type="image/webp"
-                        />
-                        <Image
-                          src={
-                            galleryImageUrl(
-                              image.src,
-                              480,
-                              Math.round(
-                                (dimensions.height * 480) / dimensions.width,
-                              ),
-                              75,
-                            ) ?? image.src
-                          }
-                          alt={image.alt}
-                          width={dimensions.width}
-                          height={dimensions.height}
-                          layout="full-width"
-                          widths={[80, 160, 240, 480, 960]}
-                          sizes="(min-width: 768px) 20vw, 33vw"
-                          quality={85}
-                          loading="lazy"
-                          decoding="async"
-                          class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
-                        />
-                      </picture>
+                            480,
+                            Math.round(
+                              (dimensions.height * 480) / dimensions.width,
+                            ),
+                            75,
+                          ) ?? image.src
+                        }
+                        alt={image.alt}
+                        width={dimensions.width}
+                        height={dimensions.height}
+                        layout="full-width"
+                        widths={[80, 160, 240, 480, 960]}
+                        sizes="(min-width: 768px) 20vw, 33vw"
+                        quality={85}
+                        loading="lazy"
+                        decoding="async"
+                        class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                      />
                     </a>
                     <Button
                       type="button"

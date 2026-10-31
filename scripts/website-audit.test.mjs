@@ -73,6 +73,31 @@ test('public gallery breadcrumbs describe their visible navigation', async () =>
   )
 })
 
+test('gallery thumbnails retain responsive previews without redundant picture wrappers', async () => {
+  for (const slug of [
+    'dawah-at-tampa-riverwalk',
+    'muslim-business-chamber-2026',
+    'sanad-silwadi-wedding',
+  ]) {
+    const html = await page(`/galleries/${slug}/`)
+    const figures = [
+      ...html.matchAll(
+        /<figure\b[^>]*data-gallery-filename="([^"]+)"[^>]*>([\s\S]*?)<\/figure>/g,
+      ),
+    ]
+    assert.ok(figures.length > 0)
+    for (const [, filename, figure] of figures) {
+      assert.doesNotMatch(figure, /<picture\b|<source\b/)
+      assert.match(figure, /<img\b[^>]*srcset="[^"]+ 960w"/)
+      assert.match(figure, /data-gallery-open="\d+"/)
+      assert.match(figure, /data-gallery-favorite/)
+      assert.ok(figure.includes(filename))
+    }
+    if (slug === 'dawah-at-tampa-riverwalk')
+      assert.doesNotMatch(html, /<span\b[^>]*data-face-rank/)
+  }
+})
+
 test('text fonts are served locally without a third-party stylesheet chain', async () => {
   const html = await page('/')
   assert.doesNotMatch(html, /https:\/\/(?:api|cdn)\.fontshare\.com/)
@@ -122,6 +147,36 @@ test('restaurant photographs have right-sized default image downloads', async ()
     const response = await fetch(new URL(url.replaceAll('&amp;', '&'), origin))
     assert.equal(response.status, 200)
     assert.ok((await response.arrayBuffer()).byteLength <= 200 * 1024, url)
+  }
+})
+
+test('cards and portfolio photographs bound their fallback image downloads', async () => {
+  for (const path of [
+    '/',
+    '/galleries/',
+    '/admin/galleries/',
+    '/portfolio/arqam-academy/',
+    '/portfolio/bayaan-academy/',
+    '/portfolio/results-after-work-podcast/',
+  ]) {
+    const html = await page(path)
+    const urls = [
+      ...new Set(
+        [...html.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g)].map(
+          (match) => match[1],
+        ),
+      ),
+    ]
+    for (const url of urls) {
+      const response = await fetch(
+        new URL(url.replaceAll('&amp;', '&'), origin),
+      )
+      assert.equal(response.status, 200, url)
+      assert.ok(
+        (await response.arrayBuffer()).byteLength <= 200 * 1024,
+        `${path}: ${url}`,
+      )
+    }
   }
 })
 

@@ -118,8 +118,12 @@ const ogImageHeight =
                   <Image
                     src={gallery.cover as string}
                     alt={gallery.coverAlt}
-                    width={gallery.coverWidth}
-                    height={gallery.coverHeight}
+                    width={Math.min(gallery.coverWidth, 960)}
+                    height={Math.round(
+                      (gallery.coverHeight *
+                        Math.min(gallery.coverWidth, 960)) /
+                        gallery.coverWidth,
+                    )}
                     layout="constrained"
                     widths={[480, 720, 960]}
                     sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
@@ -131,6 +135,10 @@ const ogImageHeight =
                   <Image
                     src={gallery.cover as ImageMetadata}
                     alt={gallery.coverAlt}
+                    width={Math.min(
+                      (gallery.cover as ImageMetadata).width,
+                      960,
+                    )}
                     layout="constrained"
                     widths={[480, 720, 960]}
                     sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"

@@ -38,11 +38,13 @@ Public event galleries offer Grid/Masonry views and photo-size controls that scr
 
 The photo viewer exposes **Save photo** directly. **Download all** downloads every gallery photo, regardless of favorites or selfie-search filters. It uses a prebuilt ZIP when configured; otherwise, the browser prepares a ZIP with progress and retry feedback, just as it does for favorites. Keep the page open while preparing a download. These browser-generated ZIPs use device memory; large galleries on limited-memory devices may need a prebuilt archive through `downloadAllUrl`. Successful preparation closes the progress dialog and shows a short confirmation. Support remains an optional link rather than a tipping dialog.
 
-Uploaded-photo thumbnails use responsive WebP candidates through the existing `/_image/` endpoint. The shared gallery template still uses Astro's `Image` component; the surrounding `picture` source supplies distinct thumbnail sizes for dynamic R2 URLs. The viewer and downloads retain the original gallery image URL. Legacy remote images keep the established Astro optimization path.
+Uploaded-photo thumbnails use responsive WebP candidates through the existing `/_image/` endpoint. The shared gallery template uses Astro's `Image` component with an explicit `srcset` for dynamic R2 URLs. The viewer and downloads retain the original gallery image URL. Legacy remote images keep the established Astro optimization path without redundant `picture` wrappers. Hidden face-match badges are included only when the gallery supports selfie search.
 
 ### Content assets
 
 Local content images belong in `src/assets/`, with portfolio media under `client-work/`. Content collection images use Astro's `image()` schema helper and the `Image` component. Imported logos and interface images also exist in `src/image/`.
+
+Card and portfolio images bound their fallback `src` dimensions as well as their responsive candidates, so clients without `srcset` support do not download the full source. Preserve aspect ratios when setting explicit width and height; original gallery files remain available through the viewer and download links.
 
 Use `public/` for files served unchanged, such as favicons, the web manifest, contact cards, redirects, and crawler files. Event photos uploaded through the dashboard or app belong in R2; see [gallery infrastructure](interactive-event-galleries.md).
 
