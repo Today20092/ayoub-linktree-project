@@ -16,17 +16,17 @@ const eventPortrait =
 
 const title = 'Instant event photography experience | Ayoub Abedrabbo'
 const description =
-  'Give your guests professional headshots, family photos, and portraits delivered to their phones during your event. Tampa event experiences starting at $300.'
+  'Give your guests professional headshots, family photos, and portraits delivered to their phones during your event. Tampa event experiences starting at $400.'
 const canonicalUrl = new URL(
   '/services/event-portraits/',
   Astro.site,
 ).toString()
 const ogImage = new URL(siteConfig.site.ogImage, Astro.site).toString()
 const packages = [
-  { hours: '1 hour', price: '$300', sessions: 'About 20' },
-  { hours: '2 hours', price: '$400', sessions: 'About 40' },
-  { hours: '3 hours', price: '$500', sessions: 'About 60' },
-  { hours: '4 hours', price: '$600', sessions: 'About 80' },
+  { hours: '1 hour', price: '$400', sessions: 'About 20' },
+  { hours: '2 hours', price: '$550', sessions: 'About 40' },
+  { hours: '3 hours', price: '$700', sessions: 'About 60' },
+  { hours: '4 hours', price: '$850', sessions: 'About 80' },
 ]
 ---
 
@@ -96,7 +96,8 @@ const packages = [
         <p class="text-muted-foreground mt-4 text-base leading-7">
           Give them a reason to remember it. A fresh LinkedIn headshot, a photo
           with their family, or a portrait with a friend. You host the
-          experience; your guests receive their photos at no charge.
+          experience for your mosque, school, nonprofit, or community event; the
+          organizer pays and guests receive their photos at no charge.
         </p>
       </div>
       <ol class="mt-8 grid gap-7 sm:grid-cols-3 sm:gap-8">
@@ -142,8 +143,8 @@ const packages = [
       </h2>
       <p class="text-muted-foreground mt-4 max-w-2xl leading-7">
         Choose the time that fits your event. Every booking includes the
-        photographer, professional camera and lighting, direct photo delivery,
-        and an event gallery for guests and the organizer.
+        photographer (Ayoub alone), professional camera and lighting, photo
+        delivery to guests' phones during the event, and a shareable gallery.
       </p>
       <div class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-12">
         <div>
@@ -185,10 +186,11 @@ const packages = [
             </tbody>
           </table>
           <p class="text-muted-foreground mt-4 text-sm leading-6">
-            All prices in USD. Allow approximately 20 portrait sessions per
-            hour, depending on group size and event flow. A session may include
-            one person, a couple, or a small group. This is a planning estimate,
-            not a guarantee that every attendee will be photographed.
+            Each extra hour starts at +$150. All prices in USD. Allow
+            approximately 20 portrait sessions per hour, depending on group size
+            and event flow. A session may include one person, a couple, or a
+            small group. This is a planning estimate, not a guarantee that every
+            attendee will be photographed.
           </p>
         </div>
         <div class="bg-muted/50 rounded-2xl p-6 sm:p-8">
@@ -204,15 +206,23 @@ const packages = [
             <div>
               <dt class="font-semibold">Larger or busier events</dt>
               <dd class="text-muted-foreground">
-                Bookings up to 8 hours are available. Your final quote considers
-                attendance, expected portrait demand, and coverage time.
+                Coverage up to 8 hours, large attendance, and high portrait
+                demand require a custom quote.
               </dd>
             </div>
             <div>
               <dt class="font-semibold">Portraits come first</dt>
               <dd class="text-muted-foreground">
                 I can capture event moments between portraits when time allows.
-                Dedicated event coverage can be discussed with your quote.
+                Dedicated candid coverage requires a custom quote.
+              </dd>
+            </div>
+            <div>
+              <dt class="font-semibold">Quoted add-ons</dt>
+              <dd class="text-muted-foreground">
+                A helper or second shooter, branded backdrop, same-night
+                organizer highlight clip, travel beyond 30 miles, and rush
+                gallery are available by custom quote.
               </dd>
             </div>
           </dl>
