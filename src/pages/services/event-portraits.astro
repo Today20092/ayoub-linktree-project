@@ -58,12 +58,20 @@ const packages = [
           Professional photos, on their phones in minutes. An experience they
           can enjoy, keep, and share before the event ends.
         </p>
-        <a
-          href="#pricing"
-          class={`${buttonVariants({ variant: 'outline', size: 'lg' })} mt-7 min-h-11 px-5`}
-        >
-          View pricing
-        </a>
+        <div class="mt-7 flex flex-wrap items-center gap-5">
+          <a
+            href="#inquiry"
+            class={`${buttonVariants({ size: 'lg' })} min-h-11 px-5`}
+          >
+            Request a quote
+          </a>
+          <a
+            href="#pricing"
+            class="text-primary rounded-sm text-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            View pricing
+          </a>
+        </div>
       </div>
       <figure>
         <Image
@@ -232,31 +240,252 @@ const packages = [
 
     <Separator />
 
-    <section aria-labelledby="inquiry-title" class="py-10 sm:py-14">
-      <h2
-        id="inquiry-title"
-        class="text-2xl font-bold tracking-tight sm:text-3xl"
+    <section
+      id="inquiry"
+      aria-labelledby="inquiry-title"
+      class="scroll-mt-24 py-10 sm:py-14"
+    >
+      <div class="max-w-2xl">
+        <h2
+          id="inquiry-title"
+          class="text-2xl font-bold tracking-tight sm:text-3xl"
+        >
+          Request a quote
+        </h2>
+        <p class="text-muted-foreground mt-4 leading-7">
+          Send the date, venue, guest count, and coverage. Ayoub reviews the
+          request and confirms the quote. Submitting opens your email app. It
+          does not reserve the date.
+        </p>
+      </div>
+      <form
+        id="event-portrait-inquiry"
+        class="mt-8 grid max-w-2xl gap-5"
+        novalidate
       >
-        Give your guests something to keep.
-      </h2>
-      <p class="text-muted-foreground mt-4 max-w-xl leading-7">
-        Send me your date, venue, approximate guest count, and desired coverage
-        time. I'll help you choose the right fit and confirm your quote.
-      </p>
-      <div class="mt-6 flex flex-wrap items-center gap-5">
+        <div
+          id="inquiry-errors"
+          class="border-destructive bg-destructive/10 text-destructive hidden rounded-xl border px-4 py-3 text-sm"
+          tabindex="-1"
+          role="alert"
+        ></div>
+        <div class="grid gap-5 sm:grid-cols-2">
+          <label class="grid gap-2 text-sm font-medium" for="coverage">
+            Coverage
+            <select
+              id="coverage"
+              name="coverage"
+              required
+              class="border-input bg-background min-h-11 rounded-xl border px-3"
+            >
+              <option value="">Choose coverage</option>
+              {packages.map((option) => (
+                <option value={option.hours}>
+                  {option.hours}, starting at {option.price}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label class="grid gap-2 text-sm font-medium" for="extraTime">
+            Longer coverage
+            <input
+              id="extraTime"
+              name="extraTime"
+              class="border-input bg-background min-h-11 rounded-xl border px-3"
+              placeholder="Optional, up to 8 hours"
+            />
+          </label>
+        </div>
+        <div class="grid gap-5 sm:grid-cols-2">
+          <label class="grid gap-2 text-sm font-medium" for="date">
+            Date
+            <input
+              id="date"
+              name="date"
+              type="date"
+              required
+              class="border-input bg-background min-h-11 rounded-xl border px-3"
+            />
+          </label>
+          <label class="grid gap-2 text-sm font-medium" for="guests">
+            Approximate guests
+            <input
+              id="guests"
+              name="guests"
+              inputmode="numeric"
+              required
+              class="border-input bg-background min-h-11 rounded-xl border px-3"
+            />
+          </label>
+        </div>
+        <div class="grid gap-5 sm:grid-cols-2">
+          <label class="grid gap-2 text-sm font-medium" for="venue">
+            Venue
+            <input
+              id="venue"
+              name="venue"
+              required
+              class="border-input bg-background min-h-11 rounded-xl border px-3"
+            />
+          </label>
+          <label class="grid gap-2 text-sm font-medium" for="city">
+            City
+            <input
+              id="city"
+              name="city"
+              required
+              class="border-input bg-background min-h-11 rounded-xl border px-3"
+            />
+          </label>
+        </div>
+        <label class="grid gap-2 text-sm font-medium" for="eventType">
+          Event type
+          <input
+            id="eventType"
+            name="eventType"
+            required
+            class="border-input bg-background min-h-11 rounded-xl border px-3"
+            placeholder="Mosque, school, nonprofit, or community event"
+          />
+        </label>
+        <div class="grid gap-5 sm:grid-cols-3">
+          <label class="grid gap-2 text-sm font-medium" for="name">
+            Name
+            <input
+              id="name"
+              name="name"
+              autocomplete="name"
+              required
+              class="border-input bg-background min-h-11 rounded-xl border px-3"
+            />
+          </label>
+          <label class="grid gap-2 text-sm font-medium" for="phone">
+            Phone
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              autocomplete="tel"
+              required
+              class="border-input bg-background min-h-11 rounded-xl border px-3"
+            />
+          </label>
+          <label class="grid gap-2 text-sm font-medium" for="email">
+            Email
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              class="border-input bg-background min-h-11 rounded-xl border px-3"
+            />
+          </label>
+        </div>
+        <div class="flex flex-wrap items-center gap-5">
+          <button
+            type="submit"
+            class={buttonVariants({ size: 'lg', className: 'min-h-11 px-5' })}
+          >
+            Open the request in your email
+          </button>
+          <a
+            href="/contact/"
+            class="text-primary rounded-sm text-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            Or use the contact page
+          </a>
+        </div>
+      </form>
+      <div
+        id="inquiry-ready"
+        class="mt-6 hidden max-w-2xl rounded-2xl bg-muted/50 p-6"
+        role="status"
+      >
+        <h3 class="text-lg font-semibold">
+          Request ready for Ayoub to review.
+        </h3>
+        <p
+          id="inquiry-ready-copy"
+          class="text-muted-foreground mt-2 text-sm leading-6"
+        ></p>
+        <p class="mt-3 text-sm leading-6">
+          This does not reserve the date, and this page does not send the email
+          itself.
+        </p>
         <a
-          href="/contact/"
-          class={buttonVariants({ size: 'lg', className: 'min-h-11 px-5' })}
+          id="inquiry-mailto"
+          class="text-primary mt-4 inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4"
+          href=""
         >
-          Ask about your event
-        </a>
-        <a
-          href="/portfolio/portraits/"
-          class="text-primary rounded-sm text-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
-        >
-          See more portraits
+          Open the email draft again
         </a>
       </div>
     </section>
+    <script>
+      import {
+        inquiryErrors,
+        inquiryMailto,
+      } from '../../lib/event-portrait-inquiry'
+
+      const form = document.querySelector('#event-portrait-inquiry')
+      const errors = document.querySelector('#inquiry-errors')
+      const ready = document.querySelector('#inquiry-ready')
+      const readyCopy = document.querySelector('#inquiry-ready-copy')
+      const mailtoLink = document.querySelector('#inquiry-mailto')
+      const keys = [
+        'coverage',
+        'extraTime',
+        'date',
+        'venue',
+        'city',
+        'guests',
+        'eventType',
+        'name',
+        'phone',
+        'email',
+      ]
+
+      form?.addEventListener('submit', (event) => {
+        event.preventDefault()
+        if (
+          !(form instanceof HTMLFormElement) ||
+          !(errors instanceof HTMLElement) ||
+          !(ready instanceof HTMLElement) ||
+          !(readyCopy instanceof HTMLElement) ||
+          !(mailtoLink instanceof HTMLAnchorElement)
+        ) {
+          return
+        }
+        const data = new FormData(form)
+        const fields = Object.fromEntries(
+          keys.map((key) => [key, String(data.get(key) ?? '')]),
+        )
+        const packages = [...form.querySelectorAll('option')]
+          .filter((option) => option.value !== '')
+          .map((option) => {
+            const price = option.textContent?.split('starting at ')[1]?.trim()
+            return { hours: option.value, price: price ?? '' }
+          })
+        const problems = inquiryErrors(fields, packages)
+        const first = Object.values(problems)[0]
+        if (first) {
+          errors.classList.remove('hidden')
+          errors.textContent = first
+          errors.focus()
+          ready.classList.add('hidden')
+          return
+        }
+        const href = inquiryMailto(fields, packages)
+        const selected = packages.find(
+          (option) => option.hours === fields.coverage,
+        )
+        errors.classList.add('hidden')
+        ready.classList.remove('hidden')
+        readyCopy.textContent = `${fields.coverage}, starting at ${selected?.price}.`
+        mailtoLink.href = href
+        window.location.href = href
+      })
+    </script>
   </main>
 </BaseLayout>
