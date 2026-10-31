@@ -1,4 +1,4 @@
-import { defineConfig } from 'astro/config'
+import { defineConfig, fontProviders } from 'astro/config'
 import tailwindcss from '@tailwindcss/vite'
 import mdx from '@astrojs/mdx'
 import react from '@astrojs/react'
@@ -11,6 +11,24 @@ export default defineConfig({
   site: 'https://ayoubabed.xyz',
   trailingSlash: 'always',
   session: false,
+  fonts: [
+    {
+      provider: fontProviders.fontshare(),
+      name: 'Plus Jakarta Sans',
+      cssVariable: '--font-jakarta',
+      weights: ['200 800'],
+      styles: ['normal', 'italic'],
+      display: 'swap',
+    },
+    {
+      provider: fontProviders.fontshare(),
+      name: 'Zodiak',
+      cssVariable: '--font-zodiak',
+      weights: ['100 900'],
+      styles: ['normal', 'italic'],
+      display: 'swap',
+    },
+  ],
   server: {
     allowedHosts: [
       'desktop-ayoub.cuttlefish-coho.ts.net',

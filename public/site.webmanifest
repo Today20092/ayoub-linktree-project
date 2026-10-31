@@ -1,6 +1,7 @@
 {
   "name": "Ayoub Abedrabbo",
   "short_name": "Ayoub",
+  "start_url": "/",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -13,7 +14,7 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#12140e",
-  "background_color": "#12140e",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
   "display": "standalone"
 }

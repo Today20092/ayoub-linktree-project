@@ -1,6 +1,7 @@
 ---
 import CloudflareWebAnalytics from '../components/CloudflareWebAnalytics.astro'
 import Header from '../components/Header.astro'
+import { Font } from 'astro:assets'
 import { cacheControlForPage } from '../lib/public-delivery'
 
 type Props = {
@@ -40,7 +41,7 @@ const {
   twitterHandle,
   robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
   sitemapUrl,
-  preconnectHints = ['https://api.fontshare.com'],
+  preconnectHints = [],
   structuredData,
   activeNav,
   disableAnalytics = false,
@@ -100,10 +101,8 @@ if (Astro.csp) {
     {preconnectHints.map((href) => (
       <link rel="preconnect" href={href} />
     ))}
-    <link
-      rel="stylesheet"
-      href="https://api.fontshare.com/v2/css?f[]=plus-jakarta-sans@1,2&f[]=zodiak@1,2&display=swap"
-    />
+    <Font cssVariable="--font-jakarta" preload={[{ style: 'normal' }]} />
+    <Font cssVariable="--font-zodiak" preload={[{ style: 'normal' }]} />
 
     <meta
       name="theme-color"

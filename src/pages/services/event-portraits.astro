@@ -38,6 +38,9 @@ const packages = eventPortraitPackages
   description={description}
   canonicalUrl={canonicalUrl}
   ogImage={ogImage}
+  ogImageWidth={siteConfig.site.ogImageWidth}
+  ogImageHeight={siteConfig.site.ogImageHeight}
+  ogImageType={siteConfig.site.ogImageType}
   ogImageAlt={siteConfig.site.ogImageAlt}
   twitterHandle={siteConfig.site.twitterHandle}
   structuredData={eventPortraitStructuredData(canonicalUrl)}
@@ -336,6 +339,9 @@ const packages = eventPortraitPackages
             <input
               id="guests"
               name="guests"
+              type="number"
+              min="0"
+              step="1"
               inputmode="numeric"
               required
               class="border-input bg-background min-h-11 rounded-xl border px-3"
@@ -367,6 +373,7 @@ const packages = eventPortraitPackages
             <input
               id="city"
               name="city"
+              autocomplete="address-level2"
               required
               class="border-input bg-background min-h-11 rounded-xl border px-3"
             />
@@ -430,6 +437,7 @@ const packages = eventPortraitPackages
               id="email"
               name="email"
               type="email"
+              enterkeyhint="done"
               autocomplete="email"
               required
               class="border-input bg-background min-h-11 rounded-xl border px-3"
@@ -487,19 +495,6 @@ const packages = eventPortraitPackages
       const ready = document.querySelector('#inquiry-ready')
       const readyCopy = document.querySelector('#inquiry-ready-copy')
       const mailtoLink = document.querySelector('#inquiry-mailto')
-      const keys = [
-        'coverage',
-        'extraTime',
-        'date',
-        'venue',
-        'city',
-        'guests',
-        'eventType',
-        'name',
-        'phone',
-        'email',
-      ]
-
       form?.addEventListener('submit', (event) => {
         event.preventDefault()
         if (
@@ -512,9 +507,18 @@ const packages = eventPortraitPackages
           return
         }
         const data = new FormData(form)
-        const fields = Object.fromEntries(
-          keys.map((key) => [key, String(data.get(key) ?? '')]),
-        )
+        const fields = {
+          coverage: String(data.get('coverage') ?? ''),
+          extraTime: String(data.get('extraTime') ?? ''),
+          date: String(data.get('date') ?? ''),
+          venue: String(data.get('venue') ?? ''),
+          city: String(data.get('city') ?? ''),
+          guests: String(data.get('guests') ?? ''),
+          eventType: String(data.get('eventType') ?? ''),
+          name: String(data.get('name') ?? ''),
+          phone: String(data.get('phone') ?? ''),
+          email: String(data.get('email') ?? ''),
+        }
         const packages = [...form.querySelectorAll('option')]
           .filter((option) => option.value !== '')
           .map((option) => {

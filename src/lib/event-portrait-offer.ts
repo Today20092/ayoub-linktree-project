@@ -4,7 +4,7 @@ export const eventPortraitTitle =
   'Instant event portraits in Tampa | Ayoub Abedrabbo.'
 
 export const eventPortraitDescription =
-  'The host pays for instant guest portraits in Tampa. Guests receive their photos at no charge. Coverage starts at $400.'
+  'The host pays for instant guest portraits in Tampa, with camera, lighting, and phone delivery. Guests receive photos at no charge. Coverage starts at $400.'
 
 export const eventPortraitEmail = 'Ayoub@AyoubAbed.xyz'
 export const eventPortraitPhone = '(813) 424-0606'

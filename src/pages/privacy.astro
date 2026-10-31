@@ -5,9 +5,9 @@ import BaseLayout from '../layouts/BaseLayout.astro'
 import { siteConfig } from '../lib/site-config'
 
 const { site } = siteConfig
-const title = 'Privacy | Ayoub Abedrabbo'
+const title = 'Website and Gallery Privacy | Ayoub Abedrabbo'
 const description =
-  'Privacy information for the Ayoub Abedrabbo portfolio and event gallery site.'
+  'How this portfolio and event gallery site uses Cloudflare hosting and analytics, handles photo uploads and face search, and receives your contact details.'
 const canonicalUrl = new URL('/privacy/', Astro.site).toString()
 const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
 ---
@@ -64,8 +64,8 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
       </p>
       <h2>Third-party resources</h2>
       <p>
-        The site requests fonts from Fontshare. Some portfolio pages embed
-        YouTube content or maps; those services receive a request when the
+        Fonts from Fontshare are served from this site. Some portfolio pages
+        embed YouTube content or maps; those services receive a request when the
         corresponding resource is loaded or used. External links open the
         destination service under its own policies.
       </p>
@@ -74,7 +74,10 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
         If you contact Ayoub by email, phone, or text, the information you
         provide is delivered through that service so the request can be
         answered. For questions about this page, use the
-        <a href="/contact/">contact page</a>.
+        <a class="underline underline-offset-4" href="/contact/">
+          contact page
+        </a>
+        .
       </p>
       <p>Last reviewed: September 11, 2026.</p>
     </div>

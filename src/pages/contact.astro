@@ -22,6 +22,21 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
   ogImageType="image/jpeg"
   ogImageAlt={site.ogImageAlt}
   activeNav="contact"
+  structuredData={{
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    name: title,
+    description,
+    url: canonicalUrl,
+    mainEntity: {
+      '@type': 'Person',
+      '@id': new URL('/#person', Astro.site).toString(),
+      name: 'Ayoub Abedrabbo',
+      email: 'Ayoub@AyoubAbed.xyz',
+      telephone: '+1-813-424-0606',
+      url: new URL('/', Astro.site).toString(),
+    },
+  }}
 >
   <main
     id="main-content"

@@ -46,6 +46,11 @@ Local content images belong in `src/assets/`, with portfolio media under `client
 
 Use `public/` for files served unchanged, such as favicons, the web manifest, contact cards, redirects, and crawler files. Event photos uploaded through the dashboard or app belong in R2; see [gallery infrastructure](interactive-event-galleries.md).
 
+`public/AGENTS.md` contains public website reading guidance, separate from repository
+agent instructions. `public/.well-known/security.txt` directs security reports to
+the published contact email without promising a response time or reward. Review its
+contact details and renew its expiry before October 1, 2027.
+
 `src/styles.css` contains shared colors, typography, theme rules, and portfolio prose styles. Adjust `.typeset-portfolio` for case-study spacing. Extra blank lines in MDX do not control rendered spacing. Check both light and dark themes after styling changes.
 
 ## Deployment watch paths

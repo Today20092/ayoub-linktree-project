@@ -2,7 +2,7 @@
 
 This is the repeatable SquirrelScan baseline for issue #83. It audits the built
 Astro Worker with local Cloudflare simulations. It does not deploy or publish
-anything. Website fixes belong to #84; CI automation belongs to #85.
+anything. Website fixes belong to #84; final audit and remaining-gap review belong to #85.
 
 ## Build and isolated storage
 
@@ -52,6 +52,15 @@ All must return 200. `/sitemap.xml` must include the three galleries and
 `/services/event-portraits/`. An unknown gallery must return 404. No admin or
 upload operation is needed. Localhost intentionally permits dashboard reads;
 that does not test production Cloudflare Access.
+
+### Focused public-page regression checks
+
+With the built local Worker running, run `node --test scripts/website-audit.test.mjs`.
+Set `AUDIT_ORIGIN` to use another isolated local port. These HTTP checks cover
+video control names, page and gallery schema, local font delivery, the manifest,
+image download sizes, social-card dimensions, and public contact/guidance files.
+They supplement `npm run verify`; they do not test browser hydration or replace
+the full SquirrelScan comparison.
 
 ### Optional local R2 and image-transform smoke check
 
