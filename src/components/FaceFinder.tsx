@@ -2,6 +2,7 @@ import * as React from 'react'
 import {
   Camera,
   CircleAlert,
+  Download,
   RotateCcw,
   Search,
   ShieldCheck,
@@ -379,6 +380,21 @@ export default function FaceFinder({
             Results are possible matches, not confirmed identities.
           </AlertDescription>
         </Alert>
+      )}
+      {matches.length > 0 && (
+        <Button
+          type="button"
+          onClick={() => {
+            document.getElementById(galleryId)?.dispatchEvent(
+              new CustomEvent('gallery:download-matches', {
+                detail: matches.map((match) => match.filename),
+              }),
+            )
+          }}
+        >
+          <Download data-icon="inline-start" aria-hidden="true" />
+          Download ZIP ({matches.length})
+        </Button>
       )}
 
       {status === 'no-match' && (

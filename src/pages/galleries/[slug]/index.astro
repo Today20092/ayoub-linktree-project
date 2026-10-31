@@ -222,75 +222,6 @@ const formatDate = (date: Date) =>
       <p class="text-muted-foreground mt-4 max-w-2xl text-base leading-7">
         {summary}
       </p>
-      {(totalPhotoCount > 0 || gallerySettings?.uploads_enabled) && (
-        <div class="mt-3 flex flex-wrap items-center gap-3 empty:hidden sm:mt-6">
-          {totalPhotoCount > 0 && (
-            <EventLightbox
-              client:load
-              galleryId={galleryId}
-              heading={galleryTitle}
-              projectSlug={eventSlug}
-              shareToken={
-                gallery.isUnlisted
-                  ? (Astro.url.searchParams.get('share') ?? undefined)
-                  : undefined
-              }
-              projectTitle={galleryTitle}
-              downloadAllUrl={data?.downloadAllUrl}
-              tipUrl={tipUrl}
-              images={allImages.map((image) => ({
-                src: image.src,
-                filename: image.filename,
-                alt: image.alt,
-                width: image.width,
-                height: image.height,
-                caption:
-                  'caption' in image && typeof image.caption === 'string'
-                    ? image.caption
-                    : undefined,
-              }))}
-            >
-              {allImages.slice(0, 1).map((image) => (
-                <figure
-                  class="m-0 flex h-full w-full flex-col items-center justify-center"
-                  data-gallery-slide="0"
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    width={lightboxPreview?.width ?? image.width}
-                    height={lightboxPreview?.height ?? image.height}
-                    layout="constrained"
-                    widths={[480, 720]}
-                    sizes="min(100vw, 1600px)"
-                    quality={75}
-                    loading="lazy"
-                    decoding="async"
-                    data-gallery-original={image.src}
-                    class="max-h-[calc(100dvh-9rem)] w-auto max-w-full object-contain"
-                  />
-                  <figcaption
-                    data-gallery-caption
-                    class="mt-3 max-w-3xl text-center text-sm text-white/75"
-                  >
-                    {'caption' in image && image.caption
-                      ? image.caption
-                      : image.filename}
-                  </figcaption>
-                </figure>
-              ))}
-            </EventLightbox>
-          )}
-          {gallerySettings?.uploads_enabled && !gallery.isUnlisted ? (
-            <Button variant="outline" size="lg" asChild>
-              <a href={`/galleries/${eventSlug}/upload/`}>
-                <ImageUp data-icon="inline-start" aria-hidden="true" />
-                Ask for a submission link
-              </a>
-            </Button>
-          ) : null}
-        </div>
-      )}
     </header>
 
     {professionalCount > 0 && (
@@ -374,6 +305,7 @@ const formatDate = (date: Date) =>
         data-gallery-page={page}
         data-gallery-page-size={GALLERY_PAGE_SIZE}
         tabindex="-1"
+        data-gallery-has-picks="false"
         aria-label={`${galleryTitle} photographs`}
       >
         {totalPhotoCount > 0 && <GalleryGridControls count={totalPhotoCount} />}
@@ -578,10 +510,81 @@ const formatDate = (date: Date) =>
             )}
           </nav>
         )}
+        {totalPhotoCount > 0 && (
+          <div class="mt-8">
+            <EventLightbox
+              client:load
+              galleryId={galleryId}
+              heading={galleryTitle}
+              projectSlug={eventSlug}
+              shareToken={
+                gallery.isUnlisted
+                  ? (Astro.url.searchParams.get('share') ?? undefined)
+                  : undefined
+              }
+              projectTitle={galleryTitle}
+              downloadAllUrl={data?.downloadAllUrl}
+              tipUrl={tipUrl}
+              images={allImages.map((image) => ({
+                src: image.src,
+                filename: image.filename,
+                alt: image.alt,
+                width: image.width,
+                height: image.height,
+                caption:
+                  'caption' in image && typeof image.caption === 'string'
+                    ? image.caption
+                    : undefined,
+              }))}
+            >
+              {allImages.slice(0, 1).map((image) => (
+                <figure
+                  class="m-0 flex h-full w-full flex-col items-center justify-center"
+                  data-gallery-slide="0"
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={lightboxPreview?.width ?? image.width}
+                    height={lightboxPreview?.height ?? image.height}
+                    layout="constrained"
+                    widths={[480, 720]}
+                    sizes="min(100vw, 1600px)"
+                    quality={75}
+                    loading="lazy"
+                    decoding="async"
+                    data-gallery-original={image.src}
+                    class="max-h-[calc(100dvh-9rem)] w-auto max-w-full object-contain"
+                  />
+                  <figcaption
+                    data-gallery-caption
+                    class="mt-3 max-w-3xl text-center text-sm text-white/75"
+                  >
+                    {'caption' in image && image.caption
+                      ? image.caption
+                      : image.filename}
+                  </figcaption>
+                </figure>
+              ))}
+            </EventLightbox>
+          </div>
+        )}
       </section>
     )}
 
-    <footer class="border-border mt-12 border-t pt-6" data-reveal="fade">
+    <footer
+      class="border-border mt-12 flex flex-wrap gap-x-6 gap-y-3 border-t pt-6"
+      data-reveal="fade"
+    >
+      {gallerySettings?.uploads_enabled && !gallery.isUnlisted ? (
+        <a
+          href={`/galleries/${eventSlug}/upload/`}
+          class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <ImageUp className="size-4" aria-hidden="true" />
+          Ask for a submission link
+        </a>
+      ) : null}
       <a
         href={portfolioUrl}
         class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
