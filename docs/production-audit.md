@@ -73,6 +73,12 @@ optionally `GALLERY_BROWSER_REPORT` for measurements and screenshots; no runtime
 dependency is added. Download bytes and ranked matches use browser fixtures;
 this does not exercise a remote face index or validate real archive contents.
 
+Run `node scripts/gallery-continuous-browser.mjs` against the same isolated Worker
+for automatic appending, manual/automatic overlap, failure and retry, selection
+reset after multiple batches, history restoration, and stable earlier-photo
+prepending. It uses the same Playwright and report environment variables and
+saves initial HTML, DOM/network measurements, and desktop/mobile screenshots.
+
 Optional access/boundary fixtures belong **only** in the isolated local database:
 apply `scripts/audit/pagination-fixtures.sql` with the same local Wrangler config
 and state directory above, then set `GALLERY_PAGINATION_FIXTURES=1` for

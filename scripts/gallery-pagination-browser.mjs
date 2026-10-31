@@ -110,7 +110,7 @@ try {
         .getByRole('button', { name: 'Larger photos', exact: true })
         .click()
     await page.locator('[data-gallery-favorite]').first().click({ force: true })
-    await page.getByRole('link', { name: 'Next', exact: true }).click()
+    await page.goto(`${path}?page=2`)
     await page.waitForFunction(
       () => !!document.querySelector('[data-gallery-favorite]:not([disabled])'),
     )
@@ -152,7 +152,7 @@ try {
     )
     const selectedDownload = page.waitForEvent('download')
     await page
-      .getByRole('button', { name: 'Download favorites (2)', exact: true })
+      .getByRole('button', { name: 'Download ZIP (2)', exact: true })
       .click()
     const selectedZip = await selectedDownload
     const zipBytes = await readFile(await selectedZip.path())
@@ -176,7 +176,7 @@ try {
     })
     const allDownload = page.waitForEvent('download')
     await page
-      .getByRole('button', { name: 'Download all', exact: true })
+      .getByRole('button', { name: 'Download ZIP', exact: true })
       .click()
     const allArchive = await allDownload
     archiveRequest ??= new URL(allArchive.url())
@@ -185,9 +185,7 @@ try {
       'https://photos.ayoubabed.xyz/events/dawah-at-tampa-riverwalk/downloads/dawah-at-tampa-riverwalk.zip',
     )
     await page.unroute('**/api/download/**')
-    await page
-      .getByRole('button', { name: 'Show all photos', exact: true })
-      .click()
+    await page.locator('[data-gallery-toggle-favorites]').click()
     await page.waitForFunction(
       () => document.querySelectorAll('[data-gallery-filename]').length === 18,
     )
@@ -229,7 +227,7 @@ try {
       .getByRole('radio', { name: 'Masonry', exact: true })
       .check({ force: true })
     await page
-      .getByRole('button', { name: 'Show page photos', exact: true })
+      .getByRole('button', { name: 'Show loaded photos', exact: true })
       .click()
     let delayed
     await page.route(
@@ -264,7 +262,7 @@ try {
           .getAttribute('aria-busy') === 'true',
     )
     await page
-      .getByRole('button', { name: 'Show page photos', exact: true })
+      .getByRole('button', { name: 'Show loaded photos', exact: true })
       .click()
     delayed?.()
     await page.unroute('**/galleries/dawah-at-tampa-riverwalk/')
@@ -305,11 +303,9 @@ try {
       () => document.querySelectorAll('[data-gallery-filename]').length === 1,
     )
     await page
-      .getByRole('button', { name: 'Show page photos', exact: true })
+      .getByRole('button', { name: 'Show loaded photos', exact: true })
       .click()
-    await page
-      .getByRole('button', { name: 'Clear favorites', exact: true })
-      .click()
+    await page.getByRole('button', { name: 'Clear', exact: true }).click()
     await page.close()
 
     const nojs = await browser.newPage({
@@ -385,7 +381,9 @@ try {
           .getByRole('button', { name: 'Larger photos', exact: true })
           .click()
       await privatePage.locator('[data-gallery-favorite]').first().click()
-      await privatePage.getByRole('link', { name: 'Next', exact: true }).click()
+      await privatePage.goto(
+        `${origin}/galleries/pagination-test-unlisted/?page=2&share=${token}`,
+      )
       assert.equal(new URL(privatePage.url()).searchParams.get('share'), token)
       await privatePage.waitForFunction(
         () =>

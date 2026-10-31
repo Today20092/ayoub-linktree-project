@@ -6,6 +6,11 @@ Anyone with the link can view and forward it. This is not private-file authoriza
 
 Numbered gallery pages and cross-page favorites retain the validated viewing token. Shared photo numbers refer to the whole gallery and open their containing page. Page canonicals, structured data, and sitemap entries never include viewing tokens; unlisted galleries remain absent from the sitemap. Invalid or out-of-range page queries return 404 after the same visibility check as the first page.
 
+Continuous browsing fetches those same authorized batch URLs and preserves their
+Astro image output. Its history state stores only the pathname, loaded batch
+range, and scroll position; viewing tokens stay in the viewing URL and request
+memory. Ordinary batch links remain functional with JavaScript disabled.
+
 Guest submissions use a **separate submission link**. Enable submissions and save settings to generate it. Share it with attendees; their photos stay in the private pending bucket until owner approval. Replacing it revokes old submission links; disabling submissions closes this path. A viewing token never authorizes uploading, and neither token authorizes management. Existing named trusted invites keep their direct-publication behavior: anyone receiving or forwarding a trusted invite can publish photos, so distribute them carefully.
 
 Guest passwords are retired. The legacy session endpoint returns 410 with guidance to request a submission link, and old cookies cannot authorize uploads. Existing Android app versions still offer a password setting: nonempty password updates return an actionable 400 directing the owner to the web dashboard. Android device pairing, management permission, uploads, known-file preflight, and existing gallery statuses remain unchanged. This is a documented guest-access change requested after the Effect migration; no Android release is claimed.

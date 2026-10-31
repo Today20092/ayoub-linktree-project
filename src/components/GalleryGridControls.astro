@@ -103,7 +103,7 @@ const { count } = Astro.props
     hidden
     class="min-h-11 underline underline-offset-4"
   >
-    Show page photos
+    Show loaded photos
   </button>
   <button
     type="button"
@@ -265,38 +265,59 @@ const { count } = Astro.props
             savePreferences()
           })
         })
-      const grids = [
-        ...gallery.querySelectorAll<HTMLElement>('[data-photo-grid]'),
-      ]
-      grids.forEach((grid) => {
-        ;[...grid.children].forEach((child, index) => {
-          if (child instanceof HTMLElement)
-            child.dataset.galleryOrder = String(index)
-        })
-      })
       const applyOrder = (order: 'oldest' | 'newest') => {
-        grids.forEach((grid) => {
-          const figures = [...grid.children].filter(
-            (child): child is HTMLElement => child instanceof HTMLElement,
-          )
-          figures.sort((a, b) => {
-            const delta =
-              Number(a.dataset.galleryOrder) - Number(b.dataset.galleryOrder)
-            return order === 'newest' ? -delta : delta
+        if (gallery.dataset.galleryFiltered === 'true') return
+        const content = gallery.querySelector<HTMLElement>(
+          '[data-gallery-page-content]',
+        )!
+        const firstSection = content.querySelector(
+          order === 'newest' ? 'section' : '[data-gallery-grid]',
+        )
+        if (firstSection) content.insertBefore(firstSection, content.firstChild)
+        gallery
+          .querySelectorAll<HTMLElement>('[data-photo-grid]')
+          .forEach((grid) => {
+            const figures = [...grid.children].filter(
+              (child): child is HTMLElement => child instanceof HTMLElement,
+            )
+            figures.sort((a, b) => {
+              const delta =
+                Number(
+                  a.querySelector<HTMLElement>('[data-gallery-open]')?.dataset
+                    .galleryOpen,
+                ) -
+                Number(
+                  b.querySelector<HTMLElement>('[data-gallery-open]')?.dataset
+                    .galleryOpen,
+                )
+              return order === 'newest' ? -delta : delta
+            })
+            figures.forEach((figure) => grid.appendChild(figure))
           })
-          figures.forEach((figure) => grid.append(figure))
-        })
       }
       toolbar
         .querySelectorAll<HTMLInputElement>('[name="gallery-order"]')
         .forEach((input) => {
           input.addEventListener('change', () => {
-            applyOrder(input.value === 'newest' ? 'newest' : 'oldest')
-            render(columns, true)
+            gallery.dispatchEvent(
+              new CustomEvent('gallery:order', { detail: input.value }),
+            )
           })
         })
       render(columns)
-      gallery.addEventListener('gallery:layout', () => render(columns))
+      gallery.addEventListener('gallery:layout', () => {
+        position = undefined
+        const order =
+          gallery.dataset.galleryOrder === 'newest' ? 'newest' : 'oldest'
+        applyOrder(order)
+        if (gallery.dataset.galleryFiltered !== 'true')
+          toolbar
+            .querySelectorAll<HTMLInputElement>('[name="gallery-order"]')
+            .forEach((input) => {
+              input.checked = input.value === order
+            })
+        render(columns)
+      })
       let width = gallery.clientWidth
       new ResizeObserver(() => {
         if (width !== gallery.clientWidth) {

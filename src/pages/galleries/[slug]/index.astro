@@ -309,6 +309,16 @@ const formatDate = (date: Date) =>
         aria-label={`${galleryTitle} photographs`}
       >
         {totalPhotoCount > 0 && <GalleryGridControls count={totalPhotoCount} />}
+        {totalPhotoCount > 0 && (
+          <a
+            data-gallery-load-earlier
+            hidden
+            class="gallery-page-link"
+            href={pagePath(page - 1)}
+          >
+            Load earlier photos
+          </a>
+        )}
         <div data-gallery-page-content>
           {images.length > 0 && (
             <div data-gallery-grid data-photo-grid>
@@ -475,6 +485,22 @@ const formatDate = (date: Date) =>
             </section>
           )}
         </div>
+        {totalPhotoCount > 0 && (
+          <div data-gallery-stream hidden class="mt-6 text-center text-sm">
+            <p
+              data-gallery-stream-status
+              role="status"
+              class="text-muted-foreground"
+            />
+            <a
+              data-gallery-load-more
+              class="gallery-page-link"
+              href={pagePath(Math.min(page + 1, pageCount))}
+            >
+              Load more photos
+            </a>
+          </div>
+        )}
         {totalPhotoCount > 0 && (
           <nav
             data-gallery-pagination
