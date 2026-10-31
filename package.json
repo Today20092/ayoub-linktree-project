@@ -22,7 +22,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "deploy": "pnpm run deploy:preview",
-    "deploy:preview": "pnpm run verify && node scripts/deploy-preview-worker.mjs",
+    "deploy:preview": "node scripts/deploy-preview-worker.mjs",
     "deploy:branch-preview": "pnpm run verify && wrangler versions upload --preview-alias dev",
     "deploy:prod": "pnpm run verify && node scripts/deploy-production-worker.mjs",
     "deploy:dry-run": "pnpm run build && wrangler deploy --dry-run",

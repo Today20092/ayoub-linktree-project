@@ -59,6 +59,12 @@ New uploaded images use `/api/gallery-media/` on the selected website, so previe
 | Production  | [ayoubabed.xyz](https://ayoubabed.xyz)                                                | Live galleries and normal app use       |
 | Preview     | [Preview website](https://ayoub-linktree-project-preview.ayoub-abedrabbo.workers.dev) | Upload, moderation, and release testing |
 
+`npm run deploy:preview` verifies and builds with the preview site origin before
+deploying the separate preview Worker and its explicit preview D1/R2 bindings.
+Normal builds retain the production origin; `ASTRO_SITE_URL` overrides it for
+isolated audit builds. Canonicals, sitemap, robots, and Markdown discovery use
+that build origin. Legacy manifest gallery media remains on the public photo CDN.
+
 Each environment has separate gallery data, image buckets, and pairing keys. Switching the app's website does not move photos or galleries. Finish or clear a pending batch before switching, then create a key on the destination website.
 
 The web dashboard uses Cloudflare Access. The Android API uses revocable device keys. Upload-only keys cannot manage galleries; management permission must be explicitly enabled. Keep keys and signing credentials out of source control.

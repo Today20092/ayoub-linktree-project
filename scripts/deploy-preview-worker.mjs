@@ -5,6 +5,28 @@ import { join } from 'node:path'
 const generatedConfigPath = join('dist', 'server', 'wrangler.json')
 const previewConfigPath = join('dist', 'server', 'wrangler.preview.json')
 
+await new Promise((resolve, reject) => {
+  const child = spawn(
+    process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
+    ['run', 'verify'],
+    {
+      stdio: 'inherit',
+      shell: process.platform === 'win32',
+      env: {
+        ...process.env,
+        ASTRO_SITE_URL:
+          'https://ayoub-linktree-project-preview.ayoub-abedrabbo.workers.dev',
+      },
+    },
+  )
+  child.on('error', reject)
+  child.on('exit', (code) =>
+    code === 0
+      ? resolve()
+      : reject(new Error(`Preview verification exited with ${code}`)),
+  )
+})
+
 const config = JSON.parse(await readFile(generatedConfigPath, 'utf8'))
 
 config.name = 'ayoub-linktree-project-preview'
