@@ -98,6 +98,18 @@ the local runtime can fetch the source image over the Internet. Local Images
 processing uses no paid Cloudflare binding. This is an offline **scanner** audit,
 not an air-gapped application test.
 
+For managed-cover regression checks, store the same sample under
+`events/image-test-published/photos/sample.jpg` in that local bucket and apply
+`scripts/audit/image-fixtures.sql` to the same local D1 configuration/state.
+Run `scripts/gallery-managed-images.test.mjs` with `GALLERY_TEST_URL` set to the
+local Worker, `GALLERY_IMAGE_SLUG=image-test-published`, and
+`GALLERY_IMAGE_FIXTURES=1`. It checks listing/admin covers, the gallery hero and
+lightbox, coming-soon flyers, distinct responsive candidates, decoded image
+dimensions, bounded WebP downloads, and original photo links. Remove the
+`image-test-*` rows from `gallery_photos` and `event_galleries` before any audit.
+Never seed these fixtures remotely. On the existing preview gallery, omit the
+fixture flag and slug override; the default slug is `angels-birthday-party-2026`.
+
 ## Exact scan and artifacts
 
 Use the same scanner version for comparisons. In PowerShell, the installed

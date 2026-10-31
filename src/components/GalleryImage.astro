@@ -1,0 +1,50 @@
+---
+import type { ComponentProps } from 'astro/types'
+import { Image } from 'astro:assets'
+import {
+  galleryImageUrl,
+  galleryMediaKey,
+  galleryThumbnailSrcset,
+} from '../lib/gallery-media'
+
+type Props = ComponentProps<typeof Image>
+const props = Astro.props
+const resolved = await props.src
+const src =
+  typeof resolved === 'object' && 'default' in resolved
+    ? resolved.default
+    : resolved
+const source = typeof src === 'string' ? src : src.src
+const managed = !!galleryMediaKey(source)
+const metadata = typeof src === 'object' ? src : undefined
+const width = Number(props.width ?? metadata?.width)
+const height = props.height
+  ? Number(props.height)
+  : metadata
+    ? Math.round((metadata.height * width) / metadata.width)
+    : 0
+const fallbackWidth = Math.min(width, 480)
+const quality = props.quality ?? 85
+// Relative R2 paths bypass Astro's asset service; use the existing R2 optimizer.
+const optimized = managed
+  ? {
+      src: galleryImageUrl(
+        source,
+        fallbackWidth,
+        Math.max(1, Math.round((height * fallbackWidth) / width)),
+        quality,
+      )!,
+      srcset: galleryThumbnailSrcset(
+        source,
+        width,
+        height,
+        props.widths,
+        quality,
+      ),
+      width,
+      height,
+    }
+  : {}
+---
+
+<Image {...props} {...optimized} />
