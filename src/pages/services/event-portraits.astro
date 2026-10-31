@@ -583,7 +583,9 @@ const packages = eventPortraitPackages
           }
           coverage.value = button.dataset.coverage ?? ''
           showSelection()
-          selection.scrollIntoView({ block: 'nearest' })
+          if (selection instanceof HTMLElement && !selection.hidden) {
+            selection.scrollIntoView({ block: 'nearest' })
+          }
         })
       })
       form?.addEventListener('submit', (event) => {
