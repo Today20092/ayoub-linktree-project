@@ -85,6 +85,9 @@ npm run audit:prod
 
 For documentation-only edits, format the changed Markdown and check its links. A website build is not needed solely for documentation changes.
 
+For an offline SquirrelScan audit of the built Worker with isolated local gallery
+storage, follow [Local production-build audit](docs/production-audit.md).
+
 ## Releases and deployment
 
 GitHub is the source of truth. Website changes go through a feature branch, verification, preview, review, and merge to `master`. Production deploys from clean `master`.
