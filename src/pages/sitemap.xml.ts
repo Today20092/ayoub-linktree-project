@@ -3,6 +3,7 @@ import { env } from 'cloudflare:workers'
 import type { APIContext } from 'astro'
 
 import { escapeXml, PUBLIC_PAGE_CACHE_CONTROL } from '../lib/discovery'
+import { eventPortraitPath } from '../lib/event-portrait-offer'
 import { galleryReader } from '../lib/gallery-read'
 import { sortPortfolioProjects } from '../lib/portfolio-order'
 
@@ -19,6 +20,7 @@ export async function GET({ site }: APIContext) {
     '/about/',
     '/contact/',
     '/privacy/',
+    eventPortraitPath,
     '/galleries/',
     ...portfolio
       .filter((entry) => entry.data.status === 'complete')

@@ -8,7 +8,7 @@ Run `npm run update:youtube` to refresh `src/data/latest-youtube-videos.json`. T
 
 Services, About, Contact, and Privacy have their own Astro pages under `src/pages/`. Payment configuration and hostname routing are covered in [payments.md](payments.md).
 
-The instant event photography rate page lives at `/services/event-portraits/`, with its content in `src/pages/services/event-portraits.astro`. The shared page footer, also rendered on the homepage below its support footer, links to it as "Event photography". It is omitted from the main navigation and sitemap, and marked `noindex`. Starting prices cover 1–4 hours; larger or high-demand events receive a custom quote. The parent `/services/` draft continues to redirect to the homepage.
+The instant event portraits page lives at `/services/event-portraits/`, with its content in `src/pages/services/event-portraits.astro`. It is public and indexable, included in the sitemap, and linked from the shared footer as "Event photography". It stays out of the main navigation. Starting prices are $400, $550, $700, and $850 for 1–4 hours, plus $150 for each extra hour. Larger or high-demand events receive a custom quote. The same offer is repeated in the page's structured data, `/index.md`, and `/llms.txt`. The parent `/services/` draft continues to redirect to the homepage.
 
 ## Portfolio case studies
 

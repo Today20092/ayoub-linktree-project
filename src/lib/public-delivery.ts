@@ -24,7 +24,12 @@ export function cacheControlForPage(
   const { pathname } = url
   if (
     pathname === '/' ||
-    ['/about/', '/contact/', '/privacy/'].includes(pathname) ||
+    [
+      '/about/',
+      '/contact/',
+      '/privacy/',
+      '/services/event-portraits/',
+    ].includes(pathname) ||
     pathname.startsWith('/portfolio/')
   ) {
     return PUBLIC_PAGE_CACHE_CONTROL

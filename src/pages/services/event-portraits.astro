@@ -5,6 +5,15 @@ import { Image } from 'astro:assets'
 import { buttonVariants } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import {
+  eventPortraitAnswers,
+  eventPortraitDescription,
+  eventPortraitEmail,
+  eventPortraitPackages,
+  eventPortraitPhone,
+  eventPortraitStructuredData,
+  eventPortraitTitle,
+} from '../../lib/event-portrait-offer'
 import { siteConfig } from '../../lib/site-config'
 
 const portraitAssets = import.meta.glob<{ default: ImageMetadata }>(
@@ -14,20 +23,14 @@ const portraitAssets = import.meta.glob<{ default: ImageMetadata }>(
 const eventPortrait =
   portraitAssets['../../assets/portraits/P1210300.JPG'].default
 
-const title = 'Instant event photography experience | Ayoub Abedrabbo'
-const description =
-  'Give your guests professional headshots, family photos, and portraits delivered to their phones during your event. Tampa event experiences starting at $400.'
+const title = eventPortraitTitle
+const description = eventPortraitDescription
 const canonicalUrl = new URL(
   '/services/event-portraits/',
   Astro.site,
 ).toString()
 const ogImage = new URL(siteConfig.site.ogImage, Astro.site).toString()
-const packages = [
-  { hours: '1 hour', price: '$400', sessions: 'About 20' },
-  { hours: '2 hours', price: '$550', sessions: 'About 40' },
-  { hours: '3 hours', price: '$700', sessions: 'About 60' },
-  { hours: '4 hours', price: '$850', sessions: 'About 80' },
-]
+const packages = eventPortraitPackages
 ---
 
 <BaseLayout
@@ -37,7 +40,7 @@ const packages = [
   ogImage={ogImage}
   ogImageAlt={siteConfig.site.ogImageAlt}
   twitterHandle={siteConfig.site.twitterHandle}
-  robots="noindex,follow"
+  structuredData={eventPortraitStructuredData(canonicalUrl)}
 >
   <main id="main-content" class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
     <section
@@ -55,8 +58,9 @@ const packages = [
           A gift your guests can take home.
         </h1>
         <p class="text-muted-foreground mt-6 max-w-lg text-lg leading-8">
-          Professional photos, on their phones in minutes. An experience they
-          can enjoy, keep, and share before the event ends.
+          Ayoub Abedrabbo makes instant guest portraits at events in Tampa,
+          Florida. Professional photos, on their phones in minutes. An
+          experience they can enjoy, keep, and share before the event ends.
         </p>
         <div class="mt-7 flex flex-wrap items-center gap-5">
           <a
@@ -106,6 +110,36 @@ const packages = [
           with their family, or a portrait with a friend. You host the
           experience for your mosque, school, nonprofit, or community event; the
           organizer pays and guests receive their photos at no charge.
+        </p>
+        <p class="mt-4 text-sm leading-6">
+          <a
+            href="/portfolio/portraits/"
+            class="text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            Portrait portfolio
+          </a>
+          <span class="text-muted-foreground">·</span>
+          <a
+            href="/portfolio/muslim-business-chamber-2026/"
+            class="text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            Attendee portraits at a Tampa event
+          </a>
+        </p>
+        <p class="text-muted-foreground mt-3 text-sm leading-6">
+          <a
+            class="text-foreground underline underline-offset-4"
+            href={`mailto:${eventPortraitEmail}`}
+          >
+            {eventPortraitEmail}
+          </a>
+          <span>·</span>
+          <a
+            class="text-foreground underline underline-offset-4"
+            href="tel:+18134240606"
+          >
+            {eventPortraitPhone}
+          </a>
         </p>
       </div>
       <ol class="mt-8 grid gap-7 sm:grid-cols-3 sm:gap-8">
@@ -236,6 +270,25 @@ const packages = [
           </dl>
         </div>
       </div>
+    </section>
+
+    <Separator />
+
+    <section aria-labelledby="portrait-answers-title" class="py-10 sm:py-14">
+      <h2
+        id="portrait-answers-title"
+        class="text-2xl font-bold tracking-tight sm:text-3xl"
+      >
+        Questions hosts ask
+      </h2>
+      <dl class="mt-8 grid max-w-3xl gap-6">
+        {eventPortraitAnswers.map((item) => (
+          <div>
+            <dt class="font-semibold">{item.question}</dt>
+            <dd class="text-muted-foreground mt-2 leading-7">{item.answer}</dd>
+          </div>
+        ))}
+      </dl>
     </section>
 
     <Separator />
