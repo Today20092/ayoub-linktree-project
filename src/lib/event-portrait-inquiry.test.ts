@@ -37,10 +37,13 @@ test('a complete request addresses Ayoub and names the selected starting price',
   assert.match(message, /Venue: Masjid hall/)
   assert.match(message, /does not reserve the date/)
   assert.equal(mailto.startsWith(`mailto:${inquiryRecipient}?`), true)
-  const body = new URLSearchParams(mailto.slice(mailto.indexOf('?') + 1)).get(
-    'body',
+  assert.equal(mailto.includes('+'), false)
+  const query = new URLSearchParams(mailto.slice(mailto.indexOf('?') + 1))
+  assert.equal(query.get('body'), message)
+  assert.equal(
+    decodeURIComponent(mailto).includes('Event portrait request'),
+    true,
   )
-  assert.equal(body, message)
 })
 
 test('missing required fields do not produce a sendable request', () => {

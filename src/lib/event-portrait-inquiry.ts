@@ -67,7 +67,7 @@ export function inquiryMessage(
     '',
     `Coverage: ${fields.coverage.trim()}`,
     `Starting at: ${selected?.price ?? 'Custom quote'}`,
-    `Longer coverage: ${extra === '' ? 'No' : extra}`,
+    ...(extra === '' ? [] : [`Longer coverage: ${extra}`]),
     `Date: ${fields.date.trim()}`,
     `Venue: ${fields.venue.trim()}`,
     `City: ${fields.city.trim()}`,
@@ -86,9 +86,6 @@ export function inquiryMailto(
   packages: readonly PortraitPackage[],
 ): string {
   const subject = `Event portrait request: ${fields.coverage.trim()}`
-  const params = new URLSearchParams({
-    subject,
-    body: inquiryMessage(fields, packages),
-  })
-  return `mailto:${inquiryRecipient}?${params.toString()}`
+  const body = inquiryMessage(fields, packages)
+  return `mailto:${inquiryRecipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 }

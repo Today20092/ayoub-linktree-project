@@ -48,19 +48,16 @@ const packages = eventPortraitPackages
       class="grid items-center gap-8 py-10 sm:py-14 lg:grid-cols-2 lg:gap-12 lg:py-20"
     >
       <div>
-        <p class="text-primary text-sm font-semibold">
-          Instant event photography · Tampa, Florida
-        </p>
         <h1
           id="experience-title"
-          class="mt-5 text-4xl leading-[1.08] font-extrabold tracking-tight text-balance sm:text-5xl"
+          class="text-4xl leading-[1.08] font-extrabold tracking-tight text-balance sm:text-5xl"
         >
           A gift your guests can take home.
         </h1>
         <p class="text-muted-foreground mt-6 max-w-lg text-lg leading-8">
           Ayoub Abedrabbo makes instant guest portraits at events in Tampa,
-          Florida. Professional photos, on their phones in minutes. An
-          experience they can enjoy, keep, and share before the event ends.
+          Florida. The host pays. Guests get their photos free, on their phones,
+          during the event.
         </p>
         <div class="mt-7 flex flex-wrap items-center gap-5">
           <a
@@ -103,13 +100,11 @@ const packages = eventPortraitPackages
           id="guest-experience-title"
           class="text-2xl font-bold tracking-tight sm:text-3xl"
         >
-          They're already dressed for the occasion.
+          Portraits for the people already there.
         </h2>
-        <p class="text-muted-foreground mt-4 text-base leading-7">
-          Give them a reason to remember it. A fresh LinkedIn headshot, a photo
-          with their family, or a portrait with a friend. You host the
-          experience for your mosque, school, nonprofit, or community event; the
-          organizer pays and guests receive their photos at no charge.
+        <p class="text-muted-foreground mt-4 max-w-2xl text-base leading-7">
+          One person, a couple, a family, or a small group. Camera and lighting
+          included. A gallery for the host updates during the event.
         </p>
         <p class="mt-4 text-sm leading-6">
           <a
@@ -142,29 +137,25 @@ const packages = eventPortraitPackages
           </a>
         </p>
       </div>
-      <ol class="mt-8 grid gap-7 sm:grid-cols-3 sm:gap-8">
+      <ol class="mt-8 grid gap-6 sm:grid-cols-3">
         <li>
-          <h3 class="font-semibold">A quick portrait</h3>
+          <h3 class="font-semibold">A short sitting</h3>
           <p class="text-muted-foreground mt-2 text-sm leading-6">
-            I bring a professional camera and lighting, and help guests feel
-            comfortable in front of the camera. Individuals, couples, families,
-            and small groups are welcome.
+            About 20 portraits an hour. A planning estimate, not a promise that
+            every guest is photographed.
           </p>
         </li>
         <li>
-          <h3 class="font-semibold">Photos on their phone</h3>
+          <h3 class="font-semibold">On their phone</h3>
           <p class="text-muted-foreground mt-2 text-sm leading-6">
-            Guests can receive their photos directly on iPhone or Android,
-            typically within a few minutes, using Quick Share or a compatible
-            phone transfer.
+            iPhone or Android, usually within a few minutes.
           </p>
         </li>
         <li>
-          <h3 class="font-semibold">Ready to use and share</h3>
+          <h3 class="font-semibold">Between portraits</h3>
           <p class="text-muted-foreground mt-2 text-sm leading-6">
-            High-quality photos ready for a profile, a post, or a family album.
-            A shareable gallery updates during the event, usually within an
-            hour, depending on connectivity.
+            Candid moments only when time allows. Dedicated coverage is a custom
+            quote.
           </p>
         </li>
       </ol>
@@ -184,91 +175,52 @@ const packages = eventPortraitPackages
         One booking. An experience for your guests.
       </h2>
       <p class="text-muted-foreground mt-4 max-w-2xl leading-7">
-        Choose the time that fits your event. Every booking includes the
-        photographer (Ayoub alone), professional camera and lighting, photo
-        delivery to guests' phones during the event, and a shareable gallery.
+        Ayoub alone, with camera, lighting, phone delivery, and a gallery.
+        Prices are starting points.
       </p>
-      <div class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] lg:gap-12">
-        <div>
-          <table class="w-full text-left">
-            <caption class="sr-only">
-              Starting prices in US dollars and approximate portrait sessions by
-              coverage time
-            </caption>
-            <thead class="text-muted-foreground text-xs">
-              <tr>
-                <th scope="col" class="pb-4 font-medium">
-                  Coverage
+      <div class="mt-8 max-w-3xl">
+        <table class="w-full text-left">
+          <caption class="sr-only">
+            Starting prices in US dollars and approximate portrait sessions by
+            coverage time
+          </caption>
+          <thead class="text-muted-foreground text-xs">
+            <tr>
+              <th scope="col" class="pb-4 font-medium">
+                Coverage
+              </th>
+              <th scope="col" class="pb-4 font-medium">
+                Portrait sessions
+              </th>
+              <th scope="col" class="pb-4 text-right font-medium">
+                Starting at
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {packages.map((option) => (
+              <tr class="odd:bg-muted/50">
+                <th
+                  scope="row"
+                  class="rounded-l-lg px-3 py-5 text-sm font-semibold sm:text-base"
+                >
+                  {option.hours}
                 </th>
-                <th scope="col" class="pb-4 font-medium">
-                  Portrait sessions
-                </th>
-                <th scope="col" class="pb-4 text-right font-medium">
-                  Starting at
-                </th>
+                <td class="text-muted-foreground px-2 py-5 text-sm">
+                  {option.sessions}
+                </td>
+                <td class="rounded-r-lg px-3 py-5 text-right text-xl font-bold tracking-tight tabular-nums sm:text-2xl">
+                  {option.price}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {packages.map((option) => (
-                <tr class="odd:bg-muted/50">
-                  <th
-                    scope="row"
-                    class="rounded-l-lg px-3 py-5 text-sm font-semibold sm:text-base"
-                  >
-                    {option.hours}
-                  </th>
-                  <td class="text-muted-foreground px-2 py-5 text-sm">
-                    {option.sessions}
-                  </td>
-                  <td class="rounded-r-lg px-3 py-5 text-right text-xl font-bold tracking-tight tabular-nums sm:text-2xl">
-                    {option.price}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <p class="text-muted-foreground mt-4 text-sm leading-6">
-            Each extra hour starts at +$150. All prices in USD. Allow
-            approximately 20 portrait sessions per hour, depending on group size
-            and event flow. A session may include one person, a couple, or a
-            small group. This is a planning estimate, not a guarantee that every
-            attendee will be photographed.
-          </p>
-        </div>
-        <div class="bg-muted/50 rounded-2xl p-6 sm:p-8">
-          <h3 class="text-lg font-semibold">Plan around your event</h3>
-          <dl class="mt-5 flex flex-col gap-5 text-sm leading-6">
-            <div>
-              <dt class="font-semibold">Travel included</dt>
-              <dd class="text-muted-foreground">
-                Within 30 miles of Tampa, Florida. Travel beyond that is quoted
-                separately.
-              </dd>
-            </div>
-            <div>
-              <dt class="font-semibold">Larger or busier events</dt>
-              <dd class="text-muted-foreground">
-                Coverage up to 8 hours, large attendance, and high portrait
-                demand require a custom quote.
-              </dd>
-            </div>
-            <div>
-              <dt class="font-semibold">Portraits come first</dt>
-              <dd class="text-muted-foreground">
-                I can capture event moments between portraits when time allows.
-                Dedicated candid coverage requires a custom quote.
-              </dd>
-            </div>
-            <div>
-              <dt class="font-semibold">Quoted add-ons</dt>
-              <dd class="text-muted-foreground">
-                A helper or second shooter, branded backdrop, same-night
-                organizer highlight clip, travel beyond 30 miles, and rush
-                gallery are available by custom quote.
-              </dd>
-            </div>
-          </dl>
-        </div>
+            ))}
+          </tbody>
+        </table>
+        <p class="text-muted-foreground mt-4 text-sm leading-6">
+          Extra hour +$150. Travel is included within 30 miles of Tampa. Farther
+          travel, a helper, a backdrop, a same-night highlight, and a rush
+          gallery are quoted separately. Up to 8 hours is a custom quote.
+        </p>
       </div>
     </section>
 
@@ -306,9 +258,8 @@ const packages = eventPortraitPackages
           Request a quote
         </h2>
         <p class="text-muted-foreground mt-4 leading-7">
-          Send the date, venue, guest count, and coverage. Ayoub reviews the
-          request and confirms the quote. Submitting opens your email app. It
-          does not reserve the date.
+          Opens an email draft to Ayoub. Required fields are marked. This does
+          not reserve the date.
         </p>
       </div>
       <form
@@ -324,7 +275,12 @@ const packages = eventPortraitPackages
         ></div>
         <div class="grid gap-5 sm:grid-cols-2">
           <label class="grid gap-2 text-sm font-medium" for="coverage">
-            Coverage
+            <span class="flex items-baseline justify-between gap-3">
+              Coverage
+              <span class="text-muted-foreground text-xs font-normal">
+                Required
+              </span>
+            </span>
             <select
               id="coverage"
               name="coverage"
@@ -340,18 +296,28 @@ const packages = eventPortraitPackages
             </select>
           </label>
           <label class="grid gap-2 text-sm font-medium" for="extraTime">
-            Longer coverage
+            <span class="flex items-baseline justify-between gap-3">
+              Longer coverage
+              <span class="text-muted-foreground text-xs font-normal">
+                Optional
+              </span>
+            </span>
             <input
               id="extraTime"
               name="extraTime"
               class="border-input bg-background min-h-11 rounded-xl border px-3"
-              placeholder="Optional, up to 8 hours"
+              placeholder="Up to 8 hours"
             />
           </label>
         </div>
         <div class="grid gap-5 sm:grid-cols-2">
           <label class="grid gap-2 text-sm font-medium" for="date">
-            Date
+            <span class="flex items-baseline justify-between gap-3">
+              Date
+              <span class="text-muted-foreground text-xs font-normal">
+                Required
+              </span>
+            </span>
             <input
               id="date"
               name="date"
@@ -361,7 +327,12 @@ const packages = eventPortraitPackages
             />
           </label>
           <label class="grid gap-2 text-sm font-medium" for="guests">
-            Approximate guests
+            <span class="flex items-baseline justify-between gap-3">
+              Guests
+              <span class="text-muted-foreground text-xs font-normal">
+                Required
+              </span>
+            </span>
             <input
               id="guests"
               name="guests"
@@ -373,7 +344,12 @@ const packages = eventPortraitPackages
         </div>
         <div class="grid gap-5 sm:grid-cols-2">
           <label class="grid gap-2 text-sm font-medium" for="venue">
-            Venue
+            <span class="flex items-baseline justify-between gap-3">
+              Venue
+              <span class="text-muted-foreground text-xs font-normal">
+                Required
+              </span>
+            </span>
             <input
               id="venue"
               name="venue"
@@ -382,7 +358,12 @@ const packages = eventPortraitPackages
             />
           </label>
           <label class="grid gap-2 text-sm font-medium" for="city">
-            City
+            <span class="flex items-baseline justify-between gap-3">
+              City
+              <span class="text-muted-foreground text-xs font-normal">
+                Required
+              </span>
+            </span>
             <input
               id="city"
               name="city"
@@ -392,7 +373,12 @@ const packages = eventPortraitPackages
           </label>
         </div>
         <label class="grid gap-2 text-sm font-medium" for="eventType">
-          Event type
+          <span class="flex items-baseline justify-between gap-3">
+            Event type
+            <span class="text-muted-foreground text-xs font-normal">
+              Required
+            </span>
+          </span>
           <input
             id="eventType"
             name="eventType"
@@ -403,7 +389,12 @@ const packages = eventPortraitPackages
         </label>
         <div class="grid gap-5 sm:grid-cols-3">
           <label class="grid gap-2 text-sm font-medium" for="name">
-            Name
+            <span class="flex items-baseline justify-between gap-3">
+              Name
+              <span class="text-muted-foreground text-xs font-normal">
+                Required
+              </span>
+            </span>
             <input
               id="name"
               name="name"
@@ -413,7 +404,12 @@ const packages = eventPortraitPackages
             />
           </label>
           <label class="grid gap-2 text-sm font-medium" for="phone">
-            Phone
+            <span class="flex items-baseline justify-between gap-3">
+              Phone
+              <span class="text-muted-foreground text-xs font-normal">
+                Required
+              </span>
+            </span>
             <input
               id="phone"
               name="phone"
@@ -424,7 +420,12 @@ const packages = eventPortraitPackages
             />
           </label>
           <label class="grid gap-2 text-sm font-medium" for="email">
-            Email
+            <span class="flex items-baseline justify-between gap-3">
+              Email
+              <span class="text-muted-foreground text-xs font-normal">
+                Required
+              </span>
+            </span>
             <input
               id="email"
               name="email"
@@ -440,7 +441,7 @@ const packages = eventPortraitPackages
             type="submit"
             class={buttonVariants({ size: 'lg', className: 'min-h-11 px-5' })}
           >
-            Open the request in your email
+            Open email draft
           </button>
           <a
             href="/contact/"
