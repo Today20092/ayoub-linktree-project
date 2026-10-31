@@ -4,7 +4,7 @@ export const eventPortraitTitle =
   'Instant event portraits in Tampa | Ayoub Abedrabbo.'
 
 export const eventPortraitDescription =
-  'The host pays for instant guest portraits in Tampa, with camera, lighting, and phone delivery. Guests receive photos at no charge. Coverage starts at $400.'
+  'Ayoub Abedrabbo makes instant guest portraits at events in Tampa, Florida, in natural light. Event pictures from the same booking can be included in the gallery. The host pays. Guests receive photos at no charge. Starting at $400.'
 
 export const eventPortraitEmail = 'Ayoub@AyoubAbed.xyz'
 export const eventPortraitPhone = '(813) 424-0606'
@@ -47,7 +47,7 @@ export const eventPortraitAnswers = [
   {
     question: 'What kind of coverage is this?',
     answer:
-      'This booking is instant guest portraits. Moments between portraits can be photographed when time allows. Dedicated event coverage is a custom quote and has no public starting price.',
+      'This booking is instant guest portraits in natural light: there is no backdrop and no light. Guests get a portrait on the spot to use for a profile and to remember the event. Event pictures from the same booking can be included in the gallery.',
   },
 ] as const
 
@@ -59,7 +59,11 @@ export function eventPortraitMarkdownSection() {
 
 - Page: https://ayoubabed.xyz${eventPortraitPath}
 - Starting prices: ${prices}, plus ${eventPortraitExtraHour.price} for each extra hour
-- Area: within 30 miles of Tampa, Florida
+- Travel: included within 30 miles of Tampa, Florida. Farther travel is a custom quote.
+- Ayoub Abedrabbo makes instant guest portraits at events in Tampa, Florida, in natural light. Guests get a portrait on the spot to use for a profile and to remember the event.
+- Event pictures from the same booking can be included in the gallery.
+- About 20 portrait sessions an hour is a planning estimate.
+- Gallery: each photo shows up within minutes of being taken.
 - Guests do not pay. The host books and pays.
 - Email: ${eventPortraitEmail}
 - Phone: ${eventPortraitPhone}
@@ -92,8 +96,9 @@ export function eventPortraitStructuredData(pageUrl: string) {
       {
         '@type': 'Service',
         '@id': `${pageUrl}#service`,
-        name: 'Instant event portraits',
-        serviceType: 'Instant guest portraits',
+        name: 'Instant guest portraits',
+        serviceType: 'Instant guest portraits in natural light',
+        description: eventPortraitDescription,
         url: pageUrl,
         provider: { '@id': businessId },
         areaServed: 'Tampa, Florida',

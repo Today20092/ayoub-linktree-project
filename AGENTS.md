@@ -58,6 +58,8 @@ Report checks run and any failures or checks left unrun; a focused suite does no
 
 ## Agent skills
 
+- Branch setup, integration, promotion, or cleanup: read [the Git workflow](docs/branch-workflow.md).
+- Version selection, release-status wording, or release preparation: read [the versioning policy](docs/releasing.md).
 - Issue work: read `docs/agents/issue-tracker.md` for GitHub issue operations and the external-PR triage boundary.
 - Triage: use the label mapping in `docs/agents/triage-labels.md`.
 - Code exploration and domain decisions: read `docs/agents/domain.md`, root `CONTEXT.md`, and relevant ADRs in `docs/adr/`.
@@ -65,20 +67,11 @@ Report checks run and any failures or checks left unrun; a focused suite does no
 ## Deployment Workflow
 
 - GitHub is the source of truth. Local uncommitted code never goes to production.
-- `master` is the production branch. Feature work stays on a feature branch until review and merge.
-- Never commit, push, merge, or deploy unless the user explicitly asks.
+- Branch roles, integration, and promotion: [the Git workflow](docs/branch-workflow.md). Version and release preparation: [the versioning policy](docs/releasing.md).
+- Commit, push, merge, tag, or deploy only when the user explicitly asks.
 - Production deploy only from clean `master`: `npm run deploy:prod`.
 - Default deploy is preview-safe: `npm run deploy` (alias of `npm run deploy:preview`).
 - Environment URLs and usage are in [README production and preview](README.md#production-and-preview). Deployment scripts are authoritative for Worker and binding selection: `scripts/deploy-preview-worker.mjs`, `scripts/deploy-production-worker.mjs`, and `scripts/gallery-production-config.mjs`.
 - Admin/upload testing must use preview only after verifying the D1 database and both R2 buckets in `scripts/deploy-preview-worker.mjs` are the isolated preview resources. Check outstanding migrations for that database before testing.
-- `npm run deploy:branch-preview` uploads Worker version with preview alias `dev`. Use for branch smoke test only, not admin/upload testing unless bindings checked isolated.
-- Do not run `wrangler deploy` directly unless the user explicitly asks for a direct production deployment.
-- When explicitly authorized, follow this flow:
-  1. create or continue feature branch,
-  2. implement change,
-  3. run `npm run verify`,
-  4. push branch to GitHub,
-  5. deploy preview with `npm run deploy` or `npm run deploy:preview`,
-  6. share preview URL for review,
-  7. merge to `master`,
-  8. on clean `master`, run `npm run deploy:prod`.
+- `npm run deploy:branch-preview` uploads a Worker version with preview alias `dev`. Use it for a branch smoke test only, not admin/upload testing unless the bindings are the isolated preview resources.
+- Run `wrangler deploy` directly only when the user explicitly asks for a direct production deployment.

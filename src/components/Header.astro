@@ -1,6 +1,7 @@
 ---
 type Props = {
-  activeNav?: 'home' | 'services' | 'galleries' | 'about' | 'contact'
+  activeNav?:
+    'home' | 'services' | 'galleries' | 'portraits' | 'about' | 'contact'
 }
 
 const { activeNav } = Astro.props as Props
@@ -8,10 +9,15 @@ const { activeNav } = Astro.props as Props
 const navItems: Array<{
   href: string
   label: string
-  key: 'home' | 'galleries' | 'about' | 'contact'
+  key: 'home' | 'galleries' | 'portraits' | 'about' | 'contact'
 }> = [
   { href: '/', label: 'Home', key: 'home' },
   { href: '/galleries/', label: 'Galleries', key: 'galleries' },
+  {
+    href: '/services/event-portraits/',
+    label: 'Event portraits',
+    key: 'portraits',
+  },
   { href: '/about/', label: 'About', key: 'about' },
   { href: '/contact/', label: 'Contact', key: 'contact' },
 ]
