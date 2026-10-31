@@ -25,12 +25,14 @@ export function galleryThumbnailSrcset(
   src: string,
   width: number,
   height: number,
+  widths = [80, 160, 240, 480, 960],
+  quality: number | string = 75,
 ) {
   if (!galleryMediaKey(src)) return
-  return [80, 160, 240, 480, 960]
+  return widths
     .map(
       (size) =>
-        `${galleryImageUrl(src, size, Math.max(1, Math.round((height * size) / width)), 75)} ${size}w`,
+        `${galleryImageUrl(src, size, Math.max(1, Math.round((height * size) / width)), quality)} ${size}w`,
     )
     .join(', ')
 }

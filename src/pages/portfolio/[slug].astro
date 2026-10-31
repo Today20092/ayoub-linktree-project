@@ -2,7 +2,7 @@
 import '../../styles.css'
 
 import type { ImageMetadata } from 'astro'
-import { Image } from 'astro:assets'
+import { Image, getImage } from 'astro:assets'
 import { getCollection, render, type CollectionEntry } from 'astro:content'
 import {
   ArrowLeft,
@@ -94,6 +94,10 @@ const heroImageHeight =
   'height' in heroImageAsset
     ? heroImageAsset.height
     : projectData.imageHeight
+const heroDisplayWidth = Math.min(heroImageWidth, 1280)
+const heroDisplayHeight = Math.round(
+  (heroImageHeight * heroDisplayWidth) / heroImageWidth,
+)
 const remoteGalleryImages = projectData.eventGallery
   ? projectData.gallery.length > 0
     ? projectData.gallery.filter(
@@ -114,10 +118,15 @@ const galleryImages = projectData.eventGallery
     }))
 const hasBody = Boolean(project.body?.trim())
 const canonicalUrl = new URL(`/portfolio/${project.id}/`, Astro.site).toString()
-const socialImageUrl =
-  typeof heroImage === 'string'
-    ? heroImage
-    : new URL(heroImage.src, Astro.site).toString()
+const socialImage = await getImage({
+  src: heroImage,
+  width: 1200,
+  height: 630,
+  fit: 'cover',
+  format: 'jpg',
+  quality: 80,
+})
+const socialImageUrl = new URL(socialImage.src, Astro.site).toString()
 const projectTitle =
   projectData.seoTitle ?? `${projectData.title} - Ayoub Abedrabbo`
 const projectDescription = projectData.seoDescription ?? projectData.summary
@@ -178,12 +187,13 @@ const galleryHeading =
   canonicalUrl={canonicalUrl}
   ogImage={socialImageUrl}
   ogImageAlt={heroImageAlt}
-  ogImageWidth={heroImageWidth}
-  ogImageHeight={heroImageHeight}
+  ogImageWidth={1200}
+  ogImageHeight={630}
+  ogImageType="image/jpeg"
   ogType="article"
   robots="index,follow,max-image-preview:large"
   sitemapUrl={sitemapUrl}
-  preconnectHints={['https://api.fontshare.com', 'https://i.ytimg.com']}
+  preconnectHints={['https://i.ytimg.com']}
 >
   <main
     id="main-content"
@@ -273,12 +283,12 @@ const galleryHeading =
           <Image
             src={heroImage}
             alt={heroImageAlt}
-            width={heroImageWidth}
-            height={heroImageHeight}
+            width={heroDisplayWidth}
+            height={heroDisplayHeight}
             layout="full-width"
             widths={[640, 960, 1280, 1600]}
             sizes="(min-width: 960px) 896px, (min-width: 640px) calc(100vw - 48px), calc(100vw - 32px)"
-            quality={82}
+            quality={70}
             priority
             class="bg-muted block h-auto w-full"
           />
@@ -286,12 +296,12 @@ const galleryHeading =
           <Image
             src={heroImage}
             alt={heroImageAlt}
-            width={heroImageWidth}
-            height={heroImageHeight}
+            width={heroDisplayWidth}
+            height={heroDisplayHeight}
             layout="full-width"
             widths={[640, 960, 1280, 1600]}
             sizes="(min-width: 960px) 896px, (min-width: 640px) calc(100vw - 48px), calc(100vw - 32px)"
-            quality={82}
+            quality={70}
             priority
             class="bg-muted block h-auto w-full"
           />
@@ -372,10 +382,11 @@ const galleryHeading =
                   <Image
                     src={image.src}
                     alt={image.alt}
+                    width={Math.min(image.src.width, 1280)}
                     layout="full-width"
-                    widths={[480, 768, 1024, 1280, 1600]}
+                    widths={[480, 768, 1024, 1280]}
                     sizes="(min-width: 640px) 50vw, 100vw"
-                    quality={80}
+                    quality={75}
                     loading="lazy"
                     decoding="async"
                     class="block h-auto w-full"
@@ -396,6 +407,7 @@ const galleryHeading =
                     <Image
                       src={group.image.src}
                       alt={group.image.alt}
+                      width={Math.min(group.image.src.width, 1280)}
                       layout="full-width"
                       widths={[640, 960, 1280, 1600]}
                       sizes="(min-width: 1280px) 896px, 100vw"
@@ -424,6 +436,7 @@ const galleryHeading =
                         <Image
                           src={image.src}
                           alt={image.alt}
+                          width={Math.min(image.src.width, 1024)}
                           layout="full-width"
                           widths={[480, 768, 1024]}
                           sizes="(min-width: 640px) 50vw, 100vw"
@@ -458,6 +471,7 @@ const galleryHeading =
                     alt={image.alt}
                     layout="full-width"
                     widths={[480, 768, 1024]}
+                    width={Math.min(image.src.width, 1024)}
                     sizes="(min-width: 640px) 50vw, 100vw"
                     quality={80}
                     loading="lazy"
@@ -487,6 +501,7 @@ const galleryHeading =
                     alt={image.alt}
                     layout="full-width"
                     widths={[640, 960, 1280, 1600]}
+                    width={Math.min(image.src.width, 1280)}
                     sizes="(min-width: 1280px) 896px, 100vw"
                     quality={80}
                     loading="lazy"

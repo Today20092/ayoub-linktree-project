@@ -13,6 +13,10 @@ test('allowlist caches only public page paths', () => {
   assert.equal(cacheControlForPage('/galleries/private-event/'), undefined)
   assert.equal(cacheControlForPage('/admin/galleries/'), undefined)
   assert.equal(cacheControlForPage('/api/faces/search'), undefined)
+  assert.match(
+    cacheControlForPage('/services/event-portraits/') ?? '',
+    /public/,
+  )
 })
 
 test('cache guard preserves personalized and existing responses', () => {

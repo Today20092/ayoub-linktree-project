@@ -2,6 +2,7 @@ import * as React from 'react'
 import {
   Camera,
   CircleAlert,
+  Download,
   RotateCcw,
   Search,
   ShieldCheck,
@@ -18,6 +19,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import { Spinner } from '@/components/ui/spinner'
+import { showGalleryMatches } from '@/lib/gallery-selection'
 import {
   createBrowserFaceAnalyzer,
   FaceTimeoutError,
@@ -88,7 +90,6 @@ export default function FaceFinder({
 }: FaceFinderProps) {
   const cameraInput = React.useRef<HTMLInputElement>(null)
   const uploadInput = React.useRef<HTMLInputElement>(null)
-  const originalFigures = React.useRef<HTMLElement[]>([])
   const [analyzer] = React.useState(() => createBrowserFaceAnalyzer(model))
   const selectionRef = React.useRef<FaceAnalysis | undefined>(undefined)
   const searchAttempt = React.useRef(0)
@@ -101,57 +102,27 @@ export default function FaceFinder({
   const [matches, setMatches] = React.useState<PhotoMatch[]>([])
 
   const resetGallery = React.useCallback(() => {
-    const grid = document
+    document
       .getElementById(galleryId)
-      ?.querySelector<HTMLElement>('[data-gallery-grid]')
-    if (!grid) return
-
-    originalFigures.current.forEach((figure) => {
-      figure.hidden = false
-      const badge = figure.querySelector<HTMLElement>('[data-face-rank]')
-      if (badge) badge.hidden = true
-      grid.appendChild(figure)
-    })
+      ?.dispatchEvent(new Event('gallery:clear-filter'))
     setMatches([])
   }, [galleryId])
 
   const showMatches = React.useCallback(
-    (nextMatches: PhotoMatch[]) => {
+    async (nextMatches: PhotoMatch[]) => {
       const gallery = document.getElementById(galleryId)
-      const grid = gallery?.querySelector<HTMLElement>('[data-gallery-grid]')
-      if (!gallery || !grid) return
-
-      gallery.dispatchEvent(new Event('gallery:search-results'))
-
-      const figures = [
-        ...gallery.querySelectorAll<HTMLElement>('[data-gallery-filename]'),
-      ]
-      if (originalFigures.current.length === 0) {
-        originalFigures.current = figures
-      }
-      const rank = new Map(
-        nextMatches.map((match, index) => [match.filename, index]),
+      if (!gallery)
+        throw new Error('Gallery is not ready. Reload and try again.')
+      await showGalleryMatches(
+        gallery,
+        nextMatches.map((match) => match.filename),
       )
-
-      figures
-        .sort(
-          (left, right) =>
-            (rank.get(left.dataset.galleryFilename ?? '') ?? Infinity) -
-            (rank.get(right.dataset.galleryFilename ?? '') ?? Infinity),
-        )
-        .forEach((figure) => {
-          const matchIndex = rank.get(figure.dataset.galleryFilename ?? '')
-          const badge = figure.querySelector<HTMLElement>('[data-face-rank]')
-          figure.hidden = matchIndex === undefined
-          if (badge) {
-            badge.hidden = matchIndex === undefined
-            badge.textContent =
-              matchIndex === undefined ? '' : `Match ${matchIndex + 1}`
-          }
-          grid.appendChild(figure)
-        })
-
-      gallery.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      gallery.scrollIntoView({
+        behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
+          ? 'instant'
+          : 'smooth',
+        block: 'start',
+      })
     },
     [galleryId],
   )
@@ -178,13 +149,27 @@ export default function FaceFinder({
       resetGallery()
     }
     gallery?.addEventListener('gallery:reset-search', resetSearch)
-    return () =>
+    const loaded = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{ mode: string; filenames: string[] }>
+      ).detail
+      if (detail.mode !== 'search') return
+      setError(undefined)
+      setMatches(detail.filenames.map((filename) => ({ filename, score: 0 })))
+    }
+    gallery?.addEventListener('gallery:filter-loaded', loaded)
+    return () => {
       gallery?.removeEventListener('gallery:reset-search', resetSearch)
+      gallery?.removeEventListener('gallery:filter-loaded', loaded)
+    }
   }, [galleryId, clearSelection, resetGallery])
 
   async function analyze(file?: File) {
     if (!file || !consent.current) return
     const currentSearchAttempt = ++searchAttempt.current
+    document
+      .getElementById(galleryId)
+      ?.dispatchEvent(new Event('gallery:search-start'))
     resetGallery()
     setError(undefined)
     clearSelection()
@@ -248,8 +233,9 @@ export default function FaceFinder({
       if (searchAttempt.current !== currentAttempt) return
       if (!response.ok) throw new Error(result.error)
       const nextMatches = result.matches ?? []
+      if (nextMatches.length > 0) await showMatches(nextMatches)
+      if (searchAttempt.current !== currentAttempt) return
       setMatches(nextMatches)
-      if (nextMatches.length > 0) showMatches(nextMatches)
       setStatus(nextMatches.length === 0 ? 'no-match' : 'idle')
     } catch (searchError) {
       if (searchAttempt.current !== currentAttempt) return
@@ -394,6 +380,21 @@ export default function FaceFinder({
             Results are possible matches, not confirmed identities.
           </AlertDescription>
         </Alert>
+      )}
+      {matches.length > 0 && (
+        <Button
+          type="button"
+          onClick={() => {
+            document.getElementById(galleryId)?.dispatchEvent(
+              new CustomEvent('gallery:download-matches', {
+                detail: matches.map((match) => match.filename),
+              }),
+            )
+          }}
+        >
+          <Download data-icon="inline-start" aria-hidden="true" />
+          Download ZIP ({matches.length})
+        </Button>
       )}
 
       {status === 'no-match' && (

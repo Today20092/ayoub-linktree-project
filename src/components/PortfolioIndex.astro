@@ -242,8 +242,11 @@ const simpleIconBody = (name?: string) =>
               <Image
                 src={project.thumbnail}
                 alt={project.imageAlt}
-                width={project.imageWidth}
-                height={project.imageHeight}
+                width={Math.min(project.imageWidth, 960)}
+                height={Math.round(
+                  (project.imageHeight * Math.min(project.imageWidth, 960)) /
+                    project.imageWidth,
+                )}
                 layout="constrained"
                 widths={[480, 720, 960]}
                 sizes="(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"
@@ -255,8 +258,11 @@ const simpleIconBody = (name?: string) =>
               <Image
                 src={project.thumbnail}
                 alt={project.imageAlt}
-                width={project.imageWidth}
-                height={project.imageHeight}
+                width={Math.min(project.imageWidth, 960)}
+                height={Math.round(
+                  (project.imageHeight * Math.min(project.imageWidth, 960)) /
+                    project.imageWidth,
+                )}
                 layout="constrained"
                 widths={[480, 720, 960]}
                 sizes="(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"

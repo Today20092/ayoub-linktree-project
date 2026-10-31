@@ -7,7 +7,7 @@ const { count } = Astro.props
 ---
 
 <div
-  class="gallery-toolbar border-border bg-background mb-2 grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-b py-2 sm:flex sm:gap-4"
+  class="gallery-toolbar border-border bg-background mb-2 flex flex-col gap-3 border-b py-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
   data-gallery-controls
 >
   <div class="sm:mr-auto">
@@ -18,11 +18,30 @@ const { count } = Astro.props
     <p class="text-muted-foreground text-xs">Tap a photo to open</p>
   </div>
   <fieldset
-    class="border-border flex rounded-lg border p-0.5"
+    class="border-border flex w-full rounded-lg border p-0.5 sm:w-auto"
+    aria-label="Photo order"
+  >
+    {['Oldest', 'Newest'].map((label) => (
+      <label class="relative flex-1 cursor-pointer sm:flex-none">
+        <input
+          class="peer sr-only"
+          type="radio"
+          name="gallery-order"
+          value={label.toLowerCase()}
+          checked={label === 'Oldest'}
+        />
+        <span class="peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:ring-ring inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-xs font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
+          {label}
+        </span>
+      </label>
+    ))}
+  </fieldset>
+  <fieldset
+    class="border-border flex w-full rounded-lg border p-0.5 sm:w-auto"
     aria-label="Gallery view"
   >
     {['Grid', 'Masonry'].map((label) => (
-      <label class="relative cursor-pointer">
+      <label class="relative flex-1 cursor-pointer sm:flex-none">
         <input
           class="peer sr-only"
           type="radio"
@@ -30,18 +49,14 @@ const { count } = Astro.props
           value={label.toLowerCase()}
           checked={label === 'Grid'}
         />
-        <span class="peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:ring-ring inline-flex min-h-11 items-center rounded-md px-3 text-xs font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
+        <span class="peer-checked:bg-foreground peer-checked:text-background peer-focus-visible:ring-ring inline-flex min-h-11 w-full items-center justify-center rounded-md px-3 text-xs font-semibold peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2">
           {label}
         </span>
       </label>
     ))}
   </fieldset>
-  <div
-    class="col-span-2 flex items-center gap-1"
-    role="group"
-    aria-label="Photo size"
-  >
-    <span class="mr-auto text-xs font-semibold sm:mr-1">Photo size</span>
+  <div class="flex items-center gap-2" role="group" aria-label="Photo size">
+    <span class="text-xs font-semibold">Photo size</span>
     <Button
       variant="outline"
       size="icon"
@@ -63,7 +78,7 @@ const { count } = Astro.props
       <Plus aria-hidden="true" />
     </Button>
   </div>
-  <div data-gallery-favorites-summary class="col-span-2 sm:col-auto">
+  <div data-gallery-favorites-summary class="sm:ml-auto">
     <span
       data-gallery-favorites-count
       role="status"
@@ -79,6 +94,25 @@ const { count } = Astro.props
     </Button>
   </div>
   <span class="sr-only" role="status" data-gallery-size-status></span>
+</div>
+<div class="mb-3 text-sm">
+  <p data-gallery-filter-status role="status"></p>
+  <button
+    type="button"
+    data-gallery-show-page
+    hidden
+    class="min-h-11 underline underline-offset-4"
+  >
+    Show loaded photos
+  </button>
+  <button
+    type="button"
+    data-gallery-filter-retry
+    hidden
+    class="min-h-11 underline underline-offset-4"
+  >
+    Retry loading photos
+  </button>
 </div>
 
 <script>
@@ -231,7 +265,59 @@ const { count } = Astro.props
             savePreferences()
           })
         })
+      const applyOrder = (order: 'oldest' | 'newest') => {
+        if (gallery.dataset.galleryFiltered === 'true') return
+        const content = gallery.querySelector<HTMLElement>(
+          '[data-gallery-page-content]',
+        )!
+        const firstSection = content.querySelector(
+          order === 'newest' ? 'section' : '[data-gallery-grid]',
+        )
+        if (firstSection) content.insertBefore(firstSection, content.firstChild)
+        gallery
+          .querySelectorAll<HTMLElement>('[data-photo-grid]')
+          .forEach((grid) => {
+            const figures = [...grid.children].filter(
+              (child): child is HTMLElement => child instanceof HTMLElement,
+            )
+            figures.sort((a, b) => {
+              const delta =
+                Number(
+                  a.querySelector<HTMLElement>('[data-gallery-open]')?.dataset
+                    .galleryOpen,
+                ) -
+                Number(
+                  b.querySelector<HTMLElement>('[data-gallery-open]')?.dataset
+                    .galleryOpen,
+                )
+              return order === 'newest' ? -delta : delta
+            })
+            figures.forEach((figure) => grid.appendChild(figure))
+          })
+      }
+      toolbar
+        .querySelectorAll<HTMLInputElement>('[name="gallery-order"]')
+        .forEach((input) => {
+          input.addEventListener('change', () => {
+            gallery.dispatchEvent(
+              new CustomEvent('gallery:order', { detail: input.value }),
+            )
+          })
+        })
       render(columns)
+      gallery.addEventListener('gallery:layout', () => {
+        position = undefined
+        const order =
+          gallery.dataset.galleryOrder === 'newest' ? 'newest' : 'oldest'
+        applyOrder(order)
+        if (gallery.dataset.galleryFiltered !== 'true')
+          toolbar
+            .querySelectorAll<HTMLInputElement>('[name="gallery-order"]')
+            .forEach((input) => {
+              input.checked = input.value === order
+            })
+        render(columns)
+      })
       let width = gallery.clientWidth
       new ResizeObserver(() => {
         if (width !== gallery.clientWidth) {
@@ -248,6 +334,9 @@ const { count } = Astro.props
 <style is:global>
   [data-gallery-favorites-only='true']
     [data-gallery-filename]:not([data-favorite='true']) {
+    display: none;
+  }
+  [data-gallery-has-picks='false'] [data-gallery-favorites-summary] {
     display: none;
   }
   [data-gallery-browser] {

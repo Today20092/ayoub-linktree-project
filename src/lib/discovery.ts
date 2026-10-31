@@ -1,3 +1,4 @@
+import { eventPortraitMarkdownSection } from './event-portrait-offer'
 import { siteConfig } from './site-config'
 export {
   cacheControlForPage,
@@ -5,7 +6,7 @@ export {
   PUBLIC_PAGE_CACHE_CONTROL,
 } from './public-delivery'
 
-export function homepageMarkdown() {
+export function homepageMarkdown(origin = 'https://ayoubabed.xyz') {
   const { site } = siteConfig
   return `# ${site.siteName}
 
@@ -24,5 +25,6 @@ ${site.pageDescription}
 - [Email Ayoub](mailto:Ayoub@AyoubAbed.xyz)
 - [Call Ayoub](tel:+18134240606)
 - [Download the contact card](https://ayoubabed.xyz/AyoubA-Contact-Card.vcf)
-`
+
+${eventPortraitMarkdownSection()}`.replaceAll('https://ayoubabed.xyz', origin)
 }

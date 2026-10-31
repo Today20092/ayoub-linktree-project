@@ -59,6 +59,12 @@ New uploaded images use `/api/gallery-media/` on the selected website, so previe
 | Production  | [ayoubabed.xyz](https://ayoubabed.xyz)                                                | Live galleries and normal app use       |
 | Preview     | [Preview website](https://ayoub-linktree-project-preview.ayoub-abedrabbo.workers.dev) | Upload, moderation, and release testing |
 
+`npm run deploy:preview` verifies and builds with the preview site origin before
+deploying the separate preview Worker and its explicit preview D1/R2 bindings.
+Normal builds retain the production origin; `ASTRO_SITE_URL` overrides it for
+isolated audit builds. Canonicals, sitemap, robots, and Markdown discovery use
+that build origin. Legacy manifest gallery media remains on the public photo CDN.
+
 Each environment has separate gallery data, image buckets, and pairing keys. Switching the app's website does not move photos or galleries. Finish or clear a pending batch before switching, then create a key on the destination website.
 
 The web dashboard uses Cloudflare Access. The Android API uses revocable device keys. Upload-only keys cannot manage galleries; management permission must be explicitly enabled. Keep keys and signing credentials out of source control.
@@ -85,17 +91,20 @@ npm run audit:prod
 
 For documentation-only edits, format the changed Markdown and check its links. A website build is not needed solely for documentation changes.
 
+For an offline SquirrelScan audit of the built Worker with isolated local gallery
+storage, follow [Local production-build audit](docs/production-audit.md).
+
 ## Releases and deployment
 
-GitHub is the source of truth. Website changes go through a feature branch, verification, preview, review, and merge to `master`. Production deploys from clean `master`.
+GitHub is the source of truth. Integrate on `development` (this event-portrait batch uses `Today20092/rockfish`), then promote to `master` as described in [the Git workflow](docs/branch-workflow.md). Choose versions as described in [the versioning policy](docs/releasing.md).
 
 - `npm run deploy` and `npm run deploy:preview` deploy the isolated preview website.
-- `npm run deploy:prod` deploys production.
-- Android release tags build and publish an APK through `.github/workflows/android.yml`.
+- `npm run deploy:prod` deploys production from clean `master`.
+- Android tags `android-v*` build and publish an APK through `.github/workflows/android.yml`.
 
 Publishing an APK does not deploy the website. Deploy required backend changes and database migrations before distributing an app that depends on them. Preview upload testing must use the isolated bindings in `scripts/deploy-preview-worker.mjs`.
 
-Follow [AGENTS.md](AGENTS.md) for deployment authorization and the repository's release procedure. Android signing and versioning instructions live in the [Android build guide](android/README.md#github-builds-and-signing).
+Follow [AGENTS.md](AGENTS.md) for deployment authorization. Android signing instructions live in the [Android build guide](android/README.md#github-builds-and-signing).
 
 ## Documentation map
 

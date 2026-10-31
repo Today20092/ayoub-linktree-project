@@ -21,6 +21,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { nextGalleryPhoto } from '@/lib/gallery-grid'
+import { galleryPagePath } from '@/lib/gallery-pagination'
+import {
+  createGallerySelection,
+  type GallerySelectionRequest,
+} from '@/lib/gallery-selection'
 import { Progress } from '@/components/ui/progress'
 import { Toaster } from '@/components/ui/sonner'
 
@@ -105,6 +110,63 @@ export default function EventLightbox({
   const touchStartX = React.useRef<number | null>(null)
   const touchStartY = React.useRef<number | null>(null)
   const selectionStorageKey = `event-gallery:${projectSlug}:favorites`
+  const gridSelection = React.useRef<ReturnType<
+    typeof createGallerySelection
+  > | null>(null)
+  const [gridRevision, setGridRevision] = React.useState(0)
+
+  React.useEffect(() => {
+    const gallery = document.getElementById(galleryId)
+    if (!gallery) return
+    const selection = createGallerySelection(gallery, images, shareToken)
+    gridSelection.current = selection
+    const refresh = () => setGridRevision((value) => value + 1)
+    const reset = () => selection.reset()
+    const search = (event: Event) => {
+      setFavoritesOnly(false)
+      const request = (event as CustomEvent<GallerySelectionRequest>).detail
+      if (request)
+        void selection.show(request).then(request.resolve, request.reject)
+    }
+    gallery.addEventListener('gallery:layout', refresh)
+    gallery.addEventListener('gallery:clear-filter', reset)
+    gallery.addEventListener('gallery:search-results', search)
+    const startSearch = () => {
+      setFavoritesOnly(false)
+      selection.reset()
+    }
+    gallery.addEventListener('gallery:search-start', startSearch)
+    const showPage = () => {
+      setFavoritesOnly(false)
+      gallery.dispatchEvent(new Event('gallery:reset-search'))
+      selection.reset()
+    }
+    gallery.addEventListener('gallery:show-page', showPage)
+    return () => {
+      selection.destroy()
+      gallery.removeEventListener('gallery:layout', refresh)
+      gallery.removeEventListener('gallery:clear-filter', reset)
+      gallery.removeEventListener('gallery:search-results', search)
+      gallery.removeEventListener('gallery:search-start', startSearch)
+      gallery.removeEventListener('gallery:show-page', showPage)
+    }
+  }, [galleryId, images, shareToken])
+
+  React.useEffect(() => {
+    if (!favoritesOnly) return
+    if (selected.size === 0) {
+      gridSelection.current?.reset()
+      setFavoritesOnly(false)
+    } else
+      void gridSelection.current
+        ?.show({
+          filenames: images
+            .filter((image) => selected.has(image.filename))
+            .map((image) => image.filename),
+          mode: 'favorites',
+        })
+        .catch(() => {})
+  }, [favoritesOnly, selected, images])
 
   React.useEffect(() => {
     const validFilenames = new Set(images.map((image) => image.filename))
@@ -147,7 +209,6 @@ export default function EventLightbox({
     if (!gallery) return
 
     const filtering = favoritesOnly && selected.size > 0
-    gallery.dataset.galleryFavoritesOnly = String(filtering)
     if (favoritesOnly && selected.size === 0) setFavoritesOnly(false)
     gallery
       .querySelectorAll<HTMLElement>('[data-gallery-filename]')
@@ -169,10 +230,9 @@ export default function EventLightbox({
         : `View favorites (${selected.size})`
       favoritesButton.setAttribute('aria-pressed', String(filtering))
     }
+    gallery.dataset.galleryHasPicks = String(selected.size > 0)
     if (count)
-      count.textContent = filtering
-        ? `Showing ${selected.size} ${selected.size === 1 ? 'favorite' : 'favorites'}`
-        : ''
+      count.textContent = selected.size > 0 ? `${selected.size} selected` : ''
 
     gallery
       .querySelectorAll<HTMLElement>('[data-gallery-favorite]')
@@ -183,7 +243,7 @@ export default function EventLightbox({
         button.dataset.selected = String(isSelected)
         button.setAttribute('aria-pressed', String(isSelected))
       })
-  }, [galleryId, selected, favoritesOnly, selectionLoaded])
+  }, [galleryId, selected, favoritesOnly, selectionLoaded, gridRevision])
 
   const toggleFavorite = React.useCallback((filename: string) => {
     setSelected((current) => {
@@ -231,13 +291,16 @@ export default function EventLightbox({
 
   const getLastFocusedOpener = React.useCallback(() => {
     if (lastFocusedRef.current?.isConnected) return lastFocusedRef.current
-    if (lastFocusedIndexRef.current === null) return null
+    const gallery = document.getElementById(galleryId)
+    if (lastFocusedIndexRef.current === null) return gallery
 
-    return document
-      .getElementById(galleryId)
-      ?.querySelector<HTMLElement>(
-        `[data-gallery-open="${lastFocusedIndexRef.current}"]`,
-      )
+    return (
+      document
+        .getElementById(galleryId)
+        ?.querySelector<HTMLElement>(
+          `[data-gallery-open="${lastFocusedIndexRef.current}"]`,
+        ) ?? gallery
+    )
   }, [galleryId])
 
   const getPhotoIndexFromUrl = React.useCallback(() => {
@@ -254,6 +317,14 @@ export default function EventLightbox({
 
       if (index === null) {
         url.searchParams.delete('photo')
+        const page = Number(
+          document.getElementById(galleryId)?.dataset.galleryPage ?? 1,
+        )
+        const base = new URL(
+          galleryPagePath(url.pathname, page, shareToken),
+          url,
+        )
+        url.search = base.search
       } else {
         url.searchParams.set('photo', String(index + 1))
       }
@@ -264,7 +335,7 @@ export default function EventLightbox({
         url,
       )
     },
-    [],
+    [galleryId, shareToken],
   )
 
   const showSlide = React.useCallback(
@@ -292,6 +363,7 @@ export default function EventLightbox({
     const gallery = document.getElementById(galleryId)
     if (!favoritesOnly)
       gallery?.dispatchEvent(new Event('gallery:reset-search'))
+    else gridSelection.current?.reset()
     setFavoritesOnly(!favoritesOnly)
     gallery?.scrollIntoView({
       behavior: matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -389,12 +461,32 @@ export default function EventLightbox({
 
     gallery.addEventListener('click', handleClick)
     const showSearchResults = () => setFavoritesOnly(false)
+    const downloadMatches = (event: Event) => {
+      const filenames = new Set((event as CustomEvent<string[]>).detail ?? [])
+      const matched = images.filter((image) => filenames.has(image.filename))
+      if (matched.length === 0) return
+      void startDownload({
+        kind: 'selection',
+        images: matched,
+        filename: `${projectSlug}-matches.zip`,
+      })
+    }
     gallery.addEventListener('gallery:search-results', showSearchResults)
+    gallery.addEventListener('gallery:download-matches', downloadMatches)
     return () => {
       gallery.removeEventListener('click', handleClick)
       gallery.removeEventListener('gallery:search-results', showSearchResults)
+      gallery.removeEventListener('gallery:download-matches', downloadMatches)
     }
-  }, [galleryId, showSlide, startDownload, toggleFavorite, updatePhotoUrl])
+  }, [
+    galleryId,
+    images,
+    projectSlug,
+    showSlide,
+    startDownload,
+    toggleFavorite,
+    updatePhotoUrl,
+  ])
 
   React.useEffect(() => {
     const syncFromUrl = () => {
@@ -465,7 +557,9 @@ export default function EventLightbox({
       toast.success('Your download is starting')
     } catch (error) {
       setDownloadError(
-        error instanceof Error ? error.message : 'Unable to prepare download',
+        error instanceof Error
+          ? `${error.message} Try again, or save one photo from the viewer.`
+          : 'Unable to prepare the ZIP. Try again, or save one photo from the viewer.',
       )
       setDownloadStatus('error')
     }
@@ -502,53 +596,63 @@ export default function EventLightbox({
 
   return (
     <>
-      {selected.size > 0 && (
-        <>
+      <div
+        className={
+          selected.size > 0
+            ? 'bg-background/95 sticky bottom-4 z-20 flex flex-wrap items-center gap-3 rounded-xl border p-3 shadow-lg backdrop-blur'
+            : 'flex flex-wrap items-center gap-3'
+        }
+      >
+        {selected.size > 0 && (
+          <>
+            <p className="text-sm font-semibold">{selected.size} selected</p>
+            <Button
+              size="lg"
+              onClick={() =>
+                startDownload({
+                  kind: 'selection',
+                  images: selectedImages,
+                  filename: `${projectSlug}-selection.zip`,
+                })
+              }
+            >
+              <Download data-icon="inline-start" aria-hidden="true" />
+              Download ZIP ({selected.size})
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => setSelected(new Set())}
+            >
+              Clear
+            </Button>
+          </>
+        )}
+        {images.length > 0 && (
           <Button
             size="lg"
+            variant={selected.size > 0 ? 'outline' : 'default'}
             onClick={() =>
-              startDownload({
-                kind: 'selection',
-                images: selectedImages,
-                filename: `${projectSlug}-selection.zip`,
-              })
+              startDownload(
+                downloadAllUrl
+                  ? {
+                      kind: 'file',
+                      url: downloadAllUrl,
+                      filename: `${projectSlug}.zip`,
+                    }
+                  : {
+                      kind: 'selection',
+                      images,
+                      filename: `${projectSlug}.zip`,
+                    },
+              )
             }
           >
             <Download data-icon="inline-start" aria-hidden="true" />
-            Download favorites ({selected.size})
+            Download ZIP
           </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => setSelected(new Set())}
-          >
-            Clear favorites
-          </Button>
-        </>
-      )}
-      {images.length > 0 && (
-        <Button
-          size="lg"
-          onClick={() =>
-            startDownload(
-              downloadAllUrl
-                ? {
-                    kind: 'file',
-                    url: downloadAllUrl,
-                    filename: `${projectSlug}.zip`,
-                  }
-                : {
-                    kind: 'selection',
-                    images,
-                    filename: `${projectSlug}.zip`,
-                  },
-            )
-          }
-        >
-          <Download data-icon="inline-start" aria-hidden="true" />
-          Download all
-        </Button>
-      )}
+        )}
+      </div>
 
       {downloadStatus === 'complete' && (
         <a
@@ -632,12 +736,11 @@ export default function EventLightbox({
                     </Button>
                     <Button
                       variant="secondary"
-                      size="icon"
-                      className="min-h-11 min-w-11"
+                      className="min-h-11"
                       onClick={shareCurrentPhoto}
-                      aria-label="Share current photo"
                     >
-                      <Share2 aria-hidden="true" />
+                      <Share2 data-icon="inline-start" aria-hidden="true" />
+                      Share
                     </Button>
                   </>
                 )}

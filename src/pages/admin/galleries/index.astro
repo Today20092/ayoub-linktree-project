@@ -2,7 +2,7 @@
 import '../../../styles.css'
 
 import type { ImageMetadata } from 'astro'
-import { Image } from 'astro:assets'
+import Image from '../../../components/GalleryImage.astro'
 import { env } from 'cloudflare:workers'
 import { ChevronRight, Images } from 'lucide-react'
 
@@ -105,8 +105,10 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
                 <Image
                   src={cover.src}
                   alt={cover.alt}
-                  width={cover.width}
-                  height={cover.height}
+                  width={Math.min(cover.width, 720)}
+                  height={Math.round(
+                    (cover.height * Math.min(cover.width, 720)) / cover.width,
+                  )}
                   layout="full-width"
                   widths={[480, 720]}
                   sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
@@ -116,6 +118,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
                 <Image
                   src={cover as ImageMetadata}
                   alt={coverAlt}
+                  width={Math.min((cover as ImageMetadata).width, 720)}
                   widths={[480, 720]}
                   sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                   class="aspect-[4/3] w-full object-cover"
@@ -145,7 +148,13 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
                 {visibilityStatus === 'hidden' && (
                   <Badge variant="destructive">Hidden</Badge>
                 )}
-                <Badge variant="outline">{category}</Badge>
+                <Badge
+                  variant="outline"
+                  className="min-w-0 flex-1"
+                  title={category}
+                >
+                  <span class="truncate">{category}</span>
+                </Badge>
                 <Badge variant="secondary">
                   <Images aria-hidden="true" />
                   {published} guest
