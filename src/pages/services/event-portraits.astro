@@ -7,7 +7,6 @@ import { Separator } from '@/components/ui/separator'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import {
   eventPortraitDescription,
-  eventPortraitEmail,
   eventPortraitPackages,
   eventPortraitPhone,
   eventPortraitStructuredData,
@@ -16,11 +15,11 @@ import {
 import { siteConfig } from '../../lib/site-config'
 
 const portraitAssets = import.meta.glob<{ default: ImageMetadata }>(
-  '../../assets/portraits/P1210300.JPG',
+  '../../assets/portraits/angel-birthday-cover.jpg',
   { eager: true },
 )
-const eventPortrait =
-  portraitAssets['../../assets/portraits/P1210300.JPG'].default
+const angelPortrait =
+  portraitAssets['../../assets/portraits/angel-birthday-cover.jpg'].default
 
 const title = eventPortraitTitle
 const description = eventPortraitDescription
@@ -60,10 +59,12 @@ const packages = eventPortraitPackages
         >
           Your event. A gallery within minutes.
         </h1>
-        <p class="text-muted-foreground mt-6 max-w-lg text-lg leading-8">
-          Book Ayoub for the event in Tampa. You get the photographs and a
-          gallery that updates within minutes. Portrait sessions are a main part
-          of the booking. The host pays. Guests receive photos at no charge.
+        <p class="mt-6 max-w-lg text-lg leading-8">
+          From $400. Angel’s birthday gallery was updating during the party.
+        </p>
+        <p class="text-muted-foreground mt-4 max-w-lg text-lg leading-8">
+          Book Ayoub for the event in Tampa. The host pays. Guests receive the
+          photos at no charge.
         </p>
         <div class="mt-7 flex flex-wrap items-center gap-5">
           <a
@@ -82,8 +83,8 @@ const packages = eventPortraitPackages
       </div>
       <figure class="min-w-0">
         <Image
-          src={eventPortrait}
-          alt="Two guests smiling together for a professional portrait at an event"
+          src={angelPortrait}
+          alt="Angel celebrating his birthday with family around the cake"
           layout="full-width"
           widths={[480, 720, 1080]}
           sizes="(min-width: 1024px) 520px, (min-width: 640px) 90vw, 100vw"
@@ -92,8 +93,14 @@ const packages = eventPortraitPackages
           quality={82}
           class="aspect-[4/3] rounded-2xl object-cover"
         />
-        <figcaption class="text-muted-foreground mt-3 text-sm">
-          Event portraits by Ayoub Abedrabbo
+        <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
+          Angel’s birthday party, October 24, 2026.
+          <a
+            href="/galleries/angels-birthday-party-2026/"
+            class="text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            See the gallery
+          </a>
         </figcaption>
       </figure>
     </section>
@@ -111,58 +118,26 @@ const packages = eventPortraitPackages
         >
           What you get
         </h2>
+        <p class="text-muted-foreground mt-4 max-w-xl leading-7">
+          Guests open a link on their phone. Each photo shows up within minutes
+          of being taken, and guests do not pay.
+        </p>
         <p class="mt-4 text-sm leading-6">
+          <a
+            href="/galleries/angels-birthday-party-2026/"
+            class="text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            Angel’s gallery
+          </a>
+          <span class="text-muted-foreground px-1.5">·</span>
           <a
             href="/portfolio/portraits/"
             class="text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
           >
             Portrait portfolio
           </a>
-          <span class="text-muted-foreground px-1.5">·</span>
-          <a
-            href="/portfolio/muslim-business-chamber-2026/"
-            class="text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
-          >
-            Attendee portraits at a Tampa event
-          </a>
-        </p>
-        <p class="text-muted-foreground mt-3 text-sm leading-6">
-          <a
-            class="text-foreground underline underline-offset-4"
-            href={`mailto:${eventPortraitEmail}`}
-          >
-            {eventPortraitEmail}
-          </a>
-          <span class="px-1.5">·</span>
-          <a
-            class="text-foreground underline underline-offset-4"
-            href="tel:+18134240606"
-          >
-            {eventPortraitPhone}
-          </a>
         </p>
       </div>
-      <ol class="mt-8 grid gap-8 md:grid-cols-3 lg:gap-12">
-        <li>
-          <h3 class="font-semibold">Event photography</h3>
-          <p class="text-muted-foreground mt-2 text-sm leading-6">
-            Coverage of the gathering, not only a portrait booth.
-          </p>
-        </li>
-        <li>
-          <h3 class="font-semibold">Portrait sessions</h3>
-          <p class="text-muted-foreground mt-2 text-sm leading-6">
-            A main part of the booking. About 20 an hour, as a planning
-            estimate.
-          </p>
-        </li>
-        <li>
-          <h3 class="font-semibold">The event gallery</h3>
-          <p class="text-muted-foreground mt-2 text-sm leading-6">
-            Each photo shows up within minutes of being taken.
-          </p>
-        </li>
-      </ol>
     </section>
 
     <Separator />
@@ -181,49 +156,44 @@ const packages = eventPortraitPackages
       <p class="text-muted-foreground mt-4 max-w-2xl leading-7">
         Ayoub, camera, and lighting. Prices are starting points.
       </p>
-      <div class="mt-8">
-        <table class="w-full text-left">
-          <caption class="sr-only">
-            Starting prices in US dollars and approximate portrait sessions by
-            coverage time
-          </caption>
-          <thead class="text-muted-foreground text-xs">
-            <tr>
-              <th scope="col" class="pb-4 font-medium">
-                Coverage
-              </th>
-              <th scope="col" class="pb-4 font-medium">
-                Portrait sessions
-              </th>
-              <th scope="col" class="pb-4 text-right font-medium">
-                Starting at
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {packages.map((option) => (
-              <tr class="odd:bg-muted/50">
-                <th
-                  scope="row"
-                  class="rounded-l-lg px-3 py-5 text-sm font-semibold sm:text-base"
-                >
-                  {option.hours}
-                </th>
-                <td class="text-muted-foreground px-2 py-5 text-sm">
-                  {option.sessions}
-                </td>
-                <td class="rounded-r-lg px-3 py-5 text-right text-xl font-bold tracking-tight tabular-nums sm:text-2xl">
+      <div class="mt-8 w-full max-w-lg">
+        <div class="text-muted-foreground flex justify-between px-4 pb-3 text-xs font-medium">
+          <span>Coverage</span>
+          <span>Starting at</span>
+        </div>
+        <ul class="grid gap-2">
+          {packages.map((option) => (
+            <li>
+              <button
+                type="button"
+                data-coverage={option.hours}
+                aria-pressed="false"
+                class="bg-muted/50 hover:bg-muted focus-visible:outline-ring aria-pressed:ring-primary flex w-full items-center justify-between gap-4 rounded-xl px-4 py-4 text-left aria-pressed:ring-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                <span>
+                  <span class="block text-sm font-semibold sm:text-base">
+                    {option.hours}
+                  </span>
+                  <span class="mt-1 block text-sm">
+                    Planning pace: {option.sessions.toLowerCase()} an hour, not
+                    a cap
+                  </span>
+                </span>
+                <span class="shrink-0 text-xl font-bold tracking-tight tabular-nums sm:text-2xl">
                   {option.price}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <p class="text-muted-foreground mt-4 max-w-3xl text-sm leading-6">
-          Extra hour +$150. Travel is included within 30 miles of Tampa. Farther
-          travel, a helper, a backdrop, a same-night highlight, and a rush
-          gallery are quoted separately. Up to 8 hours is a custom quote.
-        </p>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div class="mt-4 grid gap-1 px-4 text-sm leading-6">
+          <p>Extra hour +$150.</p>
+          <p>Travel is included within 30 miles of Tampa.</p>
+          <p class="text-muted-foreground">
+            Farther travel, a helper, a backdrop, a same-night highlight, and a
+            rush gallery are quoted separately. Up to 8 hours is a custom quote.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -255,175 +225,233 @@ const packages = eventPortraitPackages
               tabindex="-1"
               role="alert"
             ></div>
-            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <label class="grid gap-2 text-sm font-medium" for="coverage">
-                <span class="flex items-baseline justify-between gap-3">
-                  Coverage
-                  <span class="text-muted-foreground text-xs font-normal">
-                    Required
+            <fieldset class="grid gap-4">
+              <legend class="text-sm font-semibold">The event</legend>
+              <div class="grid gap-5 sm:grid-cols-2">
+                <label class="grid gap-2 text-sm font-medium" for="coverage">
+                  <span class="flex items-baseline justify-between gap-3">
+                    Coverage
+                    <span class="text-muted-foreground text-xs font-normal">
+                      Required
+                    </span>
                   </span>
-                </span>
-                <select
-                  id="coverage"
-                  name="coverage"
-                  required
-                  class="border-input bg-background min-h-11 rounded-xl border px-3"
-                >
-                  <option value="">Choose coverage</option>
-                  {packages.map((option) => (
-                    <option value={option.hours}>
-                      {option.hours}, starting at {option.price}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label class="grid gap-2 text-sm font-medium" for="extraTime">
-                <span class="flex items-baseline justify-between gap-3">
-                  Longer coverage
-                  <span class="text-muted-foreground text-xs font-normal">
-                    Optional
+                  <select
+                    id="coverage"
+                    name="coverage"
+                    required
+                    aria-describedby="error-coverage"
+                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
+                  >
+                    <option value="">Choose coverage</option>
+                    {packages.map((option) => (
+                      <option value={option.hours}>
+                        {option.hours}, starting at {option.price}
+                      </option>
+                    ))}
+                  </select>
+                  <p
+                    id="error-coverage"
+                    class="text-destructive hidden text-sm"
+                  ></p>
+                </label>
+                <label class="grid gap-2 text-sm font-medium" for="extraTime">
+                  <span class="flex items-baseline justify-between gap-3">
+                    Longer coverage
+                    <span class="text-muted-foreground text-xs font-normal">
+                      Optional
+                    </span>
                   </span>
-                </span>
-                <input
-                  id="extraTime"
-                  name="extraTime"
-                  class="border-input bg-background min-h-11 rounded-xl border px-3"
-                  placeholder="Up to 8 hours"
-                />
-              </label>
-            </div>
-            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <label class="grid gap-2 text-sm font-medium" for="date">
-                <span class="flex items-baseline justify-between gap-3">
-                  Date
-                  <span class="text-muted-foreground text-xs font-normal">
-                    Required
+                  <input
+                    id="extraTime"
+                    name="extraTime"
+                    class="border-input bg-background min-h-11 rounded-xl border px-3"
+                    placeholder="Up to 8 hours"
+                  />
+                </label>
+              </div>
+              <div class="grid gap-5 sm:grid-cols-2">
+                <label class="grid gap-2 text-sm font-medium" for="date">
+                  <span class="flex items-baseline justify-between gap-3">
+                    Date
+                    <span class="text-muted-foreground text-xs font-normal">
+                      Required
+                    </span>
                   </span>
-                </span>
-                <input
-                  id="date"
-                  name="date"
-                  type="date"
-                  required
-                  class="border-input bg-background min-h-11 rounded-xl border px-3"
-                />
-              </label>
-              <label class="grid gap-2 text-sm font-medium" for="guests">
-                <span class="flex items-baseline justify-between gap-3">
-                  Guests
-                  <span class="text-muted-foreground text-xs font-normal">
-                    Required
+                  <input
+                    id="date"
+                    name="date"
+                    type="date"
+                    required
+                    aria-describedby="error-date"
+                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
+                  />
+                  <p
+                    id="error-date"
+                    class="text-destructive hidden text-sm"
+                  ></p>
+                </label>
+                <label class="grid gap-2 text-sm font-medium" for="guests">
+                  <span class="flex items-baseline justify-between gap-3">
+                    Guests
+                    <span class="text-muted-foreground text-xs font-normal">
+                      Required
+                    </span>
                   </span>
-                </span>
-                <input
-                  id="guests"
-                  name="guests"
-                  type="number"
-                  min="0"
-                  step="1"
-                  inputmode="numeric"
-                  required
-                  class="border-input bg-background min-h-11 rounded-xl border px-3"
-                />
-              </label>
-            </div>
-            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <label class="grid gap-2 text-sm font-medium" for="venue">
-                <span class="flex items-baseline justify-between gap-3">
-                  Venue
-                  <span class="text-muted-foreground text-xs font-normal">
-                    Required
+                  <input
+                    id="guests"
+                    name="guests"
+                    type="number"
+                    min="1"
+                    step="1"
+                    inputmode="numeric"
+                    required
+                    aria-describedby="error-guests"
+                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
+                  />
+                  <p
+                    id="error-guests"
+                    class="text-destructive hidden text-sm"
+                  ></p>
+                </label>
+              </div>
+              <div class="grid gap-5 sm:grid-cols-2">
+                <label class="grid gap-2 text-sm font-medium" for="venue">
+                  <span class="flex items-baseline justify-between gap-3">
+                    Venue
+                    <span class="text-muted-foreground text-xs font-normal">
+                      Required
+                    </span>
                   </span>
-                </span>
-                <input
-                  id="venue"
-                  name="venue"
-                  required
-                  class="border-input bg-background min-h-11 rounded-xl border px-3"
-                />
-              </label>
-              <label class="grid gap-2 text-sm font-medium" for="city">
-                <span class="flex items-baseline justify-between gap-3">
-                  City
-                  <span class="text-muted-foreground text-xs font-normal">
-                    Required
+                  <input
+                    id="venue"
+                    name="venue"
+                    required
+                    aria-describedby="error-venue"
+                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
+                  />
+                  <p
+                    id="error-venue"
+                    class="text-destructive hidden text-sm"
+                  ></p>
+                </label>
+                <label class="grid gap-2 text-sm font-medium" for="city">
+                  <span class="flex items-baseline justify-between gap-3">
+                    City
+                    <span class="text-muted-foreground text-xs font-normal">
+                      Required
+                    </span>
                   </span>
-                </span>
-                <input
-                  id="city"
-                  name="city"
-                  autocomplete="address-level2"
-                  required
-                  class="border-input bg-background min-h-11 rounded-xl border px-3"
-                />
-              </label>
-            </div>
-            <label class="grid gap-2 text-sm font-medium" for="eventType">
-              <span class="flex items-baseline justify-between gap-3">
-                Event type
-                <span class="text-muted-foreground text-xs font-normal">
-                  Required
-                </span>
-              </span>
-              <input
-                id="eventType"
-                name="eventType"
-                required
-                class="border-input bg-background min-h-11 rounded-xl border px-3"
-                placeholder="Mosque, school, nonprofit, or community event"
-              />
-            </label>
-            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-3">
-              <label class="grid gap-2 text-sm font-medium" for="name">
+                  <input
+                    id="city"
+                    name="city"
+                    autocomplete="address-level2"
+                    required
+                    aria-describedby="error-city"
+                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
+                  />
+                  <p
+                    id="error-city"
+                    class="text-destructive hidden text-sm"
+                  ></p>
+                </label>
+              </div>
+              <label class="grid gap-2 text-sm font-medium" for="eventType">
                 <span class="flex items-baseline justify-between gap-3">
-                  Name
-                  <span class="text-muted-foreground text-xs font-normal">
-                    Required
-                  </span>
-                </span>
-                <input
-                  id="name"
-                  name="name"
-                  autocomplete="name"
-                  required
-                  class="border-input bg-background min-h-11 rounded-xl border px-3"
-                />
-              </label>
-              <label class="grid gap-2 text-sm font-medium" for="phone">
-                <span class="flex items-baseline justify-between gap-3">
-                  Phone
-                  <span class="text-muted-foreground text-xs font-normal">
-                    Required
-                  </span>
-                </span>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  autocomplete="tel"
-                  required
-                  class="border-input bg-background min-h-11 rounded-xl border px-3"
-                />
-              </label>
-              <label class="grid gap-2 text-sm font-medium" for="email">
-                <span class="flex items-baseline justify-between gap-3">
-                  Email
+                  Event type
                   <span class="text-muted-foreground text-xs font-normal">
                     Required
                   </span>
                 </span>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  enterkeyhint="done"
-                  autocomplete="email"
+                  id="eventType"
+                  name="eventType"
                   required
-                  class="border-input bg-background min-h-11 rounded-xl border px-3"
+                  aria-describedby="error-eventType"
+                  class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
+                  placeholder="Birthday, mosque, school, or nonprofit"
                 />
+                <p
+                  id="error-eventType"
+                  class="text-destructive hidden text-sm"
+                ></p>
               </label>
-            </div>
-            <div class="flex flex-wrap items-center gap-5">
+            </fieldset>
+            <fieldset class="grid gap-4">
+              <legend class="text-sm font-semibold">How to reach you</legend>
+              <div class="grid gap-5 sm:grid-cols-2">
+                <label class="grid gap-2 text-sm font-medium" for="name">
+                  <span class="flex items-baseline justify-between gap-3">
+                    Name
+                    <span class="text-muted-foreground text-xs font-normal">
+                      Required
+                    </span>
+                  </span>
+                  <input
+                    id="name"
+                    name="name"
+                    autocomplete="name"
+                    required
+                    aria-describedby="error-name"
+                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
+                  />
+                  <p
+                    id="error-name"
+                    class="text-destructive hidden text-sm"
+                  ></p>
+                </label>
+                <label class="grid gap-2 text-sm font-medium" for="phone">
+                  <span class="flex items-baseline justify-between gap-3">
+                    Phone
+                    <span class="text-muted-foreground text-xs font-normal">
+                      Required
+                    </span>
+                  </span>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                    required
+                    aria-describedby="error-phone"
+                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
+                  />
+                  <p
+                    id="error-phone"
+                    class="text-destructive hidden text-sm"
+                  ></p>
+                </label>
+                <label class="grid gap-2 text-sm font-medium" for="email">
+                  <span class="flex items-baseline justify-between gap-3">
+                    Email
+                    <span class="text-muted-foreground text-xs font-normal">
+                      Required
+                    </span>
+                  </span>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    enterkeyhint="done"
+                    autocomplete="email"
+                    required
+                    aria-describedby="error-email"
+                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
+                  />
+                  <p
+                    id="error-email"
+                    class="text-destructive hidden text-sm"
+                  ></p>
+                </label>
+              </div>
+            </fieldset>
+            <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
+              <a
+                class="text-foreground text-sm underline underline-offset-4"
+                href="tel:+18134240606"
+              >
+                {eventPortraitPhone}
+              </a>
+              <p id="inquiry-selection" class="text-sm font-medium" hidden></p>
               <button
                 type="submit"
                 class={buttonVariants({
@@ -479,6 +507,85 @@ const packages = eventPortraitPackages
       const ready = document.querySelector('#inquiry-ready')
       const readyCopy = document.querySelector('#inquiry-ready-copy')
       const mailtoLink = document.querySelector('#inquiry-mailto')
+      const coverage = document.querySelector('#coverage')
+      const selection = document.querySelector('#inquiry-selection')
+      const fieldNames = [
+        'coverage',
+        'date',
+        'venue',
+        'city',
+        'guests',
+        'eventType',
+        'name',
+        'phone',
+        'email',
+      ]
+      const clearFieldErrors = () => {
+        for (const name of fieldNames) {
+          document.getElementById(name)?.removeAttribute('aria-invalid')
+          const message = document.getElementById(`error-${name}`)
+          if (message) {
+            message.hidden = true
+            message.textContent = ''
+          }
+        }
+      }
+      const showFieldErrors = (
+        problems: Partial<Record<(typeof fieldNames)[number], string>>,
+      ) => {
+        clearFieldErrors()
+        let first: HTMLElement | null = null
+        for (const name of fieldNames) {
+          const message = problems[name]
+          if (!message) continue
+          const field = document.getElementById(name)
+          const slot = document.getElementById(`error-${name}`)
+          field?.setAttribute('aria-invalid', 'true')
+          if (slot) {
+            slot.hidden = false
+            slot.textContent = message
+          }
+          if (!first && field) first = field
+        }
+        first?.focus()
+      }
+      const showSelection = () => {
+        if (
+          !(coverage instanceof HTMLSelectElement) ||
+          !(selection instanceof HTMLElement)
+        ) {
+          return
+        }
+        const label = coverage.selectedOptions[0]?.textContent?.trim() ?? ''
+        document.querySelectorAll('[data-coverage]').forEach((button) => {
+          if (!(button instanceof HTMLButtonElement)) return
+          button.setAttribute(
+            'aria-pressed',
+            button.dataset.coverage === coverage.value ? 'true' : 'false',
+          )
+        })
+        if (!coverage.value || !label) {
+          selection.hidden = true
+          selection.textContent = ''
+          return
+        }
+        selection.hidden = false
+        selection.textContent = label
+      }
+      coverage?.addEventListener('change', showSelection)
+      document.querySelectorAll('[data-coverage]').forEach((button) => {
+        button.addEventListener('click', () => {
+          if (
+            !(button instanceof HTMLButtonElement) ||
+            !(coverage instanceof HTMLSelectElement)
+          ) {
+            return
+          }
+          coverage.value = button.dataset.coverage ?? ''
+          showSelection()
+          selection.scrollIntoView({ block: 'nearest' })
+        })
+      })
       form?.addEventListener('submit', (event) => {
         event.preventDefault()
         if (
@@ -510,23 +617,27 @@ const packages = eventPortraitPackages
             return { hours: option.value, price: price ?? '' }
           })
         const problems = inquiryErrors(fields, packages)
-        const first = Object.values(problems)[0]
-        if (first) {
+        const messages = Object.values(problems)
+        if (messages.length > 0) {
           errors.classList.remove('hidden')
-          errors.textContent = first
-          errors.focus()
+          errors.textContent =
+            messages.length === 1
+              ? messages[0]
+              : `Check ${messages.length} fields.`
           ready.classList.add('hidden')
+          showFieldErrors(problems)
           return
         }
         const href = inquiryMailto(fields, packages)
         const selected = packages.find(
           (option) => option.hours === fields.coverage,
         )
+        clearFieldErrors()
         errors.classList.add('hidden')
         ready.classList.remove('hidden')
         readyCopy.textContent = `${fields.coverage}, starting at ${selected?.price}.`
         mailtoLink.href = href
-        window.location.href = href
+        mailtoLink.click()
       })
     </script>
   </main>
