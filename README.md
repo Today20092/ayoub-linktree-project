@@ -96,15 +96,15 @@ storage, follow [Local production-build audit](docs/production-audit.md).
 
 ## Releases and deployment
 
-GitHub is the source of truth. Website changes go through a feature branch, verification, preview, review, and merge to `master`. Production deploys from clean `master`.
+GitHub is the source of truth. Integrate on `development` (this event-portrait batch uses `Today20092/rockfish`), then promote to `master` as described in [the Git workflow](docs/branch-workflow.md). Choose versions as described in [the versioning policy](docs/releasing.md).
 
 - `npm run deploy` and `npm run deploy:preview` deploy the isolated preview website.
-- `npm run deploy:prod` deploys production.
-- Android release tags build and publish an APK through `.github/workflows/android.yml`.
+- `npm run deploy:prod` deploys production from clean `master`.
+- Android tags `android-v*` build and publish an APK through `.github/workflows/android.yml`.
 
 Publishing an APK does not deploy the website. Deploy required backend changes and database migrations before distributing an app that depends on them. Preview upload testing must use the isolated bindings in `scripts/deploy-preview-worker.mjs`.
 
-Follow [AGENTS.md](AGENTS.md) for deployment authorization and the repository's release procedure. Android signing and versioning instructions live in the [Android build guide](android/README.md#github-builds-and-signing).
+Follow [AGENTS.md](AGENTS.md) for deployment authorization. Android signing instructions live in the [Android build guide](android/README.md#github-builds-and-signing).
 
 ## Documentation map
 

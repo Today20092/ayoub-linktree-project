@@ -21,7 +21,8 @@ type Props = {
   sitemapUrl?: string
   preconnectHints?: string[]
   structuredData?: Record<string, unknown>
-  activeNav?: 'home' | 'services' | 'galleries' | 'about' | 'contact'
+  activeNav?:
+    'home' | 'services' | 'galleries' | 'portraits' | 'about' | 'contact'
   disableAnalytics?: boolean
   minimal?: boolean
 }
