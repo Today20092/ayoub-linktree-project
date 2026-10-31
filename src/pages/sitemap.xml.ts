@@ -5,6 +5,7 @@ import type { APIContext } from 'astro'
 import { escapeXml, PUBLIC_PAGE_CACHE_CONTROL } from '../lib/discovery'
 import { eventPortraitPath } from '../lib/event-portrait-offer'
 import { galleryReader } from '../lib/gallery-read'
+import { GALLERY_PAGE_SIZE, galleryPagePath } from '../lib/gallery-pagination'
 import { sortPortfolioProjects } from '../lib/portfolio-order'
 
 export const prerender = false
@@ -26,7 +27,17 @@ export async function GET({ site }: APIContext) {
       .filter((entry) => entry.data.status === 'complete')
       .sort(sortPortfolioProjects)
       .map((entry) => `/portfolio/${entry.id}/`),
-    ...galleries.map((gallery) => `/galleries/${gallery.id}/`),
+    ...galleries.flatMap((gallery) =>
+      Array.from(
+        {
+          length: Math.max(
+            1,
+            Math.ceil(gallery.photoCount / GALLERY_PAGE_SIZE),
+          ),
+        },
+        (_, index) => galleryPagePath(`/galleries/${gallery.id}/`, index + 1),
+      ),
+    ),
   ])
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

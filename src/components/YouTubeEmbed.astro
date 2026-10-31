@@ -38,7 +38,7 @@ const localPoster = typeof poster === 'string' ? undefined : poster
       height={720}
       layout="full-width"
       widths={[640, 960, 1280]}
-      sizes="(min-width: 1280px) 1216px, 100vw"
+      sizes="(min-width: 960px) 896px, (min-width: 640px) calc(100vw - 48px), calc(100vw - 32px)"
       quality={80}
       priority
       class="absolute inset-0 size-full object-cover"
@@ -52,7 +52,7 @@ const localPoster = typeof poster === 'string' ? undefined : poster
       height={720}
       layout="full-width"
       widths={[640, 960, 1280]}
-      sizes="(min-width: 1280px) 1216px, 100vw"
+      sizes="(min-width: 960px) 896px, (min-width: 640px) calc(100vw - 48px), calc(100vw - 32px)"
       quality={80}
       priority
       class="absolute inset-0 size-full object-cover"

@@ -62,6 +62,24 @@ image download sizes, social-card dimensions, and public contact/guidance files.
 They supplement `npm run verify`; they do not test browser hydration or replace
 the full SquirrelScan comparison.
 
+For pagination, run `node --test scripts/gallery-performance.test.mjs` with
+`GALLERY_TEST_URL` set to the built Worker. The HTTP checks traverse every public
+page, verify global photo indexes and sitemap coverage, and retain the known image
+size regression. Set `AUDIT_SITE_ORIGIN` when testing a preview-origin build.
+`scripts/gallery-pagination-browser.mjs` checks desktop/mobile browsing, favorites,
+downloads, ranked gallery results, retry/cancellation, and JavaScript-disabled
+links. Supply `PLAYWRIGHT_MODULE` pointing to an existing Playwright module and
+optionally `GALLERY_BROWSER_REPORT` for measurements and screenshots; no runtime
+dependency is added. Download bytes and ranked matches use browser fixtures;
+this does not exercise a remote face index or validate real archive contents.
+
+Optional access/boundary fixtures belong **only** in the isolated local database:
+apply `scripts/audit/pagination-fixtures.sql` with the same local Wrangler config
+and state directory above, then set `GALLERY_PAGINATION_FIXTURES=1` for
+`scripts/gallery-pagination-access.test.mjs` and the browser script. Remove only
+the `pagination-test-*` fixture rows from `gallery_photos` and `event_galleries`
+afterward, before ordinary image tests or any audit. Never seed them remotely.
+
 ### Optional local R2 and image-transform smoke check
 
 This stores the existing social card under a test object key, without adding a

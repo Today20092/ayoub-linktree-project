@@ -26,6 +26,11 @@ import { Button } from '../../../components/ui/button'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { faceManifests } from '../../../lib/face-manifests'
 import { galleryReader } from '../../../lib/gallery-read'
+import {
+  GALLERY_PAGE_SIZE,
+  galleryPage,
+  galleryPagePath,
+} from '../../../lib/gallery-pagination'
 import { siteConfig } from '../../../lib/site-config'
 
 export const prerender = false
@@ -48,19 +53,42 @@ if (gallery.isUnlisted) {
 const project = gallery.staticEvent
 const data = project?.data
 const gallerySettings = gallery.settings
-const images = gallery.professionalImages
-const guestImages = gallery.guestImages
 const allImages = gallery.allImages
 const totalPhotoCount = allImages.length
+const page = galleryPage(Astro.url.searchParams, totalPhotoCount)
+if (!page)
+  return new Response(null, { status: 404, headers: Astro.response.headers })
+const pageCount = Math.max(1, Math.ceil(totalPhotoCount / GALLERY_PAGE_SIZE))
+const pageStart = (page - 1) * GALLERY_PAGE_SIZE
+const professionalCount = gallery.professionalImages.length
+const images = gallery.professionalImages.slice(
+  pageStart,
+  pageStart + GALLERY_PAGE_SIZE,
+)
+const guestStart = Math.max(0, pageStart - professionalCount)
+const guestImages = gallery.guestImages.slice(
+  guestStart,
+  Math.max(0, pageStart + GALLERY_PAGE_SIZE - professionalCount),
+)
+const pathname = `/galleries/${eventSlug}/`
+const viewingToken = gallery.isUnlisted
+  ? (Astro.url.searchParams.get('share') ?? undefined)
+  : undefined
+const pagePath = (number: number) =>
+  galleryPagePath(pathname, number, viewingToken)
 
 const galleryId = `gallery-${eventSlug}`
 const galleryUrl = new URL(`/galleries/${eventSlug}/`, Astro.site).toString()
+const canonicalUrl = new URL(
+  galleryPagePath(pathname, page),
+  Astro.site,
+).toString()
 const portfolioUrl = project ? `/portfolio/${project.id}/` : '/galleries/'
 const galleryTitle = gallery.title
 const galleryCategory = gallery.category
 const galleryImageAlt = data?.imageAlt ?? `${galleryTitle} event gallery`
 const summary = gallery.summary
-const title = `${galleryTitle} - Event Gallery`
+const title = `${galleryTitle} - Event Gallery${page > 1 ? ` - Page ${page}` : ''}`
 const ogImage = new URL(gallery.ogImage, Astro.url).toString()
 const eventDate = gallery.eventDate
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
@@ -93,7 +121,7 @@ const formatDate = (date: Date) =>
 <BaseLayout
   title={title}
   description={summary}
-  canonicalUrl={galleryUrl}
+  canonicalUrl={canonicalUrl}
   ogImage={ogImage}
   ogImageAlt={galleryImageAlt}
   ogImageWidth={ogImageWidth}
@@ -265,7 +293,7 @@ const formatDate = (date: Date) =>
       )}
     </header>
 
-    {images.length > 0 && (
+    {professionalCount > 0 && (
       <figure
         class="gallery-cover mx-auto mt-4 max-w-4xl overflow-hidden rounded-xl sm:mt-8 sm:rounded-2xl"
         data-reveal="up"
@@ -343,108 +371,21 @@ const formatDate = (date: Date) =>
         id={galleryId}
         class="mt-4"
         data-gallery-browser
+        data-gallery-page={page}
+        data-gallery-page-size={GALLERY_PAGE_SIZE}
+        tabindex="-1"
         aria-label={`${galleryTitle} photographs`}
       >
         {totalPhotoCount > 0 && <GalleryGridControls count={totalPhotoCount} />}
-        {images.length > 0 && (
-          <div data-gallery-grid data-photo-grid>
-            {images.map((image, index) => {
-              const dimensions = imageDimensions(image.width, image.height, 960)
-              const srcset = galleryThumbnailSrcset(
-                image.src,
-                dimensions.width,
-                dimensions.height,
-              )
-              return (
-                <figure
-                  class="relative mb-1 break-inside-avoid"
-                  data-gallery-filename={image.filename}
-                >
-                  {faceManifest && (
-                    <Badge
-                      variant="secondary"
-                      data-face-rank
-                      hidden
-                      className="absolute top-2 left-2"
-                    >
-                      Match
-                    </Badge>
-                  )}
-                  <a
-                    href={image.src}
-                    data-gallery-open={index}
-                    aria-label={`Open photograph ${index + 1}: ${image.alt}`}
-                    class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-                  >
-                    <Image
-                      {...(srcset ? { srcset } : {})}
-                      src={
-                        galleryImageUrl(
-                          image.src,
-                          480,
-                          Math.round(
-                            (dimensions.height * 480) / dimensions.width,
-                          ),
-                          75,
-                        ) ?? image.src
-                      }
-                      alt={image.alt}
-                      width={dimensions.width}
-                      height={dimensions.height}
-                      layout="full-width"
-                      widths={[80, 160, 240, 480, 960]}
-                      sizes="(min-width: 768px) 20vw, 33vw"
-                      quality={85}
-                      loading="lazy"
-                      decoding="async"
-                      class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
-                    />
-                  </a>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="icon"
-                    data-gallery-favorite
-                    disabled
-                    data-filename={image.filename}
-                    data-selected="false"
-                    aria-label={`Add photograph ${index + 1} to favorites`}
-                    aria-pressed="false"
-                    className="absolute top-2 right-2 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
-                  >
-                    <Heart aria-hidden="true" />
-                  </Button>
-                </figure>
-              )
-            })}
-          </div>
-        )}
-        {guestImages.length > 0 && (
-          <section
-            class="mt-14"
-            aria-labelledby="guest-photos-heading"
-            data-reveal="up"
-          >
-            <div class="mb-6 max-w-2xl">
-              <Badge variant="secondary">Community gallery</Badge>
-              <h2
-                id="guest-photos-heading"
-                class="font-heading mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl"
-              >
-                Photos shared by guests
-              </h2>
-              <p class="text-muted-foreground mt-2 leading-7">
-                Moments captured and submitted by people who attended the event.
-              </p>
-            </div>
-            <div data-photo-grid>
-              {guestImages.map((image, index) => {
+        <div data-gallery-page-content>
+          {images.length > 0 && (
+            <div data-gallery-grid data-photo-grid>
+              {images.map((image, index) => {
                 const dimensions = imageDimensions(
                   image.width,
                   image.height,
                   960,
                 )
-                const photoIndex = images.length + index
                 const srcset = galleryThumbnailSrcset(
                   image.src,
                   dimensions.width,
@@ -455,10 +396,20 @@ const formatDate = (date: Date) =>
                     class="relative mb-1 break-inside-avoid"
                     data-gallery-filename={image.filename}
                   >
+                    {faceManifest && (
+                      <Badge
+                        variant="secondary"
+                        data-face-rank
+                        hidden
+                        className="absolute top-2 left-2"
+                      >
+                        Match
+                      </Badge>
+                    )}
                     <a
                       href={image.src}
-                      data-gallery-open={photoIndex}
-                      aria-label={`Open guest photograph ${index + 1}: ${image.alt}`}
+                      data-gallery-open={pageStart + index}
+                      aria-label={`Open photograph ${pageStart + index + 1}: ${image.alt}`}
                       class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
                     >
                       <Image
@@ -493,7 +444,7 @@ const formatDate = (date: Date) =>
                       disabled
                       data-filename={image.filename}
                       data-selected="false"
-                      aria-label={`Add guest photograph ${index + 1} to favorites`}
+                      aria-label={`Add photograph ${pageStart + index + 1} to favorites`}
                       aria-pressed="false"
                       className="absolute top-2 right-2 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
                     >
@@ -503,7 +454,129 @@ const formatDate = (date: Date) =>
                 )
               })}
             </div>
-          </section>
+          )}
+          {guestImages.length > 0 && (
+            <section
+              class="mt-14"
+              aria-labelledby="guest-photos-heading"
+              data-reveal="up"
+            >
+              <div class="mb-6 max-w-2xl">
+                <Badge variant="secondary">Community gallery</Badge>
+                <h2
+                  id="guest-photos-heading"
+                  class="font-heading mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl"
+                >
+                  Photos shared by guests
+                </h2>
+                <p class="text-muted-foreground mt-2 leading-7">
+                  Moments captured and submitted by people who attended the
+                  event.
+                </p>
+              </div>
+              <div data-photo-grid>
+                {guestImages.map((image, index) => {
+                  const dimensions = imageDimensions(
+                    image.width,
+                    image.height,
+                    960,
+                  )
+                  const photoIndex = professionalCount + guestStart + index
+                  const srcset = galleryThumbnailSrcset(
+                    image.src,
+                    dimensions.width,
+                    dimensions.height,
+                  )
+                  return (
+                    <figure
+                      class="relative mb-1 break-inside-avoid"
+                      data-gallery-filename={image.filename}
+                    >
+                      <a
+                        href={image.src}
+                        data-gallery-open={photoIndex}
+                        aria-label={`Open guest photograph ${guestStart + index + 1}: ${image.alt}`}
+                        class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                      >
+                        <Image
+                          {...(srcset ? { srcset } : {})}
+                          src={
+                            galleryImageUrl(
+                              image.src,
+                              480,
+                              Math.round(
+                                (dimensions.height * 480) / dimensions.width,
+                              ),
+                              75,
+                            ) ?? image.src
+                          }
+                          alt={image.alt}
+                          width={dimensions.width}
+                          height={dimensions.height}
+                          layout="full-width"
+                          widths={[80, 160, 240, 480, 960]}
+                          sizes="(min-width: 768px) 20vw, 33vw"
+                          quality={85}
+                          loading="lazy"
+                          decoding="async"
+                          class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                        />
+                      </a>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        data-gallery-favorite
+                        disabled
+                        data-filename={image.filename}
+                        data-selected="false"
+                        aria-label={`Add guest photograph ${guestStart + index + 1} to favorites`}
+                        aria-pressed="false"
+                        className="absolute top-2 right-2 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
+                      >
+                        <Heart aria-hidden="true" />
+                      </Button>
+                    </figure>
+                  )
+                })}
+              </div>
+            </section>
+          )}
+        </div>
+        {totalPhotoCount > 0 && (
+          <nav
+            data-gallery-pagination
+            aria-label="Photo pages"
+            class="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm"
+          >
+            <p class="text-muted-foreground w-full text-center">
+              Photos {pageStart + 1}–
+              {Math.min(pageStart + GALLERY_PAGE_SIZE, totalPhotoCount)} of{' '}
+              {totalPhotoCount}
+            </p>
+            {page > 1 && (
+              <a class="gallery-page-link" href={pagePath(page - 1)} rel="prev">
+                Previous
+              </a>
+            )}
+            {Array.from({ length: pageCount }, (_, index) => index + 1).map(
+              (number) => (
+                <a
+                  class="gallery-page-link"
+                  href={pagePath(number)}
+                  aria-label={`Page ${number}`}
+                  aria-current={number === page ? 'page' : undefined}
+                >
+                  {number}
+                </a>
+              ),
+            )}
+            {page < pageCount && (
+              <a class="gallery-page-link" href={pagePath(page + 1)} rel="next">
+                Next
+              </a>
+            )}
+          </nav>
         )}
       </section>
     )}
@@ -513,7 +586,7 @@ const formatDate = (date: Date) =>
         href={portfolioUrl}
         class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
       >
-        About this event
+        {project ? 'About this event' : 'Browse all galleries'}
         <ArrowRight className="size-4" aria-hidden="true" />
       </a>
     </footer>
@@ -521,6 +594,23 @@ const formatDate = (date: Date) =>
 </BaseLayout>
 
 <style>
+  .gallery-page-link {
+    display: inline-flex;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .gallery-page-link[aria-current='page'] {
+    font-weight: 800;
+  }
+  .gallery-page-link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
   .gallery-cover :global(img) {
     max-height: 8rem;
     object-position: center 20%;

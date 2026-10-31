@@ -4,6 +4,7 @@ import sharp from 'sharp'
 
 // Run against the built local Worker described in docs/production-audit.md.
 const origin = process.env.AUDIT_ORIGIN ?? 'http://127.0.0.1:8788'
+const siteOrigin = process.env.AUDIT_SITE_ORIGIN ?? 'https://ayoubabed.xyz'
 const page = async (path) => {
   const response = await fetch(new URL(path, origin))
   assert.equal(response.status, 200, path)
@@ -20,6 +21,18 @@ test('video controls keep their visible words in their accessible names', async 
   assert.ok(links.length > 0)
   for (const link of links) assert.match(link[2], /^Watch on YouTube: /)
   assert.match(html, /<span aria-hidden="true"[^>]*>▶<\/span>\s*Play/)
+})
+
+test('portfolio hero video posters describe their 896px container', async () => {
+  const html = await page('/portfolio/ya-hala/')
+  const poster = (html.match(/<img\b[^>]*>/g) ?? []).find((tag) =>
+    tag.includes('data-youtube-poster'),
+  )
+  assert.ok(poster)
+  assert.match(
+    poster,
+    /sizes="\(min-width: 960px\) 896px, \(min-width: 640px\) calc\(100vw - 48px\), calc\(100vw - 32px\)"/,
+  )
 })
 
 const schemas = (html) =>
@@ -42,7 +55,7 @@ test('About and Contact describe the actual page in structured data', async () =
       (item) => item['@type'] === type,
     )
     assert.ok(data, `${path} has ${type} schema`)
-    assert.equal(data.url, `https://ayoubabed.xyz${path}`)
+    assert.equal(data.url, `${siteOrigin}${path}`)
     assert.equal(data.mainEntity.name, 'Ayoub Abedrabbo')
   }
 })
@@ -61,9 +74,9 @@ test('public gallery breadcrumbs describe their visible navigation', async () =>
     assert.deepEqual(
       data.itemListElement.map((item) => [item.position, item.item]),
       [
-        [1, 'https://ayoubabed.xyz/'],
-        [2, 'https://ayoubabed.xyz/galleries/'],
-        [3, `https://ayoubabed.xyz${path}`],
+        [1, `${siteOrigin}/`],
+        [2, `${siteOrigin}/galleries/`],
+        [3, `${siteOrigin}${path}`],
       ],
     )
   }

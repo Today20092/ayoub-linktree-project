@@ -80,6 +80,25 @@ const { count } = Astro.props
   </div>
   <span class="sr-only" role="status" data-gallery-size-status></span>
 </div>
+<div class="mb-3 text-sm">
+  <p data-gallery-filter-status role="status"></p>
+  <button
+    type="button"
+    data-gallery-show-page
+    hidden
+    class="min-h-11 underline underline-offset-4"
+  >
+    Show page photos
+  </button>
+  <button
+    type="button"
+    data-gallery-filter-retry
+    hidden
+    class="min-h-11 underline underline-offset-4"
+  >
+    Retry loading photos
+  </button>
+</div>
 
 <script>
   import {
@@ -232,6 +251,7 @@ const { count } = Astro.props
           })
         })
       render(columns)
+      gallery.addEventListener('gallery:layout', () => render(columns))
       let width = gallery.clientWidth
       new ResizeObserver(() => {
         if (width !== gallery.clientWidth) {
