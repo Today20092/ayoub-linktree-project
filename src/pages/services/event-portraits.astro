@@ -45,15 +45,18 @@ const packages = eventPortraitPackages
   twitterHandle={siteConfig.site.twitterHandle}
   structuredData={eventPortraitStructuredData(canonicalUrl)}
 >
-  <main id="main-content" class="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+  <main
+    id="main-content"
+    class="mx-auto w-full max-w-screen-2xl self-center px-4 sm:px-6 lg:px-8"
+  >
     <section
       aria-labelledby="experience-title"
-      class="grid items-center gap-8 py-10 sm:py-14 lg:grid-cols-2 lg:gap-12 lg:py-20"
+      class="grid items-center gap-8 py-10 sm:py-14 lg:grid-cols-2 lg:gap-16 lg:py-20"
     >
-      <div>
+      <div class="min-w-0">
         <h1
           id="experience-title"
-          class="text-4xl leading-[1.08] font-extrabold tracking-tight text-balance sm:text-5xl"
+          class="font-heading text-4xl leading-[1.08] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl"
         >
           Your event. A gallery within minutes.
         </h1>
@@ -77,7 +80,7 @@ const packages = eventPortraitPackages
           </a>
         </div>
       </div>
-      <figure>
+      <figure class="min-w-0">
         <Image
           src={eventPortrait}
           alt="Two guests smiling together for a professional portrait at an event"
@@ -97,11 +100,14 @@ const packages = eventPortraitPackages
 
     <Separator />
 
-    <section aria-labelledby="guest-experience-title" class="py-10 sm:py-14">
+    <section
+      aria-labelledby="guest-experience-title"
+      class="scroll-mt-24 py-10 sm:py-14"
+    >
       <div class="max-w-2xl">
         <h2
           id="guest-experience-title"
-          class="text-2xl font-bold tracking-tight sm:text-3xl"
+          class="font-heading text-2xl font-bold tracking-tight sm:text-3xl"
         >
           What you get
         </h2>
@@ -112,7 +118,7 @@ const packages = eventPortraitPackages
           >
             Portrait portfolio
           </a>
-          <span class="text-muted-foreground">·</span>
+          <span class="text-muted-foreground px-1.5">·</span>
           <a
             href="/portfolio/muslim-business-chamber-2026/"
             class="text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
@@ -127,7 +133,7 @@ const packages = eventPortraitPackages
           >
             {eventPortraitEmail}
           </a>
-          <span>·</span>
+          <span class="px-1.5">·</span>
           <a
             class="text-foreground underline underline-offset-4"
             href="tel:+18134240606"
@@ -136,7 +142,7 @@ const packages = eventPortraitPackages
           </a>
         </p>
       </div>
-      <ol class="mt-8 grid gap-6 sm:grid-cols-3">
+      <ol class="mt-8 grid gap-8 md:grid-cols-3 lg:gap-12">
         <li>
           <h3 class="font-semibold">Event photography</h3>
           <p class="text-muted-foreground mt-2 text-sm leading-6">
@@ -168,14 +174,14 @@ const packages = eventPortraitPackages
     >
       <h2
         id="pricing-title"
-        class="text-2xl font-bold tracking-tight sm:text-3xl"
+        class="font-heading text-2xl font-bold tracking-tight sm:text-3xl"
       >
         Starting prices
       </h2>
       <p class="text-muted-foreground mt-4 max-w-2xl leading-7">
         Ayoub, camera, and lighting. Prices are starting points.
       </p>
-      <div class="mt-8 max-w-3xl">
+      <div class="mt-8">
         <table class="w-full text-left">
           <caption class="sr-only">
             Starting prices in US dollars and approximate portrait sessions by
@@ -213,7 +219,7 @@ const packages = eventPortraitPackages
             ))}
           </tbody>
         </table>
-        <p class="text-muted-foreground mt-4 text-sm leading-6">
+        <p class="text-muted-foreground mt-4 max-w-3xl text-sm leading-6">
           Extra hour +$150. Travel is included within 30 miles of Tampa. Farther
           travel, a helper, a backdrop, a same-night highlight, and a rush
           gallery are quoted separately. Up to 8 hours is a custom quote.
@@ -228,21 +234,23 @@ const packages = eventPortraitPackages
       aria-labelledby="inquiry-title"
       class="scroll-mt-24 py-10 sm:py-14"
     >
-      <div class="max-w-2xl">
-        <h2
-          id="inquiry-title"
-          class="text-2xl font-bold tracking-tight sm:text-3xl"
-        >
-          Request a quote
-        </h2>
-        <p class="text-muted-foreground mt-4 leading-7">
-          Opens an email draft to Ayoub. Required fields are marked. This does
-          not reserve the date.
-        </p>
-      </div>
+      <div class="grid items-start gap-8 lg:grid-cols-2 lg:gap-16">
+        <div>
+          <h2
+            id="inquiry-title"
+            class="font-heading text-2xl font-bold tracking-tight sm:text-3xl"
+          >
+            Request a quote
+          </h2>
+          <p class="text-muted-foreground mt-4 max-w-md leading-7">
+            Opens an email draft to Ayoub. Required fields are marked. This does
+            not reserve the date.
+          </p>
+        </div>
+        <div>
       <form
         id="event-portrait-inquiry"
-        class="mt-8 grid max-w-2xl gap-5"
+        class="grid gap-5"
         novalidate
       >
         <div
@@ -251,7 +259,7 @@ const packages = eventPortraitPackages
           tabindex="-1"
           role="alert"
         ></div>
-        <div class="grid gap-5 sm:grid-cols-2">
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           <label class="grid gap-2 text-sm font-medium" for="coverage">
             <span class="flex items-baseline justify-between gap-3">
               Coverage
@@ -288,7 +296,7 @@ const packages = eventPortraitPackages
             />
           </label>
         </div>
-        <div class="grid gap-5 sm:grid-cols-2">
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           <label class="grid gap-2 text-sm font-medium" for="date">
             <span class="flex items-baseline justify-between gap-3">
               Date
@@ -323,7 +331,7 @@ const packages = eventPortraitPackages
             />
           </label>
         </div>
-        <div class="grid gap-5 sm:grid-cols-2">
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
           <label class="grid gap-2 text-sm font-medium" for="venue">
             <span class="flex items-baseline justify-between gap-3">
               Venue
@@ -369,7 +377,7 @@ const packages = eventPortraitPackages
             placeholder="Mosque, school, nonprofit, or community event"
           />
         </label>
-        <div class="grid gap-5 sm:grid-cols-3">
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-3">
           <label class="grid gap-2 text-sm font-medium" for="name">
             <span class="flex items-baseline justify-between gap-3">
               Name
@@ -436,7 +444,7 @@ const packages = eventPortraitPackages
       </form>
       <div
         id="inquiry-ready"
-        class="mt-6 hidden max-w-2xl rounded-2xl bg-muted/50 p-6"
+        class="mt-6 hidden rounded-2xl bg-muted/50 p-6"
         role="status"
       >
         <h3 class="text-lg font-semibold">
@@ -457,6 +465,8 @@ const packages = eventPortraitPackages
         >
           Open the email draft again
         </a>
+      </div>
+        </div>
       </div>
     </section>
     <script>
