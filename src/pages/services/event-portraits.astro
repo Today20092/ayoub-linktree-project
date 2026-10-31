@@ -248,224 +248,223 @@ const packages = eventPortraitPackages
           </p>
         </div>
         <div>
-      <form
-        id="event-portrait-inquiry"
-        class="grid gap-5"
-        novalidate
-      >
-        <div
-          id="inquiry-errors"
-          class="border-destructive bg-destructive/10 text-destructive hidden rounded-xl border px-4 py-3 text-sm"
-          tabindex="-1"
-          role="alert"
-        ></div>
-        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-          <label class="grid gap-2 text-sm font-medium" for="coverage">
-            <span class="flex items-baseline justify-between gap-3">
-              Coverage
-              <span class="text-muted-foreground text-xs font-normal">
-                Required
+          <form id="event-portrait-inquiry" class="grid gap-5" novalidate>
+            <div
+              id="inquiry-errors"
+              class="border-destructive bg-destructive/10 text-destructive hidden rounded-xl border px-4 py-3 text-sm"
+              tabindex="-1"
+              role="alert"
+            ></div>
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <label class="grid gap-2 text-sm font-medium" for="coverage">
+                <span class="flex items-baseline justify-between gap-3">
+                  Coverage
+                  <span class="text-muted-foreground text-xs font-normal">
+                    Required
+                  </span>
+                </span>
+                <select
+                  id="coverage"
+                  name="coverage"
+                  required
+                  class="border-input bg-background min-h-11 rounded-xl border px-3"
+                >
+                  <option value="">Choose coverage</option>
+                  {packages.map((option) => (
+                    <option value={option.hours}>
+                      {option.hours}, starting at {option.price}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label class="grid gap-2 text-sm font-medium" for="extraTime">
+                <span class="flex items-baseline justify-between gap-3">
+                  Longer coverage
+                  <span class="text-muted-foreground text-xs font-normal">
+                    Optional
+                  </span>
+                </span>
+                <input
+                  id="extraTime"
+                  name="extraTime"
+                  class="border-input bg-background min-h-11 rounded-xl border px-3"
+                  placeholder="Up to 8 hours"
+                />
+              </label>
+            </div>
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <label class="grid gap-2 text-sm font-medium" for="date">
+                <span class="flex items-baseline justify-between gap-3">
+                  Date
+                  <span class="text-muted-foreground text-xs font-normal">
+                    Required
+                  </span>
+                </span>
+                <input
+                  id="date"
+                  name="date"
+                  type="date"
+                  required
+                  class="border-input bg-background min-h-11 rounded-xl border px-3"
+                />
+              </label>
+              <label class="grid gap-2 text-sm font-medium" for="guests">
+                <span class="flex items-baseline justify-between gap-3">
+                  Guests
+                  <span class="text-muted-foreground text-xs font-normal">
+                    Required
+                  </span>
+                </span>
+                <input
+                  id="guests"
+                  name="guests"
+                  type="number"
+                  min="0"
+                  step="1"
+                  inputmode="numeric"
+                  required
+                  class="border-input bg-background min-h-11 rounded-xl border px-3"
+                />
+              </label>
+            </div>
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <label class="grid gap-2 text-sm font-medium" for="venue">
+                <span class="flex items-baseline justify-between gap-3">
+                  Venue
+                  <span class="text-muted-foreground text-xs font-normal">
+                    Required
+                  </span>
+                </span>
+                <input
+                  id="venue"
+                  name="venue"
+                  required
+                  class="border-input bg-background min-h-11 rounded-xl border px-3"
+                />
+              </label>
+              <label class="grid gap-2 text-sm font-medium" for="city">
+                <span class="flex items-baseline justify-between gap-3">
+                  City
+                  <span class="text-muted-foreground text-xs font-normal">
+                    Required
+                  </span>
+                </span>
+                <input
+                  id="city"
+                  name="city"
+                  autocomplete="address-level2"
+                  required
+                  class="border-input bg-background min-h-11 rounded-xl border px-3"
+                />
+              </label>
+            </div>
+            <label class="grid gap-2 text-sm font-medium" for="eventType">
+              <span class="flex items-baseline justify-between gap-3">
+                Event type
+                <span class="text-muted-foreground text-xs font-normal">
+                  Required
+                </span>
               </span>
-            </span>
-            <select
-              id="coverage"
-              name="coverage"
-              required
-              class="border-input bg-background min-h-11 rounded-xl border px-3"
+              <input
+                id="eventType"
+                name="eventType"
+                required
+                class="border-input bg-background min-h-11 rounded-xl border px-3"
+                placeholder="Mosque, school, nonprofit, or community event"
+              />
+            </label>
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-3">
+              <label class="grid gap-2 text-sm font-medium" for="name">
+                <span class="flex items-baseline justify-between gap-3">
+                  Name
+                  <span class="text-muted-foreground text-xs font-normal">
+                    Required
+                  </span>
+                </span>
+                <input
+                  id="name"
+                  name="name"
+                  autocomplete="name"
+                  required
+                  class="border-input bg-background min-h-11 rounded-xl border px-3"
+                />
+              </label>
+              <label class="grid gap-2 text-sm font-medium" for="phone">
+                <span class="flex items-baseline justify-between gap-3">
+                  Phone
+                  <span class="text-muted-foreground text-xs font-normal">
+                    Required
+                  </span>
+                </span>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autocomplete="tel"
+                  required
+                  class="border-input bg-background min-h-11 rounded-xl border px-3"
+                />
+              </label>
+              <label class="grid gap-2 text-sm font-medium" for="email">
+                <span class="flex items-baseline justify-between gap-3">
+                  Email
+                  <span class="text-muted-foreground text-xs font-normal">
+                    Required
+                  </span>
+                </span>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  enterkeyhint="done"
+                  autocomplete="email"
+                  required
+                  class="border-input bg-background min-h-11 rounded-xl border px-3"
+                />
+              </label>
+            </div>
+            <div class="flex flex-wrap items-center gap-5">
+              <button
+                type="submit"
+                class={buttonVariants({
+                  size: 'lg',
+                  className: 'min-h-11 px-5',
+                })}
+              >
+                Open email draft
+              </button>
+              <a
+                href="/contact/"
+                class="text-primary rounded-sm text-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+              >
+                Or use the contact page
+              </a>
+            </div>
+          </form>
+          <div
+            id="inquiry-ready"
+            class="mt-6 hidden rounded-2xl bg-muted/50 p-6"
+            role="status"
+          >
+            <h3 class="text-lg font-semibold">
+              Request ready for Ayoub to review.
+            </h3>
+            <p
+              id="inquiry-ready-copy"
+              class="text-muted-foreground mt-2 text-sm leading-6"
+            ></p>
+            <p class="mt-3 text-sm leading-6">
+              This does not reserve the date, and this page does not send the
+              email itself.
+            </p>
+            <a
+              id="inquiry-mailto"
+              class="text-primary mt-4 inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4"
+              href=""
             >
-              <option value="">Choose coverage</option>
-              {packages.map((option) => (
-                <option value={option.hours}>
-                  {option.hours}, starting at {option.price}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label class="grid gap-2 text-sm font-medium" for="extraTime">
-            <span class="flex items-baseline justify-between gap-3">
-              Longer coverage
-              <span class="text-muted-foreground text-xs font-normal">
-                Optional
-              </span>
-            </span>
-            <input
-              id="extraTime"
-              name="extraTime"
-              class="border-input bg-background min-h-11 rounded-xl border px-3"
-              placeholder="Up to 8 hours"
-            />
-          </label>
-        </div>
-        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-          <label class="grid gap-2 text-sm font-medium" for="date">
-            <span class="flex items-baseline justify-between gap-3">
-              Date
-              <span class="text-muted-foreground text-xs font-normal">
-                Required
-              </span>
-            </span>
-            <input
-              id="date"
-              name="date"
-              type="date"
-              required
-              class="border-input bg-background min-h-11 rounded-xl border px-3"
-            />
-          </label>
-          <label class="grid gap-2 text-sm font-medium" for="guests">
-            <span class="flex items-baseline justify-between gap-3">
-              Guests
-              <span class="text-muted-foreground text-xs font-normal">
-                Required
-              </span>
-            </span>
-            <input
-              id="guests"
-              name="guests"
-              type="number"
-              min="0"
-              step="1"
-              inputmode="numeric"
-              required
-              class="border-input bg-background min-h-11 rounded-xl border px-3"
-            />
-          </label>
-        </div>
-        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-          <label class="grid gap-2 text-sm font-medium" for="venue">
-            <span class="flex items-baseline justify-between gap-3">
-              Venue
-              <span class="text-muted-foreground text-xs font-normal">
-                Required
-              </span>
-            </span>
-            <input
-              id="venue"
-              name="venue"
-              required
-              class="border-input bg-background min-h-11 rounded-xl border px-3"
-            />
-          </label>
-          <label class="grid gap-2 text-sm font-medium" for="city">
-            <span class="flex items-baseline justify-between gap-3">
-              City
-              <span class="text-muted-foreground text-xs font-normal">
-                Required
-              </span>
-            </span>
-            <input
-              id="city"
-              name="city"
-              autocomplete="address-level2"
-              required
-              class="border-input bg-background min-h-11 rounded-xl border px-3"
-            />
-          </label>
-        </div>
-        <label class="grid gap-2 text-sm font-medium" for="eventType">
-          <span class="flex items-baseline justify-between gap-3">
-            Event type
-            <span class="text-muted-foreground text-xs font-normal">
-              Required
-            </span>
-          </span>
-          <input
-            id="eventType"
-            name="eventType"
-            required
-            class="border-input bg-background min-h-11 rounded-xl border px-3"
-            placeholder="Mosque, school, nonprofit, or community event"
-          />
-        </label>
-        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-3">
-          <label class="grid gap-2 text-sm font-medium" for="name">
-            <span class="flex items-baseline justify-between gap-3">
-              Name
-              <span class="text-muted-foreground text-xs font-normal">
-                Required
-              </span>
-            </span>
-            <input
-              id="name"
-              name="name"
-              autocomplete="name"
-              required
-              class="border-input bg-background min-h-11 rounded-xl border px-3"
-            />
-          </label>
-          <label class="grid gap-2 text-sm font-medium" for="phone">
-            <span class="flex items-baseline justify-between gap-3">
-              Phone
-              <span class="text-muted-foreground text-xs font-normal">
-                Required
-              </span>
-            </span>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              autocomplete="tel"
-              required
-              class="border-input bg-background min-h-11 rounded-xl border px-3"
-            />
-          </label>
-          <label class="grid gap-2 text-sm font-medium" for="email">
-            <span class="flex items-baseline justify-between gap-3">
-              Email
-              <span class="text-muted-foreground text-xs font-normal">
-                Required
-              </span>
-            </span>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              enterkeyhint="done"
-              autocomplete="email"
-              required
-              class="border-input bg-background min-h-11 rounded-xl border px-3"
-            />
-          </label>
-        </div>
-        <div class="flex flex-wrap items-center gap-5">
-          <button
-            type="submit"
-            class={buttonVariants({ size: 'lg', className: 'min-h-11 px-5' })}
-          >
-            Open email draft
-          </button>
-          <a
-            href="/contact/"
-            class="text-primary rounded-sm text-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
-          >
-            Or use the contact page
-          </a>
-        </div>
-      </form>
-      <div
-        id="inquiry-ready"
-        class="mt-6 hidden rounded-2xl bg-muted/50 p-6"
-        role="status"
-      >
-        <h3 class="text-lg font-semibold">
-          Request ready for Ayoub to review.
-        </h3>
-        <p
-          id="inquiry-ready-copy"
-          class="text-muted-foreground mt-2 text-sm leading-6"
-        ></p>
-        <p class="mt-3 text-sm leading-6">
-          This does not reserve the date, and this page does not send the email
-          itself.
-        </p>
-        <a
-          id="inquiry-mailto"
-          class="text-primary mt-4 inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4"
-          href=""
-        >
-          Open the email draft again
-        </a>
-      </div>
+              Open the email draft again
+            </a>
+          </div>
         </div>
       </div>
     </section>
