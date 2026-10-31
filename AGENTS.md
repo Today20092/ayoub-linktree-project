@@ -15,6 +15,8 @@ This repository contains Ayoub Abedrabbo's Astro website and link hub, MDX portf
 - For Android pairing, upload behavior, builds, or signing, read `android/README.md`. Check `android/RELEASE_NOTES.md` and the relevant release tag before claiming a feature is available in an installed APK.
 - For watched-folder discovery, session recovery, or background transfer changes, read `docs/android-watched-folder-design.md` and `docs/adr/0001-android-folder-discovery-and-transfer.md`.
 - For payment destinations or payment-host routing, read `docs/payments.md`.
+- For the barber field tracker, read `docs/barber-tracker.md`.
+- For face search, SFace indexing, or browser face models, read `docs/sface-gallery-workflow.md`. The legacy Human indexer remains in `docs/event-galleries.md`.
 
 Keep this file focused on working rules and task-specific pointers. Put operator instructions in the relevant guide, and update its README pointer when adding a new workflow. Verify documented behavior against the implementation; research and design notes do not establish release status.
 
@@ -37,7 +39,8 @@ Keep this file focused on working rules and task-specific pointers. Put operator
 ## Portfolio and Gallery Work
 
 - A **portfolio piece** is curated public work or a case study shown on the main portfolio. Start from `src/content/portfolio/PROJECT_TEMPLATE.mdx.example` and store its local media under `src/assets/client-work/`.
-- A **gallery** is an event or client photo collection for browsing, delivery, uploads, or attendee access. Create and manage it through `/admin/galleries/` or the Android app with a management-enabled key; follow `docs/event-galleries.md` for legacy manifests, ZIPs, pruning, or face-index workflows.
+- A **gallery** is an event or client photo collection for browsing, delivery, uploads, or attendee access. Create and manage it through `/admin/galleries/` or the Android app with a management-enabled key. Follow `docs/event-galleries.md` for legacy manifests, ZIPs, or pruning.
+- A legacy event write-up in the portfolio collection starts from `src/content/portfolio/EVENT_GALLERY_TEMPLATE.mdx.example`. Do not use that template to create an interactive gallery.
 - Do not turn a gallery into a portfolio piece, or a portfolio piece into a gallery, unless the user explicitly wants both. If the destination is unclear, confirm it before changing content.
 - Work that is neither belongs in its existing route or feature area; inspect the current pattern before adding a new content type.
 
@@ -67,6 +70,7 @@ Report checks run and any failures or checks left unrun; a focused suite does no
 - GitHub is the source of truth. Local uncommitted code never goes to production.
 - `master` is the production branch. Feature work stays on a feature branch until review and merge.
 - Never commit, push, merge, or deploy unless the user explicitly asks.
+- When a commit is requested, leave out `.env`, `.env.production`, `.dev.vars`, `.gallery-prune.local.json`, and Android signing files. Keep signing material outside the repo, as described in `android/README.md`.
 - Production deploy only from clean `master`: `npm run deploy:prod`.
 - Default deploy is preview-safe: `npm run deploy` (alias of `npm run deploy:preview`).
 - Environment URLs and usage are in [README production and preview](README.md#production-and-preview). Deployment scripts are authoritative for Worker and binding selection: `scripts/deploy-preview-worker.mjs`, `scripts/deploy-production-worker.mjs`, and `scripts/gallery-production-config.mjs`.
