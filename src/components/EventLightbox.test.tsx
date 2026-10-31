@@ -27,10 +27,10 @@ function renderGallery(images = [image], downloadAllUrl?: string) {
 }
 
 test('download all is offered with and without a prebuilt archive', () => {
-  assert.match(renderGallery(), />Download all<\/button>/)
+  assert.match(renderGallery(), />Download ZIP<\/button>/)
   assert.match(
     renderGallery([image], 'https://photos.ayoubabed.xyz/events/test.zip'),
-    />Download all<\/button>/,
+    />Download ZIP<\/button>/,
   )
-  assert.doesNotMatch(renderGallery([]), /Download all/)
+  assert.doesNotMatch(renderGallery([]), /Download ZIP/)
 })

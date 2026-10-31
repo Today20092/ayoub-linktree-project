@@ -169,10 +169,9 @@ export default function EventLightbox({
         : `View favorites (${selected.size})`
       favoritesButton.setAttribute('aria-pressed', String(filtering))
     }
+    gallery.dataset.galleryHasPicks = String(selected.size > 0)
     if (count)
-      count.textContent = filtering
-        ? `Showing ${selected.size} ${selected.size === 1 ? 'favorite' : 'favorites'}`
-        : ''
+      count.textContent = selected.size > 0 ? `${selected.size} selected` : ''
 
     gallery
       .querySelectorAll<HTMLElement>('[data-gallery-favorite]')
@@ -389,12 +388,32 @@ export default function EventLightbox({
 
     gallery.addEventListener('click', handleClick)
     const showSearchResults = () => setFavoritesOnly(false)
+    const downloadMatches = (event: Event) => {
+      const filenames = new Set((event as CustomEvent<string[]>).detail ?? [])
+      const matched = images.filter((image) => filenames.has(image.filename))
+      if (matched.length === 0) return
+      void startDownload({
+        kind: 'selection',
+        images: matched,
+        filename: `${projectSlug}-matches.zip`,
+      })
+    }
     gallery.addEventListener('gallery:search-results', showSearchResults)
+    gallery.addEventListener('gallery:download-matches', downloadMatches)
     return () => {
       gallery.removeEventListener('click', handleClick)
       gallery.removeEventListener('gallery:search-results', showSearchResults)
+      gallery.removeEventListener('gallery:download-matches', downloadMatches)
     }
-  }, [galleryId, showSlide, startDownload, toggleFavorite, updatePhotoUrl])
+  }, [
+    galleryId,
+    images,
+    projectSlug,
+    showSlide,
+    startDownload,
+    toggleFavorite,
+    updatePhotoUrl,
+  ])
 
   React.useEffect(() => {
     const syncFromUrl = () => {
@@ -465,7 +484,9 @@ export default function EventLightbox({
       toast.success('Your download is starting')
     } catch (error) {
       setDownloadError(
-        error instanceof Error ? error.message : 'Unable to prepare download',
+        error instanceof Error
+          ? `${error.message} Try again, or save one photo from the viewer.`
+          : 'Unable to prepare the ZIP. Try again, or save one photo from the viewer.',
       )
       setDownloadStatus('error')
     }
@@ -502,53 +523,63 @@ export default function EventLightbox({
 
   return (
     <>
-      {selected.size > 0 && (
-        <>
+      <div
+        className={
+          selected.size > 0
+            ? 'bg-background/95 sticky bottom-4 z-20 flex flex-wrap items-center gap-3 rounded-xl border p-3 shadow-lg backdrop-blur'
+            : 'flex flex-wrap items-center gap-3'
+        }
+      >
+        {selected.size > 0 && (
+          <>
+            <p className="text-sm font-semibold">{selected.size} selected</p>
+            <Button
+              size="lg"
+              onClick={() =>
+                startDownload({
+                  kind: 'selection',
+                  images: selectedImages,
+                  filename: `${projectSlug}-selection.zip`,
+                })
+              }
+            >
+              <Download data-icon="inline-start" aria-hidden="true" />
+              Download ZIP ({selected.size})
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => setSelected(new Set())}
+            >
+              Clear
+            </Button>
+          </>
+        )}
+        {images.length > 0 && (
           <Button
             size="lg"
+            variant={selected.size > 0 ? 'outline' : 'default'}
             onClick={() =>
-              startDownload({
-                kind: 'selection',
-                images: selectedImages,
-                filename: `${projectSlug}-selection.zip`,
-              })
+              startDownload(
+                downloadAllUrl
+                  ? {
+                      kind: 'file',
+                      url: downloadAllUrl,
+                      filename: `${projectSlug}.zip`,
+                    }
+                  : {
+                      kind: 'selection',
+                      images,
+                      filename: `${projectSlug}.zip`,
+                    },
+              )
             }
           >
             <Download data-icon="inline-start" aria-hidden="true" />
-            Download favorites ({selected.size})
+            Download ZIP
           </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => setSelected(new Set())}
-          >
-            Clear favorites
-          </Button>
-        </>
-      )}
-      {images.length > 0 && (
-        <Button
-          size="lg"
-          onClick={() =>
-            startDownload(
-              downloadAllUrl
-                ? {
-                    kind: 'file',
-                    url: downloadAllUrl,
-                    filename: `${projectSlug}.zip`,
-                  }
-                : {
-                    kind: 'selection',
-                    images,
-                    filename: `${projectSlug}.zip`,
-                  },
-            )
-          }
-        >
-          <Download data-icon="inline-start" aria-hidden="true" />
-          Download all
-        </Button>
-      )}
+        )}
+      </div>
 
       {downloadStatus === 'complete' && (
         <a
@@ -632,12 +663,11 @@ export default function EventLightbox({
                     </Button>
                     <Button
                       variant="secondary"
-                      size="icon"
-                      className="min-h-11 min-w-11"
+                      className="min-h-11"
                       onClick={shareCurrentPhoto}
-                      aria-label="Share current photo"
                     >
-                      <Share2 aria-hidden="true" />
+                      <Share2 data-icon="inline-start" aria-hidden="true" />
+                      Share
                     </Button>
                   </>
                 )}
