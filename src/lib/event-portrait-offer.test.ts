@@ -7,6 +7,7 @@ import {
   eventPortraitMapsUrl,
   eventPortraitMarkdownSection,
   eventPortraitPackages,
+  eventPortraitPath,
   eventPortraitProofProjects,
   eventPortraitStructuredData,
   eventPortraitTitle,
@@ -228,19 +229,16 @@ test(
 )
 
 test(
-  'services index links event photography and keeps video a custom quote',
+  'services permanently redirects to the event photography page',
   { skip: !process.env.EVENT_PORTRAIT_TEST_ORIGIN },
   async () => {
     const origin = process.env.EVENT_PORTRAIT_TEST_ORIGIN!
     const response = await fetch(`${origin}/services/`, { redirect: 'manual' })
-    assert.equal(response.status, 200)
-    const html = await response.text()
-    const copy = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
-    assert.ok(html.includes('href="/services/event-portraits/"'))
-    assert.ok(html.includes('href="/contact/"'))
-    assert.match(copy, /Starting at \$400/)
-    assert.match(copy, /Custom quote/)
-    assert.doesNotMatch(copy, /\$(600|250|300|450)\b/)
+    assert.equal(response.status, 301)
+    assert.equal(
+      new URL(response.headers.get('location')!, origin).pathname,
+      eventPortraitPath,
+    )
   },
 )
 

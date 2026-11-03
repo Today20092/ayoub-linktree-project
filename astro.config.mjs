@@ -70,6 +70,7 @@ export default defineConfig({
         const pathname = new URL(page).pathname.replace(/\/$/, '')
         return (
           !pathname.startsWith('/admin/') &&
+          pathname !== '/services' &&
           pathname !== '/payments' &&
           pathname !== '/portfolio/alphabravomedia' &&
           !pathname.includes('/photo/')
