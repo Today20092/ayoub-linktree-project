@@ -171,7 +171,11 @@ test(
     assert.match(html, /mailto:Ayoub@AyoubAbed\.xyz/)
     assert.match(html, /tel:\+18134240606/)
     // The denial is the only mention of a backdrop or lighting.
-    assert.deepEqual(copy.match(/[^.]*\b(backdrop|lighting)\b[^.]*\./gi), [
+    const visible = html
+      .replace(/<(style|script)[^>]*>[\s\S]*?<\/\1>/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+    assert.deepEqual(visible.match(/[^.]*\b(backdrop|lighting)\b[^.]*\./gi), [
       ' No backdrop, flash, or lighting kit.',
     ])
     assert.match(copy, /Travel included within 30 miles of Tampa\./)
