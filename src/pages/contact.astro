@@ -3,6 +3,7 @@ import '../styles.css'
 
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { siteConfig } from '../lib/site-config'
+import { eventPortraitPath } from '../lib/event-portrait-offer'
 
 const { site } = siteConfig
 const title = 'Contact Ayoub Abedrabbo | Tampa Digital Media'
@@ -52,6 +53,15 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
       <p class="text-muted-foreground mt-5 text-lg leading-8">
         Reach Ayoub Abedrabbo for photography, video, podcast production, and
         other digital media work in the Tampa area.
+      </p>
+      <p class="mt-4 leading-7">
+        Planning an event?{' '}
+        <a
+          class="focus-visible:ring-ring rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+          href={eventPortraitPath}
+        >
+          See starting prices and send an inquiry
+        </a>
       </p>
     </header>
     <address class="mt-10 not-italic" data-reveal="up">

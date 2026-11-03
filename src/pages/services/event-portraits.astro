@@ -1,25 +1,35 @@
 ---
 import '../../styles.css'
-import type { ImageMetadata } from 'astro'
 import { Image } from 'astro:assets'
+import { getEntry } from 'astro:content'
 import { buttonVariants } from '@/components/ui/button'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Separator } from '@/components/ui/separator'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import angelPortrait from '../../assets/portraits/angel-birthday-cover.jpg'
+import type { ImageMetadata } from 'astro'
 import {
   eventPortraitDescription,
+  eventPortraitEmail,
+  eventPortraitExtraHour,
+  eventPortraitMapsUrl,
   eventPortraitPackages,
   eventPortraitPhone,
+  eventPortraitPhoneUri,
   eventPortraitStructuredData,
   eventPortraitTitle,
 } from '../../lib/event-portrait-offer'
 import { siteConfig } from '../../lib/site-config'
 
-const portraitAssets = import.meta.glob<{ default: ImageMetadata }>(
-  '../../assets/portraits/angel-birthday-cover.jpg',
-  { eager: true },
-)
-const angelPortrait =
-  portraitAssets['../../assets/portraits/angel-birthday-cover.jpg'].default
+const mcc = await getEntry('portfolio', 'muslim-business-chamber-2026')
+if (!mcc) throw new Error('Missing MCC workshop portfolio entry')
+const mccImage = mcc.data.featuredImage
+const suitPortrait = Object.values(
+  import.meta.glob<{ default: ImageMetadata }>(
+    '../../assets/portraits/P1210377.JPG',
+    { eager: true },
+  ),
+)[0].default
 
 const title = eventPortraitTitle
 const description = eventPortraitDescription
@@ -29,6 +39,68 @@ const canonicalUrl = new URL(
 ).toString()
 const ogImage = new URL(siteConfig.site.ogImage, Astro.site).toString()
 const packages = eventPortraitPackages
+const link =
+  'text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4'
+const control =
+  'border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3'
+const proof = [
+  {
+    image: angelPortrait,
+    width: angelPortrait.width,
+    height: angelPortrait.height,
+    alt: 'Angel celebrating his birthday with family around the cake',
+    event: 'Angel’s birthday party',
+    href: '/galleries/angels-birthday-party-2026/',
+    label: 'See the gallery',
+  },
+  {
+    image: suitPortrait,
+    width: suitPortrait.width,
+    height: suitPortrait.height,
+    alt: 'Professional event portrait of a smiling man wearing a navy suit',
+    event: 'Event portrait',
+    href: '/portfolio/portraits/',
+    label: 'Portrait portfolio',
+  },
+  {
+    image: mccImage.src,
+    width: mccImage.width,
+    height: mccImage.height,
+    alt: mcc.data.imageAlt,
+    event: 'Muslim Chamber of Commerce USA workshop',
+    href: '/portfolio/muslim-business-chamber-2026/',
+    label: 'Attendee portraits',
+  },
+]
+type InquiryField = {
+  id: string
+  label: string
+  type?: 'date' | 'number' | 'tel' | 'email'
+  autocomplete?: string
+  placeholder?: string
+}
+const eventFields: InquiryField[][] = [
+  [
+    { id: 'date', label: 'Date', type: 'date' },
+    { id: 'guests', label: 'Guests', type: 'number' },
+  ],
+  [
+    { id: 'venue', label: 'Venue' },
+    { id: 'city', label: 'City', autocomplete: 'address-level2' },
+  ],
+  [
+    {
+      id: 'eventType',
+      label: 'Event type',
+      placeholder: 'Birthday, mosque, school, or nonprofit',
+    },
+  ],
+]
+const contactFields: InquiryField[] = [
+  { id: 'name', label: 'Name', autocomplete: 'name' },
+  { id: 'phone', label: 'Phone', type: 'tel', autocomplete: 'tel' },
+  { id: 'email', label: 'Email', type: 'email', autocomplete: 'email' },
+]
 ---
 
 <BaseLayout
@@ -50,7 +122,7 @@ const packages = eventPortraitPackages
   >
     <section
       aria-labelledby="experience-title"
-      class="grid items-center gap-8 py-10 sm:py-14 lg:grid-cols-2 lg:gap-16 lg:py-20"
+      class="grid items-center gap-8 py-8 sm:py-14 lg:grid-cols-2 lg:gap-16 lg:py-20"
     >
       <div class="min-w-0">
         <h1
@@ -59,25 +131,18 @@ const packages = eventPortraitPackages
         >
           Your event. A gallery within minutes.
         </h1>
-        <p class="mt-6 max-w-lg text-lg leading-8">
-          From $400. Angel’s birthday gallery was updating during the party.
+        <p class="mt-5 max-w-lg text-lg leading-8">
+          Starting at $400. The host pays. Guests receive photos at no charge.
         </p>
-        <p class="text-muted-foreground mt-4 max-w-lg text-lg leading-8">
-          Book Ayoub for the event in Tampa. The host pays. Guests receive the
-          photos at no charge.
-        </p>
-        <div class="mt-7 flex flex-wrap items-center gap-5">
+        <div class="mt-6 flex flex-wrap items-center gap-5">
           <a
             href="#inquiry"
             class={`${buttonVariants({ size: 'lg' })} min-h-11 px-5`}
           >
             Request a quote
           </a>
-          <a
-            href="#pricing"
-            class="text-primary rounded-sm text-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
-          >
-            View pricing
+          <a href="#pricing" class={`${link} text-sm`}>
+            See starting prices
           </a>
         </div>
       </div>
@@ -87,18 +152,15 @@ const packages = eventPortraitPackages
           alt="Angel celebrating his birthday with family around the cake"
           layout="full-width"
           widths={[480, 720, 1080]}
-          sizes="(min-width: 1024px) 520px, (min-width: 640px) 90vw, 100vw"
+          sizes="(min-width: 1024px) 50vw, 100vw"
           loading="eager"
           fetchpriority="high"
           quality={82}
           class="aspect-[4/3] rounded-2xl object-cover"
         />
         <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
-          Angel’s birthday party, October 24, 2026.
-          <a
-            href="/galleries/angels-birthday-party-2026/"
-            class="text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
-          >
+          Angel’s birthday, October 24, 2026 ·
+          <a href="/galleries/angels-birthday-party-2026/" class={link}>
             See the gallery
           </a>
         </figcaption>
@@ -107,37 +169,35 @@ const packages = eventPortraitPackages
 
     <Separator />
 
-    <section
-      aria-labelledby="guest-experience-title"
-      class="scroll-mt-24 py-10 sm:py-14"
-    >
-      <div class="max-w-2xl">
-        <h2
-          id="guest-experience-title"
-          class="font-heading text-2xl font-bold tracking-tight sm:text-3xl"
-        >
-          What you get
-        </h2>
-        <p class="text-muted-foreground mt-4 max-w-xl leading-7">
-          Guests open a link on their phone. Each photo shows up within minutes
-          of being taken, and guests do not pay.
-        </p>
-        <p class="mt-4 text-sm leading-6">
-          <a
-            href="/galleries/angels-birthday-party-2026/"
-            class="text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
-          >
-            Angel’s gallery
-          </a>
-          <span class="text-muted-foreground px-1.5">·</span>
-          <a
-            href="/portfolio/portraits/"
-            class="text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
-          >
-            Portrait portfolio
-          </a>
-        </p>
-      </div>
+    <section aria-label="Proof" class="py-10 sm:py-14">
+      <ul class="grid gap-6 md:grid-cols-3">
+        {proof.map((item) => (
+          <li>
+            <figure>
+              <Image
+                src={
+                  // Local metadata and remote URLs both work at runtime; the cast only satisfies the props union.
+                  item.image as string
+                }
+                width={item.width}
+                height={item.height}
+                alt={item.alt}
+                layout="full-width"
+                widths={[400, 640, 960]}
+                sizes="(min-width: 768px) 33vw, 100vw"
+                quality={78}
+                class="aspect-[4/3] rounded-2xl object-cover"
+              />
+              <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
+                {item.event} ·
+                <a href={item.href} class={link}>
+                  {item.label}
+                </a>
+              </figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
     </section>
 
     <Separator />
@@ -153,45 +213,44 @@ const packages = eventPortraitPackages
       >
         Starting prices
       </h2>
-      <p class="text-muted-foreground mt-4 max-w-2xl leading-7">
-        Ayoub, camera, and lighting. Prices are starting points.
-      </p>
-      <div class="mt-8 w-full max-w-lg">
+      <div class="mt-6 w-full max-w-2xl">
         <div class="text-muted-foreground flex justify-between px-4 pb-3 text-xs font-medium">
           <span>Coverage</span>
           <span>Starting at</span>
         </div>
-        <ul class="grid gap-2">
+        <ul class="divide-y border-y">
           {packages.map((option) => (
             <li>
               <button
                 type="button"
                 data-coverage={option.hours}
                 aria-pressed="false"
-                class="bg-muted/50 hover:bg-muted focus-visible:outline-ring aria-pressed:ring-primary flex w-full items-center justify-between gap-4 rounded-xl px-4 py-4 text-left aria-pressed:ring-2 focus-visible:outline-2 focus-visible:outline-offset-2"
+                class="hover:bg-muted/50 aria-pressed:bg-muted aria-pressed:border-primary focus-visible:outline-ring flex min-h-11 w-full items-center justify-between gap-4 border-l-2 border-transparent px-4 py-4 text-left focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 <span>
-                  <span class="block text-sm font-semibold sm:text-base">
-                    {option.hours}
-                  </span>
-                  <span class="mt-1 block text-sm">
+                  <span class="block font-semibold">{option.hours}</span>
+                  <span class="text-muted-foreground mt-1 block text-sm">
                     Planning pace: {option.sessions.toLowerCase()} an hour, not
                     a cap
                   </span>
                 </span>
-                <span class="shrink-0 text-xl font-bold tracking-tight tabular-nums sm:text-2xl">
+                <span class="shrink-0 text-2xl font-bold tabular-nums">
                   {option.price}
                 </span>
               </button>
             </li>
           ))}
+          <li class="flex items-center justify-between gap-4 px-4 py-4">
+            <span class="font-semibold">{eventPortraitExtraHour.hours}</span>
+            <span class="text-2xl font-bold tabular-nums">
+              +{eventPortraitExtraHour.price}
+            </span>
+          </li>
         </ul>
         <div class="mt-4 grid gap-1 px-4 text-sm leading-6">
-          <p>Extra hour +$150.</p>
-          <p>Travel is included within 30 miles of Tampa.</p>
+          <p>Travel included within 30 miles of Tampa.</p>
           <p class="text-muted-foreground">
-            Farther travel, a helper, a backdrop, a same-night highlight, and a
-            rush gallery are quoted separately. Up to 8 hours is a custom quote.
+            No backdrop, flash, or lighting kit.
           </p>
         </div>
       </div>
@@ -205,252 +264,146 @@ const packages = eventPortraitPackages
       class="scroll-mt-24 py-10 sm:py-14"
     >
       <div class="grid items-start gap-8 lg:grid-cols-2 lg:gap-16">
-        <div>
+        <div class="lg:sticky lg:top-24">
           <h2
             id="inquiry-title"
             class="font-heading text-2xl font-bold tracking-tight sm:text-3xl"
           >
-            Request a quote
+            Request a quote.
           </h2>
           <p class="text-muted-foreground mt-4 max-w-md leading-7">
-            Opens an email draft to Ayoub. Required fields are marked. This does
-            not reserve the date.
+            Opens an email draft to Ayoub. It does not reserve the date.
           </p>
         </div>
         <div>
-          <form id="event-portrait-inquiry" class="grid gap-5" novalidate>
+          <form id="event-portrait-inquiry" class="grid gap-6" novalidate>
             <div
               id="inquiry-errors"
               class="border-destructive bg-destructive/10 text-destructive hidden rounded-xl border px-4 py-3 text-sm"
               tabindex="-1"
               role="alert"
             ></div>
-            <fieldset class="grid gap-4">
-              <legend class="text-sm font-semibold">The event</legend>
-              <div class="grid gap-5 sm:grid-cols-2">
-                <label class="grid gap-2 text-sm font-medium" for="coverage">
-                  <span class="flex items-baseline justify-between gap-3">
-                    Coverage
-                    <span class="text-muted-foreground text-xs font-normal">
-                      Required
-                    </span>
-                  </span>
-                  <select
-                    id="coverage"
-                    name="coverage"
-                    required
-                    aria-describedby="error-coverage"
-                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
+            <fieldset>
+              <legend class="mb-4 text-sm font-semibold">The event</legend>
+              <FieldGroup>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <Field>
+                    <FieldLabel htmlFor="coverage" className="justify-between">
+                      Coverage
+                      <span class="text-muted-foreground text-xs font-normal">
+                        Required
+                      </span>
+                    </FieldLabel>
+                    <select
+                      id="coverage"
+                      name="coverage"
+                      required
+                      aria-describedby="error-coverage"
+                      class={control}
+                    >
+                      <option value="">Choose coverage</option>
+                      {packages.map((option) => (
+                        <option value={option.hours}>
+                          {option.hours}, starting at {option.price}
+                        </option>
+                      ))}
+                    </select>
+                    <p
+                      id="error-coverage"
+                      class="text-destructive text-sm"
+                      hidden
+                    ></p>
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor="extraTime" className="justify-between">
+                      Longer coverage
+                      <span class="text-muted-foreground text-xs font-normal">
+                        Optional
+                      </span>
+                    </FieldLabel>
+                    <input
+                      id="extraTime"
+                      name="extraTime"
+                      class={control}
+                      placeholder="Up to 8 hours"
+                    />
+                  </Field>
+                </div>
+                {eventFields.map((row) => (
+                  <div
+                    class:list={[
+                      'grid gap-4',
+                      row.length > 1 && 'sm:grid-cols-2',
+                    ]}
                   >
-                    <option value="">Choose coverage</option>
-                    {packages.map((option) => (
-                      <option value={option.hours}>
-                        {option.hours}, starting at {option.price}
-                      </option>
+                    {row.map((field) => (
+                      <Field>
+                        <FieldLabel
+                          htmlFor={field.id}
+                          className="justify-between"
+                        >
+                          {field.label}
+                          <span class="text-muted-foreground text-xs font-normal">
+                            Required
+                          </span>
+                        </FieldLabel>
+                        <input
+                          id={field.id}
+                          name={field.id}
+                          type={field.type ?? 'text'}
+                          autocomplete={field.autocomplete}
+                          placeholder={field.placeholder}
+                          {...(field.type === 'number'
+                            ? { min: '1', step: '1', inputmode: 'numeric' }
+                            : {})}
+                          required
+                          aria-describedby={`error-${field.id}`}
+                          class={control}
+                        />
+                        <p
+                          id={`error-${field.id}`}
+                          class="text-destructive text-sm"
+                          hidden
+                        ></p>
+                      </Field>
                     ))}
-                  </select>
-                  <p
-                    id="error-coverage"
-                    class="text-destructive hidden text-sm"
-                  ></p>
-                </label>
-                <label class="grid gap-2 text-sm font-medium" for="extraTime">
-                  <span class="flex items-baseline justify-between gap-3">
-                    Longer coverage
-                    <span class="text-muted-foreground text-xs font-normal">
-                      Optional
-                    </span>
-                  </span>
-                  <input
-                    id="extraTime"
-                    name="extraTime"
-                    class="border-input bg-background min-h-11 rounded-xl border px-3"
-                    placeholder="Up to 8 hours"
-                  />
-                </label>
-              </div>
-              <div class="grid gap-5 sm:grid-cols-2">
-                <label class="grid gap-2 text-sm font-medium" for="date">
-                  <span class="flex items-baseline justify-between gap-3">
-                    Date
-                    <span class="text-muted-foreground text-xs font-normal">
-                      Required
-                    </span>
-                  </span>
-                  <input
-                    id="date"
-                    name="date"
-                    type="date"
-                    required
-                    aria-describedby="error-date"
-                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
-                  />
-                  <p
-                    id="error-date"
-                    class="text-destructive hidden text-sm"
-                  ></p>
-                </label>
-                <label class="grid gap-2 text-sm font-medium" for="guests">
-                  <span class="flex items-baseline justify-between gap-3">
-                    Guests
-                    <span class="text-muted-foreground text-xs font-normal">
-                      Required
-                    </span>
-                  </span>
-                  <input
-                    id="guests"
-                    name="guests"
-                    type="number"
-                    min="1"
-                    step="1"
-                    inputmode="numeric"
-                    required
-                    aria-describedby="error-guests"
-                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
-                  />
-                  <p
-                    id="error-guests"
-                    class="text-destructive hidden text-sm"
-                  ></p>
-                </label>
-              </div>
-              <div class="grid gap-5 sm:grid-cols-2">
-                <label class="grid gap-2 text-sm font-medium" for="venue">
-                  <span class="flex items-baseline justify-between gap-3">
-                    Venue
-                    <span class="text-muted-foreground text-xs font-normal">
-                      Required
-                    </span>
-                  </span>
-                  <input
-                    id="venue"
-                    name="venue"
-                    required
-                    aria-describedby="error-venue"
-                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
-                  />
-                  <p
-                    id="error-venue"
-                    class="text-destructive hidden text-sm"
-                  ></p>
-                </label>
-                <label class="grid gap-2 text-sm font-medium" for="city">
-                  <span class="flex items-baseline justify-between gap-3">
-                    City
-                    <span class="text-muted-foreground text-xs font-normal">
-                      Required
-                    </span>
-                  </span>
-                  <input
-                    id="city"
-                    name="city"
-                    autocomplete="address-level2"
-                    required
-                    aria-describedby="error-city"
-                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
-                  />
-                  <p
-                    id="error-city"
-                    class="text-destructive hidden text-sm"
-                  ></p>
-                </label>
-              </div>
-              <label class="grid gap-2 text-sm font-medium" for="eventType">
-                <span class="flex items-baseline justify-between gap-3">
-                  Event type
-                  <span class="text-muted-foreground text-xs font-normal">
-                    Required
-                  </span>
-                </span>
-                <input
-                  id="eventType"
-                  name="eventType"
-                  required
-                  aria-describedby="error-eventType"
-                  class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
-                  placeholder="Birthday, mosque, school, or nonprofit"
-                />
-                <p
-                  id="error-eventType"
-                  class="text-destructive hidden text-sm"
-                ></p>
-              </label>
+                  </div>
+                ))}
+              </FieldGroup>
             </fieldset>
-            <fieldset class="grid gap-4">
-              <legend class="text-sm font-semibold">How to reach you</legend>
-              <div class="grid gap-5 sm:grid-cols-2">
-                <label class="grid gap-2 text-sm font-medium" for="name">
-                  <span class="flex items-baseline justify-between gap-3">
-                    Name
-                    <span class="text-muted-foreground text-xs font-normal">
-                      Required
-                    </span>
-                  </span>
-                  <input
-                    id="name"
-                    name="name"
-                    autocomplete="name"
-                    required
-                    aria-describedby="error-name"
-                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
-                  />
-                  <p
-                    id="error-name"
-                    class="text-destructive hidden text-sm"
-                  ></p>
-                </label>
-                <label class="grid gap-2 text-sm font-medium" for="phone">
-                  <span class="flex items-baseline justify-between gap-3">
-                    Phone
-                    <span class="text-muted-foreground text-xs font-normal">
-                      Required
-                    </span>
-                  </span>
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    autocomplete="tel"
-                    required
-                    aria-describedby="error-phone"
-                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
-                  />
-                  <p
-                    id="error-phone"
-                    class="text-destructive hidden text-sm"
-                  ></p>
-                </label>
-                <label class="grid gap-2 text-sm font-medium" for="email">
-                  <span class="flex items-baseline justify-between gap-3">
-                    Email
-                    <span class="text-muted-foreground text-xs font-normal">
-                      Required
-                    </span>
-                  </span>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    enterkeyhint="done"
-                    autocomplete="email"
-                    required
-                    aria-describedby="error-email"
-                    class="border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3"
-                  />
-                  <p
-                    id="error-email"
-                    class="text-destructive hidden text-sm"
-                  ></p>
-                </label>
-              </div>
+            <fieldset>
+              <legend class="mb-4 text-sm font-semibold">
+                How to reach you
+              </legend>
+              <FieldGroup className="grid gap-4 sm:grid-cols-2">
+                {contactFields.map((field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.id} className="justify-between">
+                      {field.label}
+                      <span class="text-muted-foreground text-xs font-normal">
+                        Required
+                      </span>
+                    </FieldLabel>
+                    <input
+                      id={field.id}
+                      name={field.id}
+                      type={field.type ?? 'text'}
+                      autocomplete={field.autocomplete}
+                      enterkeyhint={field.id === 'email' ? 'done' : undefined}
+                      required
+                      aria-describedby={`error-${field.id}`}
+                      class={control}
+                    />
+                    <p
+                      id={`error-${field.id}`}
+                      class="text-destructive text-sm"
+                      hidden
+                    ></p>
+                  </Field>
+                ))}
+              </FieldGroup>
             </fieldset>
             <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
-              <a
-                class="text-foreground text-sm underline underline-offset-4"
-                href="tel:+18134240606"
-              >
-                {eventPortraitPhone}
-              </a>
               <p id="inquiry-selection" class="text-sm font-medium" hidden></p>
               <button
                 type="submit"
@@ -461,17 +414,14 @@ const packages = eventPortraitPackages
               >
                 Open email draft
               </button>
-              <a
-                href="/contact/"
-                class="text-primary rounded-sm text-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
-              >
+              <a href="/contact/" class={`${link} text-sm`}>
                 Or use the contact page
               </a>
             </div>
           </form>
           <div
             id="inquiry-ready"
-            class="mt-6 hidden rounded-2xl bg-muted/50 p-6"
+            class="bg-muted/50 mt-6 hidden rounded-2xl p-6"
             role="status"
           >
             <h3 class="text-lg font-semibold">
@@ -495,6 +445,28 @@ const packages = eventPortraitPackages
           </div>
         </div>
       </div>
+    </section>
+
+    <Separator />
+
+    <section aria-label="Contact" class="py-8 text-sm leading-7">
+      <p class="flex flex-wrap gap-x-2">
+        <span>Ayoub Abedrabbo · Alpha Bravo Media</span>
+        <span aria-hidden="true">·</span>
+        <a href={`tel:${eventPortraitPhoneUri}`} class={link}>
+          {eventPortraitPhone}
+        </a>
+        <span aria-hidden="true">·</span>
+        <a href={`mailto:${eventPortraitEmail}`} class={link}>
+          {eventPortraitEmail}
+        </a>
+        <span aria-hidden="true">·</span>
+        <span>Tampa, Florida</span>
+        <span aria-hidden="true">·</span>
+        <a href={eventPortraitMapsUrl} class={link}>
+          Find us on Google Maps
+        </a>
+      </p>
     </section>
     <script>
       import {

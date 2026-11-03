@@ -4,8 +4,10 @@ import { readFile } from 'node:fs/promises'
 
 import {
   eventPortraitDescription,
+  eventPortraitMapsUrl,
   eventPortraitMarkdownSection,
   eventPortraitPackages,
+  eventPortraitProofProjects,
   eventPortraitStructuredData,
   eventPortraitTitle,
 } from './event-portrait-offer'
@@ -51,6 +53,41 @@ test('agent-readable copies share the offer and omit a street address', async ()
   assert.match(section, /within minutes/)
 })
 
+test('agent-readable offer answers how to book without the page layout', () => {
+  const section = eventPortraitMarkdownSection()
+  assert.match(section, /Who: Ayoub Abedrabbo/)
+  assert.match(section, /Travel within 30 miles of Tampa is included/)
+  assert.match(section, /No backdrop, no flash, and no lighting kit/)
+  assert.match(section, /Videography: custom quote/)
+  assert.match(
+    section,
+    /coverage length, extra time, event date, venue, city, guest count, event type, name, phone, and email/,
+  )
+  assert.match(section, /mailto:Ayoub@AyoubAbed\.xyz/)
+  assert.match(section, /does not reserve the date/)
+  assert.match(
+    section,
+    /https:\/\/ayoubabed\.xyz\/galleries\/angels-birthday-party-2026\//,
+  )
+  assert.match(section, /https:\/\/ayoubabed\.xyz\/portfolio\/portraits\//)
+  assert.equal(/FAQ|\$300|streetAddress/.test(section), false)
+})
+
+// Agent crawl smoke (#100): each answer a bot needs, in the plain-text copy.
+test('agent-readable offer answers who, where, prices, payer, inquiry and Maps', () => {
+  const section = eventPortraitMarkdownSection()
+  for (const fact of [
+    /Who: Ayoub Abedrabbo/,
+    /Tampa, Florida/,
+    /Starting prices: \$400 for 1 hour/,
+    /The host books and pays/,
+    /How to inquire/,
+    /Google Maps: https:\/\/maps\.app\.goo\.gl\/7r3JFHfe32ubHtKa7/,
+  ]) {
+    assert.match(section, fact)
+  }
+})
+
 test('structured data describes the visible service and each starting offer without a hidden FAQ', () => {
   const url = 'https://ayoubabed.xyz/services/event-portraits/'
   const data = eventPortraitStructuredData(url)
@@ -69,7 +106,18 @@ test('structured data describes the visible service and each starting offer with
     'Event photography with portrait sessions and a live gallery',
   )
   assert.deepEqual(service.provider, { '@id': `${url}#business` })
-  assert.equal(service.areaServed, 'Tampa, Florida')
+  const area = {
+    '@type': 'GeoCircle',
+    geoMidpoint: {
+      '@type': 'GeoCoordinates',
+      latitude: 27.9506,
+      longitude: -82.4572,
+    },
+    geoRadius: 48280,
+    description: 'Within 30 miles of Tampa, Florida',
+  }
+  assert.deepEqual(business.areaServed, area)
+  assert.deepEqual(service.areaServed, area)
   assert.deepEqual(service.offers, [
     ...[
       ['1 hour', 400],
@@ -93,6 +141,22 @@ test('structured data describes the visible service and each starting offer with
       url,
     },
   ])
+})
+
+test('structured data links the live Google Maps listing', () => {
+  const data = eventPortraitStructuredData(
+    'https://ayoubabed.xyz/services/event-portraits/',
+  )
+  const business = data['@graph'][0]
+  assert.equal(
+    eventPortraitMapsUrl,
+    'https://maps.app.goo.gl/7r3JFHfe32ubHtKa7',
+  )
+  assert.deepEqual(business.sameAs, [eventPortraitMapsUrl])
+  assert.equal(
+    business.hasMap,
+    'https://www.google.com/maps?cid=7799557622400498050',
+  )
 })
 
 test(
@@ -122,6 +186,25 @@ test(
     assert.match(copy, /does not reserve the date/)
     assert.match(html, /mailto:Ayoub@AyoubAbed\.xyz/)
     assert.match(html, /tel:\+18134240606/)
+    // The denial is the only mention of a backdrop or lighting.
+    const visible = html
+      .replace(/<(style|script)[^>]*>[\s\S]*?<\/\1>/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+    assert.deepEqual(visible.match(/[^.]*\b(backdrop|lighting)\b[^.]*\./gi), [
+      ' No backdrop, flash, or lighting kit.',
+    ])
+    assert.match(copy, /Travel included within 30 miles of Tampa\./)
+    assert.match(copy, /Ayoub Abedrabbo · Alpha Bravo Media/)
+    assert.ok(html.includes('href="https://maps.app.goo.gl/7r3JFHfe32ubHtKa7"'))
+    assert.match(copy, /Find us on Google Maps/)
+    for (const proof of [
+      '/galleries/angels-birthday-party-2026/',
+      '/portfolio/portraits/',
+      '/portfolio/muslim-business-chamber-2026/',
+    ]) {
+      assert.ok(html.includes(`href="${proof}"`), proof)
+    }
     assert.doesNotMatch(
       html,
       /FAQPage|Questions hosts ask|Dedicated event coverage|streetAddress/,
@@ -143,3 +226,30 @@ test(
     )
   },
 )
+
+test(
+  'services index links event photography and keeps video a custom quote',
+  { skip: !process.env.EVENT_PORTRAIT_TEST_ORIGIN },
+  async () => {
+    const origin = process.env.EVENT_PORTRAIT_TEST_ORIGIN!
+    const response = await fetch(`${origin}/services/`, { redirect: 'manual' })
+    assert.equal(response.status, 200)
+    const html = await response.text()
+    const copy = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
+    assert.ok(html.includes('href="/services/event-portraits/"'))
+    assert.ok(html.includes('href="/contact/"'))
+    assert.match(copy, /Starting at \$400/)
+    assert.match(copy, /Custom quote/)
+    assert.doesNotMatch(copy, /\$(600|250|300|450)\b/)
+  },
+)
+
+test('proof projects are real portfolio entries that lead back to prices', async () => {
+  assert.deepEqual([...eventPortraitProofProjects].sort(), [
+    'muslim-business-chamber-2026',
+    'portraits',
+  ])
+  for (const id of eventPortraitProofProjects) {
+    await readFile(new URL(`../content/portfolio/${id}.mdx`, import.meta.url))
+  }
+})
