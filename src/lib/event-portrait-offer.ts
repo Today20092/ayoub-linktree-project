@@ -10,6 +10,11 @@ export const eventPortraitEmail = 'Ayoub@AyoubAbed.xyz'
 export const eventPortraitPhone = '(813) 424-0606'
 export const eventPortraitPhoneUri = '+1-813-424-0606'
 
+// Alpha Bravo Media Google Business Profile listing (#91/#92).
+export const eventPortraitMapsUrl = 'https://maps.app.goo.gl/7r3JFHfe32ubHtKa7'
+const eventPortraitMapsCidUrl =
+  'https://www.google.com/maps?cid=7799557622400498050'
+
 export const eventPortraitPackages = [
   { hours: '1 hour', sessions: 'About 20', price: '$400', amount: 400 },
   { hours: '2 hours', sessions: 'About 40', price: '$550', amount: 550 },
@@ -76,6 +81,8 @@ export function eventPortraitStructuredData(pageUrl: string) {
         email: eventPortraitEmail,
         telephone: eventPortraitPhoneUri,
         areaServed: eventPortraitAreaServed,
+        sameAs: [eventPortraitMapsUrl],
+        hasMap: eventPortraitMapsCidUrl,
       },
       {
         '@type': 'Service',
