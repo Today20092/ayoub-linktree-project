@@ -61,6 +61,7 @@ Send coverage length, extra time, event date, venue, city, guest count, event ty
 
 - Live event gallery: https://ayoubabed.xyz/galleries/angels-birthday-party-2026/
 - Portrait work: https://ayoubabed.xyz/portfolio/portraits/
+- Workshop attendee portraits: https://ayoubabed.xyz/portfolio/muslim-business-chamber-2026/
 `
 }
 
