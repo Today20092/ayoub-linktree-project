@@ -170,6 +170,25 @@ test(
     assert.match(copy, /does not reserve the date/)
     assert.match(html, /mailto:Ayoub@AyoubAbed\.xyz/)
     assert.match(html, /tel:\+18134240606/)
+    // The denial is the only mention of a backdrop or lighting.
+    const visible = html
+      .replace(/<(style|script)[^>]*>[\s\S]*?<\/\1>/g, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+    assert.deepEqual(visible.match(/[^.]*\b(backdrop|lighting)\b[^.]*\./gi), [
+      ' No backdrop, flash, or lighting kit.',
+    ])
+    assert.match(copy, /Travel included within 30 miles of Tampa\./)
+    assert.match(copy, /Ayoub Abedrabbo · Alpha Bravo Media/)
+    assert.ok(html.includes('href="https://maps.app.goo.gl/7r3JFHfe32ubHtKa7"'))
+    assert.match(copy, /Find us on Google Maps/)
+    for (const proof of [
+      '/galleries/angels-birthday-party-2026/',
+      '/portfolio/portraits/',
+      '/portfolio/muslim-business-chamber-2026/',
+    ]) {
+      assert.ok(html.includes(`href="${proof}"`), proof)
+    }
     assert.doesNotMatch(
       html,
       /FAQPage|Questions hosts ask|Dedicated event coverage|streetAddress/,
@@ -189,5 +208,22 @@ test(
         'https://ayoubabed.xyz/services/event-portraits/',
       ),
     )
+  },
+)
+
+test(
+  'services index links event photography and keeps video a custom quote',
+  { skip: !process.env.EVENT_PORTRAIT_TEST_ORIGIN },
+  async () => {
+    const origin = process.env.EVENT_PORTRAIT_TEST_ORIGIN!
+    const response = await fetch(`${origin}/services/`, { redirect: 'manual' })
+    assert.equal(response.status, 200)
+    const html = await response.text()
+    const copy = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
+    assert.ok(html.includes('href="/services/event-portraits/"'))
+    assert.ok(html.includes('href="/contact/"'))
+    assert.match(copy, /Starting at \$400/)
+    assert.match(copy, /Custom quote/)
+    assert.doesNotMatch(copy, /\$(600|250|300|450)\b/)
   },
 )
