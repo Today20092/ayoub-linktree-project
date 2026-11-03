@@ -10,7 +10,7 @@ export const eventPortraitTitle =
   'Event photography in Tampa | Ayoub Abedrabbo.'
 
 export const eventPortraitDescription =
-  'Book event photography in Tampa and get a gallery that updates within minutes. Portrait sessions are included. The host pays. Guests receive photos at no charge. Coverage starts at $400.'
+  'Tampa event photography with a gallery that updates within minutes. Portraits included. The host pays; guests get photos at no charge. From $400.'
 
 export const eventPortraitEmail = 'Ayoub@AyoubAbed.xyz'
 export const eventPortraitPhone = '(813) 424-0606'

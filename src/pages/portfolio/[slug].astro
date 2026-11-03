@@ -391,7 +391,7 @@ const galleryHeading =
                     widths={[480, 768, 1024, 1280]}
                     sizes="(min-width: 640px) 50vw, 100vw"
                     quality={75}
-                    loading="lazy"
+                    loading={index < 2 ? 'eager' : 'lazy'}
                     decoding="async"
                     class="block h-auto w-full"
                   />
@@ -478,7 +478,7 @@ const galleryHeading =
                     width={Math.min(image.src.width, 1024)}
                     sizes="(min-width: 640px) 50vw, 100vw"
                     quality={80}
-                    loading="lazy"
+                    loading={index < 2 ? 'eager' : 'lazy'}
                     class="block h-auto w-full"
                   />
                   {image.caption && (
@@ -508,7 +508,7 @@ const galleryHeading =
                     width={Math.min(image.src.width, 1280)}
                     sizes="(min-width: 1280px) 896px, 100vw"
                     quality={80}
-                    loading="lazy"
+                    loading={index < 2 ? 'eager' : 'lazy'}
                     class="block h-auto w-full"
                   />
                   {image.caption && (

@@ -21,6 +21,11 @@ test('the public offer names the Tampa starting prices', () => {
   assert.match(eventPortraitDescription, /host pays/)
   assert.match(eventPortraitDescription, /no charge/)
   assert.match(eventPortraitDescription, /\$400/)
+  // Search results truncate descriptions past about 155 characters.
+  assert.ok(
+    eventPortraitDescription.length <= 155,
+    `${eventPortraitDescription.length} chars`,
+  )
   assert.deepEqual(
     eventPortraitPackages.map((option) => option.price),
     ['$400', '$550', '$700', '$850'],
