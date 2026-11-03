@@ -3,6 +3,7 @@ import '../styles.css'
 
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { siteConfig } from '../lib/site-config'
+import { eventPortraitPath } from '../lib/event-portrait-offer'
 
 const { site } = siteConfig
 const title = 'Contact Ayoub Abedrabbo | Tampa Digital Media'
@@ -57,7 +58,7 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
         Planning an event?{' '}
         <a
           class="focus-visible:ring-ring rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
-          href="/services/event-portraits/"
+          href={eventPortraitPath}
         >
           See starting prices and send an inquiry
         </a>

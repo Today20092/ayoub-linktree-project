@@ -15,6 +15,7 @@ import {
   eventPortraitMapsUrl,
   eventPortraitPackages,
   eventPortraitPhone,
+  eventPortraitPhoneUri,
   eventPortraitStructuredData,
   eventPortraitTitle,
 } from '../../lib/event-portrait-offer'
@@ -452,7 +453,7 @@ const contactFields: InquiryField[] = [
       <p class="flex flex-wrap gap-x-2">
         <span>Ayoub Abedrabbo · Alpha Bravo Media</span>
         <span aria-hidden="true">·</span>
-        <a href="tel:+18134240606" class={link}>
+        <a href={`tel:${eventPortraitPhoneUri}`} class={link}>
           {eventPortraitPhone}
         </a>
         <span aria-hidden="true">·</span>

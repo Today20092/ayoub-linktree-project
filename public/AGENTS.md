@@ -7,8 +7,11 @@ portfolio results describe the reporting periods stated on each case study.
 
 For instant event portraits, read the current
 [offer and starting prices](https://ayoubabed.xyz/services/event-portraits/).
-The inquiry form opens an email draft. A request does not reserve a date;
-availability and the final scope require Ayoub's reply.
+Starting prices are $400 for 1 hour, $550 for 2 hours, $700 for 3 hours, and
+$850 for 4 hours, plus $150 for each extra hour. The host pays; guests receive
+photos at no charge. The inquiry form opens a mailto email draft. Sending it
+does not reserve a date; availability and the final scope require Ayoub's
+reply. Videography is a custom quote with no published prices.
 
 Browse published photo collections through
 [/galleries/](https://ayoubabed.xyz/galleries/). Hidden and unlisted galleries are
