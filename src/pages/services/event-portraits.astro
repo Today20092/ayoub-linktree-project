@@ -171,7 +171,7 @@ const contactFields: InquiryField[] = [
 
     <section aria-label="Proof" class="py-10 sm:py-14">
       <ul class="grid gap-6 md:grid-cols-3">
-        {proof.map((item) => (
+        {proof.map((item, index) => (
           <li>
             <figure>
               <Image
@@ -186,6 +186,7 @@ const contactFields: InquiryField[] = [
                 widths={[400, 640, 960]}
                 sizes="(min-width: 768px) 33vw, 100vw"
                 quality={78}
+                loading={index < 2 ? 'eager' : 'lazy'}
                 class="aspect-[4/3] rounded-2xl object-cover"
               />
               <figcaption class="text-muted-foreground mt-3 text-sm leading-6">

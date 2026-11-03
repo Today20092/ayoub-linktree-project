@@ -405,7 +405,7 @@ const galleryHeading =
             </div>
           ) : project.id === 'bayaan-academy' ? (
             <div class="mt-6 space-y-6">
-              {bayaanGalleryGroups.map((group) =>
+              {bayaanGalleryGroups.map((group, groupIndex) =>
                 group.type === 'landscape' ? (
                   <figure data-reveal="up">
                     <Image
@@ -416,7 +416,7 @@ const galleryHeading =
                       widths={[640, 960, 1280, 1600]}
                       sizes="(min-width: 1280px) 896px, 100vw"
                       quality={80}
-                      loading="lazy"
+                      loading={groupIndex === 0 ? 'eager' : 'lazy'}
                       class="block h-auto w-full"
                     />
                     {group.image.caption && (
@@ -445,7 +445,9 @@ const galleryHeading =
                           widths={[480, 768, 1024]}
                           sizes="(min-width: 640px) 50vw, 100vw"
                           quality={80}
-                          loading="lazy"
+                          loading={
+                            groupIndex < 2 && index < 2 ? 'eager' : 'lazy'
+                          }
                           class="block h-auto w-full"
                         />
                         {image.caption && (
