@@ -251,7 +251,7 @@ const simpleIconBody = (name?: string) =>
                 widths={[480, 720, 960]}
                 sizes="(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"
                 quality={80}
-                priority={index === 0}
+                priority={index < 2}
                 class="bg-muted block h-auto w-full transition-[opacity,transform] duration-300 ease-out group-hover:scale-[1.015] group-hover:opacity-90"
               />
             ) : (
@@ -267,7 +267,7 @@ const simpleIconBody = (name?: string) =>
                 widths={[480, 720, 960]}
                 sizes="(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"
                 quality={80}
-                priority={index === 0}
+                priority={index < 2}
                 class="bg-muted block h-auto w-full transition-[opacity,transform] duration-300 ease-out group-hover:scale-[1.015] group-hover:opacity-90"
               />
             )}

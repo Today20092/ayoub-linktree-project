@@ -1,14 +1,25 @@
 export const eventPortraitPath = '/services/event-portraits/'
 
+// Portfolio entries that prove the event photography offer (#99).
+export const eventPortraitProofProjects: ReadonlySet<string> = new Set([
+  'portraits',
+  'muslim-business-chamber-2026',
+])
+
 export const eventPortraitTitle =
   'Event photography in Tampa | Ayoub Abedrabbo.'
 
 export const eventPortraitDescription =
-  'Book event photography in Tampa and get a gallery that updates within minutes. Portrait sessions are included. The host pays. Guests receive photos at no charge. Coverage starts at $400.'
+  'Tampa event photography with a gallery that updates within minutes. Portraits included. The host pays; guests get photos at no charge. From $400.'
 
 export const eventPortraitEmail = 'Ayoub@AyoubAbed.xyz'
 export const eventPortraitPhone = '(813) 424-0606'
 export const eventPortraitPhoneUri = '+1-813-424-0606'
+
+// Alpha Bravo Media Google Business Profile listing (#91/#92).
+export const eventPortraitMapsUrl = 'https://maps.app.goo.gl/7r3JFHfe32ubHtKa7'
+const eventPortraitMapsCidUrl =
+  'https://www.google.com/maps?cid=7799557622400498050'
 
 export const eventPortraitPackages = [
   { hours: '1 hour', sessions: 'About 20', price: '$400', amount: 400 },
@@ -31,13 +42,38 @@ export function eventPortraitMarkdownSection() {
 
 - Page: https://ayoubabed.xyz${eventPortraitPath}
 - Starting prices: ${prices}, plus ${eventPortraitExtraHour.price} for each extra hour
-- Area: within 30 miles of Tampa, Florida
+- Who: Ayoub Abedrabbo, event photographer in Tampa, Florida
+- Area: within 30 miles of Tampa, Florida. Travel within 30 miles of Tampa is included.
 - Event photography for the booking. Portrait sessions are included.
 - Gallery: each photo shows up within minutes of being taken.
 - Guests do not pay. The host books and pays.
+- No backdrop, no flash, and no lighting kit.
+- Videography: custom quote. No published video prices.
 - Email: ${eventPortraitEmail}
 - Phone: ${eventPortraitPhone}
+- Google Maps: ${eventPortraitMapsUrl}
+
+### How to inquire
+
+Send coverage length, extra time, event date, venue, city, guest count, event type, name, phone, and email to [${eventPortraitEmail}](mailto:${eventPortraitEmail}). The page form opens an email draft with these fields. Sending it does not reserve the date; Ayoub replies to confirm availability.
+
+### Proof
+
+- Live event gallery: https://ayoubabed.xyz/galleries/angels-birthday-party-2026/
+- Portrait work: https://ayoubabed.xyz/portfolio/portraits/
+- Workshop attendee portraits: https://ayoubabed.xyz/portfolio/muslim-business-chamber-2026/
 `
+}
+
+const eventPortraitAreaServed = {
+  '@type': 'GeoCircle',
+  geoMidpoint: {
+    '@type': 'GeoCoordinates',
+    latitude: 27.9506,
+    longitude: -82.4572,
+  },
+  geoRadius: 48280, // 30 miles in meters
+  description: 'Within 30 miles of Tampa, Florida',
 }
 
 export function eventPortraitStructuredData(pageUrl: string) {
@@ -48,20 +84,16 @@ export function eventPortraitStructuredData(pageUrl: string) {
       {
         '@type': 'ProfessionalService',
         '@id': businessId,
-        name: 'Ayoub Abedrabbo',
+        // Matches the Google Business Profile title so Maps can tie the listing to this page.
+        name: 'Alpha Bravo Media',
+        alternateName: 'Ayoub Abedrabbo',
+        founder: { '@type': 'Person', name: 'Ayoub Abedrabbo' },
         url: pageUrl,
         email: eventPortraitEmail,
         telephone: eventPortraitPhoneUri,
-        areaServed: {
-          '@type': 'City',
-          name: 'Tampa',
-          address: {
-            '@type': 'PostalAddress',
-            addressLocality: 'Tampa',
-            addressRegion: 'FL',
-            addressCountry: 'US',
-          },
-        },
+        areaServed: eventPortraitAreaServed,
+        sameAs: [eventPortraitMapsUrl],
+        hasMap: eventPortraitMapsCidUrl,
       },
       {
         '@type': 'Service',
@@ -71,7 +103,7 @@ export function eventPortraitStructuredData(pageUrl: string) {
           'Event photography with portrait sessions and a live gallery',
         url: pageUrl,
         provider: { '@id': businessId },
-        areaServed: 'Tampa, Florida',
+        areaServed: eventPortraitAreaServed,
         offers: [
           ...eventPortraitPackages.map((option) => ({
             '@type': 'Offer',

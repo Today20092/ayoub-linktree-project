@@ -25,6 +25,10 @@ import { buttonVariants } from '../../components/ui/button'
 import { Separator } from '../../components/ui/separator'
 import { eventGalleries } from '../../data/event-galleries'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import {
+  eventPortraitPath,
+  eventPortraitProofProjects,
+} from '../../lib/event-portrait-offer'
 import { sortPortfolioProjects } from '../../lib/portfolio-order'
 import { cn } from '../../lib/utils'
 
@@ -387,7 +391,7 @@ const galleryHeading =
                     widths={[480, 768, 1024, 1280]}
                     sizes="(min-width: 640px) 50vw, 100vw"
                     quality={75}
-                    loading="lazy"
+                    loading={index < 2 ? 'eager' : 'lazy'}
                     decoding="async"
                     class="block h-auto w-full"
                   />
@@ -401,7 +405,7 @@ const galleryHeading =
             </div>
           ) : project.id === 'bayaan-academy' ? (
             <div class="mt-6 space-y-6">
-              {bayaanGalleryGroups.map((group) =>
+              {bayaanGalleryGroups.map((group, groupIndex) =>
                 group.type === 'landscape' ? (
                   <figure data-reveal="up">
                     <Image
@@ -412,7 +416,7 @@ const galleryHeading =
                       widths={[640, 960, 1280, 1600]}
                       sizes="(min-width: 1280px) 896px, 100vw"
                       quality={80}
-                      loading="lazy"
+                      loading={groupIndex === 0 ? 'eager' : 'lazy'}
                       class="block h-auto w-full"
                     />
                     {group.image.caption && (
@@ -441,7 +445,9 @@ const galleryHeading =
                           widths={[480, 768, 1024]}
                           sizes="(min-width: 640px) 50vw, 100vw"
                           quality={80}
-                          loading="lazy"
+                          loading={
+                            groupIndex < 2 && index < 2 ? 'eager' : 'lazy'
+                          }
                           class="block h-auto w-full"
                         />
                         {image.caption && (
@@ -474,7 +480,7 @@ const galleryHeading =
                     width={Math.min(image.src.width, 1024)}
                     sizes="(min-width: 640px) 50vw, 100vw"
                     quality={80}
-                    loading="lazy"
+                    loading={index < 2 ? 'eager' : 'lazy'}
                     class="block h-auto w-full"
                   />
                   {image.caption && (
@@ -504,7 +510,7 @@ const galleryHeading =
                     width={Math.min(image.src.width, 1280)}
                     sizes="(min-width: 1280px) 896px, 100vw"
                     quality={80}
-                    loading="lazy"
+                    loading={index < 2 ? 'eager' : 'lazy'}
                     class="block h-auto w-full"
                   />
                   {image.caption && (
@@ -551,6 +557,18 @@ const galleryHeading =
             ))}
           </ul>
         </section>
+      )}
+
+      {eventPortraitProofProjects.has(project.id) && (
+        <p class="mx-auto max-w-4xl pb-8 sm:pb-10" data-reveal="up">
+          <a
+            href={eventPortraitPath}
+            class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+          >
+            See event photography starting prices
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </a>
+        </p>
       )}
 
       {hasDetails && (
