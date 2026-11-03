@@ -2,6 +2,7 @@ import type { MiddlewareHandler } from 'astro'
 import { env } from 'cloudflare:workers'
 import { galleryMediaKey } from './lib/gallery-media'
 import { transformGalleryMedia } from './lib/gallery-media-server'
+import { withSecurityHeaders } from './lib/security-headers'
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
   // Astro's default optimizer reads relative URLs from ASSETS, but uploads live in R2.
@@ -24,12 +25,13 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
       )
     return response
   }
-  if (context.url.hostname !== 'payments.ayoubabed.xyz') return next()
+  if (context.url.hostname !== 'payments.ayoubabed.xyz')
+    return withSecurityHeaders(await next())
 
   const response =
     context.url.pathname === '/'
       ? await context.rewrite('/payments/')
       : await next()
   response.headers.set('X-Robots-Tag', 'noindex, nofollow')
-  return response
+  return withSecurityHeaders(response)
 }
