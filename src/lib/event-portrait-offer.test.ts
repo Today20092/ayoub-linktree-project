@@ -185,7 +185,7 @@ test(
     assert.match(copy, /Opens an email draft to Ayoub/)
     assert.match(copy, /does not reserve the date/)
     assert.match(html, /mailto:Ayoub@AyoubAbed\.xyz/)
-    assert.match(html, /tel:\+18134240606/)
+    assert.match(html, /href="tel:\+1-813-424-0606"/)
     // The denial is the only mention of a backdrop or lighting.
     const visible = html
       .replace(/<(style|script)[^>]*>[\s\S]*?<\/\1>/g, ' ')
