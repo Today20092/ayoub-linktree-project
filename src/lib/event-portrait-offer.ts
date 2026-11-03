@@ -31,13 +31,36 @@ export function eventPortraitMarkdownSection() {
 
 - Page: https://ayoubabed.xyz${eventPortraitPath}
 - Starting prices: ${prices}, plus ${eventPortraitExtraHour.price} for each extra hour
-- Area: within 30 miles of Tampa, Florida
+- Who: Ayoub Abedrabbo, event photographer in Tampa, Florida
+- Area: within 30 miles of Tampa, Florida. Travel within 30 miles of Tampa is included.
 - Event photography for the booking. Portrait sessions are included.
 - Gallery: each photo shows up within minutes of being taken.
 - Guests do not pay. The host books and pays.
+- No backdrop, no flash, and no lighting kit.
+- Videography: custom quote. No published video prices.
 - Email: ${eventPortraitEmail}
 - Phone: ${eventPortraitPhone}
+
+### How to inquire
+
+Send coverage length, extra time, event date, venue, city, guest count, event type, name, phone, and email to [${eventPortraitEmail}](mailto:${eventPortraitEmail}). The page form opens an email draft with these fields. Sending it does not reserve the date; Ayoub replies to confirm availability.
+
+### Proof
+
+- Live event gallery: https://ayoubabed.xyz/galleries/angels-birthday-party-2026/
+- Portrait work: https://ayoubabed.xyz/portfolio/portraits/
 `
+}
+
+const eventPortraitAreaServed = {
+  '@type': 'GeoCircle',
+  geoMidpoint: {
+    '@type': 'GeoCoordinates',
+    latitude: 27.9506,
+    longitude: -82.4572,
+  },
+  geoRadius: 48280, // 30 miles in meters
+  description: 'Within 30 miles of Tampa, Florida',
 }
 
 export function eventPortraitStructuredData(pageUrl: string) {
@@ -52,16 +75,7 @@ export function eventPortraitStructuredData(pageUrl: string) {
         url: pageUrl,
         email: eventPortraitEmail,
         telephone: eventPortraitPhoneUri,
-        areaServed: {
-          '@type': 'City',
-          name: 'Tampa',
-          address: {
-            '@type': 'PostalAddress',
-            addressLocality: 'Tampa',
-            addressRegion: 'FL',
-            addressCountry: 'US',
-          },
-        },
+        areaServed: eventPortraitAreaServed,
       },
       {
         '@type': 'Service',
@@ -71,7 +85,7 @@ export function eventPortraitStructuredData(pageUrl: string) {
           'Event photography with portrait sessions and a live gallery',
         url: pageUrl,
         provider: { '@id': businessId },
-        areaServed: 'Tampa, Florida',
+        areaServed: eventPortraitAreaServed,
         offers: [
           ...eventPortraitPackages.map((option) => ({
             '@type': 'Offer',

@@ -51,6 +51,26 @@ test('agent-readable copies share the offer and omit a street address', async ()
   assert.match(section, /within minutes/)
 })
 
+test('agent-readable offer answers how to book without the page layout', () => {
+  const section = eventPortraitMarkdownSection()
+  assert.match(section, /Who: Ayoub Abedrabbo/)
+  assert.match(section, /Travel within 30 miles of Tampa is included/)
+  assert.match(section, /No backdrop, no flash, and no lighting kit/)
+  assert.match(section, /Videography: custom quote/)
+  assert.match(
+    section,
+    /coverage length, extra time, event date, venue, city, guest count, event type, name, phone, and email/,
+  )
+  assert.match(section, /mailto:Ayoub@AyoubAbed\.xyz/)
+  assert.match(section, /does not reserve the date/)
+  assert.match(
+    section,
+    /https:\/\/ayoubabed\.xyz\/galleries\/angels-birthday-party-2026\//,
+  )
+  assert.match(section, /https:\/\/ayoubabed\.xyz\/portfolio\/portraits\//)
+  assert.equal(/FAQ|\$300|streetAddress/.test(section), false)
+})
+
 test('structured data describes the visible service and each starting offer without a hidden FAQ', () => {
   const url = 'https://ayoubabed.xyz/services/event-portraits/'
   const data = eventPortraitStructuredData(url)
@@ -69,7 +89,18 @@ test('structured data describes the visible service and each starting offer with
     'Event photography with portrait sessions and a live gallery',
   )
   assert.deepEqual(service.provider, { '@id': `${url}#business` })
-  assert.equal(service.areaServed, 'Tampa, Florida')
+  const area = {
+    '@type': 'GeoCircle',
+    geoMidpoint: {
+      '@type': 'GeoCoordinates',
+      latitude: 27.9506,
+      longitude: -82.4572,
+    },
+    geoRadius: 48280,
+    description: 'Within 30 miles of Tampa, Florida',
+  }
+  assert.deepEqual(business.areaServed, area)
+  assert.deepEqual(service.areaServed, area)
   assert.deepEqual(service.offers, [
     ...[
       ['1 hour', 400],
