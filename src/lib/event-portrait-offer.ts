@@ -76,7 +76,10 @@ export function eventPortraitStructuredData(pageUrl: string) {
       {
         '@type': 'ProfessionalService',
         '@id': businessId,
-        name: 'Ayoub Abedrabbo',
+        // Matches the Google Business Profile title so Maps can tie the listing to this page.
+        name: 'Alpha Bravo Media',
+        alternateName: 'Ayoub Abedrabbo',
+        founder: { '@type': 'Person', name: 'Ayoub Abedrabbo' },
         url: pageUrl,
         email: eventPortraitEmail,
         telephone: eventPortraitPhoneUri,
