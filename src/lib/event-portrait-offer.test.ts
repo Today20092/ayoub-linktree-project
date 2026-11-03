@@ -73,6 +73,21 @@ test('agent-readable offer answers how to book without the page layout', () => {
   assert.equal(/FAQ|\$300|streetAddress/.test(section), false)
 })
 
+// Agent crawl smoke (#100): each answer a bot needs, in the plain-text copy.
+test('agent-readable offer answers who, where, prices, payer, inquiry and Maps', () => {
+  const section = eventPortraitMarkdownSection()
+  for (const fact of [
+    /Who: Ayoub Abedrabbo/,
+    /Tampa, Florida/,
+    /Starting prices: \$400 for 1 hour/,
+    /The host books and pays/,
+    /How to inquire/,
+    /Google Maps: https:\/\/maps\.app\.goo\.gl\/7r3JFHfe32ubHtKa7/,
+  ]) {
+    assert.match(section, fact)
+  }
+})
+
 test('structured data describes the visible service and each starting offer without a hidden FAQ', () => {
   const url = 'https://ayoubabed.xyz/services/event-portraits/'
   const data = eventPortraitStructuredData(url)
