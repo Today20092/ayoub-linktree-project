@@ -51,6 +51,7 @@ export function eventPortraitMarkdownSection() {
 - Videography: custom quote. No published video prices.
 - Email: ${eventPortraitEmail}
 - Phone: ${eventPortraitPhone}
+- Google Maps: ${eventPortraitMapsUrl}
 
 ### How to inquire
 
