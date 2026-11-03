@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 
 import {
   eventPortraitDescription,
+  eventPortraitMapsUrl,
   eventPortraitMarkdownSection,
   eventPortraitPackages,
   eventPortraitStructuredData,
@@ -124,6 +125,22 @@ test('structured data describes the visible service and each starting offer with
       url,
     },
   ])
+})
+
+test('structured data links the live Google Maps listing', () => {
+  const data = eventPortraitStructuredData(
+    'https://ayoubabed.xyz/services/event-portraits/',
+  )
+  const business = data['@graph'][0]
+  assert.equal(
+    eventPortraitMapsUrl,
+    'https://maps.app.goo.gl/7r3JFHfe32ubHtKa7',
+  )
+  assert.deepEqual(business.sameAs, [eventPortraitMapsUrl])
+  assert.equal(
+    business.hasMap,
+    'https://www.google.com/maps?cid=7799557622400498050',
+  )
 })
 
 test(
