@@ -7,6 +7,7 @@ import {
   eventPortraitMapsUrl,
   eventPortraitMarkdownSection,
   eventPortraitPackages,
+  eventPortraitProofProjects,
   eventPortraitStructuredData,
   eventPortraitTitle,
 } from './event-portrait-offer'
@@ -227,3 +228,13 @@ test(
     assert.doesNotMatch(copy, /\$(600|250|300|450)\b/)
   },
 )
+
+test('proof projects are real portfolio entries that lead back to prices', async () => {
+  assert.deepEqual([...eventPortraitProofProjects].sort(), [
+    'muslim-business-chamber-2026',
+    'portraits',
+  ])
+  for (const id of eventPortraitProofProjects) {
+    await readFile(new URL(`../content/portfolio/${id}.mdx`, import.meta.url))
+  }
+})

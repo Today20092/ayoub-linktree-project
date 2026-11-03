@@ -1,5 +1,11 @@
 export const eventPortraitPath = '/services/event-portraits/'
 
+// Portfolio entries that prove the event photography offer (#99).
+export const eventPortraitProofProjects: ReadonlySet<string> = new Set([
+  'portraits',
+  'muslim-business-chamber-2026',
+])
+
 export const eventPortraitTitle =
   'Event photography in Tampa | Ayoub Abedrabbo.'
 
