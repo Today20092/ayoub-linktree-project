@@ -55,3 +55,12 @@ All from https://ui.shadcn.com/r/registries.json; health is the index score on 2
 - Next.js check was spot-only (`magicui/marquee`, `cnippet gallery-1`, `tailark hero-section-1`). Run `npx shadcn view @ns/item` before each install and grep for `next/image`, `next/link`, `"use client"`, and `<img`.
 - Registry blocks land as React `.tsx`; on Astro they need a `client:*` directive only if interactive. Static blocks are better ported to `.astro` so photos go through `<Image />`.
 - Adding a registry means adding it to `components.json` `registries`; that is a separate decision (#93).
+
+## Verification (2026-11-03)
+
+Checked against primary sources; notes in `C:\Users\User\wayfinder-91-notes\verify-*.md` (outside the repo).
+
+- `@tailark`, `@reui`: repos are MIT, but hero, contact, and CTA items return 401 (paid plan or licence key). Not free; excluded.
+- `@saastro`: free to fetch; MIT LICENSE in https://github.com/saastro-io/saastro-ui. `pricing-01` is a React `"use client"` island with four dependencies, and no block uses `astro:assets` (`hero-02`, `testimonials-01` use raw `<img>`). Use as a layout reference and port to `.astro` with `<Image />`.
+- `@cnippet-blocks`: free; MIT stated on the site, but no LICENSE file was found for the blocks repo. `gallery-1..4` use raw `<img>`; `gallery-5`, `gallery-6`, `testimonial-1` use `next/image` or `next/link`. Layout reference only.
+- `@magicui`: MIT confirmed. `marquee` has no `next/*`, no `motion`, and no `"use client"`. `blur-fade` and `hero-video-dialog` import `motion/react`, so keep them off the hire page.
