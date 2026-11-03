@@ -25,6 +25,10 @@ import { buttonVariants } from '../../components/ui/button'
 import { Separator } from '../../components/ui/separator'
 import { eventGalleries } from '../../data/event-galleries'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import {
+  eventPortraitPath,
+  eventPortraitProofProjects,
+} from '../../lib/event-portrait-offer'
 import { sortPortfolioProjects } from '../../lib/portfolio-order'
 import { cn } from '../../lib/utils'
 
@@ -551,6 +555,18 @@ const galleryHeading =
             ))}
           </ul>
         </section>
+      )}
+
+      {eventPortraitProofProjects.has(project.id) && (
+        <p class="mx-auto max-w-4xl pb-8 sm:pb-10" data-reveal="up">
+          <a
+            href={eventPortraitPath}
+            class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+          >
+            See event photography starting prices
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </a>
+        </p>
       )}
 
       {hasDetails && (
