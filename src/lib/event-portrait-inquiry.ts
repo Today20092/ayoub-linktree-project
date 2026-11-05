@@ -1,4 +1,4 @@
-export const inquiryRecipient = 'Ayoub@ayoubabed.xyz'
+export const inquiryRecipient = 'inquiry@ayoubabed.xyz'
 
 export type PortraitPackage = {
   hours: string

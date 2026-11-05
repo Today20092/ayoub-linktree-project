@@ -40,7 +40,7 @@ const canonicalUrl = new URL(
 const ogImage = new URL(siteConfig.site.ogImage, Astro.site).toString()
 const packages = eventPortraitPackages
 const link =
-  'text-primary rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4'
+  'text-link rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4'
 const control =
   'border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3'
 const proof = [
@@ -118,35 +118,44 @@ const contactFields: InquiryField[] = [
 >
   <main
     id="main-content"
-    class="mx-auto w-full max-w-screen-2xl self-center px-4 sm:px-6 lg:px-8"
+    class="portrait-page mx-auto w-full max-w-screen-2xl self-center px-4 sm:px-6 lg:px-8"
   >
     <section
       aria-labelledby="experience-title"
-      class="grid items-center gap-8 py-8 sm:py-14 lg:grid-cols-2 lg:gap-16 lg:py-20"
+      class="portrait-hero grid items-center gap-8 py-8 sm:py-14 lg:grid-cols-2 lg:gap-16 lg:py-20"
     >
       <div class="min-w-0">
+        <p class="eyebrow">Ayoub Abedrabbo / Event photography / Tampa, FL</p>
         <h1
           id="experience-title"
           class="font-heading text-4xl leading-[1.08] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl"
         >
-          Your event. A gallery within minutes.
+          Good company.
+          <br />
+          Great memories.
+          <br />
+          <em>Already in the gallery.</em>
         </h1>
         <p class="mt-5 max-w-lg text-lg leading-8">
-          Starting at $400. The host pays. Guests receive photos at no charge.
+          Enjoy your event. I’ll photograph the people who make it yours—with
+          portraits included and a gallery that updates within minutes.
         </p>
         <div class="mt-6 flex flex-wrap items-center gap-5">
           <a
             href="#inquiry"
             class={`${buttonVariants({ size: 'lg' })} min-h-11 px-5`}
           >
-            Request a quote
+            Let’s plan your event<span aria-hidden="true">↗</span>
           </a>
           <a href="#pricing" class={`${link} text-sm`}>
             See starting prices
           </a>
         </div>
+        <p class="hero-note">
+          From $400 · You host. Your guests get the photos free.
+        </p>
       </div>
-      <figure class="min-w-0">
+      <figure class="hero-photo min-w-0">
         <Image
           src={angelPortrait}
           alt="Angel celebrating his birthday with family around the cake"
@@ -159,7 +168,8 @@ const contactFields: InquiryField[] = [
           class="aspect-[4/3] rounded-2xl object-cover"
         />
         <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
-          Angel’s birthday, October 24, 2026 ·
+          <span class="photo-label">A real celebration. A real gallery.</span>
+          Angel’s birthday ·
           <a href="/galleries/angels-birthday-party-2026/" class={link}>
             See the gallery
           </a>
@@ -169,8 +179,58 @@ const contactFields: InquiryField[] = [
 
     <Separator />
 
-    <section aria-label="Proof" class="py-10 sm:py-14">
-      <ul class="grid gap-6 md:grid-cols-3">
+    <section aria-labelledby="experience-heading" class="experience-section">
+      <div class="section-heading">
+        <p class="eyebrow">01 / The experience</p>
+        <h2 id="experience-heading">
+          Be there for the moment.
+          <br />
+          <em>I’ll take care of the photos.</em>
+        </h2>
+      </div>
+      <ol class="experience-steps">
+        <li>
+          <span>01</span>
+          <h3>Make it your event.</h3>
+          <p>
+            Tell me the date, place, and people. We’ll confirm availability and
+            the right amount of coverage.
+          </p>
+        </li>
+        <li>
+          <span>02</span>
+          <h3>Bring everyone together.</h3>
+          <p>
+            Event photography and portrait sessions, without a backdrop, flash,
+            or lighting kit.
+          </p>
+        </li>
+        <li>
+          <span>03</span>
+          <h3>Share while it’s happening.</h3>
+          <p>
+            Photos appear in your event gallery within minutes. Guests can
+            browse and download at no charge.
+          </p>
+        </li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="proof-title" class="proof-section py-10 sm:py-14">
+      <div class="section-heading proof-heading">
+        <div>
+          <p class="eyebrow">02 / Through my lens</p>
+          <h2 id="proof-title">
+            Real people.<em>Your kind of event.</em>
+          </h2>
+        </div>
+        <p>
+          From birthday celebrations to community gatherings.
+          <br />
+          Explore the photos before you make a plan.
+        </p>
+      </div>
+      <ul class="proof-grid grid gap-6 md:grid-cols-3">
         {proof.map((item, index) => (
           <li>
             <figure>
@@ -190,9 +250,9 @@ const contactFields: InquiryField[] = [
                 class="aspect-[4/3] rounded-2xl object-cover"
               />
               <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
-                {item.event} ·
+                <span class="proof-event">{item.event}</span>
                 <a href={item.href} class={link}>
-                  {item.label}
+                  {item.label} <span aria-hidden="true">↗</span>
                 </a>
               </figcaption>
             </figure>
@@ -208,13 +268,24 @@ const contactFields: InquiryField[] = [
       aria-labelledby="pricing-title"
       class="scroll-mt-24 py-10 sm:py-14"
     >
-      <h2
-        id="pricing-title"
-        class="font-heading text-2xl font-bold tracking-tight sm:text-3xl"
-      >
-        Starting prices
-      </h2>
-      <div class="mt-6 w-full max-w-2xl">
+      <div class="pricing-intro">
+        <p class="eyebrow">03 / Make room for the memories</p>
+        <h2
+          id="pricing-title"
+          class="font-heading text-2xl font-bold tracking-tight sm:text-3xl"
+        >
+          Your event.<em>Your pace.</em>
+        </h2>
+        <p class="text-muted-foreground mt-4 max-w-md leading-7">
+          Every booking includes event photography, portrait sessions, and your
+          live gallery. Choose a starting point below.
+        </p>
+        <p class="mt-5 text-sm">Travel within 30 miles of Tampa included.</p>
+      </div>
+      <div class="coverage-panel mt-6 w-full max-w-2xl">
+        <p class="mb-4 px-4 text-sm">
+          Choose coverage to fill in your inquiry.
+        </p>
         <div class="text-muted-foreground flex justify-between px-4 pb-3 text-xs font-medium">
           <span>Coverage</span>
           <span>Starting at</span>
@@ -235,8 +306,11 @@ const contactFields: InquiryField[] = [
                     a cap
                   </span>
                 </span>
-                <span class="shrink-0 text-2xl font-bold tabular-nums">
-                  {option.price}
+                <span class="coverage-price shrink-0 text-2xl font-bold tabular-nums">
+                  <small>from</small> {option.price}{' '}
+                  <span class="coverage-check" aria-hidden="true">
+                    ✓
+                  </span>
                 </span>
               </button>
             </li>
@@ -249,7 +323,11 @@ const contactFields: InquiryField[] = [
           </li>
         </ul>
         <div class="mt-4 grid gap-1 px-4 text-sm leading-6">
-          <p>Travel included within 30 miles of Tampa.</p>
+          <p>
+            <a href="#inquiry" class={link}>
+              Continue to event details ↗
+            </a>
+          </p>
           <p class="text-muted-foreground">
             No backdrop, flash, or lighting kit.
           </p>
@@ -266,21 +344,34 @@ const contactFields: InquiryField[] = [
     >
       <div class="grid items-start gap-8 lg:grid-cols-2 lg:gap-16">
         <div class="lg:sticky lg:top-24">
+          <p class="eyebrow">04 / Let’s make it happen</p>
           <h2
             id="inquiry-title"
             class="font-heading text-2xl font-bold tracking-tight sm:text-3xl"
           >
-            Request a quote.
+            Tell me what
+            <br />
+            you’re<em>celebrating.</em>
           </h2>
           <p class="text-muted-foreground mt-4 max-w-md leading-7">
             Opens an email draft to Ayoub. It does not reserve the date.
           </p>
+          <p class="text-muted-foreground mt-3 max-w-md leading-7">
+            I’ll review the details with you and confirm availability. For
+            coverage up to 8 hours or extras, include what you have in mind.
+          </p>
+          <a
+            class={`${link} mt-6 inline-flex min-h-11 items-center`}
+            href={`tel:${eventPortraitPhoneUri}`}
+          >
+            Prefer a conversation?{eventPortraitPhone}↗
+          </a>
         </div>
-        <div>
+        <div class="inquiry-panel">
           <form id="event-portrait-inquiry" class="grid gap-6" novalidate>
             <div
               id="inquiry-errors"
-              class="border-destructive bg-destructive/10 text-destructive hidden rounded-xl border px-4 py-3 text-sm"
+              class="border-destructive bg-destructive/10 text-foreground hidden rounded-xl border px-4 py-3 text-sm"
               tabindex="-1"
               role="alert"
             ></div>
@@ -405,7 +496,12 @@ const contactFields: InquiryField[] = [
               </FieldGroup>
             </fieldset>
             <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
-              <p id="inquiry-selection" class="text-sm font-medium" hidden></p>
+              <p
+                id="inquiry-selection"
+                class="text-sm font-medium"
+                aria-live="polite"
+                hidden
+              ></p>
               <button
                 type="submit"
                 class={buttonVariants({
@@ -438,7 +534,7 @@ const contactFields: InquiryField[] = [
             </p>
             <a
               id="inquiry-mailto"
-              class="text-primary mt-4 inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4"
+              class="text-link mt-4 inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4"
               href=""
             >
               Open the email draft again
@@ -556,9 +652,6 @@ const contactFields: InquiryField[] = [
           }
           coverage.value = button.dataset.coverage ?? ''
           showSelection()
-          if (selection instanceof HTMLElement && !selection.hidden) {
-            selection.scrollIntoView({ block: 'nearest' })
-          }
         })
       })
       form?.addEventListener('submit', (event) => {
@@ -617,3 +710,265 @@ const contactFields: InquiryField[] = [
     </script>
   </main>
 </BaseLayout>
+
+<style>
+  .portrait-page {
+    max-width: 1360px;
+  }
+  .eyebrow {
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-bottom: 1.5rem;
+  }
+  .portrait-hero {
+    padding-block: 5rem 6rem;
+    gap: 3rem;
+  }
+  .portrait-hero h1 {
+    font-family: var(--font-jakarta), sans-serif;
+    font-size: clamp(2.6rem, 4.7vw, 4.7rem);
+    font-weight: 500;
+    letter-spacing: -0.065em;
+    line-height: 1.1;
+  }
+  em {
+    font-family: var(--font-zodiak), serif;
+    font-weight: 400;
+    letter-spacing: -0.055em;
+  }
+  .portrait-hero h1 em {
+    display: inline-block;
+    font-size: 0.8em;
+    margin-top: 0.15em;
+  }
+  .portrait-hero p:not(.eyebrow):not(.hero-note) {
+    font-size: 1rem;
+    line-height: 1.9;
+    color: var(--muted-foreground);
+    max-width: 26rem;
+  }
+  .hero-note {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    margin-top: 1.25rem;
+  }
+  .hero-photo {
+    position: relative;
+    padding-bottom: 4rem;
+  }
+  .hero-photo :global(img) {
+    aspect-ratio: 1 / 1.05;
+    border-radius: 0.35rem;
+    object-position: center;
+  }
+  .hero-photo figcaption {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 1.25rem;
+    right: 1.25rem;
+    background: var(--background);
+    color: var(--muted-foreground);
+    border: 1px solid var(--border);
+    padding: 1rem 1.25rem;
+    font-size: 0.72rem;
+    box-shadow: 0 12px 30px rgb(0 0 0 / 5%);
+  }
+  .photo-label {
+    display: block;
+    font-size: 0.86rem;
+    color: var(--foreground);
+    margin-bottom: 0.15rem;
+  }
+  .experience-section {
+    padding-block: 5rem;
+  }
+  .section-heading h2,
+  #pricing-title,
+  #inquiry-title {
+    font-family: var(--font-jakarta), sans-serif;
+    font-weight: 500;
+    font-size: clamp(2rem, 3.2vw, 3rem);
+    line-height: 1.2;
+    letter-spacing: -0.05em;
+  }
+  .experience-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3rem;
+    margin-top: 3rem;
+  }
+  .experience-steps li {
+    border-top: 1px solid var(--border);
+    padding-top: 1.25rem;
+  }
+  .experience-steps li > span {
+    font-size: 0.7rem;
+    color: var(--muted-foreground);
+  }
+  .experience-steps h3 {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-block: 1rem 0.65rem;
+  }
+  .experience-steps p,
+  .proof-heading > p {
+    font-size: 0.85rem;
+    line-height: 1.9;
+    color: var(--muted-foreground);
+  }
+  .proof-section {
+    padding-block: 2rem 5rem;
+  }
+  .proof-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+  }
+  .proof-heading h2 {
+    max-width: 30rem;
+  }
+  .proof-grid {
+    align-items: start;
+    gap: 1.25rem;
+  }
+  .proof-grid :global(img) {
+    border-radius: 0.35rem;
+    aspect-ratio: 4 / 3;
+  }
+  .proof-grid li:nth-child(2) :global(img) {
+    aspect-ratio: 4 / 5;
+  }
+  .proof-event {
+    display: block;
+    color: var(--foreground);
+    font-size: 0.85rem;
+    margin-bottom: 0.15rem;
+  }
+  #pricing {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 5rem;
+    padding-block: 5rem;
+  }
+  .coverage-panel {
+    margin-top: 0;
+  }
+  .coverage-panel button {
+    border-radius: 0.3rem;
+    transition: background 160ms ease;
+  }
+  .coverage-panel button[aria-pressed='true'] {
+    border-color: var(--primary);
+    background: var(--muted);
+  }
+  .coverage-panel button:hover {
+    background: var(--muted);
+  }
+  .coverage-price {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .coverage-price small {
+    font-size: 0.65rem;
+    color: var(--muted-foreground);
+    font-weight: 400;
+  }
+  .coverage-check {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: transparent;
+    font-size: 0.8rem;
+    display: inline-grid;
+    place-items: center;
+  }
+  [aria-pressed='true'] .coverage-check {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--primary);
+  }
+  #inquiry {
+    padding-block: 5rem;
+  }
+  .inquiry-panel {
+    background: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 2rem;
+  }
+  .inquiry-panel input,
+  .inquiry-panel select {
+    border-radius: 0.3rem;
+  }
+  .portrait-page a {
+    text-underline-offset: 4px;
+  }
+  @media (min-width: 1024px) {
+    .portrait-page {
+      padding-inline: 4rem;
+    }
+  }
+  @media (max-width: 767px) {
+    .portrait-hero {
+      padding-block: 2.5rem 2rem;
+      gap: 2.5rem;
+    }
+    .portrait-hero h1 {
+      font-size: clamp(2.5rem, 9vw, 4rem);
+    }
+    .hero-photo :global(img) {
+      aspect-ratio: 4 / 3;
+    }
+    .hero-photo {
+      padding-bottom: 3rem;
+    }
+    .hero-photo figcaption {
+      bottom: 0;
+    }
+    .experience-section,
+    #pricing,
+    #inquiry {
+      padding-block: 3rem;
+    }
+    .experience-steps {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .experience-steps h3 {
+      margin-top: 0.5rem;
+    }
+    .proof-heading {
+      display: block;
+    }
+    .proof-heading > p {
+      margin-top: 1rem;
+    }
+    .proof-grid {
+      gap: 2rem;
+    }
+    .proof-grid li:nth-child(2) :global(img) {
+      aspect-ratio: 4 / 3;
+      object-position: center 30%;
+    }
+    #pricing {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .inquiry-panel {
+      padding: 1.25rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .coverage-panel button {
+      transition: none;
+    }
+  }
+</style>
