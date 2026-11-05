@@ -1,4 +1,5 @@
--- Managed gallery content correction, prepared November 5, 2026; not applied.
+-- Managed gallery content correction, applied and read back November 5, 2026.
+-- Target: production ayoub-gallery-data; date/status preserved. Repeat is a no-op.
 -- Review the current row first. A changed summary/status/date makes this a no-op.
 -- Keep the gallery coming soon: no delivery date has been confirmed.
 -- Preview only in an explicitly isolated local/preview database containing this row.

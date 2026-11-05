@@ -261,7 +261,7 @@
         [data-not-typeset] *
       )
     ) {
-    color: var(--primary);
+    color: var(--link);
   }
 
   .typeset

@@ -62,6 +62,14 @@ image download sizes, social-card dimensions, and public contact/guidance files.
 They supplement `npm run verify`; they do not test browser hydration or replace
 the full SquirrelScan comparison.
 
+For focused public UI accessibility regressions, run
+`node scripts/web-ui-accessibility-browser.mjs` with `PLAYWRIGHT_MODULE` pointing
+to an existing Playwright module. It defaults to the normal Astro dev server at
+`http://localhost:4321`; set `WEB_UI_TEST_URL` to use another origin. It checks
+keyboard navigation, inquiry reflow/errors/contrast, gallery controls, reduced
+motion and forced-colors focus. It supplements manual screen-reader and device
+checks; it does not establish WCAG conformance.
+
 For pagination, run `node --test scripts/gallery-performance.test.mjs` with
 `GALLERY_TEST_URL` set to the built Worker. The HTTP checks traverse every public
 page, verify global photo indexes and sitemap coverage, and retain the known image

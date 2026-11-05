@@ -389,7 +389,7 @@ const formatDate = (date: Date) =>
                       data-selected="false"
                       aria-label={`Add photograph ${pageStart + index + 1} to favorites`}
                       aria-pressed="false"
-                      className="absolute top-2 right-2 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
+                      className="absolute top-2 right-2 min-h-11 min-w-11 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
                     >
                       <Heart aria-hidden="true" />
                     </Button>
@@ -475,7 +475,7 @@ const formatDate = (date: Date) =>
                         data-selected="false"
                         aria-label={`Add guest photograph ${guestStart + index + 1} to favorites`}
                         aria-pressed="false"
-                        className="absolute top-2 right-2 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
+                        className="absolute top-2 right-2 min-h-11 min-w-11 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
                       >
                         <Heart aria-hidden="true" />
                       </Button>
@@ -606,7 +606,7 @@ const formatDate = (date: Date) =>
       {gallerySettings?.uploads_enabled && !gallery.isUnlisted ? (
         <a
           href={`/galleries/${eventSlug}/upload/`}
-          class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+          class="text-foreground hover:text-link focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
         >
           <ImageUp className="size-4" aria-hidden="true" />
           Ask for a submission link
@@ -614,14 +614,14 @@ const formatDate = (date: Date) =>
       ) : null}
       <a
         href={portfolioUrl}
-        class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+        class="text-foreground hover:text-link focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
       >
         {project ? 'About this event' : 'Browse all galleries'}
         <ArrowRight className="size-4" aria-hidden="true" />
       </a>
       <a
         href={eventPortraitPath}
-        class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+        class="text-foreground hover:text-link focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
       >
         Book event photography
         <ArrowRight className="size-4" aria-hidden="true" />
