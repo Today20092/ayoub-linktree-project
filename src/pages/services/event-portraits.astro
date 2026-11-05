@@ -14,8 +14,6 @@ import {
   eventPortraitExtraHour,
   eventPortraitMapsUrl,
   eventPortraitPackages,
-  eventPortraitPhone,
-  eventPortraitPhoneUri,
   eventPortraitStructuredData,
   eventPortraitTitle,
 } from '../../lib/event-portrait-offer'
@@ -360,12 +358,6 @@ const contactFields: InquiryField[] = [
             I’ll review the details with you and confirm availability. For
             coverage up to 8 hours or extras, include what you have in mind.
           </p>
-          <a
-            class={`${link} mt-6 inline-flex min-h-11 items-center`}
-            href={`tel:${eventPortraitPhoneUri}`}
-          >
-            Prefer a conversation?{eventPortraitPhone}↗
-          </a>
         </div>
         <div class="inquiry-panel">
           <form id="event-portrait-inquiry" class="grid gap-6" novalidate>
@@ -549,10 +541,6 @@ const contactFields: InquiryField[] = [
     <section aria-label="Contact" class="py-8 text-sm leading-7">
       <p class="flex flex-wrap gap-x-2">
         <span>Ayoub Abedrabbo · Alpha Bravo Media</span>
-        <span aria-hidden="true">·</span>
-        <a href={`tel:${eventPortraitPhoneUri}`} class={link}>
-          {eventPortraitPhone}
-        </a>
         <span aria-hidden="true">·</span>
         <a href={`mailto:${eventPortraitEmail}`} class={link}>
           {eventPortraitEmail}

@@ -7,12 +7,11 @@ request so hostname routing runs before the page is selected; the homepage keeps
 its existing public cache headers. The main production site's `/payments/`
 redirects to the subdomain. It is excluded from the sitemap and sends `noindex` in
 both its HTML and response headers. This is discoverability control, not access
-control; anyone with the URL can see the payment destinations and phone number.
+control; anyone with the URL can see the payment destinations.
 
-Cash App, Venmo, and PayPal reuse `src/data/site.yaml`. The confirmed Zelle number
-is in `src/pages/payments.astro`. The Zelle button copies it; customers paste it into
-Zelle within their banking app. Copy failure leaves the visible number and explains
-how to enter it manually. The page does not process or confirm payments.
+Cash App, Venmo, and PayPal reuse `src/data/site.yaml`. The phone-based Zelle
+option was removed to keep Ayoub's number off the page. The page does not process
+or confirm payments.
 
 The Scan button opens a native dialog with a locally generated, black-on-white QR
 code, error correction L and a four-module quiet zone. It generates the code in
@@ -56,15 +55,14 @@ production deployment is performed by local development.
 - `npm run verify`
 - At `/payments/`, check small phone, desktop, light/dark, and enlarged text.
 - Open Scan, close with Escape, and confirm focus returns to Scan.
-- Copy Zelle and verify the clipboard contains `+18134240606`.
 - Check all three payment links without sending money.
 - Check the three Stripe choices open "Photography tip" with $10/$20/$30 editable.
 - Check Other opens an editable amount.
 - Open a URL with a query/fragment and verify Scan encodes only its origin/path.
 
 Local validation covered a 320 x 568 phone viewport, a 390 x 844 phone viewport,
-desktop, light/dark themes, enlarged text, QR dismissal/focus return, and the exact
-Zelle clipboard value. Secondary text and Scan button contrast exceed 4.5:1.
+desktop, light/dark themes, enlarged text, and QR dismissal/focus return.
+Secondary text and Scan button contrast exceed 4.5:1.
 The routing test and project verification passed. The Cloudflare build logged
 runtime cancellation messages during teardown but exited successfully. Lighthouse
 could not complete because the local browser launcher failed; no performance score

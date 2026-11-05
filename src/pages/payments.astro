@@ -3,7 +3,7 @@ import '../styles.css'
 
 export const prerender = false
 import simpleIcons from '@iconify-json/simple-icons/icons.json'
-import { ArrowUpRight, Check, CreditCard, QrCode, X } from 'lucide-react'
+import { ArrowUpRight, CreditCard, QrCode, X } from 'lucide-react'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { siteConfig } from '../lib/site-config'
 
@@ -23,7 +23,6 @@ const paymentLinks = ['cash-app', 'venmo', 'paypal'].map((id) => {
 })
 const stripePaymentLink = siteConfig.payments?.stripePaymentLink
 const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
-const zellePhone = '+18134240606'
 ---
 
 <BaseLayout
@@ -115,39 +114,7 @@ const zellePhone = '+18134240606'
             </a>
           )
         })}
-        <button
-          id="copy-zelle"
-          class="payment-option zelle-option"
-          data-phone={zellePhone}
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-            fill="currentColor"
-            aria-hidden="true"
-            set:html={simpleIcons.icons.zelle.body}
-          />
-          <span class="zelle-label">
-            <strong>Zelle</strong>
-          </span>
-          <span class="zelle-detail">
-            <span class="phone">813-424-0606</span>
-            <span id="copy-label" class="copy-label">
-              Copy number
-            </span>
-          </span>
-          <Check
-            id="copy-check"
-            size={20}
-            aria-hidden="true"
-            className="hidden"
-          />
-        </button>
       </div>
-      <p id="copy-status" class="copy-status" role="status" aria-live="polite">
-        For Zelle, copy the number into your banking app.
-      </p>
     </section>
 
     <a class="back-link" href="https://ayoubabed.xyz/">
@@ -209,20 +176,6 @@ const zellePhone = '+18134240606'
       event.clientY > rect.bottom
     )
       dialog.close()
-  })
-  const copyButton = document.querySelector<HTMLButtonElement>('#copy-zelle')!
-  copyButton.addEventListener('click', async () => {
-    const status = document.querySelector<HTMLElement>('#copy-status')!
-    try {
-      await navigator.clipboard.writeText(copyButton.dataset.phone!)
-      document.querySelector('#copy-label')!.textContent = 'Copied'
-      document.querySelector('#copy-check')!.classList.remove('hidden')
-      status.textContent =
-        'Number copied. Paste it into Zelle in your banking app.'
-    } catch {
-      status.textContent =
-        'Could not copy. Enter 813-424-0606 in your banking app.'
-    }
   })
 </script>
 
@@ -373,47 +326,6 @@ const zellePhone = '+18134240606'
   .tip-amount:hover {
     box-shadow: inset 0 0 0 2px currentColor;
   }
-  .zelle-option {
-    --brand-background: #6d1ed4;
-    --brand-foreground: #ffffff;
-  }
-  .zelle-label {
-    display: grid;
-    gap: 0.125rem;
-  }
-  .phone,
-  .copy-label {
-    font-size: 0.75rem;
-    font-weight: 500;
-  }
-  .zelle-detail {
-    grid-column: 1 / -1;
-    display: grid;
-    align-items: center;
-    gap: 0.25rem;
-    line-height: 1.25;
-  }
-  .phone {
-    font-size: 0.75rem;
-    white-space: nowrap;
-  }
-  .copy-label {
-    font-size: 0.75rem;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-  .zelle-option :global(#copy-check) {
-    position: absolute;
-    right: 0.5rem;
-    top: 0.5rem;
-  }
-  .copy-status {
-    min-height: 2.25rem;
-    margin-top: 0.875rem;
-    font-size: 0.75rem;
-    line-height: 1.5;
-    color: var(--muted-foreground);
-  }
   .back-link {
     display: flex;
     align-items: center;
@@ -499,11 +411,6 @@ const zellePhone = '+18134240606'
     .payment-option {
       min-height: 64px;
       padding-block: 0.5rem;
-    }
-    .copy-status {
-      min-height: 2rem;
-      margin-top: 0.5rem;
-      line-height: 1.3;
     }
   }
 </style>

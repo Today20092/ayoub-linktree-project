@@ -51,6 +51,7 @@ test('agent-readable copies share the offer and omit a street address', async ()
     assert.match(copy, /\$150/)
     assert.match(copy, /Tampa/)
     assert.match(copy, /Ayoub@AyoubAbed\.xyz/)
+    assert.doesNotMatch(copy, /- Phone:|(?:tel|sms):/)
     assert.equal(copy.includes('streetAddress'), false)
     assert.equal(copy.includes('$300'), false)
   }
@@ -103,7 +104,7 @@ test('structured data describes the visible service and each starting offer with
   )
   const business = data['@graph'][0]
   assert.equal(business.email, 'Ayoub@AyoubAbed.xyz')
-  assert.equal(business.telephone, '+1-813-424-0606')
+  assert.equal('telephone' in business, false)
   assert.equal(JSON.stringify(data).includes('streetAddress'), false)
   const service = data['@graph'][1]
   assert.equal(service.name, 'Event photography')
@@ -191,7 +192,7 @@ test(
     assert.match(copy, /Opens an email draft to Ayoub/)
     assert.match(copy, /does not reserve the date/)
     assert.match(html, /mailto:Ayoub@AyoubAbed\.xyz/)
-    assert.match(html, /href="tel:\+1-813-424-0606"/)
+    assert.doesNotMatch(html, /href="(?:tel|sms):/)
     // The denial is the only mention of a backdrop or lighting.
     const visible = html
       .replace(/<(style|script)[^>]*>[\s\S]*?<\/\1>/g, ' ')
