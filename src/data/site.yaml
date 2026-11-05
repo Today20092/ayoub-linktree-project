@@ -132,7 +132,7 @@ socialLinks:
 
 actionLinks:
   - id: contact
-    label: '1. Save Ayoub to contacts'
+    label: Save Ayoub to contacts
     url: https://www.ayoubabed.xyz/AyoubA-Contact-Card.vcf
     icon: lucide:id-card
     group: primary
@@ -144,10 +144,10 @@ actionLinks:
     darkColor3: 'var(--color-brand-700)'
     textColor: 'var(--primary-foreground)'
     pulse: true
-  - id: sms
-    label: '2. Text me your name'
-    url: 'sms:+18134240606?body=Hi%20Ayoub%2C%20this%20is%20'
-    icon: lucide:message-square-text
+  - id: email
+    label: Email Ayoub
+    url: mailto:Ayoub@AyoubAbed.xyz
+    icon: lucide:mail
     group: primary
     color: 'var(--color-brand-600)'
     color2: 'var(--color-brand-500)'

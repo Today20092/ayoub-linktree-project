@@ -23,7 +23,6 @@ ${site.pageDescription}
 ## Contact
 
 - [Email Ayoub](mailto:Ayoub@AyoubAbed.xyz)
-- [Call Ayoub](tel:+18134240606)
 - [Download the contact card](https://ayoubabed.xyz/AyoubA-Contact-Card.vcf)
 
 ${eventPortraitMarkdownSection()}`.replaceAll('https://ayoubabed.xyz', origin)

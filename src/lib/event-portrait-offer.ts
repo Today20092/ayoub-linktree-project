@@ -13,8 +13,6 @@ export const eventPortraitDescription =
   'Tampa event photography with a gallery that updates within minutes. Portraits included. The host pays; guests get photos at no charge. From $400.'
 
 export const eventPortraitEmail = 'Ayoub@AyoubAbed.xyz'
-export const eventPortraitPhone = '(813) 424-0606'
-export const eventPortraitPhoneUri = '+1-813-424-0606'
 
 // Alpha Bravo Media Google Business Profile listing (#91/#92).
 export const eventPortraitMapsUrl = 'https://maps.app.goo.gl/7r3JFHfe32ubHtKa7'
@@ -50,7 +48,6 @@ export function eventPortraitMarkdownSection() {
 - No backdrop, no flash, and no lighting kit.
 - Videography: custom quote. No published video prices.
 - Email: ${eventPortraitEmail}
-- Phone: ${eventPortraitPhone}
 - Google Maps: ${eventPortraitMapsUrl}
 
 ### How to inquire
@@ -90,7 +87,6 @@ export function eventPortraitStructuredData(pageUrl: string) {
         founder: { '@type': 'Person', name: 'Ayoub Abedrabbo' },
         url: pageUrl,
         email: eventPortraitEmail,
-        telephone: eventPortraitPhoneUri,
         areaServed: eventPortraitAreaServed,
         sameAs: [eventPortraitMapsUrl],
         hasMap: eventPortraitMapsCidUrl,
