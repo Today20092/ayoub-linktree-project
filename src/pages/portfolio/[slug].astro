@@ -563,7 +563,7 @@ const galleryHeading =
         <p class="mx-auto max-w-4xl pb-8 sm:pb-10" data-reveal="up">
           <a
             href={eventPortraitPath}
-            class="text-foreground hover:text-primary focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+            class="text-foreground hover:text-link focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
           >
             See event photography starting prices
             <ArrowRight className="size-4" aria-hidden="true" />
@@ -663,7 +663,7 @@ const galleryHeading =
                 style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
               >
                 <div>
-                  <p class="text-primary text-xs font-bold tracking-wider uppercase">
+                  <p class="text-link text-xs font-bold tracking-wider uppercase">
                     {video.label}
                   </p>
                   <p class="text-muted-foreground mt-1 text-sm font-medium">
@@ -778,7 +778,7 @@ const galleryHeading =
                       href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="text-primary mt-4 inline-flex font-bold underline underline-offset-4"
+                      class="text-link mt-4 inline-flex font-bold underline underline-offset-4"
                     >
                       Watch {video.title} on YouTube
                     </a>

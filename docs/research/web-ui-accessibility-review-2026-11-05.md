@@ -1,6 +1,54 @@
 # Public website usability and accessibility review
 
-Reviewed November 5, 2026. Mode: audit/find. Target: WCAG 2.2 AA, including level A. This is a bounded public-site review, not a conformance evaluation. No application changes or deployments were made.
+Originally reviewed November 5, 2026 in audit/find mode; implementation and follow-up validation are recorded below. Target: WCAG 2.2 AA, including level A. This is a bounded public-site review, not a conformance evaluation. The original findings and evidence below describe the pre-fix site.
+
+## Implementation and follow-up status
+
+Updated November 5, 2026 on `codex/accessibility-review-completion`, following the first fixes merged in PR #104. All four original findings now have implemented corrections. This does not mean every evaluation method or every site route has been tested.
+
+| Recommendation                     | Current result                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Readable text links                | Implemented `text-link` and extended it to the reviewed public header hover, contact/privacy labels, portfolio/location labels, YouTube fallback links, gallery links, and shared link variants. Bright primary fills remain unchanged. Browser checks verify light/dark rendered pairs.                                                                                                  |
+| Readable inquiry errors            | Summary and inline messages use the foreground token. Inline errors are on the redesigned muted panel, so checking red on white alone would not establish their contrast. Error wording, associations, destructive borders and focus recovery remain intact.                                                                                                                              |
+| Past-event wording                 | Neutral shared delivery message is implemented. The guarded SQL was applied to production D1 `ayoub-gallery-data`, UUID `30b7489f-2cf5-441a-9c62-a479df0822fe`, after reading the exact current row. Readback confirmed the corrected past-tense Radiant Hands description, original event date and `coming_soon` status. No photographs, other gallery settings, or schema were changed. |
+| Pricing action cue                 | Instruction appears before the rows; selection retains the visible checkmark, pressed state, polite feedback and form synchronization.                                                                                                                                                                                                                                                    |
+| Enlarged text/layout follow-up     | Flexible grid/form minimum widths, wrapping labels/prices and wrapping CTA text remove the observed overflow. Browser assertions pass at 320, 390, 768 and 1280 CSS px, at normal and 200% root-font size, including simultaneous text-spacing overrides. These are reflow/resize checks, not actual browser zoom.                                                                        |
+| Preferred generous gallery targets | Photographer/guest favorite controls and viewer previous/next controls now have 44×44px minimum targets. The default mobile thumbnails retain a separate photo-opening area.                                                                                                                                                                                                              |
+| Forced-colors focus                | Shared system-color focus outline is implemented. A browser with actual `forced-colors: active` emulation reports a solid 2px visible focus outline.                                                                                                                                                                                                                                      |
+| Keyboard and dismissal uncertainty | Resolved in this local run: keyboard skip link is visible and the following Tab enters main content; photography filter updates; gallery Escape removes the dialog/photo query and restores the opener. No dismissal workaround was needed.                                                                                                                                               |
+| Reduced motion                     | Browser media emulation confirms the reduced-motion query is active and thumbnail transitions are at most 0.01ms.                                                                                                                                                                                                                                                                         |
+
+### Executed follow-up checks
+
+All 20 focused browser regression groups passed. The machine-readable results are in ignored `.astro/accessibility-browser-results.json`. Inline guest-count error contrast measured 18.11:1 in light mode and 14.52:1 in dark mode.
+
+Two additional defects were reproduced during completion and fixed at their responsible layer:
+
+- At 320px with 200% text, the sticky header was 489px tall and completely covered the focused coverage field (field bounds approximately 356–444px). The header now scrolls normally below the `sm` breakpoint. The enlarged-text regression asserts that the invalid field is exposed, including with text-spacing overrides.
+- A portfolio prose link passed in its resting state but switched to the bright primary color on hover (approximately 2.47:1 on white). `src/typeset.css` now uses the accessible link token for that shared hover state. Public-consumer regression groups cover normal, hover and focus colors in both themes.
+
+- `npm run verify` passed on the implementation tree: formatting, barber tracker, face/gallery suites, Astro diagnostics and production build. Build notices about CSP syntax highlighting and bundle size remain; no new build error was reported.
+- `scripts/web-ui-accessibility-browser.mjs` uses the repository's existing external-Playwright convention without adding a dependency. It checks keyboard skip/filter behavior; responsive/enlarged text and spacing; inquiry selection, error focus and recovery while preserving entered data; light/dark contrast; gallery targets and dismissal; reduced motion; and forced-colors focus. Representative rendered summary/link contrast was 15.13:1 / 5.11:1 in light mode and 12.63:1 / 7.99:1 in dark mode. These are current browser measurements, distinct from the earlier source-color estimates.
+- The existing `scripts/gallery-pagination-browser.mjs` passed with six measurements, including pagination and no-JavaScript checks. The existing `scripts/gallery-continuous-browser.mjs` passed continuous loading, filters, retry, overlapping requests, history and stable prepending at 1440px and 390px. Both ran against the built Worker at `127.0.0.1:8788` with `scripts/audit/wrangler.jsonc`, dummy local D1 and local R2, under `.wrangler/accessibility-review-state`. No production/preview upload or moderation was tested. Downloads and ranked matches in these suites use fixtures; they do not prove real archive contents or remote face-model accuracy.
+- Shared-preview interaction checks confirmed incomplete-form focus below the sticky header and field-specific messages; ordinary-motion gallery dismissal and focus return; pricing anchor positioning; and the payment QR dialog's Escape dismissal and focus return. No payment or email was sent.
+- The normal dev server runs at `http://localhost:4321/`; `/_astro/status` returned `{"ok":true}`. Managed production-only gallery rows are not copied into local storage merely to populate the dev listing.
+
+Reproduce the focused accessibility checks using an existing Playwright installation:
+
+```powershell
+$env:PLAYWRIGHT_MODULE = 'file:///absolute/path/to/playwright/index.mjs'
+node scripts/web-ui-accessibility-browser.mjs
+```
+
+See [the local audit guide](../production-audit.md) for the isolated built-Worker gallery checks. Execution logs and fixture reports from this run are in ignored `.astro/accessibility-completion-verify.log`, `.astro/accessibility-pagination.log`, `.astro/accessibility-continuous.log` and the corresponding gallery-report files.
+
+### Remaining evaluation limits
+
+Actual 400% browser zoom, real screen-reader announcements, physical mobile/assistive-technology combinations and representative-user sessions remain unavailable in this environment. The shared preview's Ctrl-plus attempt did not change `devicePixelRatio` or the CSS viewport, so it is explicitly not counted as zoom evidence. Forced-colors and reduced-motion checks are browser emulation, not a physical Windows high-contrast/mobile test. Screen-reader semantics and keyboard behavior are checked, but they do not substitute for listening to announcements.
+
+These are uncompleted external evaluation methods, not additional confirmed defects or a claim that the site conforms to WCAG AA. The original sampling exclusions below remain exclusions: this work does not audit every portfolio/gallery, protected admin/upload workflow, or external service. Valid email-client handoff, actual clipboard permission recovery, third-party video captions/audio description and remote face-search matching remain untested. Do not expand the historical pass statements into claims about those surfaces.
+
+## Original audit
 
 ## Scope and reference
 

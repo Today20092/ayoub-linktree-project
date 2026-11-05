@@ -767,7 +767,7 @@ export default function EventLightbox({
                 type="button"
                 variant="secondary"
                 size="icon-lg"
-                className="absolute left-2 sm:left-5"
+                className="absolute left-2 min-h-11 min-w-11 sm:left-5"
                 onClick={() => navigatePhoto(-1)}
                 disabled={navigationDisabled}
                 aria-label="Previous photograph"
@@ -786,7 +786,7 @@ export default function EventLightbox({
                 type="button"
                 variant="secondary"
                 size="icon-lg"
-                className="absolute right-2 sm:right-5"
+                className="absolute right-2 min-h-11 min-w-11 sm:right-5"
                 onClick={() => navigatePhoto(1)}
                 disabled={navigationDisabled}
                 aria-label="Next photograph"

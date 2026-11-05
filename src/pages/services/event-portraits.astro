@@ -394,7 +394,7 @@ const contactFields: InquiryField[] = [
                     </select>
                     <p
                       id="error-coverage"
-                      class="text-destructive text-sm"
+                      class="text-foreground text-sm"
                       hidden
                     ></p>
                   </Field>
@@ -446,7 +446,7 @@ const contactFields: InquiryField[] = [
                         />
                         <p
                           id={`error-${field.id}`}
-                          class="text-destructive text-sm"
+                          class="text-foreground text-sm"
                           hidden
                         ></p>
                       </Field>
@@ -480,7 +480,7 @@ const contactFields: InquiryField[] = [
                     />
                     <p
                       id={`error-${field.id}`}
-                      class="text-destructive text-sm"
+                      class="text-foreground text-sm"
                       hidden
                     ></p>
                   </Field>
@@ -702,6 +702,28 @@ const contactFields: InquiryField[] = [
 <style>
   .portrait-page {
     max-width: 1360px;
+    overflow-wrap: anywhere;
+  }
+  .portrait-hero a[href='#inquiry'],
+  #event-portrait-inquiry button[type='submit'] {
+    max-width: 100%;
+    height: auto;
+    white-space: normal;
+    padding-block: 0.75rem;
+  }
+  #inquiry :global(.grid > *),
+  #event-portrait-inquiry fieldset,
+  #event-portrait-inquiry input,
+  #event-portrait-inquiry select {
+    min-width: 0;
+  }
+  #event-portrait-inquiry input,
+  #event-portrait-inquiry select {
+    width: 100%;
+  }
+  #event-portrait-inquiry :global([data-slot='field-label']) {
+    max-width: 100%;
+    flex-wrap: wrap;
   }
   .eyebrow {
     font-size: 0.66rem;
@@ -849,6 +871,11 @@ const contactFields: InquiryField[] = [
   .coverage-panel button {
     border-radius: 0.3rem;
     transition: background 160ms ease;
+    flex-wrap: wrap;
+  }
+  .coverage-panel button > span:first-child {
+    flex: 1 1 10rem;
+    min-width: 0;
   }
   .coverage-panel button[aria-pressed='true'] {
     border-color: var(--primary);
@@ -859,6 +886,8 @@ const contactFields: InquiryField[] = [
   }
   .coverage-price {
     display: flex;
+    flex-wrap: wrap;
+    max-width: 100%;
     align-items: center;
     gap: 0.6rem;
   }

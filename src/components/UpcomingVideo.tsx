@@ -36,7 +36,7 @@ export default function UpcomingVideo({
         </div>
 
         <div>
-          <p className="text-primary text-xs font-bold tracking-wider uppercase">
+          <p className="text-link text-xs font-bold tracking-wider uppercase">
             {label}
           </p>
           <h2
