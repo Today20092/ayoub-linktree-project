@@ -127,7 +127,7 @@ function PhotoTile({
       />
       <button
         type="button"
-        className="hover:text-primary block w-full truncate p-3 text-left text-xs font-medium"
+        className="hover:text-link block w-full truncate p-3 text-left text-xs font-medium"
         onClick={onOpen}
       >
         {label}
@@ -135,19 +135,19 @@ function PhotoTile({
       {onSetCover && (
         <button
           type="button"
-          className="bg-background/90 hover:text-primary absolute top-3 right-3 inline-flex size-9 items-center justify-center rounded-full shadow-sm"
+          className="bg-background/90 hover:text-link absolute top-3 right-3 inline-flex size-9 items-center justify-center rounded-full shadow-sm"
           onClick={onSetCover}
           aria-label={cover ? `${label} is the cover` : `Set ${label} as cover`}
         >
           <Star
-            className={cover ? 'fill-primary text-primary size-4' : 'size-4'}
+            className={cover ? 'fill-link text-link size-4' : 'size-4'}
             aria-hidden="true"
           />
         </button>
       )}
       <input
         type="checkbox"
-        className="accent-primary absolute top-3 left-3 size-5"
+        className="accent-primary absolute top-3 left-3 size-6"
         checked={selected}
         onChange={onSelect}
         aria-label={`Select ${label}`}
@@ -601,7 +601,7 @@ export default function AdminGallery({
     : `/galleries/${eventSlug}/`
 
   return (
-    <div className="space-y-6 [&_button]:min-h-11 [&_input:not([type=checkbox])]:min-h-11 [&_select]:min-h-11">
+    <div className="space-y-6 [&_button]:h-auto [&_button]:min-h-11 [&_button]:max-w-full [&_button]:whitespace-normal [&_input:not([type=checkbox])]:min-h-11 [&_select]:min-h-11 [&_select]:max-w-full [&_select]:min-w-0">
       <nav
         aria-label="Gallery settings"
         className="bg-muted/50 grid grid-cols-2 gap-2 rounded-2xl p-2 sm:flex sm:flex-wrap"
@@ -887,7 +887,7 @@ export default function AdminGallery({
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
-              <form className="flex gap-2" onSubmit={createInvite}>
+              <form className="flex flex-wrap gap-2" onSubmit={createInvite}>
                 <Input
                   value={guestName}
                   aria-label="Guest name"
@@ -1102,7 +1102,7 @@ export default function AdminGallery({
                   Guest photos awaiting review
                 </h2>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   disabled={
                     pending ||

@@ -137,7 +137,7 @@ export default function AdminEventCreator() {
             </Field>
             <Field>
               <FieldLabel>Event date</FieldLabel>
-              <div className="border-border w-fit rounded-2xl border">
+              <div className="border-border w-fit max-w-full overflow-x-auto rounded-2xl border">
                 <Calendar
                   mode="single"
                   selected={date}

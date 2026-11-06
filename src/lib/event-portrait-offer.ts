@@ -1,4 +1,7 @@
 export const eventPortraitPath = '/services/event-portraits/'
+// Public proof is delivered from production, including on preview/local builds.
+export const eventPortraitProofGalleryUrl =
+  'https://ayoubabed.xyz/galleries/angels-birthday-party-2026/'
 
 // Portfolio entries that prove the event photography offer (#99).
 export const eventPortraitProofProjects: ReadonlySet<string> = new Set([
@@ -20,10 +23,10 @@ const eventPortraitMapsCidUrl =
   'https://www.google.com/maps?cid=7799557622400498050'
 
 export const eventPortraitPackages = [
-  { hours: '1 hour', sessions: 'About 20', price: '$400', amount: 400 },
-  { hours: '2 hours', sessions: 'About 40', price: '$550', amount: 550 },
-  { hours: '3 hours', sessions: 'About 60', price: '$700', amount: 700 },
-  { hours: '4 hours', sessions: 'About 80', price: '$850', amount: 850 },
+  { hours: '1 hour', price: '$400', amount: 400 },
+  { hours: '2 hours', price: '$550', amount: 550 },
+  { hours: '3 hours', price: '$700', amount: 700 },
+  { hours: '4 hours', price: '$850', amount: 850 },
 ] as const
 
 export const eventPortraitExtraHour = {
@@ -32,13 +35,13 @@ export const eventPortraitExtraHour = {
   amount: 150,
 } as const
 
-export function eventPortraitMarkdownSection() {
+export function eventPortraitMarkdownSection(origin = 'https://ayoubabed.xyz') {
   const prices = eventPortraitPackages
     .map((option) => `${option.price} for ${option.hours}`)
     .join(', ')
   return `## Event photography
 
-- Page: https://ayoubabed.xyz${eventPortraitPath}
+- Page: ${origin}${eventPortraitPath}
 - Starting prices: ${prices}, plus ${eventPortraitExtraHour.price} for each extra hour
 - Who: Ayoub Abedrabbo, event photographer in Tampa, Florida
 - Area: within 30 miles of Tampa, Florida. Travel within 30 miles of Tampa is included.
@@ -56,9 +59,9 @@ Send coverage length, extra time, event date, venue, city, guest count, event ty
 
 ### Proof
 
-- Live event gallery: https://ayoubabed.xyz/galleries/angels-birthday-party-2026/
-- Portrait work: https://ayoubabed.xyz/portfolio/portraits/
-- Workshop attendee portraits: https://ayoubabed.xyz/portfolio/muslim-business-chamber-2026/
+- Live event gallery: ${eventPortraitProofGalleryUrl}
+- Portrait work: ${origin}/portfolio/portraits/
+- Workshop attendee portraits: ${origin}/portfolio/muslim-business-chamber-2026/
 `
 }
 

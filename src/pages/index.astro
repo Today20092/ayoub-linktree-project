@@ -6,6 +6,7 @@ export const prerender = false
 
 import type { ImageMetadata } from 'astro'
 import { getCollection } from 'astro:content'
+import { getImage } from 'astro:assets'
 
 import PortfolioIndex from '../components/PortfolioIndex.astro'
 import BaseLayout from '../layouts/BaseLayout.astro'
@@ -95,6 +96,24 @@ const portfolioProjects = (await getCollection('portfolio'))
     }
   })
 
+const firstProject = portfolioProjects[0]
+const firstPreview = firstProject
+  ? await getImage({
+      src: firstProject.thumbnail,
+      width: Math.min(firstProject.imageWidth, 960),
+      height: Math.round(
+        (firstProject.imageHeight * Math.min(firstProject.imageWidth, 960)) /
+          firstProject.imageWidth,
+      ),
+      widths: [480, 720, 960],
+      sizes: '(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw',
+      layout: 'constrained',
+      fit: 'cover',
+      position: 'center',
+      quality: 80,
+    })
+  : undefined
+
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'ProfilePage',
@@ -141,6 +160,18 @@ const structuredData = {
   structuredData={structuredData}
   activeNav="home"
 >
+  {firstPreview && (
+    <link
+      slot="head"
+      rel="preload"
+      as="image"
+      href={firstPreview.src}
+      imagesrcset={firstPreview.srcSet.attribute}
+      imagesizes={firstPreview.attributes.sizes}
+      media="(min-width: 768px)"
+      fetchpriority="high"
+    />
+  )}
   <PortfolioIndex
     shareTitle={shareTitle}
     shareText={shareText}

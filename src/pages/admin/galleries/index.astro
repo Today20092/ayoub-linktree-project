@@ -32,11 +32,6 @@ if (
 }
 
 const galleries = await galleryReader(env.GALLERY_DB).listAdmin()
-const firstCover = galleries[0]?.cover
-const ogImage =
-  typeof firstCover === 'string'
-    ? firstCover
-    : (firstCover?.src ?? '/og-ayoub-digital-media.jpg')
 
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
 ---
@@ -45,7 +40,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
   title="Gallery administration"
   description="Manage event gallery uploads and culling."
   canonicalUrl={new URL('/admin/galleries/', Astro.site).toString()}
-  ogImage={ogImage}
+  ogImage="/og-ayoub-digital-media.jpg"
   ogImageAlt="Gallery administration"
 >
   <main
@@ -53,9 +48,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-10 sm:px-6 lg:px-8"
   >
     <header class="max-w-2xl">
-      <p class="text-primary text-sm font-bold tracking-wide uppercase">
-        Admin
-      </p>
+      <p class="text-link text-sm font-bold tracking-wide uppercase">Admin</p>
       <h1 class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
         Event galleries
       </h1>
@@ -72,7 +65,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
       >
         Connect Android app
       </a>
-      <details class="grow rounded-2xl border p-4">
+      <details class="min-w-0 grow rounded-2xl border p-4">
         <summary class="cursor-pointer font-semibold">New gallery</summary>
         <div class="mt-4">
           <AdminEventCreator client:only="react" />
@@ -85,17 +78,20 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
       aria-label="Manage event galleries"
     >
       {galleries.map(
-        ({
-          event,
-          settings,
-          pending,
-          published,
-          cover,
-          coverAlt,
-          title,
-          category,
-          visibilityStatus,
-        }) => (
+        (
+          {
+            event,
+            settings,
+            pending,
+            published,
+            cover,
+            coverAlt,
+            title,
+            category,
+            visibilityStatus,
+          },
+          index,
+        ) => (
           <Card className="transition-colors hover:bg-muted/30">
             <a
               href={`/admin/galleries/${event.id}/`}
@@ -112,6 +108,8 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
                   layout="full-width"
                   widths={[480, 720]}
                   sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  loading={index < 3 ? 'eager' : 'lazy'}
+                  priority={index === 0}
                   class="aspect-[4/3] w-full object-cover"
                 />
               ) : typeof cover === 'object' ? (
@@ -121,6 +119,8 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
                   width={Math.min((cover as ImageMetadata).width, 720)}
                   widths={[480, 720]}
                   sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  loading={index < 3 ? 'eager' : 'lazy'}
+                  priority={index === 0}
                   class="aspect-[4/3] w-full object-cover"
                 />
               ) : null}

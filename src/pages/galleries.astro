@@ -2,6 +2,8 @@
 import '../styles.css'
 
 import Image from '../components/GalleryImage.astro'
+import { getImage } from 'astro:assets'
+import { galleryMediaKey } from '../lib/gallery-media'
 import { env } from 'cloudflare:workers'
 import { Calendar, Images } from 'lucide-react'
 
@@ -53,6 +55,28 @@ const ogImageHeight =
   typeof firstCover.height === 'number'
     ? firstCover.height
     : (firstGallery?.coverHeight ?? 630)
+const coverWidth =
+  typeof firstCover === 'object' ? firstCover.width : firstGallery?.coverWidth
+const coverHeight =
+  typeof firstCover === 'object' ? firstCover.height : firstGallery?.coverHeight
+const coverSource =
+  typeof firstCover === 'string' ? firstCover : firstCover?.src
+const coverPreload =
+  coverSource && coverWidth && coverHeight && !galleryMediaKey(coverSource)
+    ? await getImage({
+        src: coverSource,
+        width: Math.min(coverWidth, 960),
+        height: Math.round(
+          (coverHeight * Math.min(coverWidth, 960)) / coverWidth,
+        ),
+        layout: 'constrained',
+        widths: [480, 720, 960],
+        sizes: '(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw',
+        quality: 80,
+        fit: 'cover',
+        position: 'center',
+      })
+    : undefined
 ---
 
 <BaseLayout
@@ -66,6 +90,17 @@ const ogImageHeight =
   ogType="website"
   activeNav="galleries"
 >
+  {coverPreload && (
+    <link
+      slot="head"
+      rel="preload"
+      as="image"
+      href={coverPreload.src}
+      imagesrcset={coverPreload.srcSet.attribute}
+      imagesizes={coverPreload.attributes.sizes}
+      fetchpriority="high"
+    />
+  )}
   <main
     id="main-content"
     class="mx-auto w-full max-w-screen-2xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-16"
@@ -128,7 +163,8 @@ const ogImageHeight =
                     widths={[480, 720, 960]}
                     sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
                     quality={80}
-                    priority={index < 2}
+                    loading={index < 3 ? 'eager' : 'lazy'}
+                    priority={index === 0}
                     class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                   />
                 ) : (
@@ -143,7 +179,8 @@ const ogImageHeight =
                     widths={[480, 720, 960]}
                     sizes="(min-width: 1280px) 30vw, (min-width: 640px) 48vw, 100vw"
                     quality={80}
-                    priority={index < 2}
+                    loading={index < 3 ? 'eager' : 'lazy'}
+                    priority={index === 0}
                     class="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                   />
                 )}

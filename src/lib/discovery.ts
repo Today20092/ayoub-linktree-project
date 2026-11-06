@@ -14,16 +14,16 @@ ${site.pageDescription}
 
 ## Explore
 
-- [Portfolio](https://ayoubabed.xyz/)
-- [Event galleries](https://ayoubabed.xyz/galleries/)
-- [About Ayoub](https://ayoubabed.xyz/about/)
-- [Contact](https://ayoubabed.xyz/contact/)
-- [Privacy](https://ayoubabed.xyz/privacy/)
+- [Portfolio](${origin}/)
+- [Event galleries](${origin}/galleries/)
+- [About Ayoub](${origin}/about/)
+- [Contact](${origin}/contact/)
+- [Privacy](${origin}/privacy/)
 
 ## Contact
 
 - [Email Ayoub](mailto:Ayoub@AyoubAbed.xyz)
-- [Download the contact card](https://ayoubabed.xyz/AyoubA-Contact-Card.vcf)
+- [Download the contact card](${origin}/AyoubA-Contact-Card.vcf)
 
-${eventPortraitMarkdownSection()}`.replaceAll('https://ayoubabed.xyz', origin)
+${eventPortraitMarkdownSection(origin)}`
 }

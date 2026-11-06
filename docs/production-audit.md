@@ -53,6 +53,35 @@ All must return 200. `/sitemap.xml` must include the three galleries and
 upload operation is needed. Localhost intentionally permits dashboard reads;
 that does not test production Cloudflare Access.
 
+### Origin-aligned local scans
+
+For a new local audit, a dedicated build origin avoids treating valid production
+sitemap URLs as cross-domain links. This changes only generated audit output:
+
+```powershell
+$previousAuditOrigin = $env:ASTRO_SITE_URL
+try {
+  $env:ASTRO_SITE_URL = 'http://127.0.0.1:8788'
+  pnpm run build
+} finally {
+  $env:ASTRO_SITE_URL = $previousAuditOrigin
+}
+```
+
+Restart the isolated Wrangler server after the build, verify the sitemap origin,
+and wait for the ready server before scanning. Run browser measurement separately
+from the crawler to avoid CPU contention on the local simulator. A bounded local
+run can use `--concurrency 2`; record that setting alongside its score.
+
+`scripts/audit/squirrel.toml` contains one supported SRI host exemption for
+Cloudflare's manually embedded, self-updating analytics beacon. Cloudflare does
+not support version pinning for that script, so a fixed integrity hash can break
+analytics. No pages or rules are excluded. Use the explicit
+`--config-file scripts/audit/squirrel.toml` global option for that contextual run;
+omit it for the unadjusted comparison, and preserve both reports. `--no-ignore`
+remains enabled. This exception is audit configuration, not an application
+security fix. See the [Cloudflare SRI guidance](https://developers.cloudflare.com/web-analytics/faq/#how-can-i-enforce-subresource-integrity-sri-with-the-js-beacon).
+
 ### Focused public-page regression checks
 
 With the built local Worker running, run `node --test scripts/website-audit.test.mjs`.
