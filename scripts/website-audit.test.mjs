@@ -11,6 +11,109 @@ const page = async (path) => {
   return response.text()
 }
 
+test('gallery continuation pages have distinct concise metadata and descriptive navigation', async () => {
+  const path = '/galleries/muslim-business-chamber-2026/'
+  const first = await page(path)
+  const second = await page(path + '?page=2')
+  const title = second.match(/<title>(.*?)<\/title>/)?.[1]
+  assert.ok(title.length <= 75)
+  assert.match(title, /Page 2/)
+  const description = (html) =>
+    html.match(/<meta\s+name="description"\s+content="([^"]*)"/)?.[1]
+  assert.notEqual(description(first), description(second))
+  assert.match(description(second), /photos 41–80 of 167/)
+  assert.match(second, /Previous photo page/)
+  assert.match(second, /Next photo page/)
+  assert.match(second, /rel="canonical"[^>]*href="[^"]*\?page=2"/)
+})
+
+test('hero preloads match rendered responsive image candidates', async () => {
+  for (const path of [
+    '/',
+    '/services/event-portraits/',
+    '/portfolio/ya-hala/',
+    '/portfolio/portraits/',
+    '/galleries/',
+    '/galleries/muslim-business-chamber-2026/',
+  ]) {
+    const html = await page(path)
+    const head = html.split('</head>')[0]
+    const link = (head.match(/<link\b[^>]*>/g) || []).find(
+      (tag) => /as="image"/.test(tag) && /rel="preload"/.test(tag),
+    )
+    assert.ok(link, `${path} has a head image preload`)
+    const srcset = link.match(/imagesrcset="([^"]+)"/)?.[1]
+    const sizes = link.match(/imagesizes="([^"]+)"/)?.[1]
+    assert.ok(srcset && sizes, `${path} has responsive preload attributes`)
+    assert.ok(
+      (html.match(/<img\b[^>]*>/g) || []).some(
+        (tag) =>
+          tag.includes(`srcset="${srcset}"`) &&
+          tag.includes(`sizes="${sizes}"`),
+      ),
+      `${path} preload matches an actual image`,
+    )
+    if (path === '/') assert.match(link, /media="\(min-width: 768px\)"/)
+  }
+})
+
+test('the first gallery thumbnail row loads eagerly while later photos stay lazy', async () => {
+  const html = await page('/galleries/dawah-at-tampa-riverwalk/')
+  const thumbnails = [
+    ...html.matchAll(/<a\b[^>]*data-gallery-open="\d+"[^>]*>[\s\S]*?<\/a>/g),
+  ]
+    .map(([anchor]) => anchor.match(/<img\b[^>]*>/)?.[0])
+    .filter(Boolean)
+  assert.ok(thumbnails.length > 5)
+  assert.ok(
+    thumbnails.slice(0, 5).every((image) => image.includes('loading="eager"')),
+  )
+  assert.ok(
+    thumbnails.slice(5).every((image) => image.includes('loading="lazy"')),
+  )
+})
+
+test('visible gallery card rows load eagerly with one high-priority cover', async () => {
+  for (const path of ['/galleries/', '/admin/galleries/']) {
+    const images = ((await page(path)).match(/<img\b[^>]*>/g) || []).slice(0, 3)
+    assert.equal(images.length, 3)
+    assert.ok(images.every((image) => image.includes('loading="eager"')))
+    assert.equal(
+      images.filter((image) => image.includes('fetchpriority="high"')).length,
+      1,
+    )
+  }
+})
+
+test('photography proof links target the public delivery site from local builds too', async () => {
+  const html = await page('/services/event-portraits/')
+  assert.match(
+    html,
+    /href="https:\/\/ayoubabed.xyz\/galleries\/angels-birthday-party-2026\/"/,
+  )
+  assert.doesNotMatch(html, /href="\/galleries\/angels-birthday-party-2026\/"/)
+  for (const path of ['/index.md', '/llms.txt']) {
+    const text = await page(path)
+    assert.ok(
+      text.includes(
+        'https://ayoubabed.xyz/galleries/angels-birthday-party-2026/',
+      ),
+    )
+    assert.ok(text.includes(`${siteOrigin}/services/event-portraits/`))
+  }
+})
+
+test('missing gallery recovery does not echo private URLs or load analytics', async () => {
+  const response = await fetch(
+    new URL('/galleries/missing-gallery/?share=private-test-token', origin),
+  )
+  assert.equal(response.status, 404)
+  const html = await response.text()
+  assert.match(html, /Page not found/)
+  assert.match(html, /href="\/galleries\/"/)
+  assert.doesNotMatch(html, /private-test-token|beacon\.min\.js/)
+})
+
 test('video controls keep their visible words in their accessible names', async () => {
   const html = await page('/portfolio/chop-shop-show-podcast/')
   const links = [

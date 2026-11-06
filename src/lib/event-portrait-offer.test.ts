@@ -9,6 +9,7 @@ import {
   eventPortraitPackages,
   eventPortraitPath,
   eventPortraitProofProjects,
+  eventPortraitProofGalleryUrl,
   eventPortraitStructuredData,
   eventPortraitTitle,
 } from './event-portrait-offer'
@@ -206,7 +207,7 @@ test(
     assert.ok(html.includes('href="https://maps.app.goo.gl/7r3JFHfe32ubHtKa7"'))
     assert.match(copy, /Find us on Google Maps/)
     for (const proof of [
-      '/galleries/angels-birthday-party-2026/',
+      eventPortraitProofGalleryUrl,
       '/portfolio/portraits/',
       '/portfolio/muslim-business-chamber-2026/',
     ]) {

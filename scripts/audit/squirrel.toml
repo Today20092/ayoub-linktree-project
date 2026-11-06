@@ -1,0 +1,5 @@
+# Cloudflare does not support version-pinning its manually embedded analytics beacon.
+# https://developers.cloudflare.com/web-analytics/faq/#how-can-i-enforce-subresource-integrity-sri-with-the-js-beacon
+# Keep other hosts checked; no rules or pages are excluded.
+[rule_options."security/sri"]
+exempt_hosts = ["static.cloudflareinsights.com"]

@@ -313,7 +313,9 @@ try {
       viewport: { width, height: 900 },
     })
     await nojs.goto(path)
-    await nojs.getByRole('link', { name: 'Next', exact: true }).click()
+    await nojs
+      .getByRole('link', { name: 'Next photo page', exact: true })
+      .click()
     assert.equal(await nojs.locator('[data-gallery-filename]').count(), 18)
     assert.ok(
       await nojs.locator('[data-gallery-open="40"]').getAttribute('href'),

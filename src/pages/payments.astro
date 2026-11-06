@@ -53,7 +53,11 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
       </h1>
       <p class="intro">Your photos are free. Tips are always appreciated.</p>
       {stripePaymentLink && (
-        <div class="card-tips" aria-label="Tip by card or mobile wallet">
+        <div
+          class="card-tips"
+          role="group"
+          aria-label="Tip by card or mobile wallet"
+        >
           <div class="card-heading">
             <CreditCard size={20} aria-hidden="true" />
             <strong>Tip by card</strong>
@@ -63,9 +67,9 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
               <a
                 href={tip.url}
                 class:list={['tip-amount', { suggested: tip.amount === 20 }]}
-                aria-label={`Tip $${tip.amount} by card or mobile wallet`}
+                aria-describedby="card-tip-note"
               >
-                <span>${tip.amount}</span>
+                <span>${tip.amount}</span>{' '}
                 {tip.amount === 20 && (
                   <span class="suggested-label">Suggested</span>
                 )}
@@ -75,11 +79,13 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
               Other
             </a>
           </div>
-          <p class="tip-note">Cards & mobile wallets. Any amount welcome.</p>
+          <p id="card-tip-note" class="tip-note">
+            Cards & mobile wallets. Any amount welcome.
+          </p>
         </div>
       )}
       <p class="apps-heading">Or use your favorite app</p>
-      <div class="payment-options" aria-label="Payment apps">
+      <div class="payment-options" role="group" aria-label="Payment apps">
         {paymentLinks.map((link) => {
           const icon =
             simpleIcons.icons[

@@ -36,8 +36,8 @@ const {
   ogImage,
   ogImageAlt,
   ogType = 'website',
-  ogImageWidth = 960,
-  ogImageHeight = 1200,
+  ogImageWidth = 1200,
+  ogImageHeight = 630,
   ogImageType,
   twitterHandle,
   robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
@@ -104,6 +104,7 @@ if (Astro.csp) {
     ))}
     <Font cssVariable="--font-jakarta" preload={[{ style: 'normal' }]} />
     <Font cssVariable="--font-zodiak" preload={[{ style: 'normal' }]} />
+    <slot name="head" />
 
     <meta
       name="theme-color"

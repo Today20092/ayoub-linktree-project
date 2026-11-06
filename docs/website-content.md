@@ -4,6 +4,8 @@
 
 Edit `src/data/site.yaml` for profile information, social and contact links, YouTube channels, and support links. `src/lib/site-config.ts` reads the configuration. `src/pages/index.astro` renders the homepage and loads portfolio cards through `src/components/PortfolioIndex.astro`.
 
+The homepage Support links use one link per row below 640px so the longer Patreon label does not crowd Ko-fi. At wider widths they wrap across rows. Link labels can wrap with enlarged text; icons keep their size and each link stays within its container.
+
 Run `npm run update:youtube` to refresh `src/data/latest-youtube-videos.json`. The updater uses cached data when YouTube cannot be reached. Portfolio videos are entered separately in each project's MDX frontmatter.
 
 Services, About, Contact, and Privacy have their own Astro pages under `src/pages/`. Payment configuration and hostname routing are covered in [payments.md](payments.md).
@@ -11,6 +13,10 @@ Services, About, Contact, and Privacy have their own Astro pages under `src/page
 The event photography page lives at `/services/event-portraits/`, with its content in `src/pages/services/event-portraits.astro`. It is public and indexable, included in the sitemap, and linked from the shared header and footer as "Event photography". Portrait sessions and a gallery that updates within minutes are included; the host pays and guests receive photos at no charge. Starting prices are $400, $550, $700, and $850 for 1–4 hours, plus $150 for each extra hour. Coverage up to 8 hours and the listed extras receive a custom quote. The inquiry opens an email draft and does not reserve the date. The same offer is repeated in the page's Service/Offer structured data, `/index.md`, and `/llms.txt`; there is no FAQ section or FAQ structured data. `/services/` (`src/pages/services.astro`) permanently redirects to this page and is left out of the sitemap until video prices are published. The contact page, each gallery page, and the proof portfolio projects in `eventPortraitProofProjects` (`src/lib/event-portrait-offer.ts`) link to the hire page. `/llms.txt` also lists the Alpha Bravo Media Google Maps listing.
 
 ## Portfolio case studies
+
+The live proof gallery on the event photography page deliberately links to its public production URL, including from local and preview builds. The Markdown discovery endpoints preserve that delivery URL while rebasing navigation to their own site origin. Gallery continuation titles include the page number and their descriptions include the visible photo range. Primary navigation is visibly underlined, with a stronger current-page treatment.
+
+Measured hero-image candidates use responsive head preloads whose URLs, quality, crop, `srcset` and `sizes` match the rendered Astro image. The homepage hint applies only at desktop/tablet widths. Uploaded R2 images retain the existing eager/high-priority custom optimizer path rather than using an incompatible Astro asset preload.
 
 Each project has an MDX file in `src/content/portfolio/`. `src/content.config.ts` validates the fields, and `src/pages/portfolio/[slug].astro` renders the shared layout. Consult the schema and template for supported fields.
 
@@ -59,6 +65,8 @@ the published contact email without promising a response time or reward. Review 
 contact details and renew its expiry before October 1, 2027.
 
 `src/styles.css` contains shared colors, typography, theme rules, and portfolio prose styles. Adjust `.typeset-portfolio` for case-study spacing. Extra blank lines in MDX do not control rendered spacing. Check both light and dark themes after styling changes.
+
+Use `text-link` for readable green text and navigation; reserve primary colors for action fills and their paired foreground. Shared body text can wrap long URLs and email addresses. Badges grow and wrap rather than forcing a single fixed-height line. Portfolio table links have at least 24px-tall hit areas. Preserve these rules under enlarged text and spacing overrides; contain two-dimensional calendar scrolling locally. The photography offer describes about 20 portrait sessions per hour for every coverage duration, as a planning estimate rather than a cap.
 
 ## Deployment watch paths
 
