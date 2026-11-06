@@ -129,6 +129,9 @@ const simpleIconBody = (name?: string) =>
         <p class="text-foreground mt-3 max-w-xl text-base leading-7 sm:text-lg sm:leading-8">
           I'm a digital media specialist in Tampa. I make videos, take photos,
           and share what I'm learning.
+          <a href="/about/" class="text-link underline underline-offset-4">
+            More about my background.
+          </a>
         </p>
         <nav
           aria-label="Explore my website"
@@ -413,10 +416,10 @@ const simpleIconBody = (name?: string) =>
     class="border-border text-muted-foreground mt-16 flex flex-col gap-8 border-t py-8 text-sm sm:flex-row sm:items-end sm:justify-between lg:mt-24"
     data-reveal="fade"
   >
-    <div>
+    <div class="min-w-0">
       <p class="mb-3 text-xs font-semibold tracking-wider uppercase">Support</p>
       <nav
-        class="flex flex-wrap gap-x-6 gap-y-3"
+        class="flex min-w-0 flex-col items-start gap-x-6 gap-y-3 sm:flex-row sm:flex-wrap"
         aria-label="Support and payment links"
       >
         {supportLinks.map((link) => (
@@ -424,21 +427,21 @@ const simpleIconBody = (name?: string) =>
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            class="text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex min-h-12 items-center gap-3 rounded-sm px-2 text-base font-bold underline decoration-dotted underline-offset-4 transition-[color,background-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98]"
+            class="text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex min-h-12 max-w-full min-w-0 items-center gap-3 rounded-sm px-2 py-2 text-base font-bold underline decoration-dotted underline-offset-4 transition-[color,background-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98]"
           >
             {link.icon === 'lucide:credit-card' ? (
-              <CreditCard className="size-5" aria-hidden="true" />
+              <CreditCard className="size-5 shrink-0" aria-hidden="true" />
             ) : (
               link.icon && (
                 <svg
-                  class="size-5"
+                  class="size-5 shrink-0"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                   set:html={simpleIconBody(link.icon)}
                 />
               )
             )}
-            <span>{link.label}</span>
+            <span class="min-w-0 wrap-break-word">{link.label}</span>
           </a>
         ))}
       </nav>

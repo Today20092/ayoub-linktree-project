@@ -42,10 +42,10 @@ const navItems: Array<{
                 href={item.href}
                 aria-current={isActive ? 'page' : undefined}
                 class:list={[
-                  'focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-2 text-xs font-bold tracking-wide no-underline transition-[color,background-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] sm:px-3 sm:text-sm',
+                  'focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-2 text-xs font-bold tracking-wide underline decoration-dotted underline-offset-4 transition-[color,background-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] sm:px-3 sm:text-sm',
                   isActive
-                    ? 'text-foreground underline decoration-2 underline-offset-4'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent hover:text-accent-foreground hover:underline hover:underline-offset-4',
+                    ? 'text-foreground decoration-2 decoration-solid'
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:decoration-solid',
                 ]}
               >
                 {item.label}

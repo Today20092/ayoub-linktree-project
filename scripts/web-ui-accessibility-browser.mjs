@@ -23,40 +23,47 @@ const noOverflow = async (page) => {
     JSON.stringify(dimensions),
   )
 }
-const contrast = async (locator) =>
-  locator.evaluate((element) => {
-    const canvas = document.createElement('canvas')
-    canvas.width = canvas.height = 1
-    const context = canvas.getContext('2d', { willReadFrequently: true })
-    const colors = []
-    for (let current = element; current; current = current.parentElement)
-      colors.unshift(getComputedStyle(current).backgroundColor)
-    context.fillStyle = 'white'
-    context.fillRect(0, 0, 1, 1)
-    for (const color of colors) {
-      context.fillStyle = color
-      context.fillRect(0, 0, 1, 1)
-    }
-    const background = [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
-    context.clearRect(0, 0, 1, 1)
-    context.fillStyle = getComputedStyle(element).color
-    context.fillRect(0, 0, 1, 1)
-    const foreground = [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
-    const luminance = (rgb) =>
-      rgb.reduce((sum, value, index) => {
-        value /= 255
-        return (
-          sum +
-          (value <= 0.04045
-            ? value / 12.92
-            : ((value + 0.055) / 1.055) ** 2.4) *
-            [0.2126, 0.7152, 0.0722][index]
+const contrast = async (locator, imageBackdrop, foregroundProperty = 'color') =>
+  locator.evaluate(
+    (element, { imageBackdrop, foregroundProperty }) => {
+      const canvas = document.createElement('canvas')
+      canvas.width = canvas.height = 1
+      const context = canvas.getContext('2d', { willReadFrequently: true })
+      const colors = []
+      for (let current = element; current; current = current.parentElement)
+        colors.unshift(
+          current === element.parentElement && imageBackdrop
+            ? imageBackdrop
+            : getComputedStyle(current).backgroundColor,
         )
-      }, 0)
-    const a = luminance(foreground)
-    const b = luminance(background)
-    return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
-  })
+      context.fillStyle = 'white'
+      context.fillRect(0, 0, 1, 1)
+      for (const color of colors) {
+        context.fillStyle = color
+        context.fillRect(0, 0, 1, 1)
+      }
+      const background = [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+      context.clearRect(0, 0, 1, 1)
+      context.fillStyle = getComputedStyle(element)[foregroundProperty]
+      context.fillRect(0, 0, 1, 1)
+      const foreground = [...context.getImageData(0, 0, 1, 1).data].slice(0, 3)
+      const luminance = (rgb) =>
+        rgb.reduce((sum, value, index) => {
+          value /= 255
+          return (
+            sum +
+            (value <= 0.04045
+              ? value / 12.92
+              : ((value + 0.055) / 1.055) ** 2.4) *
+              [0.2126, 0.7152, 0.0722][index]
+          )
+        }, 0)
+      const a = luminance(foreground)
+      const b = luminance(background)
+      return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+    },
+    { imageBackdrop, foregroundProperty },
+  )
 try {
   await check('homepage keyboard skip and photography filter', async () => {
     const page = await browser.newPage({ reducedMotion: 'reduce' })
@@ -66,6 +73,9 @@ try {
       assert.equal(
         await page.evaluate(() => document.activeElement.textContent.trim()),
         'Skip to content',
+      )
+      await page.waitForFunction(
+        () => document.activeElement.getBoundingClientRect().top >= 0,
       )
       const skip = await page.locator('a').first().boundingBox()
       assert.ok(skip.y >= 0, 'Focused skip link must be visible')
@@ -87,6 +97,72 @@ try {
       await page.close()
     }
   })
+  await check(
+    'homepage Support links fit mobile and enlarged text',
+    async () => {
+      const measurements = []
+      for (const colorScheme of ['light', 'dark']) {
+        for (const width of [320, 360, 390, 430, 640, 768, 1280]) {
+          const page = await browser.newPage({
+            viewport: { width, height: 900 },
+            colorScheme,
+            reducedMotion: 'reduce',
+          })
+          try {
+            await page.goto(origin)
+            await page.evaluate(() => document.fonts.ready)
+            const links = page
+              .getByRole('navigation', {
+                name: 'Support and payment links',
+              })
+              .getByRole('link')
+            assert.equal(await links.count(), 6)
+            for (const enlarged of [false, true]) {
+              if (enlarged) {
+                await page.addStyleTag({
+                  content:
+                    'html{font-size:200%!important}*{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}',
+                })
+              }
+              await noOverflow(page)
+              const bounds = await links.evaluateAll((elements) =>
+                elements.map((element) => {
+                  const rect = element.getBoundingClientRect()
+                  const label = element.querySelector('span')
+                  const range = document.createRange()
+                  range.selectNodeContents(label)
+                  return {
+                    text: element.textContent.trim(),
+                    left: rect.left,
+                    right: rect.right,
+                    height: rect.height,
+                    textFits: [...range.getClientRects()].every(
+                      (part) =>
+                        part.left >= rect.left - 1 &&
+                        part.right <= rect.right + 1,
+                    ),
+                  }
+                }),
+              )
+              for (const link of bounds) {
+                assert.ok(
+                  link.left >= 0 &&
+                    link.right <= width &&
+                    link.height >= 44 &&
+                    link.textFits,
+                  JSON.stringify({ width, colorScheme, enlarged, link }),
+                )
+              }
+              measurements.push({ width, colorScheme, enlarged })
+            }
+          } finally {
+            await page.close()
+          }
+        }
+      }
+      return measurements
+    },
+  )
   for (const width of [320, 390, 768, 1280]) {
     await check(
       `inquiry reflow ${width}px, 200% text and spacing`,
@@ -201,6 +277,16 @@ try {
     )
   }
   const textConsumers = [
+    { path: '/admin/galleries/', selectors: ['main header .text-link'] },
+    { path: '/admin/galleries/devices/', selectors: ['main > a.text-link'] },
+    {
+      path: '/admin/galleries/dawah-at-tampa-riverwalk/',
+      selectors: ['main header .text-link'],
+    },
+    {
+      path: '/galleries/dawah-at-tampa-riverwalk/upload/',
+      selectors: ['main header .text-link'],
+    },
     {
       path: '/contact/',
       selectors: [
@@ -276,6 +362,202 @@ try {
     }
   }
   await check(
+    'review layouts with enlarged text and spacing, including expanded controls',
+    async () => {
+      const paths = [
+        '/about/',
+        '/contact/',
+        '/privacy/',
+        '/galleries/',
+        '/admin/galleries/',
+        '/admin/galleries/devices/',
+        '/barber-tracker/',
+        '/galleries/missing-gallery/',
+      ]
+      for (const path of paths) {
+        const page = await browser.newPage({
+          viewport: { width: 320, height: 900 },
+          reducedMotion: 'reduce',
+        })
+        try {
+          const response = await page.goto(`${origin}${path}`)
+          assert.equal(
+            response.status(),
+            path.includes('missing-gallery') ? 404 : 200,
+          )
+          if (path === '/admin/galleries/')
+            await page.locator('#event-title').waitFor({ state: 'attached' })
+          await page
+            .locator('details')
+            .evaluateAll((elements) =>
+              elements.forEach((element) => (element.open = true)),
+            )
+          if (path === '/admin/galleries/') {
+            assert.equal(
+              await page
+                .getByRole('checkbox', { name: 'Coming soon', exact: true })
+                .count(),
+              1,
+            )
+          }
+          await noOverflow(page)
+          await page.addStyleTag({
+            content:
+              'html{font-size:200%!important}*{line-height:1.5!important;letter-spacing:.12em!important;word-spacing:.16em!important}p{margin-bottom:2em!important}',
+          })
+          await noOverflow(page)
+          if (path === '/barber-tracker/') {
+            const controls = await page
+              .locator('.tally button')
+              .evaluateAll((elements) =>
+                elements.map((element) => ({
+                  symbol: element.textContent.trim(),
+                  name: element.getAttribute('aria-label'),
+                })),
+              )
+            assert.equal(controls.length, 6)
+            assert.ok(
+              controls.every((control) =>
+                control.name?.startsWith(
+                  control.symbol === '+' ? 'Add one' : 'Subtract one',
+                ),
+              ),
+            )
+            for (const button of await page
+              .locator('.tally button, .price-buttons button')
+              .all()) {
+              const size = await button.boundingBox()
+              assert.ok(size.width >= 24 && size.height >= 24)
+              assert.ok(
+                await button.evaluate(
+                  (element) => element.scrollHeight <= element.clientHeight + 1,
+                ),
+                'Tracker label must fit',
+              )
+            }
+          }
+        } finally {
+          await page.close()
+        }
+      }
+      return paths
+    },
+  )
+  for (const colorScheme of ['light', 'dark']) {
+    await check(
+      `payment names, groups and QR dismissal ${colorScheme}`,
+      async () => {
+        const page = await browser.newPage({
+          colorScheme,
+          reducedMotion: 'reduce',
+          viewport: { width: 390, height: 844 },
+        })
+        try {
+          await page.goto(`${origin}/payments/`)
+          assert.equal(
+            await page
+              .getByRole('group', { name: 'Tip by card or mobile wallet' })
+              .count(),
+            1,
+          )
+          assert.equal(
+            await page.getByRole('group', { name: 'Payment apps' }).count(),
+            1,
+          )
+          assert.equal(
+            await page
+              .getByRole('link', {
+                name: '$20 Suggested',
+                exact: true,
+              })
+              .count(),
+            1,
+          )
+          const opener = page.getByRole('button', {
+            name: 'Show QR code to scan',
+          })
+          await opener.click()
+          await page.getByRole('dialog').waitFor()
+          await page.locator('.qr-code svg').waitFor()
+          await page.keyboard.press('Escape')
+          await page.getByRole('dialog').waitFor({ state: 'hidden' })
+          assert.ok(
+            await opener.evaluate(
+              (element) => document.activeElement === element,
+            ),
+          )
+        } finally {
+          await page.close()
+        }
+      },
+    )
+    await check(
+      `coverage indicators and image-overlay contrast ${colorScheme}`,
+      async () => {
+        const page = await browser.newPage({
+          colorScheme,
+          reducedMotion: 'reduce',
+        })
+        const measurements = []
+        try {
+          await page.goto(`${origin}/services/event-portraits/`)
+          const choices = page.locator('[data-coverage]')
+          assert.equal(await choices.count(), 4)
+          for (const choice of await choices.all()) {
+            assert.match(
+              await choice.innerText(),
+              /about 20 portrait sessions per hour/,
+            )
+          }
+          const choice = choices.first()
+          const checkmark = choice.locator('.coverage-check')
+          assert.equal(await checkmark.locator('svg').isVisible(), false)
+          const resting = await contrast(checkmark, undefined, 'borderTopColor')
+          assert.ok(resting >= 3, `Indicator boundary: ${resting}`)
+          await choice.click()
+          assert.equal(await choice.getAttribute('aria-pressed'), 'true')
+          await checkmark.locator('svg').waitFor({ state: 'visible' })
+          const selected = await contrast(checkmark)
+          assert.ok(selected >= 3, `Selected indicator: ${selected}`)
+          measurements.push({ resting, selected })
+          for (const [path, selector] of [
+            ['/galleries/', 'main a > div > span'],
+            ['/portfolio/ya-hala/', '[data-youtube-play] > span'],
+          ]) {
+            await page.goto(`${origin}${path}`)
+            const overlay = page.locator(selector).first()
+            await overlay.waitFor({ state: 'visible' })
+            for (const backdrop of ['black', 'white']) {
+              const ratio = await contrast(overlay, backdrop)
+              assert.ok(ratio >= 4.5, `${path} over ${backdrop}: ${ratio}`)
+              measurements.push({ path, backdrop, ratio })
+            }
+          }
+          return measurements
+        } finally {
+          await page.close()
+        }
+      },
+    )
+  }
+  await check('portfolio table navigation target sizes', async () => {
+    const page = await browser.newPage({
+      colorScheme: 'dark',
+      reducedMotion: 'reduce',
+    })
+    try {
+      await page.goto(`${origin}/portfolio/chop-shop-show-podcast/`)
+      const links = page.locator('th[scope="row"] > a')
+      assert.equal(await links.count(), 4)
+      for (const link of await links.all()) {
+        const box = await link.boundingBox()
+        assert.ok(box.width >= 24 && box.height >= 24, JSON.stringify(box))
+      }
+    } finally {
+      await page.close()
+    }
+  })
+  await check(
     'gallery targets, reduced motion, Escape and focus return',
     async () => {
       const page = await browser.newPage({
@@ -297,6 +579,13 @@ try {
         await opener.focus()
         await page.keyboard.press('Enter')
         await page.getByRole('dialog').waitFor()
+        await page.waitForFunction(() => {
+          const button = document.querySelector(
+            '[role="dialog"] button[aria-label="Next photograph"]',
+          )
+          const box = button?.getBoundingClientRect()
+          return box && box.width >= 43.99 && box.height >= 43.99
+        })
         for (const name of ['Previous photograph', 'Next photograph']) {
           const box = await page
             .getByRole('button', { name, exact: true })
@@ -305,6 +594,11 @@ try {
         }
         await page.keyboard.press('Escape')
         await page.getByRole('dialog').waitFor({ state: 'detached' })
+        await page.waitForFunction(
+          () =>
+            document.activeElement ===
+            document.querySelector('[data-gallery-open="0"]'),
+        )
         assert.equal(
           await opener.evaluate(
             (element) => element === document.activeElement,

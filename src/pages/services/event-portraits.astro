@@ -1,6 +1,7 @@
 ---
 import '../../styles.css'
-import { Image } from 'astro:assets'
+import { Image, getImage } from 'astro:assets'
+import { Check } from 'lucide-react'
 import { getEntry } from 'astro:content'
 import { buttonVariants } from '@/components/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -14,6 +15,7 @@ import {
   eventPortraitExtraHour,
   eventPortraitMapsUrl,
   eventPortraitPackages,
+  eventPortraitProofGalleryUrl,
   eventPortraitStructuredData,
   eventPortraitTitle,
 } from '../../lib/event-portrait-offer'
@@ -37,6 +39,15 @@ const canonicalUrl = new URL(
 ).toString()
 const ogImage = new URL(siteConfig.site.ogImage, Astro.site).toString()
 const packages = eventPortraitPackages
+const heroImage = await getImage({
+  src: angelPortrait,
+  layout: 'full-width',
+  fit: 'cover',
+  position: 'center',
+  widths: [480, 720, 1080],
+  sizes: '(min-width: 1024px) 50vw, 100vw',
+  quality: 82,
+})
 const link =
   'text-link rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4'
 const control =
@@ -48,7 +59,7 @@ const proof = [
     height: angelPortrait.height,
     alt: 'Angel celebrating his birthday with family around the cake',
     event: 'Angel’s birthday party',
-    href: '/galleries/angels-birthday-party-2026/',
+    href: eventPortraitProofGalleryUrl,
     label: 'See the gallery',
   },
   {
@@ -114,6 +125,15 @@ const contactFields: InquiryField[] = [
   twitterHandle={siteConfig.site.twitterHandle}
   structuredData={eventPortraitStructuredData(canonicalUrl)}
 >
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    href={heroImage.src}
+    imagesrcset={heroImage.srcSet.attribute}
+    imagesizes={heroImage.attributes.sizes}
+    fetchpriority="high"
+  />
   <main
     id="main-content"
     class="portrait-page mx-auto w-full max-w-screen-2xl self-center px-4 sm:px-6 lg:px-8"
@@ -168,7 +188,7 @@ const contactFields: InquiryField[] = [
         <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
           <span class="photo-label">A real celebration. A real gallery.</span>
           Angel’s birthday ·
-          <a href="/galleries/angels-birthday-party-2026/" class={link}>
+          <a href={eventPortraitProofGalleryUrl} class={link}>
             See the gallery
           </a>
         </figcaption>
@@ -249,7 +269,11 @@ const contactFields: InquiryField[] = [
               />
               <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
                 <span class="proof-event">{item.event}</span>
-                <a href={item.href} class={link}>
+                <a
+                  href={item.href}
+                  aria-label={`${item.label}: ${item.event}`}
+                  class={link}
+                >
                   {item.label} <span aria-hidden="true">↗</span>
                 </a>
               </figcaption>
@@ -300,26 +324,27 @@ const contactFields: InquiryField[] = [
                 <span>
                   <span class="block font-semibold">{option.hours}</span>
                   <span class="text-muted-foreground mt-1 block text-sm">
-                    Planning pace: {option.sessions.toLowerCase()} an hour, not
-                    a cap
+                    Planning pace: about 20 portrait sessions per hour, not a
+                    cap
                   </span>
                 </span>
                 <span class="coverage-price shrink-0 text-2xl font-bold tabular-nums">
                   <small>from</small> {option.price}{' '}
                   <span class="coverage-check" aria-hidden="true">
-                    ✓
+                    <Check size={16} />
                   </span>
                 </span>
               </button>
             </li>
           ))}
-          <li class="flex items-center justify-between gap-4 px-4 py-4">
-            <span class="font-semibold">{eventPortraitExtraHour.hours}</span>
-            <span class="text-2xl font-bold tabular-nums">
-              +{eventPortraitExtraHour.price}
-            </span>
-          </li>
         </ul>
+        <p class="text-muted-foreground mt-4 px-4 text-sm leading-6">
+          Need more time? Add an extra hour for{' '}
+          <span class="text-foreground font-medium tabular-nums">
+            +{eventPortraitExtraHour.price}
+          </span>
+          .
+        </p>
         <div class="mt-4 grid gap-1 px-4 text-sm leading-6">
           <p>
             <a href="#inquiry" class={link}>
@@ -899,17 +924,23 @@ const contactFields: InquiryField[] = [
   .coverage-check {
     width: 1.5rem;
     height: 1.5rem;
-    border: 1px solid var(--border);
+    border: 1px solid var(--muted-foreground);
     border-radius: 50%;
-    color: transparent;
+    color: var(--primary-foreground);
     font-size: 0.8rem;
     display: inline-grid;
     place-items: center;
+  }
+  .coverage-check :global(svg) {
+    visibility: hidden;
   }
   [aria-pressed='true'] .coverage-check {
     background: var(--primary);
     color: var(--primary-foreground);
     border-color: var(--primary);
+  }
+  [aria-pressed='true'] .coverage-check :global(svg) {
+    visibility: visible;
   }
   #inquiry {
     padding-block: 5rem;

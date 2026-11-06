@@ -353,4 +353,10 @@
   .typeset-scroll {
     overflow-x: auto;
   }
+
+  .typeset :where(th, td) > a {
+    display: block;
+    min-height: 24px;
+    padding-block: 0.125rem;
+  }
 }

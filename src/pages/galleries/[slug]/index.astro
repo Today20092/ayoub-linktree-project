@@ -2,9 +2,11 @@
 import '../../../styles.css'
 
 import Image from '../../../components/GalleryImage.astro'
+import { getImage } from 'astro:assets'
 import { eventPortraitPath } from '../../../lib/event-portrait-offer'
 import {
   galleryImageUrl,
+  galleryMediaKey,
   galleryThumbnailSrcset,
 } from '../../../lib/gallery-media'
 import { ArrowRight, ChevronDown, Heart, ImageUp, Search } from 'lucide-react'
@@ -89,7 +91,11 @@ const galleryTitle = gallery.title
 const galleryCategory = gallery.category
 const galleryImageAlt = data?.imageAlt ?? `${galleryTitle} event gallery`
 const summary = gallery.summary
-const title = `${galleryTitle} - Event Gallery${page > 1 ? ` - Page ${page}` : ''}`
+const title = `${galleryTitle} — ${page > 1 ? `Page ${page}` : 'Photos'}`
+const description =
+  totalPhotoCount > 0
+    ? `${galleryTitle}: photos ${pageStart + 1}–${Math.min(pageStart + GALLERY_PAGE_SIZE, totalPhotoCount)} of ${totalPhotoCount}. Browse event photos full screen, find your moments, and download copies to keep.`
+    : summary
 const ogImage = new URL(gallery.ogImage, Astro.url).toString()
 const eventDate = gallery.eventDate
 const tipUrl = siteConfig.socialLinks.find((link) => link.id === 'kofi')?.url
@@ -107,6 +113,24 @@ const imageDimensions = (width: number, height: number, maxWidth: number) => {
 const lightboxPreview = allImages[0]
   ? imageDimensions(allImages[0].width, allImages[0].height, 720)
   : undefined
+const heroDimensions = galleryHeroImage
+  ? imageDimensions(galleryHeroImage.width, galleryHeroImage.height, 1280)
+  : undefined
+const heroSizes = '(min-width: 1024px) 56rem, 100vw'
+// Uploaded R2 heroes use GalleryImage's custom optimizer, not Astro asset URLs.
+const heroPreload =
+  galleryHeroImage && heroDimensions && !galleryMediaKey(galleryHeroImage.src)
+    ? await getImage({
+        src: galleryHeroImage.src,
+        ...heroDimensions,
+        layout: 'constrained',
+        fit: 'cover',
+        position: 'center',
+        widths: [360, 720, 960, 1280],
+        sizes: heroSizes,
+        quality: 85,
+      })
+    : undefined
 const ogImageWidth = galleryHeroImage?.width ?? allImages[0]?.width ?? 1200
 const ogImageHeight = galleryHeroImage?.height ?? allImages[0]?.height ?? 800
 
@@ -121,7 +145,7 @@ const formatDate = (date: Date) =>
 
 <BaseLayout
   title={title}
-  description={summary}
+  description={description}
   canonicalUrl={canonicalUrl}
   ogImage={ogImage}
   ogImageAlt={galleryImageAlt}
@@ -164,6 +188,17 @@ const formatDate = (date: Date) =>
         }
   }
 >
+  {heroPreload && (
+    <link
+      slot="head"
+      rel="preload"
+      as="image"
+      href={heroPreload.src}
+      imagesrcset={heroPreload.srcSet.attribute}
+      imagesizes={heroPreload.attributes.sizes}
+      fetchpriority="high"
+    />
+  )}
   <main
     id="main-content"
     class="mx-auto w-full max-w-screen-2xl scroll-mt-20 px-4 py-6 sm:px-6 sm:py-8 lg:px-8"
@@ -374,7 +409,7 @@ const formatDate = (date: Date) =>
                         widths={[80, 160, 240, 480, 960]}
                         sizes="(min-width: 768px) 20vw, 33vw"
                         quality={85}
-                        loading="lazy"
+                        loading={index < 5 ? 'eager' : 'lazy'}
                         decoding="async"
                         class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
                       />
@@ -515,7 +550,7 @@ const formatDate = (date: Date) =>
             </p>
             {page > 1 && (
               <a class="gallery-page-link" href={pagePath(page - 1)} rel="prev">
-                Previous
+                Previous photo page
               </a>
             )}
             {Array.from({ length: pageCount }, (_, index) => index + 1).map(
@@ -532,7 +567,7 @@ const formatDate = (date: Date) =>
             )}
             {page < pageCount && (
               <a class="gallery-page-link" href={pagePath(page + 1)} rel="next">
-                Next
+                Next photo page
               </a>
             )}
           </nav>
