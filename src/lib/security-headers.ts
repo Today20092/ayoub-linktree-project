@@ -11,6 +11,20 @@ export function withSecurityHeaders(response: Response): Response {
   const missing = Object.entries(securityHeaders).filter(
     ([name]) => !response.headers.has(name),
   )
+  if (
+    response.status >= 400 ||
+    response.headers.get('X-Robots-Tag')?.includes('noindex')
+  ) {
+    const cacheControl = response.headers.get('Cache-Control')
+    // Prevent edge analytics injection on unlisted, upload, admin, and error pages.
+    if (
+      !cacheControl?.split(',').some((value) => value.trim() === 'no-transform')
+    )
+      missing.push([
+        'Cache-Control',
+        cacheControl ? `${cacheControl}, no-transform` : 'no-transform',
+      ])
+  }
   if (!missing.length) return response
   try {
     for (const [name, value] of missing) response.headers.set(name, value)

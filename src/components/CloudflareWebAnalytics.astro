@@ -1,7 +1,6 @@
 ---
-const token =
-  import.meta.env.PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN ??
-  '128cac0318f948219e6b6f71273996b9'
+// Production uses Cloudflare's automatic injection; previews can opt in explicitly.
+const token = import.meta.env.PUBLIC_CLOUDFLARE_WEB_ANALYTICS_TOKEN ?? ''
 ---
 
 {token && (

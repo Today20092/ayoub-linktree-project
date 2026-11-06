@@ -108,6 +108,8 @@ Follow [AGENTS.md](AGENTS.md) for deployment authorization. Android signing inst
 
 ## Documentation map
 
+[Website analytics](docs/website-analytics.md) covers automatic Cloudflare injection, private-page exclusions, report access, and rollback.
+
 | When you need to…                                                  | Read                                                                          |
 | ------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
 | Edit links, portfolio content, images, or shared styles            | [Website content](docs/website-content.md)                                    |
