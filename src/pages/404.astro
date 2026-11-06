@@ -1,6 +1,9 @@
 ---
 import '../styles.css'
 import BaseLayout from '../layouts/BaseLayout.astro'
+
+// Error responses need middleware's no-transform header before edge injection.
+export const prerender = false
 ---
 
 <BaseLayout
