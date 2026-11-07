@@ -10,7 +10,8 @@ import {
 import { downloadZip } from 'client-zip'
 import { toast } from 'sonner'
 
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import {
   Dialog,
   DialogClose,
@@ -105,6 +106,7 @@ export default function EventLightbox({
   const [pendingDownload, setPendingDownload] =
     React.useState<DownloadRequest | null>(null)
   const slidesRef = React.useRef<HTMLDivElement>(null)
+  const selectionBarRef = React.useRef<HTMLDivElement>(null)
   const lastFocusedRef = React.useRef<HTMLElement | null>(null)
   const lastFocusedIndexRef = React.useRef<number | null>(null)
   const touchStartX = React.useRef<number | null>(null)
@@ -114,6 +116,25 @@ export default function EventLightbox({
     typeof createGallerySelection
   > | null>(null)
   const [gridRevision, setGridRevision] = React.useState(0)
+
+  React.useEffect(() => {
+    const bar = selectionBarRef.current
+    if (!bar) return
+    const resize = () =>
+      document.documentElement.style.setProperty(
+        '--gallery-selection-height',
+        `${Math.ceil(bar.getBoundingClientRect().height) + 32}px`,
+      )
+    resize()
+    const observer = new ResizeObserver(resize)
+    observer.observe(bar)
+    return () => {
+      observer.disconnect()
+      document.documentElement.style.removeProperty(
+        '--gallery-selection-height',
+      )
+    }
+  }, [selected.size])
 
   React.useEffect(() => {
     const gallery = document.getElementById(galleryId)
@@ -208,7 +229,6 @@ export default function EventLightbox({
     const gallery = document.getElementById(galleryId)
     if (!gallery) return
 
-    const filtering = favoritesOnly && selected.size > 0
     if (favoritesOnly && selected.size === 0) setFavoritesOnly(false)
     gallery
       .querySelectorAll<HTMLElement>('[data-gallery-filename]')
@@ -217,22 +237,7 @@ export default function EventLightbox({
           selected.has(figure.dataset.galleryFilename ?? ''),
         )
       })
-    const favoritesButton = gallery.querySelector<HTMLButtonElement>(
-      '[data-gallery-toggle-favorites]',
-    )
-    const count = gallery.querySelector<HTMLElement>(
-      '[data-gallery-favorites-count]',
-    )
-    if (favoritesButton) {
-      favoritesButton.disabled = selected.size === 0
-      favoritesButton.textContent = filtering
-        ? 'Show all photos'
-        : `View favorites (${selected.size})`
-      favoritesButton.setAttribute('aria-pressed', String(filtering))
-    }
     gallery.dataset.galleryHasPicks = String(selected.size > 0)
-    if (count)
-      count.textContent = selected.size > 0 ? `${selected.size} selected` : ''
 
     gallery
       .querySelectorAll<HTMLElement>('[data-gallery-favorite]')
@@ -242,6 +247,13 @@ export default function EventLightbox({
           button.disabled = !selectionLoaded
         button.dataset.selected = String(isSelected)
         button.setAttribute('aria-pressed', String(isSelected))
+        const photo = images.findIndex(
+          (image) => image.filename === button.dataset.filename,
+        )
+        button.setAttribute(
+          'aria-label',
+          `${isSelected ? 'Remove' : 'Add'} photograph ${photo + 1} ${isSelected ? 'from' : 'to'} favorites`,
+        )
       })
   }, [galleryId, selected, favoritesOnly, selectionLoaded, gridRevision])
 
@@ -417,10 +429,6 @@ export default function EventLightbox({
 
     const handleClick = async (event: MouseEvent) => {
       const target = event.target as Element
-      if (target.closest('[data-gallery-toggle-favorites]')) {
-        toggleFavoritesView()
-        return
-      }
       const favorite = target.closest<HTMLElement>('[data-gallery-favorite]')
 
       if (favorite) {
@@ -596,18 +604,41 @@ export default function EventLightbox({
 
   return (
     <>
-      <div
-        className={
-          selected.size > 0
-            ? 'bg-background/95 sticky bottom-4 z-20 flex flex-wrap items-center gap-3 rounded-xl border p-3 shadow-lg backdrop-blur'
-            : 'flex flex-wrap items-center gap-3'
-        }
-      >
+      <div className="flex flex-wrap items-center gap-3">
         {selected.size > 0 && (
-          <>
-            <p className="text-sm font-semibold">{selected.size} selected</p>
+          <div
+            ref={selectionBarRef}
+            data-gallery-selection-bar
+            role="region"
+            aria-label="Selected photos"
+            className="bg-background text-foreground fixed bottom-4 left-1/2 z-20 flex w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 flex-wrap items-center gap-2 rounded-xl border p-3 shadow-lg"
+          >
+            <div className="mr-auto flex flex-col gap-1">
+              <span
+                role="status"
+                aria-atomic="true"
+                className="text-sm font-semibold"
+              >
+                {selected.size} selected
+              </span>
+              <span className="text-muted-foreground text-xs">
+                Saved on this device
+              </span>
+            </div>
             <Button
               size="lg"
+              variant={favoritesOnly ? 'default' : 'outline'}
+              data-gallery-toggle-favorites
+              aria-pressed={favoritesOnly}
+              onClick={toggleFavoritesView}
+              disabled={downloadStatus === 'preparing'}
+            >
+              <Heart data-icon="inline-start" aria-hidden="true" />
+              Favorites ({selected.size})
+            </Button>
+            <Button
+              size="lg"
+              disabled={downloadStatus === 'preparing'}
               onClick={() =>
                 startDownload({
                   kind: 'selection',
@@ -617,16 +648,23 @@ export default function EventLightbox({
               }
             >
               <Download data-icon="inline-start" aria-hidden="true" />
-              Download ZIP ({selected.size})
+              Download selected ({selected.size})
             </Button>
             <Button
               size="lg"
               variant="outline"
-              onClick={() => setSelected(new Set())}
+              disabled={downloadStatus === 'preparing'}
+              onClick={() => {
+                document
+                  .getElementById(galleryId)
+                  ?.querySelector<HTMLElement>('[data-gallery-controls] button')
+                  ?.focus()
+                setSelected(new Set())
+              }}
             >
               Clear
             </Button>
-          </>
+          </div>
         )}
         {images.length > 0 && (
           <Button
@@ -667,18 +705,15 @@ export default function EventLightbox({
 
       <Toaster position="bottom-center" />
 
-      <Dialog open={open} onOpenChange={handleOpenChange}>
+      <Dialog
+        open={open}
+        onOpenChange={handleOpenChange}
+        disablePointerDismissal
+      >
         <DialogContent
           showCloseButton={false}
-          className="flex h-dvh max-h-none w-screen max-w-none flex-col gap-0 rounded-none bg-black p-0 text-white shadow-none ring-0 sm:max-w-none"
-          onInteractOutside={(event) => event.preventDefault()}
-          onCloseAutoFocus={(event) => {
-            const opener = getLastFocusedOpener()
-            if (opener) {
-              event.preventDefault()
-              opener.focus()
-            }
-          }}
+          className="gallery-viewer bg-background text-foreground left-0 flex h-dvh max-h-none w-screen max-w-none translate-x-0 flex-col gap-0 rounded-none p-0 shadow-none ring-0 sm:max-w-none"
+          finalFocus={() => getLastFocusedOpener() ?? true}
           onKeyDown={(event) => {
             if (event.key === 'ArrowLeft') navigatePhoto(-1)
             if (event.key === 'ArrowRight') navigatePhoto(1)
@@ -693,16 +728,13 @@ export default function EventLightbox({
           </DialogDescription>
 
           <div className="flex h-full min-h-0 flex-1 flex-col">
-            <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-              <p
-                className="w-full text-sm font-semibold sm:w-auto"
-                aria-live="polite"
-              >
+            <div className="gallery-viewer-toolbar flex flex-wrap items-center justify-between gap-2 px-3 py-2 sm:px-6">
+              <p className="mr-auto text-sm font-semibold" aria-live="polite">
                 {favoritesOnly && selected.has(images[currentIndex]?.filename)
                   ? `Favorite ${visibleIndexes.indexOf(currentIndex) + 1} of ${visibleIndexes.length}`
                   : `Photograph ${currentIndex + 1} of ${images.length}`}
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex max-w-full flex-wrap items-center gap-2">
                 {currentImage && (
                   <>
                     <Button
@@ -722,43 +754,48 @@ export default function EventLightbox({
                         aria-hidden="true"
                       />
                     </Button>
-                    <Button variant="secondary" className="min-h-11" asChild>
-                      <a
-                        href={downloadUrl(
-                          currentImage.src,
-                          currentImage.filename,
-                        )}
-                        download={currentImage.filename}
-                      >
-                        <Download data-icon="inline-start" aria-hidden="true" />
-                        Save photo
-                      </a>
-                    </Button>
+                    <a
+                      className={cn(
+                        buttonVariants({ variant: 'secondary' }),
+                        'min-h-11',
+                      )}
+                      href={downloadUrl(
+                        currentImage.src,
+                        currentImage.filename,
+                      )}
+                      download={currentImage.filename}
+                    >
+                      <Download data-icon="inline-start" aria-hidden="true" />
+                      <span>Save photo</span>
+                    </a>
                     <Button
                       variant="secondary"
                       className="min-h-11"
                       onClick={shareCurrentPhoto}
                     >
                       <Share2 data-icon="inline-start" aria-hidden="true" />
-                      Share
+                      <span className="hidden sm:inline">Share</span>
+                      <span className="sr-only sm:hidden">Share</span>
                     </Button>
                   </>
                 )}
-                <DialogClose asChild>
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="min-h-11 min-w-11"
-                    aria-label="Close photograph viewer"
-                  >
-                    <X aria-hidden="true" />
-                  </Button>
+                <DialogClose
+                  render={
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="min-h-11 min-w-11"
+                      aria-label="Close photograph viewer"
+                    />
+                  }
+                >
+                  <X aria-hidden="true" />
                 </DialogClose>
               </div>
             </div>
 
             <div
-              className="relative flex min-h-0 flex-1 items-center justify-center px-14 py-4 sm:px-20"
+              className="gallery-viewer-stage relative flex min-h-0 flex-1 items-center justify-center pb-16 sm:px-16 sm:py-3"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
               style={{ touchAction: 'pan-y' }}
@@ -767,7 +804,7 @@ export default function EventLightbox({
                 type="button"
                 variant="secondary"
                 size="icon-lg"
-                className="absolute left-2 min-h-11 min-w-11 sm:left-5"
+                className="absolute bottom-2 left-3 min-h-11 min-w-11 sm:bottom-auto sm:left-3"
                 onClick={() => navigatePhoto(-1)}
                 disabled={navigationDisabled}
                 aria-label="Previous photograph"
@@ -786,7 +823,7 @@ export default function EventLightbox({
                 type="button"
                 variant="secondary"
                 size="icon-lg"
-                className="absolute right-2 min-h-11 min-w-11 sm:right-5"
+                className="absolute right-3 bottom-2 min-h-11 min-w-11 sm:right-3 sm:bottom-auto"
                 onClick={() => navigatePhoto(1)}
                 disabled={navigationDisabled}
                 aria-label="Next photograph"
@@ -800,19 +837,16 @@ export default function EventLightbox({
 
       <Dialog
         open={downloadDialogOpen}
-        onOpenChange={(nextOpen) => {
-          if (downloadStatus !== 'preparing') setDownloadDialogOpen(nextOpen)
+        disablePointerDismissal={downloadStatus === 'preparing'}
+        onOpenChange={(nextOpen, details) => {
+          if (!nextOpen && downloadStatus === 'preparing') {
+            details.cancel()
+            return
+          }
+          setDownloadDialogOpen(nextOpen)
         }}
       >
-        <DialogContent
-          showCloseButton={downloadStatus !== 'preparing'}
-          onEscapeKeyDown={(event) => {
-            if (downloadStatus === 'preparing') event.preventDefault()
-          }}
-          onPointerDownOutside={(event) => {
-            if (downloadStatus === 'preparing') event.preventDefault()
-          }}
-        >
+        <DialogContent showCloseButton={downloadStatus !== 'preparing'}>
           {downloadStatus === 'preparing' && (
             <>
               <DialogHeader>

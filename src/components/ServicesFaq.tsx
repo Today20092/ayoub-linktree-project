@@ -35,7 +35,7 @@ const faqs = [
 
 export default function ServicesFaq() {
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion className="w-full">
       {faqs.map((item, index) => (
         <AccordionItem key={item.question} value={`item-${index}`}>
           <AccordionTrigger>{item.question}</AccordionTrigger>

@@ -21,7 +21,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from '../../../components/ui/breadcrumb'
 import { Badge } from '../../../components/ui/badge'
@@ -223,10 +222,6 @@ const formatDate = (date: Date) =>
               Galleries
             </BreadcrumbLink>
           </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{galleryTitle}</BreadcrumbPage>
-          </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
     </div>
@@ -252,10 +247,10 @@ const formatDate = (date: Date) =>
           <Badge variant="outline">Coming soon</Badge>
         )}
       </div>
-      <h1 class="font-heading mt-3 text-3xl leading-none font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+      <h1 class="font-heading mt-3 text-2xl leading-tight font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
         {galleryTitle}
       </h1>
-      <p class="text-muted-foreground mt-4 max-w-2xl text-base leading-7">
+      <p class="text-muted-foreground mt-3 max-w-2xl text-sm leading-relaxed sm:text-base">
         {summary}
       </p>
     </header>
@@ -303,11 +298,13 @@ const formatDate = (date: Date) =>
 
     {faceManifest && (
       <details class="gallery-search border-border group mx-auto mt-4 max-w-4xl border-y">
-        <summary class="focus-visible:ring-ring flex min-h-14 cursor-pointer list-none items-center gap-2 rounded-sm py-3 text-sm font-bold focus-visible:ring-2 focus-visible:outline-none">
+        <summary class="focus-visible:ring-ring grid min-h-14 cursor-pointer list-none grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-sm py-3 text-sm font-bold focus-visible:ring-2 focus-visible:outline-none">
           <Search className="size-4" aria-hidden="true" />
-          Find your photos
-          <span class="text-muted-foreground ml-auto text-xs font-normal">
-            Use a selfie
+          <span class="flex min-w-0 flex-col gap-1">
+            <span>Find your photos</span>
+            <span class="text-muted-foreground text-xs font-normal">
+              Use a selfie
+            </span>
           </span>
           <ChevronDown
             className="size-4 transition-transform group-open:rotate-180"
@@ -601,7 +598,7 @@ const formatDate = (date: Date) =>
             >
               {allImages.slice(0, 1).map((image) => (
                 <figure
-                  class="m-0 flex h-full w-full flex-col items-center justify-center"
+                  class="m-0 grid max-h-full w-full justify-items-center"
                   data-gallery-slide="0"
                 >
                   <Image
@@ -616,11 +613,11 @@ const formatDate = (date: Date) =>
                     loading="lazy"
                     decoding="async"
                     data-gallery-original={image.src}
-                    class="max-h-[calc(100dvh-9rem)] w-auto max-w-full object-contain"
+                    class="h-full min-h-0 w-full object-contain"
                   />
                   <figcaption
                     data-gallery-caption
-                    class="mt-3 max-w-3xl text-center text-sm text-white/75"
+                    class="gallery-viewer-caption max-w-3xl px-3 py-2 text-center text-xs"
                   >
                     {'caption' in image && image.caption
                       ? image.caption
@@ -695,6 +692,13 @@ const formatDate = (date: Date) =>
     border: 0;
     padding-top: 0.5rem;
     padding-bottom: 1.5rem;
+  }
+  .gallery-search :global(button) {
+    max-width: 100%;
+    min-height: 2.75rem;
+    height: auto;
+    padding-block: 0.5rem;
+    white-space: normal;
   }
   @media (min-width: 640px) {
     .gallery-cover :global(img) {

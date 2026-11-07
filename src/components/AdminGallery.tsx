@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -1385,11 +1385,14 @@ export default function AdminGallery({
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" asChild>
-                  <a href={reviewPhoto.src} target="_blank" rel="noreferrer">
-                    Open image in new tab
-                  </a>
-                </Button>
+                <a
+                  className={buttonVariants({ variant: 'outline' })}
+                  href={reviewPhoto.src}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open image in new tab
+                </a>
                 {reviewPhoto.key.startsWith('pending:') && (
                   <>
                     <Button
