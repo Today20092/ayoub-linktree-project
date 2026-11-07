@@ -233,7 +233,7 @@ export default function GuestUpload({
             </ul>
             {(uploading || settled > 0) && (
               <div className="space-y-2">
-                <Progress value={progress} />
+                <Progress value={progress} aria-label="Photo upload progress" />
                 <p className="text-muted-foreground text-xs">
                   {completed} of {items.length} uploaded
                 </p>

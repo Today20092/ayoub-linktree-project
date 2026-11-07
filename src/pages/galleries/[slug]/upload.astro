@@ -5,7 +5,7 @@ import { env } from 'cloudflare:workers'
 import { ArrowLeft } from 'lucide-react'
 
 import GuestUpload from '../../../components/GuestUpload'
-import { Button } from '../../../components/ui/button'
+import { buttonVariants } from '../../../components/ui/button'
 import { galleryReader } from '../../../lib/gallery-read'
 import { matchesSharingToken } from '../../../lib/gallery-sharing'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
@@ -55,12 +55,13 @@ Astro.response.headers.set('Referrer-Policy', 'no-referrer')
     id="main-content"
     class="mx-auto w-full max-w-2xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14"
   >
-    <Button variant="ghost" size="sm" asChild>
-      <a href="/galleries/">
-        <ArrowLeft data-icon="inline-start" aria-hidden="true" />
-        Gallery listing
-      </a>
-    </Button>
+    <a
+      class={buttonVariants({ variant: 'ghost', size: 'sm' })}
+      href="/galleries/"
+    >
+      <ArrowLeft data-icon="inline-start" aria-hidden="true" />
+      Gallery listing
+    </a>
 
     <header class="mt-8">
       <p class="text-link text-sm font-bold tracking-wide uppercase">

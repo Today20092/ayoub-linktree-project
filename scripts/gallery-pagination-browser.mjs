@@ -8,6 +8,11 @@ const output = process.env.GALLERY_BROWSER_REPORT
 const baseline = process.env.GALLERY_BROWSER_BASELINE === '1'
 const browser = await chromium.launch({ channel: 'msedge', headless: true })
 const results = []
+const openView = async (page) => {
+  const trigger = page.locator('[data-gallery-view-toggle]')
+  if ((await trigger.getAttribute('aria-expanded')) === 'false')
+    await trigger.click()
+}
 try {
   for (const width of [1440, 390]) {
     for (const slug of [
@@ -105,10 +110,12 @@ try {
       .locator('[data-gallery-filename]')
       .first()
       .getAttribute('data-gallery-filename')
-    if (width >= 768)
+    if (width >= 768) {
+      await openView(page)
       await page
         .getByRole('button', { name: 'Larger photos', exact: true })
         .click()
+    }
     await page.locator('[data-gallery-favorite]').first().click({ force: true })
     await page.goto(`${path}?page=2`)
     await page.waitForFunction(
@@ -120,17 +127,17 @@ try {
       .getAttribute('data-gallery-filename')
     await page.locator('[data-gallery-favorite]').first().click({ force: true })
     await page
-      .getByRole('button', { name: 'View favorites (2)', exact: true })
+      .getByRole('button', { name: 'Favorites (2)', exact: true })
       .click()
     await page.waitForFunction(
       () => document.querySelectorAll('[data-gallery-filename]').length === 2,
     )
     await page.reload()
     await page
-      .getByRole('button', { name: 'View favorites (2)', exact: true })
+      .getByRole('button', { name: 'Favorites (2)', exact: true })
       .waitFor()
     await page
-      .getByRole('button', { name: 'View favorites (2)', exact: true })
+      .getByRole('button', { name: 'Favorites (2)', exact: true })
       .click()
     await page.waitForFunction(
       () => document.querySelectorAll('[data-gallery-filename]').length === 2,
@@ -152,7 +159,7 @@ try {
     )
     const selectedDownload = page.waitForEvent('download')
     await page
-      .getByRole('button', { name: 'Download ZIP (2)', exact: true })
+      .getByRole('button', { name: 'Download selected (2)', exact: true })
       .click()
     const selectedZip = await selectedDownload
     const zipBytes = await readFile(await selectedZip.path())
@@ -223,9 +230,10 @@ try {
         ),
       [second, first],
     )
+    await openView(page)
     await page
-      .getByRole('radio', { name: 'Masonry', exact: true })
-      .check({ force: true })
+      .getByRole('button', { name: 'Natural layout', exact: true })
+      .click()
     await page
       .getByRole('button', { name: 'Show loaded photos', exact: true })
       .click()
@@ -353,7 +361,7 @@ try {
       .click()
     await storageFailure.keyboard.press('Escape')
     await storageFailure
-      .getByRole('button', { name: 'View favorites (1)', exact: true })
+      .getByRole('button', { name: 'Favorites (1)', exact: true })
       .click()
     await storageFailure.waitForFunction(
       () => document.querySelectorAll('[data-gallery-filename]').length === 1,
@@ -378,10 +386,12 @@ try {
         () =>
           !!document.querySelector('[data-gallery-favorite]:not([disabled])'),
       )
-      if (width >= 768)
+      if (width >= 768) {
+        await openView(privatePage)
         await privatePage
           .getByRole('button', { name: 'Larger photos', exact: true })
           .click()
+      }
       await privatePage.locator('[data-gallery-favorite]').first().click()
       await privatePage.goto(
         `${origin}/galleries/pagination-test-unlisted/?page=2&share=${token}`,
@@ -393,7 +403,7 @@ try {
       )
       await privatePage.locator('[data-gallery-favorite]').first().click()
       await privatePage
-        .getByRole('button', { name: 'View favorites (2)', exact: true })
+        .getByRole('button', { name: 'Favorites (2)', exact: true })
         .click()
       await privatePage.waitForFunction(
         () => document.querySelectorAll('[data-gallery-filename]').length === 2,

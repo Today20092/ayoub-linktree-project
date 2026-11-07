@@ -5,7 +5,7 @@ import { env } from 'cloudflare:workers'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 
 import AdminGallery from '../../../components/AdminGallery'
-import { Button } from '../../../components/ui/button'
+import { buttonVariants } from '../../../components/ui/button'
 import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
 import { galleryReader } from '../../../lib/gallery-read'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
@@ -63,22 +63,22 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-10 sm:px-6 lg:px-8"
   >
     <div class="flex flex-wrap items-center justify-between gap-3 [&_a]:h-auto [&_a]:max-w-full [&_a]:whitespace-normal">
-      <Button variant="ghost" size="sm" asChild>
-        <a href="/admin/galleries/">
-          <ArrowLeft data-icon="inline-start" aria-hidden="true" />
-          All galleries
-        </a>
-      </Button>
-      <Button variant="outline" size="sm" asChild>
-        <a
-          href={`/galleries/${eventSlug}/${gallery.dynamicEvent?.is_unlisted ? '?share=' + gallery.dynamicEvent.share_token : ''}`}
-          target="_blank"
-          aria-label={`View gallery: ${eventTitle}`}
-        >
-          View gallery
-          <ExternalLink data-icon="inline-end" aria-hidden="true" />
-        </a>
-      </Button>
+      <a
+        class={buttonVariants({ variant: 'ghost', size: 'sm' })}
+        href="/admin/galleries/"
+      >
+        <ArrowLeft data-icon="inline-start" aria-hidden="true" />
+        All galleries
+      </a>
+      <a
+        class={buttonVariants({ variant: 'outline', size: 'sm' })}
+        href={`/galleries/${eventSlug}/${gallery.dynamicEvent?.is_unlisted ? '?share=' + gallery.dynamicEvent.share_token : ''}`}
+        target="_blank"
+        aria-label={`View gallery: ${eventTitle}`}
+      >
+        View gallery
+        <ExternalLink data-icon="inline-end" aria-hidden="true" />
+      </a>
     </div>
 
     <header class="mt-8 max-w-3xl">
