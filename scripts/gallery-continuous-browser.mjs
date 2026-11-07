@@ -6,6 +6,11 @@ const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || 'playwright')
 const origin = process.env.GALLERY_TEST_URL ?? 'http://127.0.0.1:8791'
 const browser = await chromium.launch({ channel: 'msedge', headless: true })
 const report = []
+const openView = async (page) => {
+  const trigger = page.locator('[data-gallery-view-toggle]')
+  if ((await trigger.getAttribute('aria-expanded')) === 'false')
+    await trigger.click()
+}
 const output = process.env.GALLERY_BROWSER_REPORT
 const count = (page, minimum) =>
   page.waitForFunction(
@@ -80,9 +85,10 @@ try {
       .locator('[data-gallery-filename]')
       .evaluateAll((cards) => cards.map((card) => card.dataset.galleryFilename))
     assert.equal(new Set(filenames).size, filenames.length)
+    await openView(page)
     await page
-      .getByRole('radio', { name: 'Masonry', exact: true })
-      .check({ force: true })
+      .getByRole('button', { name: 'Natural layout', exact: true })
+      .click()
     await page
       .getByRole('button', { name: 'Larger photos', exact: true })
       .click()
@@ -111,9 +117,7 @@ try {
         ),
       [filenames[100], filenames[0], filenames[80]],
     )
-    await page
-      .getByRole('radio', { name: 'Newest', exact: true })
-      .check({ force: true })
+    await page.getByRole('button', { name: 'Newest', exact: true }).click()
     assert.equal(
       await page
         .locator('[data-gallery-filename]')
@@ -121,14 +125,10 @@ try {
         .getAttribute('data-gallery-filename'),
       filenames[100],
     )
-    await page
-      .getByRole('radio', { name: 'Oldest', exact: true })
-      .check({ force: true })
+    await page.getByRole('button', { name: 'Oldest', exact: true }).click()
     await page.locator('[data-gallery-show-page]').click()
     await count(page, 120)
-    await page
-      .getByRole('radio', { name: 'Oldest', exact: true })
-      .check({ force: true })
+    await page.getByRole('button', { name: 'Oldest', exact: true }).click()
     await page.locator('[data-gallery-load-more]').scrollIntoViewIfNeeded()
     await page
       .getByRole('link', { name: 'Retry loading photos', exact: true })
@@ -298,9 +298,7 @@ try {
     await ordered.route('**/galleries/sanad-silwadi-wedding/?page=4', (route) =>
       route.fulfill({ status: 503, body: 'Unavailable' }),
     )
-    await ordered
-      .getByRole('radio', { name: 'Newest', exact: true })
-      .check({ force: true })
+    await ordered.getByRole('button', { name: 'Newest', exact: true }).click()
     await ordered
       .getByRole('link', { name: 'Retry loading photos', exact: true })
       .waitFor()
@@ -364,9 +362,7 @@ try {
         .getAttribute('data-gallery-open'),
       '200',
     )
-    await ordered
-      .getByRole('radio', { name: 'Oldest', exact: true })
-      .check({ force: true })
+    await ordered.getByRole('button', { name: 'Oldest', exact: true }).click()
     await ordered.waitForFunction(
       () =>
         document.querySelector('[data-gallery-browser]').dataset
@@ -456,9 +452,7 @@ try {
       ),
       false,
     )
-    await page
-      .getByRole('radio', { name: 'Newest', exact: true })
-      .check({ force: true })
+    await page.getByRole('button', { name: 'Newest', exact: true }).click()
     await page.waitForFunction(
       () =>
         document.querySelector('[data-gallery-browser]').dataset

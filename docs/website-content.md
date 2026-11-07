@@ -40,12 +40,48 @@ The portfolio was migrated from a TypeScript array to content collections. Keep 
 
 ### Gallery browsing
 
+Gallery sort and layout controls use Cnippet's `@cnippet/toggle-group` and
+`@cnippet/toggle`, retrieved through the shadcn CLI on November 7, 2026 from
+`https://ui.cnippet.dev/r/{name}.json`. Cnippet identifies its collection as
+[MIT licensed](https://ui.cnippet.dev/). The Cnippet controls are used in
+`GalleryPreferences.tsx`. Shared interactive primitives now use Base UI, and
+`components.json` selects `base-rhea` for future shadcn additions. The registry's
+existing separator was skipped during the initial Cnippet installation and
+subsequently migrated with the shared primitives. Migration behavior and checks
+are recorded in [the project migration report](../.migration/project.md).
+Local adaptations use the site's semantic colors, 44px control heights, and
+the existing gallery events for remembered layout and asynchronous ordering.
+
+**Sort** stays visible. **View** is an inline disclosure containing Grid,
+**Natural layout**, and photo-size controls. Natural layout keeps original photo
+proportions; the stored value remains `masonry` for preference compatibility.
+The View button stays in the same place when options expand below it, exposes
+its expanded state and panel relationship, and retains focus on activation.
+Escape closes the disclosure and returns focus to View.
+
+Thumbnail favorites use a 32px visible circle inside a 44px tap target at the
+default text size. A filled heart identifies a favorite. Selecting photos opens
+a fixed action bar with Favorites, **Download selected**, Clear, and the note
+**Saved on this device**. The bar respects the safe area and its
+measured height reserves bottom space for scrolling and keyboard focus. Clearing
+the selection returns focus to the gallery controls. Download selected prepares
+the same favorites ZIP as before; Download ZIP still includes the whole gallery.
+
+The viewer uses a dedicated dark image surface in either site theme. On phones,
+previous/next controls sit below the image so the photograph can use the full
+width; save, share, favorite, and close controls remain at the top. **Save photo**
+keeps its visible label on phones as well as desktop.
+The heading and breadcrumb are kept compact to bring photographs closer to the
+start of the page. Favorites stay visible on touch devices and when selected
+or keyboard focused on desktop. As before, dense views keep favorite controls
+in the photograph viewer so they do not cover small thumbnails.
+
 **Oldest** starts at the first batch; **Newest** starts at the last batch and
 loads older photos below it. Changing order starts a new browsing range at that
 end of the gallery. Order changes made during a filter take effect when returning
 to normal browsing; ranked selfie results retain their match order.
 
-Public event galleries initially render up to 40 photos. JavaScript automatically appends the next Astro-rendered batch before the visitor reaches the bottom, with a visible loading status and **Load more photos** or retry fallback. Numbered links remain available without JavaScript and to crawlers; shared photo links open their containing batch and offer **Load earlier photos**, preserving the visible position when prepending. Browser history retains the loaded range and scroll position without storing viewing tokens. Grid/Masonry views, photo order within loaded sections, and photo-size controls scroll with the page. Layout and density are remembered per gallery in the current browser. Favorites are also stored in that browser; they are not synchronized between devices. **View favorites** loads favorites from every batch and filters viewer navigation. Selfie results likewise load matches across the whole gallery, in match order; the viewer retains gallery-wide navigation. **Show all photos** or **Show loaded photos** restores every previously appended normal photo. Ordinary page navigation resets transient filters while preserving favorites and layout. Starting a selfie search leaves the favorites view; opening favorites clears the selfie search. Failed batch or filter loading preserves existing photos and offers retry; automatic loading pauses after a failed batch.
+Public event galleries initially render up to 40 photos. JavaScript automatically appends the next Astro-rendered batch before the visitor reaches the bottom, with a visible loading status and **Load more photos** or retry fallback. Numbered links remain available without JavaScript and to crawlers; shared photo links open their containing batch and offer **Load earlier photos**, preserving the visible position when prepending. Browser history retains the loaded range and scroll position without storing viewing tokens. Grid/Natural layout views, photo order within loaded sections, and photo-size controls scroll with the page. Layout and density are remembered per gallery in the current browser. Favorites are also stored in that browser; they are not synchronized between devices. **Favorites** loads favorites from every batch and filters viewer navigation. Selfie results likewise load matches across the whole gallery, in match order; the viewer retains gallery-wide navigation. **Show all photos** or **Show loaded photos** restores every previously appended normal photo. Ordinary page navigation resets transient filters while preserving favorites and layout. Starting a selfie search leaves the favorites view; opening favorites clears the selfie search. Failed batch or filter loading preserves existing photos and offers retry; automatic loading pauses after a failed batch.
 
 The photo viewer exposes **Save photo** directly. **Download ZIP** downloads every gallery photo, regardless of favorites or selfie-search filters; the selected-photo action includes the selection count. It uses a prebuilt ZIP when configured; otherwise, the browser prepares a ZIP with progress and retry feedback, just as it does for favorites. Keep the page open while preparing a download. These browser-generated ZIPs use device memory; large galleries on limited-memory devices may need a prebuilt archive through `downloadAllUrl`. Successful preparation closes the progress dialog and shows a short confirmation. Support remains an optional link rather than a tipping dialog.
 
