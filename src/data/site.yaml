@@ -144,10 +144,10 @@ actionLinks:
     darkColor3: 'var(--color-brand-700)'
     textColor: 'var(--primary-foreground)'
     pulse: true
-  - id: email
-    label: Email Ayoub
-    url: mailto:Ayoub@AyoubAbed.xyz
-    icon: lucide:mail
+  - id: sms
+    label: SMS Ayoub
+    url: 'sms:+18134240606?body=Hi%2C%20nice%20to%20meet%20you.%20My%20name%20is%20'
+    icon: lucide:message-circle
     group: primary
     color: 'var(--color-brand-600)'
     color2: 'var(--color-brand-500)'
