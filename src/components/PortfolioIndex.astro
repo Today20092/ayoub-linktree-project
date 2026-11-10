@@ -12,6 +12,7 @@ import {
 
 import keetIcon from '@/assets/keet.svg?raw'
 import MotionPreview from './MotionPreview.astro'
+import TechnicalWork from './TechnicalWork.astro'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -128,7 +129,7 @@ const simpleIconBody = (name?: string) =>
         </div>
         <p class="text-foreground mt-3 max-w-xl text-base leading-7 sm:text-lg sm:leading-8">
           I'm a digital media specialist in Tampa. I make videos, take photos,
-          and share what I'm learning.
+          build tools for video work, and share what I'm learning.
           <a href="/about/" class="text-link underline underline-offset-4">
             More about my background.
           </a>
@@ -142,6 +143,12 @@ const simpleIconBody = (name?: string) =>
             class="text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 hover:decoration-solid focus-visible:ring-2 focus-visible:outline-none"
           >
             My work
+          </a>
+          <a
+            href="#technical-work"
+            class="text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 hover:decoration-solid focus-visible:ring-2 focus-visible:outline-none"
+          >
+            Technical work
           </a>
           <a
             href="#elsewhere"
@@ -287,6 +294,8 @@ const simpleIconBody = (name?: string) =>
       ))}
     </div>
   </section>
+
+  <TechnicalWork />
 
   <section
     id="elsewhere"

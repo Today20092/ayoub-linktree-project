@@ -1,0 +1,164 @@
+---
+import simpleIcons from '@iconify-json/simple-icons/icons.json'
+import { ArrowUpRight, Clapperboard } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+
+// One line per project: what it is and who it helps. Links go to the live tool when one exists.
+const projects = [
+  {
+    name: 'yahalausa.net',
+    line: 'Media hub I built for Ya Hala with Haithum. Episodes and channel stats update on their own.',
+    stack: 'Astro',
+    url: 'https://www.yahalausa.net',
+    linkLabel: 'Live site',
+  },
+  {
+    name: 'ayoubabed.xyz',
+    line: 'This site. Portfolio, event galleries with guest uploads and face search, and an Android upload app, on Cloudflare Workers.',
+    stack: 'Astro',
+    url: 'https://github.com/Today20092/ayoub-linktree-project',
+    linkLabel: 'Source',
+  },
+  {
+    name: 'lut_builder',
+    line: 'Builds false-color exposure LUTs in the browser, so you can judge exposure on any monitor that loads a LUT.',
+    stack: 'JavaScript',
+    url: 'https://today20092.github.io/lut_builder/',
+    linkLabel: 'Open the tool',
+  },
+  {
+    name: 'podcast-bleed-reducer',
+    line: 'Cuts mic bleed in multitrack podcasts offline and writes gain envelopes you can still edit.',
+    stack: 'Rust',
+    url: 'https://github.com/Today20092/podcast-bleed-reducer',
+    linkLabel: 'Repo',
+  },
+  {
+    name: 'ArchiveBench',
+    line: 'Benchmarks CPU and GPU encoders on your own footage and reports quality, size, and speed before you archive.',
+    stack: 'Python',
+    url: 'https://github.com/Today20092/ArchiveBench',
+    linkLabel: 'Repo',
+  },
+  {
+    name: 'cutnotes',
+    line: 'Self-hosted video review for small teams. Upload a cut and collect timestamped comments and drawings from any phone.',
+    stack: 'TypeScript',
+    url: 'https://github.com/Today20092/cutnotes',
+    linkLabel: 'Repo',
+  },
+  {
+    name: 'Resolve TimeTracker',
+    line: 'Logs active editing and render time in DaVinci Resolve Studio, stored locally. MIT licensed.',
+    stack: 'Python',
+    url: 'https://github.com/Today20092/Davinci-Resolve-TimeTracker',
+    linkLabel: 'Repo',
+  },
+  {
+    name: 'Dashbeam contributions',
+    line: 'Two merged PRs to an open-source file-sharing app: shareable receive links and Android share-sheet batches.',
+    stack: 'Open source',
+    url: 'https://github.com/tonyantony300/dashbeam/pulls?q=is%3Apr+author%3AToday20092+is%3Amerged',
+    linkLabel: 'Merged PRs',
+  },
+]
+
+const githubIcon = simpleIcons.icons.github.body
+---
+
+<section
+  id="technical-work"
+  aria-labelledby="technical-work-title"
+  class="border-border mt-12 scroll-mt-20 border-t pt-8 lg:mt-16 lg:pt-10"
+  data-reveal="fade"
+>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div class="max-w-2xl">
+      <h2
+        id="technical-work-title"
+        class="font-heading text-foreground text-2xl font-extrabold sm:text-3xl"
+      >
+        Technical work
+      </h2>
+      <p class="text-muted-foreground mt-2 text-base leading-7">
+        I build the tools I want on set and in the edit, plus websites for
+        clients. I write them with AI coding agents and review, test, and ship
+        every change myself.
+      </p>
+    </div>
+    <a
+      href="https://github.com/Today20092"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-foreground hover:bg-accent focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-sm px-2 text-sm font-bold underline decoration-dotted underline-offset-4 hover:decoration-solid focus-visible:ring-2 focus-visible:outline-none"
+    >
+      <svg
+        class="size-5"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        set:html={githubIcon}
+      />
+      All projects on GitHub
+    </a>
+  </div>
+
+  <a
+    href="/portfolio/ya-hala-workflow/"
+    class="group border-border bg-muted/40 hover:bg-muted focus-visible:ring-ring mt-6 flex items-start gap-4 rounded-sm border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none sm:items-center sm:p-5"
+    data-reveal="up"
+  >
+    <span
+      class="bg-foreground text-background inline-flex size-10 shrink-0 items-center justify-center rounded-sm"
+      aria-hidden="true"
+    >
+      <Clapperboard size={20} />
+    </span>
+    <span class="min-w-0 flex-1">
+      <strong class="font-heading text-foreground block text-base font-extrabold">
+        Case study: the Ya Hala production workflow
+      </strong>
+      <span class="text-muted-foreground mt-1 block text-sm leading-6">
+        How a shoot goes from log footage and false-color exposure to a Rec.709
+        grade, with scripts handling the repetitive parts.
+      </span>
+    </span>
+    <ArrowUpRight
+      size={20}
+      aria-hidden="true"
+      class="text-muted-foreground group-hover:text-foreground mt-1 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 sm:mt-0"
+    />
+  </a>
+
+  <ul class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    {projects.map((project, index) => (
+      <li
+        data-reveal="up"
+        style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}
+      >
+        <a
+          href={project.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="group border-border hover:border-foreground/40 focus-visible:ring-ring flex h-full flex-col rounded-sm border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <span class="flex items-start justify-between gap-3">
+            <strong class="font-heading text-foreground min-w-0 text-base leading-5 font-extrabold wrap-anywhere">
+              {project.name}
+            </strong>
+            <Badge variant="outline" className="shrink-0">
+              {project.stack}
+            </Badge>
+          </span>
+          <span class="text-muted-foreground mt-2 block flex-1 text-sm leading-6">
+            {project.line}
+          </span>
+          <span class="text-foreground mt-3 inline-flex items-center gap-1 text-sm font-bold underline decoration-dotted underline-offset-4 group-hover:decoration-solid">
+            {project.linkLabel}
+            <ArrowUpRight size={16} aria-hidden="true" />
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>
