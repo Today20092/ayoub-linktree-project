@@ -1,0 +1,306 @@
+---
+import { Image } from 'astro:assets'
+import simpleIcons from '@iconify-json/simple-icons/icons.json'
+import { ArrowUpRight, Download, Play } from 'lucide-react'
+
+import ayoubabedShot from '@/assets/technical-work/ayoubabed-site.png'
+import lutBuilderShot from '@/assets/technical-work/lut-builder.png'
+import rateControlShot from '@/assets/technical-work/rate-control.png'
+import yahalaShot from '@/assets/technical-work/yahala-site.png'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+// Facts from the CleanSlate README (v1.0.0). Update when a new release ships.
+const cleanSlate = {
+  repo: 'https://github.com/Today20092/podcast-bleed-reducer',
+  demo: 'https://youtu.be/Tumeje13o5g',
+  thumbnail: 'https://i.ytimg.com/vi/Tumeje13o5g/maxresdefault.jpg',
+  facts: [
+    ['Built with', 'Rust, Iced'],
+    ['Runs on', 'Windows, macOS, Linux'],
+    ['Release', '1.0.0 stable'],
+  ],
+}
+
+// Projects with a page to look at get a screenshot; the rest are a plain list.
+const featured = [
+  {
+    name: 'yahalausa.net',
+    kind: 'Client website',
+    line: 'Media hub for Ya Hala. Views and episodes update on their own.',
+    url: 'https://www.yahalausa.net',
+    image: yahalaShot,
+    alt: 'Ya Hala USA homepage with the show banner and a total views counter',
+  },
+  {
+    name: 'ayoubabed.xyz',
+    kind: 'This site',
+    line: 'Event galleries with guest uploads, face search, and an Android app.',
+    url: 'https://github.com/Today20092/ayoub-linktree-project',
+    image: ayoubabedShot,
+    alt: 'Event galleries page on ayoubabed.xyz with photo cards and dates',
+  },
+  {
+    name: 'lut_builder',
+    kind: 'Camera tool',
+    line: 'False-color exposure LUTs for your log profile, built in the browser.',
+    url: 'https://today20092.github.io/lut_builder/',
+    image: lutBuilderShot,
+    alt: 'LUT Builder setup screen with Sony S-Log3 selected',
+  },
+  {
+    name: 'Rate control field guide',
+    kind: 'Encoding guide',
+    line: 'Interactive guide to H.264 and H.265 rate control modes.',
+    url: 'https://today20092.github.io/rate-control-field-guide/',
+    image: rateControlShot,
+    alt: 'Rate control field guide hero reading Something always has to move',
+  },
+]
+
+const tools = [
+  {
+    name: 'ArchiveBench',
+    kind: 'Encoding',
+    line: 'Tests encoders on your footage before you archive.',
+    url: 'https://github.com/Today20092/ArchiveBench',
+  },
+  {
+    name: 'cutnotes',
+    kind: 'Review',
+    line: 'Timestamped team comments on a cut, self-hosted.',
+    url: 'https://github.com/Today20092/cutnotes',
+  },
+  {
+    name: 'Resolve TimeTracker',
+    kind: 'DaVinci Resolve',
+    line: 'Logs editing and render time locally.',
+    url: 'https://github.com/Today20092/Davinci-Resolve-TimeTracker',
+  },
+  {
+    name: 'Dashbeam',
+    kind: 'Open source',
+    line: '2 merged PRs to a file-sharing app: receive links and Android share batches.',
+    url: 'https://github.com/tonyantony300/dashbeam/pulls?q=is%3Apr+author%3AToday20092+is%3Amerged',
+  },
+]
+
+const githubIcon = simpleIcons.icons.github.body
+const focusRing =
+  'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none'
+const textLink =
+  'text-foreground inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 hover:decoration-solid'
+---
+
+<section
+  id="technical-work"
+  aria-labelledby="technical-work-title"
+  class="border-border mt-12 scroll-mt-20 border-t pt-8 lg:mt-16 lg:pt-10"
+  data-reveal="fade"
+>
+  <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+    <div class="max-w-xl">
+      <h2
+        id="technical-work-title"
+        class="font-heading text-foreground text-2xl font-extrabold tracking-tight text-balance sm:text-3xl"
+      >
+        Technical work
+      </h2>
+      <p class="text-muted-foreground mt-2 text-base leading-7">
+        Tools I build for my own shoots and edits, plus client websites. Written
+        with AI coding agents, reviewed and shipped by me.
+      </p>
+    </div>
+    <a
+      href="https://github.com/Today20092"
+      target="_blank"
+      rel="noopener noreferrer"
+      class:list={[textLink, 'hover:bg-accent px-2', focusRing]}
+    >
+      <svg
+        class="size-5"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        set:html={githubIcon}
+      />
+      GitHub profile
+    </a>
+  </div>
+
+  <article
+    aria-labelledby="cleanslate-title"
+    class="mt-8 grid gap-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-center lg:gap-10"
+    data-reveal="up"
+  >
+    <a
+      href={cleanSlate.demo}
+      target="_blank"
+      rel="noopener noreferrer"
+      class:list={[
+        'group border-border bg-muted relative block overflow-hidden rounded-2xl border',
+        focusRing,
+      ]}
+    >
+      <Image
+        src={cleanSlate.thumbnail}
+        alt="CleanSlate demo video: Why your podcast audio sounds bad, and how to fix it"
+        width={1280}
+        height={720}
+        widths={[640, 960, 1280]}
+        sizes="(min-width: 1024px) 56vw, 100vw"
+        quality={75}
+        class="block aspect-video h-auto w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.02] motion-reduce:transition-none"
+      />
+      <span class="bg-background/90 text-foreground absolute top-3 left-3 inline-flex min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-bold shadow-[0_4px_16px_rgb(0_0_0/0.25)]">
+        <Play size={16} aria-hidden="true" className="fill-current" />
+        Watch the 7-minute demo
+      </span>
+    </a>
+    <div class="min-w-0">
+      <h3
+        id="cleanslate-title"
+        class="font-heading text-foreground text-2xl font-extrabold tracking-tight text-balance sm:text-3xl"
+      >
+        CleanSlate
+      </h3>
+      <p class="text-foreground mt-3 max-w-prose text-base leading-7">
+        Removes microphone bleed from multitrack podcasts. You label a few
+        examples of who is speaking, it learns each voice, then turns each mic
+        down while its speaker is silent.
+      </p>
+      <p class="text-muted-foreground mt-2 max-w-prose text-sm leading-6">
+        It writes gain envelopes you can still adjust, and runs offline with no
+        model download. It replaced my earlier Python automixer.
+      </p>
+      <dl class="border-border mt-5 grid grid-cols-3 gap-4 border-t pt-4">
+        {cleanSlate.facts.map(([label, value]) => (
+          <div class="min-w-0">
+            <dt class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+              {label}
+            </dt>
+            <dd class="text-foreground mt-1 text-sm font-bold">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2">
+        <a
+          href={`${cleanSlate.repo}#download`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class={cn(
+            buttonVariants({ size: 'lg' }),
+            'min-h-11 rounded-xl px-4 text-sm font-bold',
+          )}
+        >
+          <Download data-icon="inline-start" aria-hidden="true" />
+          Download free
+        </a>
+        <a
+          href={cleanSlate.repo}
+          target="_blank"
+          rel="noopener noreferrer"
+          class:list={[textLink, focusRing]}
+        >
+          <svg
+            class="size-4"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            set:html={githubIcon}
+          />
+          Source on GitHub
+        </a>
+      </div>
+    </div>
+  </article>
+
+  <ul class="mt-14 grid gap-x-6 gap-y-10 sm:grid-cols-2">
+    {featured.map((project, index) => (
+      <li data-reveal="up" style={`--reveal-delay: ${index * 60}ms`}>
+        <a
+          href={project.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class:list={['group block rounded-2xl', focusRing]}
+        >
+          <span class="border-border bg-muted block overflow-hidden rounded-2xl border">
+            <Image
+              src={project.image}
+              alt={project.alt}
+              width={960}
+              height={600}
+              widths={[480, 720, 960]}
+              sizes="(min-width: 640px) 48vw, 100vw"
+              fit="cover"
+              position="top"
+              quality={75}
+              class="block aspect-16/10 h-auto w-full object-cover object-top transition-transform duration-300 ease-out group-hover:scale-[1.02] motion-reduce:transition-none"
+            />
+          </span>
+          <span class="mt-3 flex items-baseline justify-between gap-3">
+            <strong class="font-heading text-foreground min-w-0 text-lg leading-6 font-extrabold">
+              {project.name}
+            </strong>
+            <small class="text-muted-foreground shrink-0 text-xs font-semibold tracking-wider uppercase">
+              {project.kind}
+            </small>
+          </span>
+          <span class="text-muted-foreground mt-1 block text-sm leading-6">
+            {project.line}
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <a
+    href="/portfolio/ya-hala-workflow/"
+    class:list={[
+      'group border-border hover:bg-muted/50 mt-14 flex items-center justify-between gap-4 rounded-2xl border px-5 py-4 transition-colors sm:px-6 sm:py-5',
+      focusRing,
+    ]}
+  >
+    <span class="min-w-0">
+      <strong class="font-heading text-foreground block text-lg leading-6 font-extrabold tracking-tight text-balance">
+        Ya Hala case study: from log footage to the final grade
+      </strong>
+      <span class="text-muted-foreground mt-1 block text-sm leading-6">
+        How these tools fit one real shoot: false color on set, a color-managed
+        Resolve timeline, and scripted cleanup.
+      </span>
+    </span>
+    <ArrowUpRight
+      size={22}
+      aria-hidden="true"
+      className="text-muted-foreground group-hover:text-foreground shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none"
+    />
+  </a>
+
+  <h3 class="font-heading text-foreground mt-12 text-lg font-extrabold">
+    More tools and contributions
+  </h3>
+  <ul class="divide-border border-border mt-3 divide-y border-y">
+    {tools.map((tool) => (
+      <li>
+        <a
+          href={tool.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class:list={[
+            'group hover:bg-muted/50 grid min-h-11 gap-x-6 gap-y-1 px-2 py-3 transition-colors sm:grid-cols-[12rem_minmax(0,1fr)_auto] sm:items-baseline',
+            focusRing,
+          ]}
+        >
+          <strong class="text-foreground text-sm font-bold wrap-anywhere underline decoration-transparent underline-offset-4 group-hover:decoration-current">
+            {tool.name}
+          </strong>
+          <span class="text-muted-foreground text-sm leading-6">
+            {tool.line}
+          </span>
+          <small class="text-muted-foreground text-xs font-semibold tracking-wider uppercase sm:text-right">
+            {tool.kind}
+          </small>
+        </a>
+      </li>
+    ))}
+  </ul>
+</section>

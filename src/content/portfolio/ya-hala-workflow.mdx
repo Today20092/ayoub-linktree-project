@@ -1,0 +1,159 @@
+---
+order: 1
+title: 'Case study: the Ya Hala production workflow'
+seoDescription: How Ayoub Abedrabbo shoots, color manages, and finishes Ya Hala with Haithum episodes, from false-color exposure and log capture to a Rec.709 Gamma 2.2 grade and scripted cleanup.
+status: complete
+category: Case study · camera, color, and automation
+summary: One Ya Hala with Haithum shoot, followed from camera setup and false-color exposure through log capture, color management, the grade, and the scripts that speed up post.
+featuredImage: https://i.ytimg.com/vi/Aml_gBJ06ms/maxresdefault.jpg
+heroVideo: Aml_gBJ06ms
+imageAlt: Ya Hala with Haithum on location for the Houston real estate episode
+imageWidth: 1280
+imageHeight: 720
+role: Field videographer, camera and audio technician, colorist, tool builder
+collaborators:
+  - Haithum
+  - Ya Hala editing team
+duration: October 2025-present
+tools:
+  - Sony a7S III
+  - Lumix S5IIX
+  - Aputure and Amaran lighting
+  - Hollyland wireless microphones
+  - lut_builder
+  - DaVinci Resolve Studio
+  - Resolve TimeTracker
+  - Codex CLI
+outcomes:
+  - A repeatable shoot checklist across two camera systems, lighting, and sound
+  - Exposure judged with false color instead of guessed from the screen
+  - Color managed from log to Rec.709 Gamma 2.2 for phone and web viewers
+  - A cleaner handoff to the editors, with dialogue and color already finished
+links:
+  - label: Open lut_builder
+    url: https://today20092.github.io/lut_builder/
+  - label: Resolve TimeTracker on GitHub
+    url: https://github.com/Today20092/Davinci-Resolve-TimeTracker
+  - label: Ya Hala on YouTube
+    url: https://www.youtube.com/@YaHalaUSA
+videos:
+  - youtubeId: E2H1HMGjfbk
+    label: Before working together
+    title: 'تجربة لا تُنسى: ثلاثة أيام في مؤتمر ماس السنوي في شيكاغو - الجزء الثاني MasCon'
+    publishedAt: '2025-01-22'
+    description: Published before I joined. This is the baseline for camera, color, lighting, and sound.
+    comparisonRole: before
+  - youtubeId: Aml_gBJ06ms
+    label: After the new workflow
+    title: الحقيقة وراء أرخص منزل في أمريكا… جولة داخل سوق العقارات في هيوستن
+    publishedAt: '2026-03-30'
+    description: The Houston real estate episode, shot and finished with the workflow on this page.
+    comparisonRole: after
+---
+
+import {
+  Timeline,
+  TimelineContent,
+  TimelineDescription,
+  TimelineIndicator,
+  TimelineItem,
+  TimelineTitle,
+} from '@/components/ui/timeline'
+
+{/* TODO(Ayoub): add exact camera settings, time saved, and shareable view counts. Nothing below is a guessed number. */}
+
+## The workflow at a glance
+
+<Timeline className="not-typeset my-6">
+  <TimelineItem>
+    <TimelineIndicator>1</TimelineIndicator>
+    <TimelineContent>
+      <TimelineTitle>
+        <strong>Production</strong>
+      </TimelineTitle>
+      <TimelineDescription>
+        Camera and gimbal setup, lighting checks, and exposure set with false
+        color.
+      </TimelineDescription>
+    </TimelineContent>
+  </TimelineItem>
+  <TimelineItem>
+    <TimelineIndicator>2</TimelineIndicator>
+    <TimelineContent>
+      <TimelineTitle>
+        <strong>Pipeline</strong>
+      </TimelineTitle>
+      <TimelineDescription>
+        Log capture on both cameras, then a color-managed timeline in DaVinci
+        Resolve.
+      </TimelineDescription>
+    </TimelineContent>
+  </TimelineItem>
+  <TimelineItem>
+    <TimelineIndicator>3</TimelineIndicator>
+    <TimelineContent>
+      <TimelineTitle>
+        <strong>Post</strong>
+      </TimelineTitle>
+      <TimelineDescription>
+        Dialogue cleanup and the grade, delivered as Rec.709 Gamma 2.2.
+      </TimelineDescription>
+    </TimelineContent>
+  </TimelineItem>
+  <TimelineItem>
+    <TimelineIndicator>4</TimelineIndicator>
+    <TimelineContent>
+      <TimelineTitle>
+        <strong>Automation</strong>
+      </TimelineTitle>
+      <TimelineDescription>
+        AI noise reduction, scripts, and tracked editing time.
+      </TimelineDescription>
+    </TimelineContent>
+  </TimelineItem>
+  <TimelineItem>
+    <TimelineIndicator>5</TimelineIndicator>
+    <TimelineContent>
+      <TimelineTitle>
+        <strong>Result</strong>
+      </TimelineTitle>
+      <TimelineDescription>
+        Finished dialogue and color handed to the Ya Hala editors.
+      </TimelineDescription>
+    </TimelineContent>
+  </TimelineItem>
+</Timeline>
+
+## Production
+
+We shoot on a Sony a7S III and a Lumix S5IIX, light with Aputure and Amaran fixtures, and record dialogue on Hollyland wireless mics. Before each setup I check the lights against the subject and the background, then set exposure with a false-color LUT on the monitor.
+
+That LUT comes from [lut_builder](https://today20092.github.io/lut_builder/), a browser tool I built. It maps each exposure band to a color, so I can see when skin sits where I want it and when highlights are about to clip, without trusting a bright screen outdoors.
+
+{/* TODO(Ayoub): shutter, ISO, frame rate, and gimbal model for this shoot. */}
+
+## Pipeline
+
+Both cameras record in log. Log keeps more highlight and shadow detail than a baked-in look, which matters on bright Houston exteriors. In DaVinci Resolve, a color-managed timeline converts each camera's log to one working space, so the a7S III and S5IIX shots match before I grade.
+
+Delivery is Rec.709 with Gamma 2.2, not 2.4. Gamma 2.4 suits a dim room with a reference monitor. Most of the Ya Hala audience watches on phones and laptops in normal light, where 2.2 keeps shadows from looking crushed.
+
+{/* TODO(Ayoub): recording codec and bitrate, and why. */}
+
+## Post
+
+The editors cut the episode. I handle the technical finish: AI noise reduction, EQ, compression, and limiting on dialogue, then the grade. The before and after videos below show the difference against an episode from before I joined.
+
+{/* TODO(Ayoub): add 2-3 before/after grade stills to src/assets/client-work/ya-hala/ and list them under gallery. */}
+
+## Automation
+
+Resolve's AI noise reduction handles the first cleanup pass on dialogue. I use AI coding agents to write small scripts for repetitive steps, and [Resolve TimeTracker](https://github.com/Today20092/Davinci-Resolve-TimeTracker), another tool I built, logs active editing and render time so I can measure what each change saves.
+
+{/* TODO(Ayoub): name the transcript tool and give the measured time saved per episode. */}
+
+## Result
+
+The Houston real estate episode is the finished piece. The editors receive dialogue and color already done, so they spend their time on the story. See the [full Ya Hala project](/portfolio/ya-hala/) for the website I built for the channel.
+
+For scale, [yahalausa.net](https://www.yahalausa.net) lists 155,359,353+ total views across the channel (updated June 22, 2026). That number covers all of Ya Hala's videos, not only the episodes I shot.
