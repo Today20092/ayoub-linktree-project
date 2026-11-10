@@ -1,70 +1,91 @@
 ---
+import { Image } from 'astro:assets'
 import simpleIcons from '@iconify-json/simple-icons/icons.json'
-import { ArrowUpRight, Clapperboard } from 'lucide-react'
+import {
+  ArrowUpRight,
+  AudioLines,
+  Clapperboard,
+  GitMerge,
+  HardDrive,
+  MessageSquareText,
+  Timer,
+} from 'lucide-react'
 
-import { Badge } from '@/components/ui/badge'
+import ayoubabedShot from '@/assets/technical-work/ayoubabed-site.png'
+import lutBuilderShot from '@/assets/technical-work/lut-builder.png'
+import rateControlShot from '@/assets/technical-work/rate-control.png'
+import yahalaShot from '@/assets/technical-work/yahala-site.png'
 
-// One line per project: what it is and who it helps. Links go to the live tool when one exists.
-const projects = [
+// Projects with a page to look at get a screenshot; the rest get an icon.
+const featured = [
   {
     name: 'yahalausa.net',
-    line: 'Media hub I built for Ya Hala with Haithum. Episodes and channel stats update on their own.',
-    stack: 'Astro',
+    kind: 'Client website',
+    line: 'Media hub for Ya Hala. Views and episodes update on their own.',
     url: 'https://www.yahalausa.net',
-    linkLabel: 'Live site',
+    image: yahalaShot,
+    alt: 'Ya Hala USA homepage with the show banner and a total views counter',
   },
   {
     name: 'ayoubabed.xyz',
-    line: 'This site. Portfolio, event galleries with guest uploads and face search, and an Android upload app, on Cloudflare Workers.',
-    stack: 'Astro',
+    kind: 'This site',
+    line: 'Event galleries with guest uploads, face search, and an Android app.',
     url: 'https://github.com/Today20092/ayoub-linktree-project',
-    linkLabel: 'Source',
+    image: ayoubabedShot,
+    alt: 'Event galleries page on ayoubabed.xyz with photo cards and dates',
   },
   {
     name: 'lut_builder',
-    line: 'Builds false-color exposure LUTs in the browser, so you can judge exposure on any monitor that loads a LUT.',
-    stack: 'JavaScript',
+    kind: 'Camera tool',
+    line: 'False-color exposure LUTs for your log profile, built in the browser.',
     url: 'https://today20092.github.io/lut_builder/',
-    linkLabel: 'Open the tool',
+    image: lutBuilderShot,
+    alt: 'LUT Builder setup screen with Sony S-Log3 selected',
   },
   {
+    name: 'Rate control field guide',
+    kind: 'Encoding guide',
+    line: 'Interactive guide to H.264 and H.265 rate control modes.',
+    url: 'https://today20092.github.io/rate-control-field-guide/',
+    image: rateControlShot,
+    alt: 'Rate control field guide hero reading Something always has to move',
+  },
+]
+
+const tools = [
+  {
     name: 'podcast-bleed-reducer',
-    line: 'Cuts mic bleed in multitrack podcasts offline and writes gain envelopes you can still edit.',
-    stack: 'Rust',
+    kind: 'Audio',
+    line: 'Removes mic bleed from multitrack podcasts.',
     url: 'https://github.com/Today20092/podcast-bleed-reducer',
-    linkLabel: 'Repo',
+    icon: AudioLines,
   },
   {
     name: 'ArchiveBench',
-    line: 'Benchmarks CPU and GPU encoders on your own footage and reports quality, size, and speed before you archive.',
-    stack: 'Python',
+    kind: 'Encoding',
+    line: 'Tests encoders on your footage before you archive.',
     url: 'https://github.com/Today20092/ArchiveBench',
-    linkLabel: 'Repo',
+    icon: HardDrive,
   },
   {
     name: 'cutnotes',
-    line: 'Self-hosted video review for small teams. Upload a cut and collect timestamped comments and drawings from any phone.',
-    stack: 'TypeScript',
+    kind: 'Review',
+    line: 'Timestamped team comments on a cut, self-hosted.',
     url: 'https://github.com/Today20092/cutnotes',
-    linkLabel: 'Repo',
+    icon: MessageSquareText,
   },
   {
     name: 'Resolve TimeTracker',
-    line: 'Logs active editing and render time in DaVinci Resolve Studio, stored locally. MIT licensed.',
-    stack: 'Python',
+    kind: 'DaVinci Resolve',
+    line: 'Logs editing and render time locally.',
     url: 'https://github.com/Today20092/Davinci-Resolve-TimeTracker',
-    linkLabel: 'Repo',
-  },
-  {
-    name: 'Dashbeam contributions',
-    line: 'Two merged PRs to an open-source file-sharing app: shareable receive links and Android share-sheet batches.',
-    stack: 'Open source',
-    url: 'https://github.com/tonyantony300/dashbeam/pulls?q=is%3Apr+author%3AToday20092+is%3Amerged',
-    linkLabel: 'Merged PRs',
+    icon: Timer,
   },
 ]
 
 const githubIcon = simpleIcons.icons.github.body
+const focusRing =
+  'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none'
 ---
 
 <section
@@ -73,8 +94,8 @@ const githubIcon = simpleIcons.icons.github.body
   class="border-border mt-12 scroll-mt-20 border-t pt-8 lg:mt-16 lg:pt-10"
   data-reveal="fade"
 >
-  <div class="flex flex-wrap items-end justify-between gap-4">
-    <div class="max-w-2xl">
+  <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+    <div class="max-w-xl">
       <h2
         id="technical-work-title"
         class="font-heading text-foreground text-2xl font-extrabold sm:text-3xl"
@@ -82,16 +103,18 @@ const githubIcon = simpleIcons.icons.github.body
         Technical work
       </h2>
       <p class="text-muted-foreground mt-2 text-base leading-7">
-        I build the tools I want on set and in the edit, plus websites for
-        clients. I write them with AI coding agents and review, test, and ship
-        every change myself.
+        Tools I build for my own shoots and edits, plus client websites. Written
+        with AI coding agents, reviewed and shipped by me.
       </p>
     </div>
     <a
       href="https://github.com/Today20092"
       target="_blank"
       rel="noopener noreferrer"
-      class="text-foreground hover:bg-accent focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-sm px-2 text-sm font-bold underline decoration-dotted underline-offset-4 hover:decoration-solid focus-visible:ring-2 focus-visible:outline-none"
+      class:list={[
+        'text-foreground hover:bg-accent inline-flex min-h-11 items-center gap-2 rounded-sm px-2 text-sm font-bold underline decoration-dotted underline-offset-4 hover:decoration-solid',
+        focusRing,
+      ]}
     >
       <svg
         class="size-5"
@@ -99,13 +122,16 @@ const githubIcon = simpleIcons.icons.github.body
         aria-hidden="true"
         set:html={githubIcon}
       />
-      All projects on GitHub
+      GitHub profile
     </a>
   </div>
 
   <a
     href="/portfolio/ya-hala-workflow/"
-    class="group border-border bg-muted/40 hover:bg-muted focus-visible:ring-ring mt-6 flex items-start gap-4 rounded-sm border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none sm:items-center sm:p-5"
+    class:list={[
+      'group border-border bg-muted/40 hover:bg-muted mt-6 flex items-center gap-4 rounded-sm border p-4 transition-colors sm:p-5',
+      focusRing,
+    ]}
     data-reveal="up"
   >
     <span
@@ -115,50 +141,109 @@ const githubIcon = simpleIcons.icons.github.body
       <Clapperboard size={20} />
     </span>
     <span class="min-w-0 flex-1">
-      <strong class="font-heading text-foreground block text-base font-extrabold">
-        Case study: the Ya Hala production workflow
+      <small class="text-muted-foreground block text-xs font-semibold tracking-wider uppercase">
+        Case study
+      </small>
+      <strong class="font-heading text-foreground mt-0.5 block text-base font-extrabold">
+        How a Ya Hala shoot goes from log footage to final grade
       </strong>
-      <span class="text-muted-foreground mt-1 block text-sm leading-6">
-        How a shoot goes from log footage and false-color exposure to a Rec.709
-        grade, with scripts handling the repetitive parts.
-      </span>
     </span>
     <ArrowUpRight
       size={20}
       aria-hidden="true"
-      class="text-muted-foreground group-hover:text-foreground mt-1 shrink-0 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 sm:mt-0"
+      className="text-muted-foreground group-hover:text-foreground shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
     />
   </a>
 
-  <ul class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-    {projects.map((project, index) => (
-      <li
-        data-reveal="up"
-        style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}
-      >
+  <ul class="mt-8 grid gap-x-6 gap-y-8 sm:grid-cols-2">
+    {featured.map((project, index) => (
+      <li data-reveal="up" style={`--reveal-delay: ${index * 60}ms`}>
         <a
           href={project.url}
           target="_blank"
           rel="noopener noreferrer"
-          class="group border-border hover:border-foreground/40 focus-visible:ring-ring flex h-full flex-col rounded-sm border p-4 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          class:list={['group block rounded-sm', focusRing]}
         >
-          <span class="flex items-start justify-between gap-3">
-            <strong class="font-heading text-foreground min-w-0 text-base leading-5 font-extrabold wrap-anywhere">
+          <span class="border-border bg-muted block overflow-hidden rounded-sm border">
+            <Image
+              src={project.image}
+              alt={project.alt}
+              width={960}
+              height={600}
+              widths={[480, 720, 960]}
+              sizes="(min-width: 640px) 48vw, 100vw"
+              fit="cover"
+              position="top"
+              quality={75}
+              class="block aspect-16/10 h-auto w-full object-cover object-top transition-transform duration-300 ease-out group-hover:scale-[1.02]"
+            />
+          </span>
+          <span class="mt-3 flex items-baseline justify-between gap-3">
+            <strong class="font-heading text-foreground min-w-0 text-lg leading-6 font-extrabold">
               {project.name}
             </strong>
-            <Badge variant="outline" className="shrink-0">
-              {project.stack}
-            </Badge>
+            <small class="text-muted-foreground shrink-0 text-xs font-semibold tracking-wider uppercase">
+              {project.kind}
+            </small>
           </span>
-          <span class="text-muted-foreground mt-2 block flex-1 text-sm leading-6">
+          <span class="text-muted-foreground mt-1 block text-sm leading-6">
             {project.line}
-          </span>
-          <span class="text-foreground mt-3 inline-flex items-center gap-1 text-sm font-bold underline decoration-dotted underline-offset-4 group-hover:decoration-solid">
-            {project.linkLabel}
-            <ArrowUpRight size={16} aria-hidden="true" />
           </span>
         </a>
       </li>
     ))}
   </ul>
+
+  <h3 class="text-foreground mt-10 mb-3 text-base font-bold">
+    Tools for production and post
+  </h3>
+  <ul class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    {tools.map((tool) => (
+      <li>
+        <a
+          href={tool.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class:list={[
+            'group border-border hover:bg-muted/60 flex h-full items-start gap-3 rounded-sm border p-3 transition-colors',
+            focusRing,
+          ]}
+        >
+          <span
+            class="bg-muted text-foreground inline-flex size-9 shrink-0 items-center justify-center rounded-sm"
+            aria-hidden="true"
+          >
+            <tool.icon size={18} />
+          </span>
+          <span class="min-w-0">
+            <strong class="text-foreground block text-sm leading-5 font-bold wrap-anywhere">
+              {tool.name}
+            </strong>
+            <span class="text-muted-foreground mt-0.5 block text-sm leading-5">
+              {tool.line}
+            </span>
+            <small class="text-muted-foreground mt-1.5 block text-xs font-semibold tracking-wider uppercase">
+              {tool.kind}
+            </small>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <p class="text-muted-foreground mt-6 flex items-center gap-2 text-sm">
+    <GitMerge size={16} aria-hidden="true" className="shrink-0" />
+    <span>
+      Open source:
+      <a
+        href="https://github.com/tonyantony300/dashbeam/pulls?q=is%3Apr+author%3AToday20092+is%3Amerged"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-foreground font-semibold underline decoration-dotted underline-offset-4 hover:decoration-solid"
+      >
+        2 merged PRs to Dashbeam
+      </a>
+      , a file-sharing app.
+    </span>
+  </p>
 </section>
