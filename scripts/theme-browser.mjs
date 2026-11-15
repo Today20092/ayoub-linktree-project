@@ -9,6 +9,11 @@ const context = await browser.newContext({
 })
 let checks = 0
 const failures = []
+// The theme switch sits inside the header menu; open it before interacting.
+const openMenu = (page) =>
+  page.evaluate(() => {
+    document.querySelector('[data-header-menu]').open = true
+  })
 const checkTheme = async (page, preference, dark) => {
   await page.waitForFunction(
     ({ preference, dark }) =>
@@ -66,6 +71,7 @@ try {
   ]) {
     await page.emulateMedia({ colorScheme: system })
     const button = page.locator(`[data-theme-option="${preference}"]`)
+    await openMenu(page)
     await button.focus()
     await page.keyboard.press('Enter')
     await checkTheme(page, preference, preference === 'dark')
@@ -87,8 +93,10 @@ try {
   const second = await context.newPage()
   await second.goto(origin)
   await checkTheme(second, 'dark', true)
+  await openMenu(page)
   await page.locator('[data-theme-option="light"]').click()
   await checkTheme(second, 'light', false)
+  await openMenu(second)
   await second.locator('[data-theme-option="system"]').click()
   await checkTheme(page, 'system', false)
   for (const width of [320, 390]) {
@@ -97,6 +105,7 @@ try {
       await page.evaluate((size) => {
         document.documentElement.style.fontSize = `${size}%`
       }, size)
+      await openMenu(page)
       const measurements = await page.evaluate(() => ({
         viewport: innerWidth,
         document: document.documentElement.scrollWidth,
