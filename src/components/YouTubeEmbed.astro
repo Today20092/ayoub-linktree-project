@@ -66,10 +66,10 @@ const localPoster = typeof poster === 'string' ? undefined : poster
     <button
       type="button"
       aria-label={`Play ${title}`}
-      class="absolute inset-0 flex cursor-pointer items-center justify-center focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-white"
+      class="absolute inset-0 flex cursor-pointer items-center justify-center focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-viewer-foreground"
       data-youtube-play
     >
-      <span class="rounded-full bg-black/80 px-6 py-4 text-lg font-bold text-white">
+      <span class="rounded-full bg-scrim/80 px-6 py-4 text-lg font-bold text-scrim-foreground">
         <span aria-hidden="true" class="mr-2">
           ▶
         </span>

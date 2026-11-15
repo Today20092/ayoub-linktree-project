@@ -2,6 +2,7 @@
 import '../styles.css'
 
 import BaseLayout from '../layouts/BaseLayout.astro'
+import PageContainer from '../components/PageContainer.astro'
 import { siteConfig } from '../lib/site-config'
 
 const { site } = siteConfig
@@ -22,10 +23,7 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
   ogImageType="image/jpeg"
   ogImageAlt={site.ogImageAlt}
 >
-  <main
-    id="main-content"
-    class="mx-auto w-full max-w-3xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-20"
-  >
+  <PageContainer id="main-content">
     <header data-reveal="up">
       <p class="text-link text-sm font-bold tracking-wide uppercase">Privacy</p>
       <h1 class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
@@ -36,10 +34,7 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
         this site.
       </p>
     </header>
-    <div
-      class="prose prose-stone dark:prose-invert mt-10 max-w-none"
-      data-reveal="up"
-    >
+    <div class="typeset mt-10 max-w-none" data-reveal="up">
       <h2>Site hosting and analytics</h2>
       <p>
         The site is hosted on Cloudflare. Cloudflare Web Analytics is loaded on
@@ -79,5 +74,5 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
       </p>
       <p>Last reviewed: September 11, 2026.</p>
     </div>
-  </main>
+  </PageContainer>
 </BaseLayout>

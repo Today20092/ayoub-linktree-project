@@ -4,6 +4,7 @@ import '../styles.css'
 import { Image } from 'astro:assets'
 import portrait from '../assets/ayoub-portrait.jpg'
 import BaseLayout from '../layouts/BaseLayout.astro'
+import PageContainer from '../components/PageContainer.astro'
 import { siteConfig } from '../lib/site-config'
 
 const { site } = siteConfig
@@ -38,10 +39,7 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
     },
   }}
 >
-  <main
-    id="main-content"
-    class="mx-auto w-full max-w-3xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-20"
-  >
+  <PageContainer id="main-content">
     <header data-reveal="up">
       <h1 class="font-heading text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
         Ayoub Abedrabbo
@@ -135,5 +133,5 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
         .
       </p>
     </div>
-  </main>
+  </PageContainer>
 </BaseLayout>

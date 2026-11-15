@@ -23,6 +23,25 @@ const noOverflow = async (page) => {
     JSON.stringify(dimensions),
   )
 }
+const assertTheme = async (page, expected) => {
+  const rendered = await page.evaluate(() => {
+    const root = document.documentElement
+    const dark = root.classList.contains('dark')
+    const scheme = getComputedStyle(root).colorScheme
+    const background = getComputedStyle(document.body).backgroundColor
+    root.classList.toggle('dark', !dark)
+    const oppositeBackground = getComputedStyle(document.body).backgroundColor
+    root.classList.toggle('dark', dark)
+    return { dark, scheme, background, oppositeBackground }
+  })
+  assert.equal(rendered.dark, expected === 'dark', `${expected} class`)
+  assert.equal(rendered.scheme, expected, `${expected} native color scheme`)
+  assert.notEqual(
+    rendered.background,
+    rendered.oppositeBackground,
+    `${expected} background`,
+  )
+}
 const contrast = async (locator, imageBackdrop, foregroundProperty = 'color') =>
   locator.evaluate(
     (element, { imageBackdrop, foregroundProperty }) => {
@@ -110,6 +129,7 @@ try {
           })
           try {
             await page.goto(origin)
+            await assertTheme(page, colorScheme)
             await page.evaluate(() => document.fonts.ready)
             const links = page
               .getByRole('navigation', {
@@ -213,6 +233,7 @@ try {
         })
         try {
           await page.goto(`${origin}/services/event-portraits/`)
+          await assertTheme(page, colorScheme)
           await page.locator('#name').fill('Accessibility test')
           await page.locator('[data-coverage="2 hours"]').click()
           assert.equal(await page.locator('#coverage').inputValue(), '2 hours')
@@ -323,6 +344,7 @@ try {
           })
           try {
             await page.goto(`${origin}${path}`)
+            await assertTheme(page, colorScheme)
             const measurements = []
             for (const selector of selectors) {
               const text = page.locator(selector).first()
@@ -454,6 +476,7 @@ try {
         })
         try {
           await page.goto(`${origin}/payments/`)
+          await assertTheme(page, colorScheme)
           assert.equal(
             await page
               .getByRole('group', { name: 'Tip by card or mobile wallet' })
@@ -501,6 +524,7 @@ try {
         const measurements = []
         try {
           await page.goto(`${origin}/services/event-portraits/`)
+          await assertTheme(page, colorScheme)
           const choices = page.locator('[data-coverage]')
           assert.equal(await choices.count(), 4)
           for (const choice of await choices.all()) {
@@ -525,6 +549,7 @@ try {
             ['/portfolio/ya-hala/', '[data-youtube-play] > span'],
           ]) {
             await page.goto(`${origin}${path}`)
+            await assertTheme(page, colorScheme)
             const overlay = page.locator(selector).first()
             await overlay.waitFor({ state: 'visible' })
             for (const backdrop of ['black', 'white']) {
@@ -547,6 +572,7 @@ try {
     })
     try {
       await page.goto(`${origin}/portfolio/chop-shop-show-podcast/`)
+      await assertTheme(page, 'dark')
       const links = page.locator('th[scope="row"] > a')
       assert.equal(await links.count(), 4)
       for (const link of await links.all()) {

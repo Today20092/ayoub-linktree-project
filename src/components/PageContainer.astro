@@ -1,0 +1,15 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+type Props = HTMLAttributes<'main'>
+const { class: className, ...attributes } = Astro.props
+---
+
+<main
+  {...attributes}
+  class:list={[
+    'mx-auto w-full max-w-3xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-20',
+    className,
+  ]}
+>
+  <slot />
+</main>

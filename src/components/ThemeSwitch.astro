@@ -1,0 +1,16 @@
+<div
+  role="group"
+  aria-label="Color theme"
+  class="border-border inline-flex rounded-md border p-1"
+>
+  {['system', 'light', 'dark'].map((theme) => (
+    <button
+      type="button"
+      data-theme-option={theme}
+      aria-pressed="false"
+      class="text-muted-foreground aria-pressed:bg-accent aria-pressed:text-accent-foreground focus-visible:ring-ring min-h-11 min-w-11 rounded-sm px-2 text-xs font-bold focus-visible:ring-2 focus-visible:outline-none"
+    >
+      {theme[0].toUpperCase() + theme.slice(1)}
+    </button>
+  ))}
+</div>
