@@ -36,3 +36,38 @@ export async function galleryAdminAuthorized(
     return false
   }
 }
+
+export type GalleryAdminGate =
+  'skip' | 'allow' | 'forbidden' | 'forbidden-api' | 'not-found'
+
+// Single admin gate, applied by src/middleware.ts to /admin/** and /api/admin/**.
+export async function galleryAdminGate(
+  request: Request,
+  env: {
+    GALLERY_ADMIN_EMAIL: string
+    GALLERY_ACCESS_TEAM_DOMAIN?: string
+    GALLERY_ACCESS_AUDS?: string
+  },
+): Promise<GalleryAdminGate> {
+  const url = new URL(request.url)
+  // Astro decodes the path before routing, so match the decoded form; undecodable paths fail closed.
+  let path = url.pathname
+  try {
+    path = decodeURIComponent(path)
+  } catch {
+    path = '/admin/'
+  }
+  path = path.replace(/\/{2,}/g, '/').toLowerCase()
+  if (!/^\/(api\/)?admin(\/|$)/.test(path)) return 'skip'
+  if (url.hostname === 'payments.ayoubabed.xyz') return 'not-found'
+  return (await galleryAdminAuthorized(
+    request,
+    env.GALLERY_ADMIN_EMAIL,
+    env.GALLERY_ACCESS_TEAM_DOMAIN,
+    env.GALLERY_ACCESS_AUDS,
+  ))
+    ? 'allow'
+    : path.startsWith('/api/')
+      ? 'forbidden-api'
+      : 'forbidden'
+}

@@ -5,20 +5,32 @@ import { Check } from 'lucide-react'
 import { getEntry } from 'astro:content'
 import { buttonVariants } from '@/components/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { inputClassName } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import PageContainer from '../../components/layout/PageContainer.astro'
+import ServiceSection from '../../components/layout/ServiceSection.astro'
 import angelPortrait from '../../assets/portraits/angel-birthday-cover.jpg'
 import type { ImageMetadata } from 'astro'
 import {
   eventPortraitDescription,
-  eventPortraitEmail,
   eventPortraitExtraHour,
-  eventPortraitMapsUrl,
-  eventPortraitPackages,
+  eventPortraitOffer,
   eventPortraitProofGalleryUrl,
-  eventPortraitStructuredData,
   eventPortraitTitle,
 } from '../../lib/event-portrait-offer'
+import {
+  formatUsd,
+  headlineStartingPrice,
+  inquiryEmail,
+  mapsListingUrl,
+  offerStructuredData,
+} from '../../lib/service-offer'
+import {
+  inquiryFieldDefs,
+  type InquiryFieldDef,
+  type InquiryFieldName,
+} from '../../lib/event-portrait-inquiry'
 import { siteConfig } from '../../lib/site-config'
 
 const mcc = await getEntry('portfolio', 'muslim-business-chamber-2026')
@@ -37,8 +49,10 @@ const canonicalUrl = new URL(
   '/services/event-portraits/',
   Astro.site,
 ).toString()
-const ogImage = new URL(siteConfig.site.ogImage, Astro.site).toString()
-const packages = eventPortraitPackages
+const packages = eventPortraitOffer.startingPrices.map(({ name, price }) => ({
+  hours: name,
+  price: formatUsd(price),
+}))
 const heroImage = await getImage({
   src: angelPortrait,
   layout: 'full-width',
@@ -48,10 +62,7 @@ const heroImage = await getImage({
   sizes: '(min-width: 1024px) 50vw, 100vw',
   quality: 82,
 })
-const link =
-  'text-link rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4'
-const control =
-  'border-input bg-background aria-invalid:border-destructive min-h-11 rounded-xl border px-3'
+const control = `${inputClassName} min-h-11 w-full min-w-0`
 const proof = [
   {
     image: angelPortrait,
@@ -81,49 +92,23 @@ const proof = [
     label: 'Attendee portraits',
   },
 ]
-type InquiryField = {
-  id: string
-  label: string
-  type?: 'date' | 'number' | 'tel' | 'email'
-  autocomplete?: string
-  placeholder?: string
-}
-const eventFields: InquiryField[][] = [
-  [
-    { id: 'date', label: 'Date', type: 'date' },
-    { id: 'guests', label: 'Guests', type: 'number' },
-  ],
-  [
-    { id: 'venue', label: 'Venue' },
-    { id: 'city', label: 'City', autocomplete: 'address-level2' },
-  ],
-  [
-    {
-      id: 'eventType',
-      label: 'Event type',
-      placeholder: 'Birthday, mosque, school, or nonprofit',
-    },
-  ],
-]
-const contactFields: InquiryField[] = [
-  { id: 'name', label: 'Name', autocomplete: 'name' },
-  { id: 'phone', label: 'Phone', type: 'tel', autocomplete: 'tel' },
-  { id: 'email', label: 'Email', type: 'email', autocomplete: 'email' },
-]
+const eventFieldRows = [
+  ['date', 'guests'],
+  ['venue', 'city'],
+  ['eventType'],
+] as const
+const contactFieldNames = ['name', 'phone', 'email'] as const
+const requirement = (name: InquiryFieldName) =>
+  (inquiryFieldDefs[name] as InquiryFieldDef).required ? 'Required' : 'Optional'
 ---
 
 <BaseLayout
-  activeNav="portraits"
+  activeNav="event-photography"
   title={title}
   description={description}
   canonicalUrl={canonicalUrl}
-  ogImage={ogImage}
-  ogImageWidth={siteConfig.site.ogImageWidth}
-  ogImageHeight={siteConfig.site.ogImageHeight}
-  ogImageType={siteConfig.site.ogImageType}
-  ogImageAlt={siteConfig.site.ogImageAlt}
   twitterHandle={siteConfig.site.twitterHandle}
-  structuredData={eventPortraitStructuredData(canonicalUrl)}
+  structuredData={offerStructuredData(eventPortraitOffer, canonicalUrl)}
 >
   <link
     slot="head"
@@ -134,46 +119,47 @@ const contactFields: InquiryField[] = [
     imagesizes={heroImage.attributes.sizes}
     fetchpriority="high"
   />
-  <main
-    id="main-content"
-    class="portrait-page mx-auto w-full max-w-screen-2xl self-center px-4 sm:px-6 lg:px-8"
-  >
+  <PageContainer width="wide">
     <section
       aria-labelledby="experience-title"
-      class="portrait-hero grid items-center gap-8 py-8 sm:py-14 lg:grid-cols-2 lg:gap-16 lg:py-20"
+      class="grid items-center gap-10 py-10 sm:py-16 lg:grid-cols-2 lg:gap-16 lg:py-20"
     >
       <div class="min-w-0">
-        <p class="eyebrow">Ayoub Abedrabbo / Event photography / Tampa, FL</p>
-        <h1
-          id="experience-title"
-          class="font-heading text-4xl leading-[1.08] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl"
-        >
+        <p class="eyebrow mb-5">
+          Ayoub Abedrabbo / Event photography / Tampa, FL
+        </p>
+        <h1 id="experience-title" class="display-hero">
           Good company.
           <br />
           Great memories.
           <br />
           <em>Already in the gallery.</em>
         </h1>
-        <p class="mt-5 max-w-lg text-lg leading-8">
+        <p class="text-muted-foreground mt-5 max-w-lg text-lg leading-8">
           Enjoy your event. I’ll photograph the people who make it yours—with
           portraits included and a gallery that updates within minutes.
         </p>
         <div class="mt-6 flex flex-wrap items-center gap-5">
           <a
             href="#inquiry"
-            class={`${buttonVariants({ size: 'lg' })} min-h-11 px-5`}
+            class={buttonVariants({
+              size: 'lg',
+              className:
+                'h-auto min-h-11 max-w-full px-5 py-3 whitespace-normal',
+            })}
           >
             Let’s plan your event<span aria-hidden="true">↗</span>
           </a>
-          <a href="#pricing" class={`${link} text-sm`}>
+          <a href="#pricing" class="link text-sm font-medium">
             See starting prices
           </a>
         </div>
-        <p class="hero-note">
-          From $400 · You host. Your guests get the photos free.
+        <p class="text-muted-foreground mt-5 text-xs">
+          From{formatUsd(headlineStartingPrice(eventPortraitOffer))}· You host.
+          Your guests get the photos free.
         </p>
       </div>
-      <figure class="hero-photo min-w-0">
+      <figure class="relative min-w-0 pb-12 md:pb-16">
         <Image
           src={angelPortrait}
           alt="Angel celebrating his birthday with family around the cake"
@@ -183,12 +169,14 @@ const contactFields: InquiryField[] = [
           loading="eager"
           fetchpriority="high"
           quality={82}
-          class="aspect-[4/3] rounded-2xl object-cover"
+          class="aspect-[4/3] rounded-sm object-cover md:aspect-[1/1.05]"
         />
-        <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
-          <span class="photo-label">A real celebration. A real gallery.</span>
+        <figcaption class="bg-background text-muted-foreground absolute inset-x-5 bottom-0 border px-5 py-4 text-xs shadow-md md:bottom-5">
+          <span class="text-foreground mb-0.5 block text-sm">
+            A real celebration. A real gallery.
+          </span>
           Angel’s birthday ·
-          <a href={eventPortraitProofGalleryUrl} class={link}>
+          <a href={eventPortraitProofGalleryUrl} class="link font-medium">
             See the gallery
           </a>
         </figcaption>
@@ -197,58 +185,55 @@ const contactFields: InquiryField[] = [
 
     <Separator />
 
-    <section aria-labelledby="experience-heading" class="experience-section">
-      <div class="section-heading">
-        <p class="eyebrow">01 / The experience</p>
-        <h2 id="experience-heading">
-          Be there for the moment.
-          <br />
-          <em>I’ll take care of the photos.</em>
-        </h2>
-      </div>
-      <ol class="experience-steps">
-        <li>
-          <span>01</span>
-          <h3>Make it your event.</h3>
-          <p>
+    <ServiceSection titleId="experience-heading" eyebrow="01 / The experience">
+      <Fragment slot="title">
+        Be there for the moment.
+        <em>I’ll take care of the photos.</em>
+      </Fragment>
+      <ol class="grid gap-6 md:mt-4 md:grid-cols-3 md:gap-12">
+        <li class="border-t pt-5">
+          <span class="text-muted-foreground text-xs">01</span>
+          <h3 class="mt-2 mb-2.5 text-base font-semibold md:mt-4">
+            Make it your event.
+          </h3>
+          <p class="text-muted-foreground text-sm leading-7">
             Tell me the date, place, and people. We’ll confirm availability and
             the right amount of coverage.
           </p>
         </li>
-        <li>
-          <span>02</span>
-          <h3>Bring everyone together.</h3>
-          <p>
+        <li class="border-t pt-5">
+          <span class="text-muted-foreground text-xs">02</span>
+          <h3 class="mt-2 mb-2.5 text-base font-semibold md:mt-4">
+            Bring everyone together.
+          </h3>
+          <p class="text-muted-foreground text-sm leading-7">
             Event photography and portrait sessions, without a backdrop, flash,
             or lighting kit.
           </p>
         </li>
-        <li>
-          <span>03</span>
-          <h3>Share while it’s happening.</h3>
-          <p>
+        <li class="border-t pt-5">
+          <span class="text-muted-foreground text-xs">03</span>
+          <h3 class="mt-2 mb-2.5 text-base font-semibold md:mt-4">
+            Share while it’s happening.
+          </h3>
+          <p class="text-muted-foreground text-sm leading-7">
             Photos appear in your event gallery within minutes. Guests can
             browse and download at no charge.
           </p>
         </li>
       </ol>
-    </section>
+    </ServiceSection>
 
-    <section aria-labelledby="proof-title" class="proof-section py-10 sm:py-14">
-      <div class="section-heading proof-heading">
-        <div>
-          <p class="eyebrow">02 / Through my lens</p>
-          <h2 id="proof-title">
-            Real people.<em>Your kind of event.</em>
-          </h2>
-        </div>
-        <p>
-          From birthday celebrations to community gatherings.
-          <br />
-          Explore the photos before you make a plan.
-        </p>
-      </div>
-      <ul class="proof-grid grid gap-6 md:grid-cols-3">
+    <ServiceSection titleId="proof-title" eyebrow="02 / Through my lens">
+      <Fragment slot="title">
+        Real people.
+        <em>Your kind of event.</em>
+      </Fragment>
+      <p slot="lead">
+        From birthday celebrations to community gatherings. Explore the photos
+        before you make a plan.
+      </p>
+      <ul class="grid items-start gap-8 md:grid-cols-3 md:gap-5">
         {proof.map((item, index) => (
           <li>
             <figure>
@@ -265,14 +250,21 @@ const contactFields: InquiryField[] = [
                 sizes="(min-width: 768px) 33vw, 100vw"
                 quality={78}
                 loading={index < 2 ? 'eager' : 'lazy'}
-                class="aspect-[4/3] rounded-2xl object-cover"
+                class:list={[
+                  'rounded-sm object-cover',
+                  index === 1
+                    ? 'aspect-[4/3] object-[center_30%] md:aspect-[4/5] md:object-center'
+                    : 'aspect-[4/3]',
+                ]}
               />
               <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
-                <span class="proof-event">{item.event}</span>
+                <span class="text-foreground mb-0.5 block text-sm">
+                  {item.event}
+                </span>
                 <a
                   href={item.href}
                   aria-label={`${item.label}: ${item.event}`}
-                  class={link}
+                  class="link font-medium"
                 >
                   {item.label} <span aria-hidden="true">↗</span>
                 </a>
@@ -281,73 +273,100 @@ const contactFields: InquiryField[] = [
           </li>
         ))}
       </ul>
-    </section>
+    </ServiceSection>
 
     <Separator />
 
-    <section
+    <ServiceSection
       id="pricing"
-      aria-labelledby="pricing-title"
-      class="scroll-mt-24 py-10 sm:py-14"
+      titleId="pricing-title"
+      eyebrow="03 / Make room for the memories"
+      layout="split"
     >
-      <div class="pricing-intro">
-        <p class="eyebrow">03 / Make room for the memories</p>
-        <h2
-          id="pricing-title"
-          class="font-heading text-2xl font-bold tracking-tight sm:text-3xl"
-        >
-          Your event.<em>Your pace.</em>
-        </h2>
-        <p class="text-muted-foreground mt-4 max-w-md leading-7">
+      <Fragment slot="title">
+        Your event.
+        <em>Your pace.</em>
+      </Fragment>
+      <Fragment slot="lead">
+        <p>
           Every booking includes event photography, portrait sessions, and your
           live gallery. Choose a starting point below.
         </p>
-        <p class="mt-5 text-sm">Travel within 30 miles of Tampa included.</p>
-      </div>
-      <div class="coverage-panel mt-6 w-full max-w-2xl">
-        <p class="mb-4 px-4 text-sm">
-          Choose coverage to fill in your inquiry.
+        <p class="text-foreground text-sm">
+          Travel within 30 miles of Tampa included.
         </p>
-        <div class="text-muted-foreground flex justify-between px-4 pb-3 text-xs font-medium">
-          <span>Coverage</span>
-          <span>Starting at</span>
-        </div>
-        <ul class="divide-y border-y">
-          {packages.map((option) => (
-            <li>
-              <button
-                type="button"
-                data-coverage={option.hours}
-                aria-pressed="false"
-                class="hover:bg-muted/50 aria-pressed:bg-muted aria-pressed:border-primary focus-visible:outline-ring flex min-h-11 w-full items-center justify-between gap-4 border-l-2 border-transparent px-4 py-4 text-left focus-visible:outline-2 focus-visible:outline-offset-2"
-              >
-                <span>
+      </Fragment>
+      <div class="w-full max-w-2xl">
+        <fieldset
+          id="coverage"
+          tabindex="-1"
+          aria-describedby="error-coverage"
+          class="outline-none"
+        >
+          <legend class="mb-4 px-4 text-sm">
+            Choose coverage to fill in your inquiry.
+            <span class="text-muted-foreground">
+              ({requirement('coverage')})
+            </span>
+          </legend>
+          <div
+            class="text-muted-foreground flex justify-between px-4 pb-3 text-xs font-medium"
+            aria-hidden="true"
+          >
+            <span>Coverage</span>
+            <span>Starting at</span>
+          </div>
+          <div class="divide-y border-y">
+            {packages.map((option) => (
+              <label class="group hover:bg-muted/50 has-checked:bg-muted has-checked:border-primary has-focus-visible:ring-ring flex min-h-11 w-full cursor-pointer flex-wrap items-center justify-between gap-4 border-l-2 border-transparent px-4 py-4 has-focus-visible:ring-2 has-focus-visible:ring-inset">
+                <input
+                  type="radio"
+                  name="coverage"
+                  value={option.hours}
+                  form="event-portrait-inquiry"
+                  class="sr-only"
+                />
+                <span class="min-w-0 flex-[1_1_10rem]">
                   <span class="block font-semibold">{option.hours}</span>
                   <span class="text-muted-foreground mt-1 block text-sm">
                     Planning pace: about 20 portrait sessions per hour, not a
                     cap
                   </span>
                 </span>
-                <span class="coverage-price shrink-0 text-2xl font-bold tabular-nums">
-                  <small>from</small> {option.price}{' '}
-                  <span class="coverage-check" aria-hidden="true">
-                    <Check size={16} />
+                <span class="flex max-w-full shrink-0 flex-wrap items-center gap-2.5 text-2xl font-bold tabular-nums">
+                  <small class="text-muted-foreground text-[0.65rem] font-normal">
+                    from
+                  </small>{' '}
+                  {option.price}
+                  <span
+                    class="border-muted-foreground group-has-checked:bg-primary group-has-checked:border-primary group-has-checked:text-primary-foreground inline-grid size-6 place-items-center rounded-full border"
+                    aria-hidden="true"
+                  >
+                    <Check
+                      size={16}
+                      className="invisible group-has-checked:visible"
+                    />
                   </span>
                 </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+              </label>
+            ))}
+          </div>
+          <p
+            id="error-coverage"
+            class="text-foreground mt-3 px-4 text-sm"
+            hidden
+          ></p>
+        </fieldset>
         <p class="text-muted-foreground mt-4 px-4 text-sm leading-6">
           Need more time? Add an extra hour for{' '}
           <span class="text-foreground font-medium tabular-nums">
-            +{eventPortraitExtraHour.price}
+            +{formatUsd(eventPortraitExtraHour.price)}
           </span>
           .
         </p>
         <div class="mt-4 grid gap-1 px-4 text-sm leading-6">
           <p>
-            <a href="#inquiry" class={link}>
+            <a href="#inquiry" class="link font-medium">
               Continue to event details ↗
             </a>
           </p>
@@ -356,109 +375,79 @@ const contactFields: InquiryField[] = [
           </p>
         </div>
       </div>
-    </section>
+    </ServiceSection>
 
     <Separator />
 
-    <section
+    <ServiceSection
       id="inquiry"
-      aria-labelledby="inquiry-title"
-      class="scroll-mt-24 py-10 sm:py-14"
+      titleId="inquiry-title"
+      eyebrow="04 / Let’s make it happen"
+      layout="split"
+      stickyIntro
     >
-      <div class="grid items-start gap-8 lg:grid-cols-2 lg:gap-16">
-        <div class="lg:sticky lg:top-24">
-          <p class="eyebrow">04 / Let’s make it happen</p>
-          <h2
-            id="inquiry-title"
-            class="font-heading text-2xl font-bold tracking-tight sm:text-3xl"
-          >
-            Tell me what
-            <br />
-            you’re<em>celebrating.</em>
-          </h2>
-          <p class="text-muted-foreground mt-4 max-w-md leading-7">
-            Opens an email draft to Ayoub. It does not reserve the date.
-          </p>
-          <p class="text-muted-foreground mt-3 max-w-md leading-7">
-            I’ll review the details with you and confirm availability. For
-            coverage up to 8 hours or extras, include what you have in mind.
-          </p>
-        </div>
-        <div class="inquiry-panel">
-          <form id="event-portrait-inquiry" class="grid gap-6" novalidate>
-            <div
-              id="inquiry-errors"
-              class="border-destructive bg-destructive/10 text-foreground hidden rounded-xl border px-4 py-3 text-sm"
-              tabindex="-1"
-              role="alert"
-            ></div>
-            <fieldset>
-              <legend class="mb-4 text-sm font-semibold">The event</legend>
-              <FieldGroup>
-                <div class="grid gap-4 sm:grid-cols-2">
-                  <Field>
-                    <FieldLabel htmlFor="coverage" className="justify-between">
-                      Coverage
-                      <span class="text-muted-foreground text-xs font-normal">
-                        Required
-                      </span>
-                    </FieldLabel>
-                    <select
-                      id="coverage"
-                      name="coverage"
-                      required
-                      aria-describedby="error-coverage"
-                      class={control}
-                    >
-                      <option value="">Choose coverage</option>
-                      {packages.map((option) => (
-                        <option value={option.hours}>
-                          {option.hours}, starting at {option.price}
-                        </option>
-                      ))}
-                    </select>
-                    <p
-                      id="error-coverage"
-                      class="text-foreground text-sm"
-                      hidden
-                    ></p>
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="extraTime" className="justify-between">
-                      Longer coverage
-                      <span class="text-muted-foreground text-xs font-normal">
-                        Optional
-                      </span>
-                    </FieldLabel>
-                    <input
-                      id="extraTime"
-                      name="extraTime"
-                      class={control}
-                      placeholder="Up to 8 hours"
-                    />
-                  </Field>
-                </div>
-                {eventFields.map((row) => (
-                  <div
-                    class:list={[
-                      'grid gap-4',
-                      row.length > 1 && 'sm:grid-cols-2',
-                    ]}
-                  >
-                    {row.map((field) => (
-                      <Field>
+      <Fragment slot="title">
+        Tell me what you’re
+        <em>celebrating.</em>
+      </Fragment>
+      <Fragment slot="lead">
+        <p>Opens an email draft to Ayoub. It does not reserve the date.</p>
+        <p>
+          I’ll review the details with you and confirm availability. For
+          coverage up to 8 hours or extras, include what you have in mind.
+        </p>
+      </Fragment>
+      <div class="bg-muted rounded-md border p-5 md:p-8">
+        <form id="event-portrait-inquiry" class="grid gap-6" novalidate>
+          <div
+            id="inquiry-errors"
+            class="border-destructive bg-destructive/10 text-foreground hidden rounded-xl border px-4 py-3 text-sm"
+            tabindex="-1"
+            role="alert"
+          ></div>
+          <fieldset class="min-w-0">
+            <legend class="mb-4 text-sm font-semibold">The event</legend>
+            <FieldGroup>
+              <Field className="min-w-0">
+                <FieldLabel
+                  htmlFor="extraTime"
+                  className="max-w-full flex-wrap justify-between"
+                >
+                  {inquiryFieldDefs.extraTime.label}
+                  <span class="text-muted-foreground text-xs font-normal">
+                    {requirement('extraTime')}
+                  </span>
+                </FieldLabel>
+                <input
+                  id="extraTime"
+                  name="extraTime"
+                  class={control}
+                  placeholder={inquiryFieldDefs.extraTime.placeholder}
+                />
+              </Field>
+              {eventFieldRows.map((row) => (
+                <div
+                  class:list={[
+                    'grid gap-4',
+                    row.length > 1 && 'sm:grid-cols-2',
+                  ]}
+                >
+                  {row.map((id) => {
+                    const field: InquiryFieldDef = inquiryFieldDefs[id]
+                    return (
+                      <Field className="min-w-0">
                         <FieldLabel
-                          htmlFor={field.id}
-                          className="justify-between"
+                          htmlFor={id}
+                          className="max-w-full flex-wrap justify-between"
                         >
                           {field.label}
                           <span class="text-muted-foreground text-xs font-normal">
-                            Required
+                            {requirement(id)}
                           </span>
                         </FieldLabel>
                         <input
-                          id={field.id}
-                          name={field.id}
+                          id={id}
+                          name={id}
                           type={field.type ?? 'text'}
                           autocomplete={field.autocomplete}
                           placeholder={field.placeholder}
@@ -466,100 +455,105 @@ const contactFields: InquiryField[] = [
                             ? { min: '1', step: '1', inputmode: 'numeric' }
                             : {})}
                           required
-                          aria-describedby={`error-${field.id}`}
+                          aria-describedby={`error-${id}`}
                           class={control}
                         />
                         <p
-                          id={`error-${field.id}`}
+                          id={`error-${id}`}
                           class="text-foreground text-sm"
                           hidden
                         ></p>
                       </Field>
-                    ))}
-                  </div>
-                ))}
-              </FieldGroup>
-            </fieldset>
-            <fieldset>
-              <legend class="mb-4 text-sm font-semibold">
-                How to reach you
-              </legend>
-              <FieldGroup className="grid gap-4 sm:grid-cols-2">
-                {contactFields.map((field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.id} className="justify-between">
+                    )
+                  })}
+                </div>
+              ))}
+            </FieldGroup>
+          </fieldset>
+          <fieldset class="min-w-0">
+            <legend class="mb-4 text-sm font-semibold">How to reach you</legend>
+            <FieldGroup className="grid gap-4 sm:grid-cols-2">
+              {contactFieldNames.map((id) => {
+                const field: InquiryFieldDef = inquiryFieldDefs[id]
+                return (
+                  <Field className="min-w-0">
+                    <FieldLabel
+                      htmlFor={id}
+                      className="max-w-full flex-wrap justify-between"
+                    >
                       {field.label}
                       <span class="text-muted-foreground text-xs font-normal">
-                        Required
+                        {requirement(id)}
                       </span>
                     </FieldLabel>
                     <input
-                      id={field.id}
-                      name={field.id}
+                      id={id}
+                      name={id}
                       type={field.type ?? 'text'}
                       autocomplete={field.autocomplete}
-                      enterkeyhint={field.id === 'email' ? 'done' : undefined}
+                      enterkeyhint={id === 'email' ? 'done' : undefined}
                       required
-                      aria-describedby={`error-${field.id}`}
+                      aria-describedby={`error-${id}`}
                       class={control}
                     />
                     <p
-                      id={`error-${field.id}`}
+                      id={`error-${id}`}
                       class="text-foreground text-sm"
                       hidden
                     ></p>
                   </Field>
-                ))}
-              </FieldGroup>
-            </fieldset>
-            <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
-              <p
-                id="inquiry-selection"
-                class="text-sm font-medium"
-                aria-live="polite"
-                hidden
-              ></p>
-              <button
-                type="submit"
-                class={buttonVariants({
-                  size: 'lg',
-                  className: 'min-h-11 px-5',
-                })}
-              >
-                Open email draft
-              </button>
-              <a href="/contact/" class={`${link} text-sm`}>
-                Or use the contact page
-              </a>
-            </div>
-          </form>
-          <div
-            id="inquiry-ready"
-            class="bg-muted/50 mt-6 hidden rounded-2xl p-6"
-            role="status"
-          >
-            <h3 class="text-lg font-semibold">
-              Request ready for Ayoub to review.
-            </h3>
+                )
+              })}
+            </FieldGroup>
+          </fieldset>
+          <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
             <p
-              id="inquiry-ready-copy"
-              class="text-muted-foreground mt-2 text-sm leading-6"
+              id="inquiry-selection"
+              class="text-sm font-medium"
+              aria-live="polite"
+              hidden
             ></p>
-            <p class="mt-3 text-sm leading-6">
-              This does not reserve the date, and this page does not send the
-              email itself.
-            </p>
-            <a
-              id="inquiry-mailto"
-              class="text-link mt-4 inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-4"
-              href=""
+            <button
+              type="submit"
+              class={buttonVariants({
+                size: 'lg',
+                className:
+                  'h-auto min-h-11 max-w-full px-5 py-3 whitespace-normal',
+              })}
             >
-              Open the email draft again
+              Open email draft
+            </button>
+            <a href="/contact/" class="link text-sm font-medium">
+              Or use the contact page
             </a>
           </div>
+        </form>
+        <div
+          id="inquiry-ready"
+          class="bg-muted/50 mt-6 hidden rounded-2xl p-6"
+          role="status"
+        >
+          <h3 class="text-lg font-semibold">
+            Request ready for Ayoub to review.
+          </h3>
+          <p
+            id="inquiry-ready-copy"
+            class="text-muted-foreground mt-2 text-sm leading-6"
+          ></p>
+          <p class="mt-3 text-sm leading-6">
+            This does not reserve the date, and this page does not send the
+            email itself.
+          </p>
+          <a
+            id="inquiry-mailto"
+            class="link mt-4 inline-flex min-h-11 items-center text-sm font-medium"
+            href=""
+          >
+            Open the email draft again
+          </a>
         </div>
       </div>
-    </section>
+    </ServiceSection>
 
     <Separator />
 
@@ -567,13 +561,13 @@ const contactFields: InquiryField[] = [
       <p class="flex flex-wrap gap-x-2">
         <span>Ayoub Abedrabbo · Alpha Bravo Media</span>
         <span aria-hidden="true">·</span>
-        <a href={`mailto:${eventPortraitEmail}`} class={link}>
-          {eventPortraitEmail}
+        <a href={`mailto:${inquiryEmail}`} class="link font-medium">
+          {inquiryEmail}
         </a>
         <span aria-hidden="true">·</span>
         <span>Tampa, Florida</span>
         <span aria-hidden="true">·</span>
-        <a href={eventPortraitMapsUrl} class={link}>
+        <a href={mapsListingUrl} class="link font-medium">
           Find us on Google Maps
         </a>
       </p>
@@ -581,8 +575,12 @@ const contactFields: InquiryField[] = [
     <script>
       import {
         inquiryErrors,
+        inquiryFieldNames,
         inquiryMailto,
+        startingPriceFor,
+        type InquiryFields,
       } from '../../lib/event-portrait-inquiry'
+      import { formatUsd } from '../../lib/service-offer'
 
       const form = document.querySelector('#event-portrait-inquiry')
       const errors = document.querySelector('#inquiry-errors')
@@ -591,17 +589,7 @@ const contactFields: InquiryField[] = [
       const mailtoLink = document.querySelector('#inquiry-mailto')
       const coverage = document.querySelector('#coverage')
       const selection = document.querySelector('#inquiry-selection')
-      const fieldNames = [
-        'coverage',
-        'date',
-        'venue',
-        'city',
-        'guests',
-        'eventType',
-        'name',
-        'phone',
-        'email',
-      ]
+      const fieldNames = inquiryFieldNames
       const clearFieldErrors = () => {
         for (const name of fieldNames) {
           document.getElementById(name)?.removeAttribute('aria-invalid')
@@ -632,41 +620,18 @@ const contactFields: InquiryField[] = [
         first?.focus()
       }
       const showSelection = () => {
-        if (
-          !(coverage instanceof HTMLSelectElement) ||
-          !(selection instanceof HTMLElement)
-        ) {
-          return
-        }
-        const label = coverage.selectedOptions[0]?.textContent?.trim() ?? ''
-        document.querySelectorAll('[data-coverage]').forEach((button) => {
-          if (!(button instanceof HTMLButtonElement)) return
-          button.setAttribute(
-            'aria-pressed',
-            button.dataset.coverage === coverage.value ? 'true' : 'false',
-          )
-        })
-        if (!coverage.value || !label) {
-          selection.hidden = true
-          selection.textContent = ''
-          return
-        }
-        selection.hidden = false
-        selection.textContent = label
+        if (!(selection instanceof HTMLElement)) return
+        const checked = document.querySelector<HTMLInputElement>(
+          'input[name="coverage"]:checked',
+        )
+        const price = checked && startingPriceFor(checked.value)
+        selection.hidden = !checked
+        selection.textContent =
+          checked && price != null
+            ? `${checked.value}, starting at ${formatUsd(price)}`
+            : ''
       }
       coverage?.addEventListener('change', showSelection)
-      document.querySelectorAll('[data-coverage]').forEach((button) => {
-        button.addEventListener('click', () => {
-          if (
-            !(button instanceof HTMLButtonElement) ||
-            !(coverage instanceof HTMLSelectElement)
-          ) {
-            return
-          }
-          coverage.value = button.dataset.coverage ?? ''
-          showSelection()
-        })
-      })
       form?.addEventListener('submit', (event) => {
         event.preventDefault()
         if (
@@ -679,25 +644,10 @@ const contactFields: InquiryField[] = [
           return
         }
         const data = new FormData(form)
-        const fields = {
-          coverage: String(data.get('coverage') ?? ''),
-          extraTime: String(data.get('extraTime') ?? ''),
-          date: String(data.get('date') ?? ''),
-          venue: String(data.get('venue') ?? ''),
-          city: String(data.get('city') ?? ''),
-          guests: String(data.get('guests') ?? ''),
-          eventType: String(data.get('eventType') ?? ''),
-          name: String(data.get('name') ?? ''),
-          phone: String(data.get('phone') ?? ''),
-          email: String(data.get('email') ?? ''),
-        }
-        const packages = [...form.querySelectorAll('option')]
-          .filter((option) => option.value !== '')
-          .map((option) => {
-            const price = option.textContent?.split('starting at ')[1]?.trim()
-            return { hours: option.value, price: price ?? '' }
-          })
-        const problems = inquiryErrors(fields, packages)
+        const fields = Object.fromEntries(
+          fieldNames.map((name) => [name, String(data.get(name) ?? '')]),
+        ) as InquiryFields
+        const problems = inquiryErrors(fields)
         const messages = Object.values(problems)
         if (messages.length > 0) {
           errors.classList.remove('hidden')
@@ -709,315 +659,15 @@ const contactFields: InquiryField[] = [
           showFieldErrors(problems)
           return
         }
-        const href = inquiryMailto(fields, packages)
-        const selected = packages.find(
-          (option) => option.hours === fields.coverage,
-        )
+        const href = inquiryMailto(fields)
+        const price = startingPriceFor(fields.coverage)
         clearFieldErrors()
         errors.classList.add('hidden')
         ready.classList.remove('hidden')
-        readyCopy.textContent = `${fields.coverage}, starting at ${selected?.price}.`
+        readyCopy.textContent = `${fields.coverage}, starting at ${formatUsd(price ?? 0)}.`
         mailtoLink.href = href
         mailtoLink.click()
       })
     </script>
-  </main>
+  </PageContainer>
 </BaseLayout>
-
-<style>
-  .portrait-page {
-    max-width: 1360px;
-    overflow-wrap: anywhere;
-  }
-  .portrait-hero a[href='#inquiry'],
-  #event-portrait-inquiry button[type='submit'] {
-    max-width: 100%;
-    height: auto;
-    white-space: normal;
-    padding-block: 0.75rem;
-  }
-  #inquiry :global(.grid > *),
-  #event-portrait-inquiry fieldset,
-  #event-portrait-inquiry input,
-  #event-portrait-inquiry select {
-    min-width: 0;
-  }
-  #event-portrait-inquiry input,
-  #event-portrait-inquiry select {
-    width: 100%;
-  }
-  #event-portrait-inquiry :global([data-slot='field-label']) {
-    max-width: 100%;
-    flex-wrap: wrap;
-  }
-  .eyebrow {
-    font-size: 0.66rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted-foreground);
-    margin-bottom: 1.5rem;
-  }
-  .portrait-hero {
-    padding-block: 5rem 6rem;
-    gap: 3rem;
-  }
-  .portrait-hero h1 {
-    font-family: var(--font-jakarta), sans-serif;
-    font-size: clamp(2.6rem, 4.7vw, 4.7rem);
-    font-weight: 500;
-    letter-spacing: -0.065em;
-    line-height: 1.1;
-  }
-  em {
-    font-family: var(--font-zodiak), serif;
-    font-weight: 400;
-    letter-spacing: -0.055em;
-  }
-  .portrait-hero h1 em {
-    display: inline-block;
-    font-size: 0.8em;
-    margin-top: 0.15em;
-  }
-  .portrait-hero p:not(.eyebrow):not(.hero-note) {
-    font-size: 1rem;
-    line-height: 1.9;
-    color: var(--muted-foreground);
-    max-width: 26rem;
-  }
-  .hero-note {
-    color: var(--muted-foreground);
-    font-size: 0.72rem;
-    margin-top: 1.25rem;
-  }
-  .hero-photo {
-    position: relative;
-    padding-bottom: 4rem;
-  }
-  .hero-photo :global(img) {
-    aspect-ratio: 1 / 1.05;
-    border-radius: 0.35rem;
-    object-position: center;
-  }
-  .hero-photo figcaption {
-    position: absolute;
-    bottom: 1.25rem;
-    left: 1.25rem;
-    right: 1.25rem;
-    background: var(--background);
-    color: var(--muted-foreground);
-    border: 1px solid var(--border);
-    padding: 1rem 1.25rem;
-    font-size: 0.72rem;
-    box-shadow: 0 12px 30px
-      color-mix(in srgb, var(--shadow-color) 5%, transparent);
-  }
-  .photo-label {
-    display: block;
-    font-size: 0.86rem;
-    color: var(--foreground);
-    margin-bottom: 0.15rem;
-  }
-  .experience-section {
-    padding-block: 5rem;
-  }
-  .section-heading h2,
-  #pricing-title,
-  #inquiry-title {
-    font-family: var(--font-jakarta), sans-serif;
-    font-weight: 500;
-    font-size: clamp(2rem, 3.2vw, 3rem);
-    line-height: 1.2;
-    letter-spacing: -0.05em;
-  }
-  .experience-steps {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 3rem;
-    margin-top: 3rem;
-  }
-  .experience-steps li {
-    border-top: 1px solid var(--border);
-    padding-top: 1.25rem;
-  }
-  .experience-steps li > span {
-    font-size: 0.7rem;
-    color: var(--muted-foreground);
-  }
-  .experience-steps h3 {
-    font-weight: 600;
-    font-size: 1rem;
-    margin-block: 1rem 0.65rem;
-  }
-  .experience-steps p,
-  .proof-heading > p {
-    font-size: 0.85rem;
-    line-height: 1.9;
-    color: var(--muted-foreground);
-  }
-  .proof-section {
-    padding-block: 2rem 5rem;
-  }
-  .proof-heading {
-    display: flex;
-    justify-content: space-between;
-    align-items: end;
-    gap: 2rem;
-    margin-bottom: 2.5rem;
-  }
-  .proof-heading h2 {
-    max-width: 30rem;
-  }
-  .proof-grid {
-    align-items: start;
-    gap: 1.25rem;
-  }
-  .proof-grid :global(img) {
-    border-radius: 0.35rem;
-    aspect-ratio: 4 / 3;
-  }
-  .proof-grid li:nth-child(2) :global(img) {
-    aspect-ratio: 4 / 5;
-  }
-  .proof-event {
-    display: block;
-    color: var(--foreground);
-    font-size: 0.85rem;
-    margin-bottom: 0.15rem;
-  }
-  #pricing {
-    display: grid;
-    grid-template-columns: 1fr 1.15fr;
-    gap: 5rem;
-    padding-block: 5rem;
-  }
-  .coverage-panel {
-    margin-top: 0;
-  }
-  .coverage-panel button {
-    border-radius: 0.3rem;
-    transition: background 160ms ease;
-    flex-wrap: wrap;
-  }
-  .coverage-panel button > span:first-child {
-    flex: 1 1 10rem;
-    min-width: 0;
-  }
-  .coverage-panel button[aria-pressed='true'] {
-    border-color: var(--primary);
-    background: var(--muted);
-  }
-  .coverage-panel button:hover {
-    background: var(--muted);
-  }
-  .coverage-price {
-    display: flex;
-    flex-wrap: wrap;
-    max-width: 100%;
-    align-items: center;
-    gap: 0.6rem;
-  }
-  .coverage-price small {
-    font-size: 0.65rem;
-    color: var(--muted-foreground);
-    font-weight: 400;
-  }
-  .coverage-check {
-    width: 1.5rem;
-    height: 1.5rem;
-    border: 1px solid var(--muted-foreground);
-    border-radius: 50%;
-    color: var(--primary-foreground);
-    font-size: 0.8rem;
-    display: inline-grid;
-    place-items: center;
-  }
-  .coverage-check :global(svg) {
-    visibility: hidden;
-  }
-  [aria-pressed='true'] .coverage-check {
-    background: var(--primary);
-    color: var(--primary-foreground);
-    border-color: var(--primary);
-  }
-  [aria-pressed='true'] .coverage-check :global(svg) {
-    visibility: visible;
-  }
-  #inquiry {
-    padding-block: 5rem;
-  }
-  .inquiry-panel {
-    background: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    padding: 2rem;
-  }
-  .inquiry-panel input,
-  .inquiry-panel select {
-    border-radius: 0.3rem;
-  }
-  .portrait-page a {
-    text-underline-offset: 4px;
-  }
-  @media (min-width: 1024px) {
-    .portrait-page {
-      padding-inline: 4rem;
-    }
-  }
-  @media (max-width: 767px) {
-    .portrait-hero {
-      padding-block: 2.5rem 2rem;
-      gap: 2.5rem;
-    }
-    .portrait-hero h1 {
-      font-size: clamp(2.5rem, 9vw, 4rem);
-    }
-    .hero-photo :global(img) {
-      aspect-ratio: 4 / 3;
-    }
-    .hero-photo {
-      padding-bottom: 3rem;
-    }
-    .hero-photo figcaption {
-      bottom: 0;
-    }
-    .experience-section,
-    #pricing,
-    #inquiry {
-      padding-block: 3rem;
-    }
-    .experience-steps {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-      margin-top: 2rem;
-    }
-    .experience-steps h3 {
-      margin-top: 0.5rem;
-    }
-    .proof-heading {
-      display: block;
-    }
-    .proof-heading > p {
-      margin-top: 1rem;
-    }
-    .proof-grid {
-      gap: 2rem;
-    }
-    .proof-grid li:nth-child(2) :global(img) {
-      aspect-ratio: 4 / 3;
-      object-position: center 30%;
-    }
-    #pricing {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-    .inquiry-panel {
-      padding: 1.25rem;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .coverage-panel button {
-      transition: none;
-    }
-  }
-</style>

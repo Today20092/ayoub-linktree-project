@@ -1,0 +1,26 @@
+---
+// Standard page header: optional eyebrow, the page's one <h1>, optional lead
+// (slot="lead"), and anything else in the default slot. Extra attributes
+// (data-reveal, class) go on the <header>.
+interface Props {
+  title: string
+  eyebrow?: string
+  class?: string
+  [attr: string]: unknown
+}
+
+const { title, eyebrow, class: className, ...attrs } = Astro.props
+---
+
+<header class={className} {...attrs}>
+  {eyebrow && <p class="eyebrow mb-3">{eyebrow}</p>}
+  <h1 class="font-heading text-4xl leading-none font-extrabold tracking-tight text-balance sm:text-5xl">
+    {title}
+  </h1>
+  {Astro.slots.has('lead') && (
+    <p class="text-muted-foreground mt-5 text-lg leading-8">
+      <slot name="lead" />
+    </p>
+  )}
+  <slot />
+</header>

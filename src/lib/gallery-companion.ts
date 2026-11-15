@@ -49,6 +49,15 @@ export function parseDeviceCommand(value: unknown) {
   }
 }
 
+export async function listDevices(db: D1Database) {
+  const { results } = await db
+    .prepare(
+      'SELECT id, name, expires_at, can_manage FROM gallery_devices ORDER BY created_at DESC',
+    )
+    .all<{ id: string; name: string; expires_at: number; can_manage: number }>()
+  return results
+}
+
 export async function createDevice(
   db: D1Database,
   name: string,

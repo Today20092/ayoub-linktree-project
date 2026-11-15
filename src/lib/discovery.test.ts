@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
+import { homepageMarkdown, llmsText } from './discovery'
 import { cacheControlForPage, escapeXml } from './public-delivery'
+import { inquiryEmail } from './service-offer'
 
 test('allowlist caches only public page paths', () => {
   const homepage = cacheControlForPage('/')
@@ -56,3 +58,32 @@ test('cache guard preserves personalized and existing responses', () => {
 test('escapes sitemap XML values', () => {
   assert.equal(escapeXml(`a&<b>"c'`), 'a&amp;&lt;b&gt;&quot;c&apos;')
 })
+
+// Agent-readable outputs are generated from the offer data, not copied by hand.
+const site = { siteName: 'Ayoub Abedrabbo', pageDescription: 'Tampa media.' }
+
+for (const [name, render] of [
+  ['/index.md', homepageMarkdown],
+  ['/llms.txt', llmsText],
+] as const) {
+  test(`${name} lists every service offer with the inquiry email and no private details`, () => {
+    const text = render('https://example.test', site)
+    assert.match(text, /## Event photography/)
+    assert.match(text, /## Mobile podcast production/)
+    assert.ok(text.includes('https://example.test/services/event-portraits/'))
+    assert.ok(
+      text.includes('https://example.test/services/podcast-production/'),
+    )
+    assert.ok(text.includes('$400 for 1 hour'))
+    assert.ok(text.includes('$450 for Record & Polish'))
+    assert.ok(text.includes(inquiryEmail))
+    assert.equal(/ayoub@ayoubabed/i.test(text), false)
+    assert.doesNotMatch(text, /- Phone:|(?:tel|sms):|streetAddress/)
+    // Delivery URLs stay on production while navigation follows the origin.
+    assert.ok(
+      text.includes(
+        'https://ayoubabed.xyz/galleries/angels-birthday-party-2026/',
+      ),
+    )
+  })
+}

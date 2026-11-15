@@ -1,46 +1,84 @@
-export const inquiryRecipient = 'inquiry@ayoubabed.xyz'
+import {
+  eventPortraitOffer,
+  eventPortraitStartingPrices,
+} from './event-portrait-offer'
+import { formatUsd, offerMailto } from './service-offer'
 
-export type PortraitPackage = {
-  hours: string
-  price: string
+export type InquiryFieldDef = {
+  label: string
+  /** Present when the field is required: the message shown if it is empty. */
+  required?: string
+  type?: 'date' | 'number' | 'tel' | 'email'
+  autocomplete?: string
+  placeholder?: string
 }
 
-export type InquiryFields = {
-  coverage: string
-  extraTime: string
-  date: string
-  venue: string
-  city: string
-  guests: string
-  eventType: string
-  name: string
-  phone: string
-  email: string
-}
+// The one inquiry field list: markup, validation, and the email draft read it.
+export const inquiryFieldDefs = {
+  coverage: {
+    label: 'Coverage',
+    required: 'Choose a coverage length.',
+  },
+  extraTime: { label: 'Longer coverage', placeholder: 'Up to 8 hours' },
+  date: { label: 'Date', type: 'date', required: 'Enter the event date.' },
+  guests: {
+    label: 'Guests',
+    type: 'number',
+    required: 'Enter the approximate guest count.',
+  },
+  venue: { label: 'Venue', required: 'Enter the venue.' },
+  city: {
+    label: 'City',
+    autocomplete: 'address-level2',
+    required: 'Enter the city.',
+  },
+  eventType: {
+    label: 'Event type',
+    placeholder: 'Birthday, mosque, school, or nonprofit',
+    required: 'Enter the event type.',
+  },
+  name: { label: 'Name', autocomplete: 'name', required: 'Enter your name.' },
+  phone: {
+    label: 'Phone',
+    type: 'tel',
+    autocomplete: 'tel',
+    required: 'Enter your phone number.',
+  },
+  email: {
+    label: 'Email',
+    type: 'email',
+    autocomplete: 'email',
+    required: 'Enter your email.',
+  },
+} as const satisfies Record<string, InquiryFieldDef>
 
-const required: Array<[keyof InquiryFields, string]> = [
-  ['coverage', 'Choose a coverage length.'],
-  ['date', 'Enter the event date.'],
-  ['venue', 'Enter the venue.'],
-  ['city', 'Enter the city.'],
-  ['guests', 'Enter the approximate guest count.'],
-  ['eventType', 'Enter the event type.'],
-  ['name', 'Enter your name.'],
-  ['phone', 'Enter your phone number.'],
-  ['email', 'Enter your email.'],
-]
+export type InquiryFieldName = keyof typeof inquiryFieldDefs
+export type InquiryFields = Record<InquiryFieldName, string>
+export const inquiryFieldNames = Object.keys(
+  inquiryFieldDefs,
+) as InquiryFieldName[]
+
+export type CoveragePrice = { name: string; price: number }
+
+export function startingPriceFor(
+  coverage: string,
+  prices: readonly CoveragePrice[] = eventPortraitStartingPrices,
+) {
+  return prices.find((option) => option.name === coverage)?.price
+}
 
 export function inquiryErrors(
   fields: InquiryFields,
-  packages: readonly PortraitPackage[],
-): Partial<Record<keyof InquiryFields, string>> {
-  const errors: Partial<Record<keyof InquiryFields, string>> = {}
-  for (const [key, message] of required) {
-    if (fields[key].trim() === '') errors[key] = message
+  prices: readonly CoveragePrice[] = eventPortraitStartingPrices,
+): Partial<Record<InquiryFieldName, string>> {
+  const errors: Partial<Record<InquiryFieldName, string>> = {}
+  for (const name of inquiryFieldNames) {
+    const def: InquiryFieldDef = inquiryFieldDefs[name]
+    if (def.required && fields[name].trim() === '') errors[name] = def.required
   }
   if (
     fields.coverage.trim() !== '' &&
-    !packages.some((option) => option.hours === fields.coverage)
+    startingPriceFor(fields.coverage, prices) === undefined
   ) {
     errors.coverage = 'Choose a published coverage length.'
   }
@@ -58,15 +96,15 @@ export function inquiryErrors(
 
 export function inquiryMessage(
   fields: InquiryFields,
-  packages: readonly PortraitPackage[],
+  prices: readonly CoveragePrice[] = eventPortraitStartingPrices,
 ): string {
-  const selected = packages.find((option) => option.hours === fields.coverage)
+  const price = startingPriceFor(fields.coverage, prices)
   const extra = fields.extraTime.trim()
   return [
     'Event portrait request',
     '',
     `Coverage: ${fields.coverage.trim()}`,
-    `Starting at: ${selected?.price ?? 'Custom quote'}`,
+    `Starting at: ${price === undefined ? 'Custom quote' : formatUsd(price)}`,
     ...(extra === '' ? [] : [`Longer coverage: ${extra}`]),
     `Date: ${fields.date.trim()}`,
     `Venue: ${fields.venue.trim()}`,
@@ -83,9 +121,8 @@ export function inquiryMessage(
 
 export function inquiryMailto(
   fields: InquiryFields,
-  packages: readonly PortraitPackage[],
+  prices: readonly CoveragePrice[] = eventPortraitStartingPrices,
 ): string {
-  const subject = `Event portrait request: ${fields.coverage.trim()}`
-  const body = inquiryMessage(fields, packages)
-  return `mailto:${inquiryRecipient}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+  const body = inquiryMessage(fields, prices)
+  return offerMailto(eventPortraitOffer, fields.coverage.trim(), body)
 }

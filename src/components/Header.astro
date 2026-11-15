@@ -1,40 +1,29 @@
 ---
 import ThemeSwitch from './ThemeSwitch.astro'
+import { publicRoutes, type NavKey } from '../lib/public-routes'
 
-type Props = {
-  activeNav?:
-    'home' | 'services' | 'galleries' | 'portraits' | 'about' | 'contact'
-}
+type Props = { activeNav?: NavKey }
 
 const { activeNav } = Astro.props as Props
 
 const linkClass = (isActive: boolean) => [
-  'focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-3 text-sm font-bold tracking-wide underline decoration-dotted underline-offset-4 transition-colors focus-visible:ring-2 focus-visible:outline-none',
+  'link-quiet inline-flex min-h-11 items-center px-3 text-sm font-bold tracking-wide decoration-dotted transition-colors',
   isActive
     ? 'text-foreground decoration-2 decoration-solid'
     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:decoration-solid',
 ]
 
-const navItems: Array<{
-  href: string
-  label: string
-  key: 'home' | 'galleries' | 'portraits' | 'services' | 'about' | 'contact'
-}> = [
-  { href: '/', label: 'Home', key: 'home' },
-  { href: '/galleries/', label: 'Galleries', key: 'galleries' },
-  {
-    href: '/services/event-portraits/',
-    label: 'Events',
-    key: 'portraits',
-  },
-  {
-    href: '/services/podcast-production/',
-    label: 'Podcasts',
-    key: 'services',
-  },
-  { href: '/about/', label: 'About', key: 'about' },
-  { href: '/contact/', label: 'Contact', key: 'contact' },
-]
+const navItems = publicRoutes.flatMap((route) =>
+  route.nav
+    ? [
+        {
+          href: route.path,
+          label: route.navLabel ?? route.label,
+          key: route.nav,
+        },
+      ]
+    : [],
+)
 ---
 
 <header

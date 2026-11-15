@@ -25,9 +25,10 @@ import {
 } from '../../../components/ui/breadcrumb'
 import { Badge } from '../../../components/ui/badge'
 import { Button } from '../../../components/ui/button'
+import { formatUtcDate } from '../../../lib/format-date'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
 import { faceManifests } from '../../../lib/face-manifests'
-import { galleryReader } from '../../../lib/gallery-read'
+import { loadPublicGallery } from '../../../lib/gallery-read'
 import {
   GALLERY_PAGE_SIZE,
   galleryPage,
@@ -38,19 +39,9 @@ import { siteConfig } from '../../../lib/site-config'
 export const prerender = false
 
 const eventSlug = Astro.params.slug
-const gallery = eventSlug
-  ? await galleryReader(env.GALLERY_DB).getPublicDetail(
-      eventSlug,
-      Astro.url.searchParams.get('share') ?? undefined,
-    )
-  : undefined
+const gallery = await loadPublicGallery(env.GALLERY_DB, eventSlug, Astro.url)
 if (!gallery || !eventSlug) {
   return new Response(null, { status: 404 })
-}
-if (gallery.isUnlisted) {
-  Astro.response.headers.set('Cache-Control', 'no-store')
-  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
-  Astro.response.headers.set('Referrer-Policy', 'no-referrer')
 }
 const project = gallery.staticEvent
 const data = project?.data
@@ -133,13 +124,7 @@ const heroPreload =
 const ogImageWidth = galleryHeroImage?.width ?? allImages[0]?.width ?? 1200
 const ogImageHeight = galleryHeroImage?.height ?? allImages[0]?.height ?? 800
 
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(date)
+const formatDate = (date: Date) => formatUtcDate(date)
 ---
 
 <BaseLayout
@@ -151,12 +136,8 @@ const formatDate = (date: Date) =>
   ogImageWidth={ogImageWidth}
   ogImageHeight={ogImageHeight}
   ogType="article"
-  disableAnalytics={gallery.isUnlisted}
-  robots={
-    gallery.isUnlisted
-      ? 'noindex,nofollow'
-      : 'index,follow,max-image-preview:large'
-  }
+  privatePage={gallery.isUnlisted}
+  robots="index,follow,max-image-preview:large"
   activeNav="galleries"
   structuredData={
     gallery.isUnlisted
@@ -638,7 +619,7 @@ const formatDate = (date: Date) =>
       {gallerySettings?.uploads_enabled && !gallery.isUnlisted ? (
         <a
           href={`/galleries/${eventSlug}/upload/`}
-          class="text-foreground hover:text-link focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+          class="link-quiet hover:text-link text-foreground inline-flex min-h-11 items-center gap-2 text-sm font-bold"
         >
           <ImageUp className="size-4" aria-hidden="true" />
           Ask for a submission link
@@ -646,14 +627,14 @@ const formatDate = (date: Date) =>
       ) : null}
       <a
         href={portfolioUrl}
-        class="text-foreground hover:text-link focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+        class="link-quiet hover:text-link text-foreground inline-flex min-h-11 items-center gap-2 text-sm font-bold"
       >
         {project ? 'About this event' : 'Browse all galleries'}
         <ArrowRight className="size-4" aria-hidden="true" />
       </a>
       <a
         href={eventPortraitPath}
-        class="text-foreground hover:text-link focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+        class="link-quiet hover:text-link text-foreground inline-flex min-h-11 items-center gap-2 text-sm font-bold"
       >
         Book event photography
         <ArrowRight className="size-4" aria-hidden="true" />

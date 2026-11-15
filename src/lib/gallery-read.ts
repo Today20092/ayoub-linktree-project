@@ -422,6 +422,20 @@ export function galleryReader(database: D1Database) {
   return createGalleryReader(galleryReaderDependencies(database))
 }
 
+// Public pages: undefined means respond 404 (hidden, unknown, or wrong share token).
+export function loadPublicGallery(
+  database: D1Database,
+  slug: string | undefined,
+  url: URL,
+) {
+  return slug
+    ? galleryReader(database).getPublicDetail(
+        slug,
+        url.searchParams.get('share') ?? undefined,
+      )
+    : undefined
+}
+
 export function createGalleryReader(dependencies: GalleryReaderDependencies) {
   const effects = createGalleryReaderEffects(dependencies)
   return {

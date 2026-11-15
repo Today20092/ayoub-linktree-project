@@ -129,14 +129,11 @@ const simpleIconBody = (name?: string) =>
         </div>
         <p class="text-foreground mt-3 max-w-xl text-base leading-7 sm:text-lg sm:leading-8">
           I'm a digital media specialist in Tampa. I make videos, take photos,
-          <a
-            href="#technical-work"
-            class="text-link underline underline-offset-4"
-          >
+          <a href="#technical-work" class="link">
             build tools for video work
           </a>
           , and share what I'm learning.
-          <a href="/about/" class="text-link underline underline-offset-4">
+          <a href="/about/" class="link">
             More about my background.
           </a>
         </p>
@@ -146,19 +143,19 @@ const simpleIconBody = (name?: string) =>
         >
           <a
             href="#portfolio"
-            class="text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 hover:decoration-solid focus-visible:ring-2 focus-visible:outline-none"
+            class="link-quiet text-foreground inline-flex min-h-11 items-center text-sm font-bold"
           >
             My work
           </a>
           <a
             href="#technical-work"
-            class="text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 hover:decoration-solid focus-visible:ring-2 focus-visible:outline-none"
+            class="link-quiet text-foreground inline-flex min-h-11 items-center text-sm font-bold"
           >
             Technical work
           </a>
           <a
             href="#elsewhere"
-            class="text-foreground focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 hover:decoration-solid focus-visible:ring-2 focus-visible:outline-none"
+            class="link-quiet text-foreground inline-flex min-h-11 items-center text-sm font-bold"
           >
             Channels & social
           </a>
@@ -228,7 +225,10 @@ const simpleIconBody = (name?: string) =>
             type="button"
             data-filter={filter}
             aria-pressed={filter === 'all'}
-            class="border-border hover:bg-muted focus-visible:ring-ring aria-pressed:bg-foreground aria-pressed:text-background min-h-11 rounded-sm border px-3 text-sm font-semibold capitalize focus-visible:ring-2 focus-visible:outline-none sm:px-4"
+            class={buttonVariants({
+              variant: 'outline',
+              className: 'min-h-11 px-3 font-semibold capitalize sm:px-4',
+            })}
           >
             {filter}
           </button>
@@ -442,7 +442,7 @@ const simpleIconBody = (name?: string) =>
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            class="text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex min-h-12 max-w-full min-w-0 items-center gap-3 rounded-sm px-2 py-2 text-base font-bold underline decoration-dotted underline-offset-4 transition-[color,background-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98]"
+            class="link-quiet text-foreground hover:bg-accent hover:text-accent-foreground inline-flex min-h-12 max-w-full min-w-0 items-center gap-3 px-2 py-2 text-base font-bold transition-[color,background-color,transform] active:scale-[0.98]"
           >
             {link.icon === 'lucide:credit-card' ? (
               <CreditCard className="size-5 shrink-0" aria-hidden="true" />

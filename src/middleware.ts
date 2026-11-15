@@ -1,10 +1,20 @@
 import type { MiddlewareHandler } from 'astro'
 import { env } from 'cloudflare:workers'
+import { galleryAdminGate } from './lib/gallery-admin'
+import { galleryJson } from './lib/gallery-effect'
 import { galleryMediaKey } from './lib/gallery-media'
 import { transformGalleryMedia } from './lib/gallery-media-server'
 import { withSecurityHeaders } from './lib/security-headers'
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
+  // Every /admin/** and /api/admin/** request is gated here; handlers must not re-check.
+  const gate = await galleryAdminGate(context.request, env)
+  if (gate === 'not-found')
+    return withSecurityHeaders(new Response(null, { status: 404 }))
+  if (gate === 'forbidden-api')
+    return withSecurityHeaders(galleryJson({ error: 'Forbidden.' }, 403))
+  if (gate === 'forbidden')
+    return withSecurityHeaders(new Response('Forbidden', { status: 403 }))
   // Astro's default optimizer reads relative URLs from ASSETS, but uploads live in R2.
   if (
     context.request.method === 'GET' &&

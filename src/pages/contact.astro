@@ -2,27 +2,21 @@
 import '../styles.css'
 
 import BaseLayout from '../layouts/BaseLayout.astro'
-import PageContainer from '../components/PageContainer.astro'
-import { siteConfig } from '../lib/site-config'
+import PageContainer from '../components/layout/PageContainer.astro'
+import PageHeader from '../components/layout/PageHeader.astro'
 import { eventPortraitPath } from '../lib/event-portrait-offer'
+import { inquiryEmail, personEntity } from '../lib/service-offer'
 
-const { site } = siteConfig
 const title = 'Contact Ayoub Abedrabbo | Tampa Digital Media'
 const description =
   'Contact Ayoub Abedrabbo in Tampa about photography, videography, podcast production, and digital media work.'
 const canonicalUrl = new URL('/contact/', Astro.site).toString()
-const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
 ---
 
 <BaseLayout
   title={title}
   description={description}
   canonicalUrl={canonicalUrl}
-  ogImage={ogImage}
-  ogImageWidth={1200}
-  ogImageHeight={630}
-  ogImageType="image/jpeg"
-  ogImageAlt={site.ogImageAlt}
   activeNav="contact"
   structuredData={{
     '@context': 'https://schema.org',
@@ -30,53 +24,38 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
     name: title,
     description,
     url: canonicalUrl,
-    mainEntity: {
-      '@type': 'Person',
-      '@id': new URL('/#person', Astro.site).toString(),
-      name: 'Ayoub Abedrabbo',
-      email: 'Ayoub@AyoubAbed.xyz',
-      url: new URL('/', Astro.site).toString(),
-    },
+    mainEntity: personEntity(Astro.site!),
   }}
 >
-  <PageContainer id="main-content">
-    <header data-reveal="up">
-      <p class="text-link text-sm font-bold tracking-wide uppercase">Contact</p>
-      <h1 class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
-        Let’s talk about your project
-      </h1>
-      <p class="text-muted-foreground mt-5 text-lg leading-8">
+  <PageContainer>
+    <PageHeader
+      eyebrow="Contact"
+      title="Let’s talk about your project"
+      data-reveal="up"
+    >
+      <Fragment slot="lead">
         Reach Ayoub Abedrabbo for photography, video, podcast production, and
         other digital media work in the Tampa area.
-      </p>
+      </Fragment>
       <p class="mt-4 leading-7">
         Planning an event?{' '}
-        <a
-          class="focus-visible:ring-ring rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
-          href={eventPortraitPath}
-        >
+        <a class="link-quiet font-bold" href={eventPortraitPath}>
           See starting prices and send an inquiry
         </a>
       </p>
-    </header>
+    </PageHeader>
     <address class="mt-10 not-italic" data-reveal="up">
       <ul class="grid gap-4 sm:grid-cols-2">
         <li class="border-border rounded-xl border p-5">
-          <a
-            class="font-bold underline underline-offset-4"
-            href="mailto:Ayoub@AyoubAbed.xyz"
-          >
+          <a class="link-quiet font-bold" href={`mailto:${inquiryEmail}`}>
             Email Ayoub
           </a>
           <p class="text-muted-foreground mt-2 text-sm leading-6">
-            Ayoub@AyoubAbed.xyz
+            {inquiryEmail}
           </p>
         </li>
         <li class="border-border rounded-xl border p-5">
-          <a
-            class="font-bold underline underline-offset-4"
-            href="/AyoubA-Contact-Card.vcf"
-          >
+          <a class="link-quiet font-bold" href="/AyoubA-Contact-Card.vcf">
             Save contact card
           </a>
           <p class="text-muted-foreground mt-2 text-sm leading-6">
@@ -87,7 +66,7 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
     </address>
     <p class="text-muted-foreground mt-6 leading-7">
       Learn
-      <a href="/about/" class="text-link underline underline-offset-4">
+      <a href="/about/" class="link">
         about Ayoub's background and media work
       </a>
       before planning your project.

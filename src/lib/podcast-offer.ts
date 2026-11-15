@@ -1,17 +1,18 @@
-import { eventPortraitEmail } from './event-portrait-offer'
+import {
+  formatUsd,
+  headlineStartingPrice,
+  type ServiceOffer,
+} from './service-offer'
 
 export const podcastPath = '/services/podcast-production/'
-export const podcastEmail = eventPortraitEmail
 
 export const podcastTitle =
   'Mobile podcast production in Tampa | Ayoub Abedrabbo'
-export const podcastDescription =
-  'Mobile 4K video podcast production in Tampa. I bring the gear, record on location, and deliver a color-graded, audio-mastered episode with AI shorts. From $450 per episode.'
 
 export type PodcastPackage = {
   id: 'record' | 'growth' | 'full'
   name: string
-  price: number
+  startingPrice: number
   tagline: string
   delivery: string
   featured?: boolean
@@ -22,7 +23,7 @@ export const podcastPackages: PodcastPackage[] = [
   {
     id: 'record',
     name: 'Record & Polish',
-    price: 450,
+    startingPrice: 450,
     tagline: 'Show up and talk. Walk away with a finished episode.',
     delivery: '3 days',
     features: [
@@ -37,7 +38,7 @@ export const podcastPackages: PodcastPackage[] = [
   {
     id: 'growth',
     name: 'Growth',
-    price: 750,
+    startingPrice: 750,
     tagline: 'One recording becomes dozens of chances to be discovered.',
     delivery: '3 days',
     featured: true,
@@ -51,7 +52,7 @@ export const podcastPackages: PodcastPackage[] = [
   {
     id: 'full',
     name: 'Full Service',
-    price: 1000,
+    startingPrice: 1000,
     tagline: 'Know exactly what is working after every episode.',
     delivery: '72 hours',
     features: [
@@ -67,6 +68,9 @@ export type PodcastComparisonRow = {
   name: string
   values: Record<PodcastPackage['id'], boolean | string>
 }
+
+// Shared by the comparison table and the add-on so the two prices can't drift.
+const shortsPackPrice = 150
 
 export const podcastComparison: PodcastComparisonRow[] = [
   {
@@ -95,7 +99,11 @@ export const podcastComparison: PodcastComparisonRow[] = [
   },
   {
     name: '25–50 AI shorts, auto-published',
-    values: { record: '+$150', growth: true, full: true },
+    values: {
+      record: `+${formatUsd(shortsPackPrice)}`,
+      growth: true,
+      full: true,
+    },
   },
   {
     name: 'Analytics report',
@@ -120,7 +128,7 @@ export const podcastAddOns: PodcastAddOn[] = [
   {
     id: 'shorts',
     label: 'AI shorts pack',
-    price: 150,
+    price: shortsPackPrice,
     description:
       '25–50 OpusClip shorts, auto-published. Included in Growth and Full Service.',
     onlyFor: ['record'],
@@ -204,41 +212,47 @@ export const podcastFaqs = [
 export const podcastGuarantee =
   'Your episode on time, or the rush fee is waived and your next episode’s shorts are free.'
 
-const tampaArea = {
-  '@type': 'GeoCircle',
-  geoMidpoint: {
-    '@type': 'GeoCoordinates',
-    latitude: 27.9506,
-    longitude: -82.4572,
+const platformAddOn = podcastAddOns.find((a) => a.id === 'platform')
+if (!platformAddOn) throw new Error('Missing livestream platform add-on')
+export const podcastExtraPlatformPrice = platformAddOn.price
+
+export const podcastOffer: ServiceOffer = {
+  name: 'Mobile podcast production',
+  path: podcastPath,
+  serviceType: 'On-location video podcast recording and post-production',
+  unit: 'per episode',
+  startingPrices: podcastPackages.map((p) => ({
+    name: p.name,
+    price: p.startingPrice,
+  })),
+  extraPrices: [
+    {
+      name: 'Extra recording hour',
+      price: podcastExtraHour,
+      note: 'for each recorded hour over 2',
+    },
+  ],
+  facts: [
+    'Who: Ayoub Abedrabbo, mobile podcast producer in Tampa, Florida',
+    'Mobile 4K video podcast production: gear brought to your location, color-graded video, mastered audio, and AI shorts.',
+    `Add-ons: ${podcastAddOns.map((a) => `${a.label} ${formatUsd(a.price)}`).join(', ')}`,
+    `Area: ${podcastTravelNote}`,
+  ],
+  inquiry: {
+    subject: 'Podcast inquiry',
+    sends:
+      'show name, recording city, episodes per month, preferred first recording date, and the package and add-ons you want',
+    note: 'The price estimator on the page opens an email draft with these fields. Ayoub replies to confirm availability.',
   },
-  geoRadius: 48280,
-  description: 'Within 30 miles of Tampa, Florida',
+  proof: [
+    {
+      label: 'Chop Shop Show case study',
+      href: '/portfolio/chop-shop-show-podcast/',
+    },
+  ],
 }
 
-export function podcastStructuredData(pageUrl: string) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Service',
-    '@id': `${pageUrl}#service`,
-    name: 'Mobile podcast production',
-    serviceType: 'On-location video podcast recording and post-production',
-    url: pageUrl,
-    provider: {
-      '@type': 'Person',
-      name: 'Ayoub Abedrabbo',
-      email: podcastEmail,
-    },
-    areaServed: tampaArea,
-    offers: podcastPackages.map((p) => ({
-      '@type': 'Offer',
-      name: p.name,
-      price: p.price,
-      priceCurrency: 'USD',
-      description: 'Starting price per episode',
-      url: pageUrl,
-    })),
-  }
-}
+export const podcastDescription = `Mobile 4K video podcast production in Tampa. I bring the gear, record on location, and deliver a color-graded, audio-mastered episode with AI shorts. From ${formatUsd(headlineStartingPrice(podcastOffer))} per episode.`
 
 export type PodcastEstimateInput = {
   packageId: PodcastPackage['id']
@@ -257,10 +271,12 @@ export function estimatePodcastPrice(input: PodcastEstimateInput): number {
     .filter((a) => !a.onlyFor || a.onlyFor.includes(pkg.id))
     .reduce((sum, a) => sum + a.price, 0)
   const livestream = input.addOns.includes('livestream')
-  const platforms = livestream ? input.extraPlatforms * 50 : 0
+  const platforms = livestream
+    ? input.extraPlatforms * podcastExtraPlatformPrice
+    : 0
   const hours = 2 + input.extraHours
   return (
-    pkg.price +
+    pkg.startingPrice +
     addOns +
     platforms +
     input.extraHours * podcastExtraHour +

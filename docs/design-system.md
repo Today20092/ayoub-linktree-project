@@ -81,7 +81,7 @@ A necessary exception requires a same-line comment `design-system-allow: <reason
 
 ## Theme and layout
 
-`BaseLayout.astro` runs the theme boot script before rendering. `ThemeSwitch` supports System, Light, and Dark; the preference is stored in `localStorage.theme`. It renders once, inside the header menu (`[data-header-menu]`): the phone menu panel and the desktop Appearance dropdown. Avoid per-page theme scripts. Reuse `src/components/ui/` for shared controls. `src/components/PageContainer.astro` owns the matching About, Contact, and Privacy main region: `max-w-3xl`, responsive 4/6/8 gutters, and 10/14/20 vertical padding. Other page widths remain local until they share the same layout need.
+`BaseLayout.astro` runs the theme boot script before rendering. `ThemeSwitch` supports System, Light, and Dark; the preference is stored in `localStorage.theme`. It renders once, inside the header menu (`[data-header-menu]`): the phone menu panel and the desktop Appearance dropdown. Avoid per-page theme scripts. Reuse `src/components/ui/` for shared controls. Page layout modules (`PageContainer`, `PageHeader`, `ServiceSection` in `src/components/layout/`) and the shared `link`, `eyebrow` and display-heading utilities are described in [DESIGN.md](../DESIGN.md).
 
 When adding a color role, define the semantic value for both themes (or deliberately inherit an unchanged value), expose a utility in `@theme inline` if needed, update this table, and run both design-system commands. Check rendered contrast in both applied themes where tokens alone cannot establish it.
 

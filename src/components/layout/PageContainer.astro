@@ -1,0 +1,25 @@
+---
+// The page's <main>. `narrow` is prose-width with its own vertical padding;
+// `wide` is the service-page width, where each section owns its padding.
+interface Props {
+  width?: 'narrow' | 'wide'
+  class?: string
+}
+
+const { width = 'narrow', class: className } = Astro.props
+const widths = {
+  narrow: 'max-w-3xl py-10 sm:py-14 lg:py-20',
+  wide: 'max-w-screen-xl self-center',
+}
+---
+
+<main
+  id="main-content"
+  class:list={[
+    'mx-auto w-full scroll-mt-20 px-4 sm:px-6 lg:px-8',
+    widths[width],
+    className,
+  ]}
+>
+  <slot />
+</main>

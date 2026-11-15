@@ -4,26 +4,20 @@ import '../styles.css'
 import { Image } from 'astro:assets'
 import portrait from '../assets/ayoub-portrait.jpg'
 import BaseLayout from '../layouts/BaseLayout.astro'
-import PageContainer from '../components/PageContainer.astro'
-import { siteConfig } from '../lib/site-config'
+import PageContainer from '../components/layout/PageContainer.astro'
+import PageHeader from '../components/layout/PageHeader.astro'
+import { personEntity } from '../lib/service-offer'
 
-const { site } = siteConfig
 const title = 'About Ayoub Abedrabbo | Digital Media Specialist'
 const description =
   'Meet Ayoub Abedrabbo, a Tampa media producer, husband, and father sharing beneficial knowledge through tutorials and reflections inspired by his faith.'
 const canonicalUrl = new URL('/about/', Astro.site).toString()
-const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
 ---
 
 <BaseLayout
   title={title}
   description={description}
   canonicalUrl={canonicalUrl}
-  ogImage={ogImage}
-  ogImageWidth={1200}
-  ogImageHeight={630}
-  ogImageType="image/jpeg"
-  ogImageAlt={site.ogImageAlt}
   activeNav="about"
   structuredData={{
     '@context': 'https://schema.org',
@@ -31,19 +25,11 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
     name: title,
     description,
     url: canonicalUrl,
-    mainEntity: {
-      '@type': 'Person',
-      '@id': new URL('/#person', Astro.site).toString(),
-      name: 'Ayoub Abedrabbo',
-      url: new URL('/', Astro.site).toString(),
-    },
+    mainEntity: personEntity(Astro.site!),
   }}
 >
-  <PageContainer id="main-content">
-    <header data-reveal="up">
-      <h1 class="font-heading text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
-        Ayoub Abedrabbo
-      </h1>
+  <PageContainer>
+    <PageHeader title="Ayoub Abedrabbo" data-reveal="up">
       <div class="mt-6">
         <div class="h-80 overflow-hidden rounded-sm sm:h-[28rem]">
           <Image
@@ -65,7 +51,7 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
           share what I learn through tutorials and personal reflections.
         </p>
       </div>
-    </header>
+    </PageHeader>
     <div class="mt-10 space-y-8 text-base leading-8" data-reveal="up">
       <p>
         I started making videos after high school because I wanted my own
@@ -91,10 +77,7 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
       </p>
       <p>
         On{' '}
-        <a
-          class="underline underline-offset-4"
-          href="https://islam.ayoubabed.xyz"
-        >
+        <a class="link-quiet" href="https://islam.ayoubabed.xyz">
           islam.ayoubabed.xyz
         </a>
         , I write personal reflections and lessons I take from reading the Quran
@@ -119,15 +102,15 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
       </p>
       <p>
         You can browse my{' '}
-        <a class="underline underline-offset-4" href="/">
+        <a class="link-quiet" href="/">
           portfolio
         </a>
         , look through the{' '}
-        <a class="underline underline-offset-4" href="/galleries/">
+        <a class="link-quiet" href="/galleries/">
           event galleries
         </a>
         , or{' '}
-        <a class="underline underline-offset-4" href="/contact/">
+        <a class="link-quiet" href="/contact/">
           get in touch
         </a>
         .

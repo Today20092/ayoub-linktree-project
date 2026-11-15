@@ -8,6 +8,7 @@ import GuestUpload from '../../../../components/GuestUpload'
 import { buttonVariants } from '../../../../components/ui/button'
 import { galleryReader } from '../../../../lib/gallery-read'
 import BaseLayout from '../../../../layouts/BaseLayout.astro'
+import PageHeader from '../../../../components/layout/PageHeader.astro'
 
 export const prerender = false
 
@@ -27,16 +28,11 @@ if (!context) {
 const { gallery, invite } = context
 const eventTitle = gallery.title
 const summary = gallery.summary
-const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc ?? '/og.jpg'
-
-Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
-Astro.response.headers.set('Cache-Control', 'no-store')
-Astro.response.headers.set('Referrer-Policy', 'no-referrer')
+const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc
 ---
 
 <BaseLayout
-  disableAnalytics
-  robots="noindex,nofollow"
+  privatePage
   title={`Upload photos for ${eventTitle}`}
   description={`Upload photos for ${eventTitle}.`}
   canonicalUrl={new URL(
@@ -59,19 +55,17 @@ Astro.response.headers.set('Referrer-Policy', 'no-referrer')
       Gallery listing
     </a>
 
-    <header class="mt-8">
-      <p class="text-link text-sm font-bold tracking-wide uppercase">
-        Guest upload
-      </p>
-      <h1 class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
-        Share photos for{eventTitle}
-      </h1>
-      <p class="text-muted-foreground mt-5 max-w-xl text-lg leading-8">
+    <PageHeader
+      eyebrow="Guest upload"
+      title={`Share photos for ${eventTitle}`}
+      class="mt-8"
+    >
+      <Fragment slot="lead">
         This upload link is assigned to{invite.guest_name}. Photos publish to
         the gallery after upload.
-      </p>
+      </Fragment>
       {summary && <p class="text-muted-foreground mt-3 text-sm">{summary}</p>}
-    </header>
+    </PageHeader>
 
     <div class="mt-8">
       <GuestUpload

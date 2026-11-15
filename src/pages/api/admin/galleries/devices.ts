@@ -1,7 +1,6 @@
 import { Effect } from 'effect'
 import type { APIRoute } from 'astro'
 import { env } from 'cloudflare:workers'
-import { galleryAdminAuthorized } from '@/lib/gallery-admin'
 import { createDevice, parseDeviceCommand } from '@/lib/gallery-companion'
 import {
   database,
@@ -14,20 +13,6 @@ export const prerender = false
 export const POST: APIRoute = ({ request }) =>
   runGalleryHttp(
     Effect.gen(function* () {
-      if (
-        !(yield* validation(
-          () =>
-            galleryAdminAuthorized(
-              request,
-              env.GALLERY_ADMIN_EMAIL,
-              env.GALLERY_ACCESS_TEAM_DOMAIN,
-              env.GALLERY_ACCESS_AUDS,
-            ),
-          'Forbidden.',
-          403,
-        ))
-      )
-        return yield* Effect.fail(galleryFailure(403, 'Forbidden.'))
       if (request.headers.get('origin') !== new URL(request.url).origin)
         return yield* Effect.fail(galleryFailure(403, 'Invalid origin.'))
       if (Number(request.headers.get('content-length')) > 1024)

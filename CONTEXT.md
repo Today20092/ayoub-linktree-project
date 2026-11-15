@@ -12,6 +12,10 @@ _Avoid_: Service category, equipment need
 A completed portfolio project selected as evidence that Ayoub can satisfy a particular client need.
 _Avoid_: Sample, related work
 
+**Service offer**:
+A bookable service described once as data: its page path, **Starting prices**, facts, inquiry details, and **Proof projects**. The website pages, structured data, `/index.md`, `/llms.txt`, and email drafts are all derived from it.
+_Avoid_: Package, product
+
 **Starting price**:
 A realistic entry price or range that helps a prospective client judge fit before requesting a tailored quote.
 _Avoid_: Package price, fixed price

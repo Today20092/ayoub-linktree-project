@@ -32,16 +32,16 @@ import {
   estimatePodcastPrice,
   podcastAddOns,
   podcastComparison,
-  podcastEmail,
   podcastExtraHour,
+  podcastExtraPlatformPrice,
   podcastFaqs,
   podcastMistakeCutsPerHour,
+  podcastOffer,
   podcastPackages,
   podcastTravelNote,
   type PodcastPackage,
 } from '@/lib/podcast-offer'
-
-const usd = (n: number) => `$${n.toLocaleString('en-US')}`
+import { formatUsd as usd, offerMailto } from '@/lib/service-offer'
 
 function FeatureCell({ value }: { value: boolean | string }) {
   if (typeof value === 'string')
@@ -92,11 +92,11 @@ export default function PodcastPricing() {
     ...(extraHours ? [`${extraHours} extra recording hour(s)`] : []),
     ...(mistakeCuts ? ['Mistake cuts'] : []),
   ]
-  const mailto = `mailto:${podcastEmail}?subject=${encodeURIComponent(
-    `Podcast inquiry: ${pkg.name}`,
-  )}&body=${encodeURIComponent(
+  const mailto = offerMailto(
+    podcastOffer,
+    pkg.name,
     [
-      `Package: ${pkg.name} (from ${usd(pkg.price)})`,
+      `Package: ${pkg.name} (from ${usd(pkg.startingPrice)})`,
       `Add-ons: ${chosen.length ? chosen.join(', ') : 'None'}`,
       `Estimated starting price: ${usd(total)} per episode`,
       '',
@@ -105,7 +105,7 @@ export default function PodcastPricing() {
       'Episodes per month:',
       'Preferred first recording date:',
     ].join('\n'),
-  )}`
+  )
 
   return (
     <div className="flex flex-col gap-14">
@@ -126,7 +126,7 @@ export default function PodcastPricing() {
               <p className="flex items-baseline gap-1.5">
                 <span className="text-muted-foreground text-xs">from</span>
                 <span className="text-4xl font-bold tracking-tight tabular-nums">
-                  {usd(p.price)}
+                  {usd(p.startingPrice)}
                 </span>
                 <span className="text-muted-foreground text-sm">/ episode</span>
               </p>
@@ -167,7 +167,7 @@ export default function PodcastPricing() {
           Compare packages
         </h3>
         <Card className="py-0">
-          <Table>
+          <Table scrollLabel="Package comparison">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-2/5">What you get</TableHead>
@@ -237,12 +237,17 @@ export default function PodcastPricing() {
                 >
                   <Checkbox
                     id={`${id}-${a.id}`}
+                    // Base UI renders a span role="checkbox"; a wrapping <label> doesn't name it.
+                    aria-labelledby={`${id}-${a.id}-name`}
                     checked={addOns.includes(a.id)}
                     onCheckedChange={() => toggle(a.id)}
                     className="mt-0.5"
                   />
                   <span className="flex-1">
-                    <span className="flex items-center justify-between gap-2 text-sm font-medium">
+                    <span
+                      id={`${id}-${a.id}-name`}
+                      className="flex items-center justify-between gap-2 text-sm font-medium"
+                    >
                       {a.label}
                       <span className="tabular-nums">
                         +{usd(a.price)}
@@ -268,12 +273,16 @@ export default function PodcastPricing() {
               >
                 <Checkbox
                   id={`${id}-cuts`}
+                  aria-labelledby={`${id}-cuts-name`}
                   checked={mistakeCuts}
                   onCheckedChange={(c) => setMistakeCuts(c === true)}
                   className="mt-0.5"
                 />
                 <span className="flex-1">
-                  <span className="flex items-center justify-between gap-2 text-sm font-medium">
+                  <span
+                    id={`${id}-cuts-name`}
+                    className="flex items-center justify-between gap-2 text-sm font-medium"
+                  >
                     Mistake cuts
                     <span className="tabular-nums">
                       +{usd(podcastMistakeCutsPerHour)}
@@ -318,7 +327,7 @@ export default function PodcastPricing() {
                 <span id={`${id}-platforms`} className="text-sm font-medium">
                   Extra livestream platforms{' '}
                   <span className="text-muted-foreground font-normal">
-                    (+$50 each)
+                    (+{usd(podcastExtraPlatformPrice)} each)
                   </span>
                 </span>
                 <ToggleGroup
@@ -356,7 +365,7 @@ export default function PodcastPricing() {
           <CardContent className="flex flex-col gap-3 text-sm">
             <div className="flex justify-between gap-2">
               <span>{pkg.name}</span>
-              <span className="tabular-nums">{usd(pkg.price)}</span>
+              <span className="tabular-nums">{usd(pkg.startingPrice)}</span>
             </div>
             {chosen.length > 0 && (
               <ul className="text-muted-foreground flex flex-col gap-1">
