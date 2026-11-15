@@ -8,6 +8,13 @@ type Props = {
 
 const { activeNav } = Astro.props as Props
 
+const linkClass = (isActive: boolean) => [
+  'focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-3 text-sm font-bold tracking-wide underline decoration-dotted underline-offset-4 transition-colors focus-visible:ring-2 focus-visible:outline-none',
+  isActive
+    ? 'text-foreground decoration-2 decoration-solid'
+    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:decoration-solid',
+]
+
 const navItems: Array<{
   href: string
   label: string
@@ -17,7 +24,7 @@ const navItems: Array<{
   { href: '/galleries/', label: 'Galleries', key: 'galleries' },
   {
     href: '/services/event-portraits/',
-    label: 'Event photography',
+    label: 'Events',
     key: 'portraits',
   },
   {
@@ -30,8 +37,11 @@ const navItems: Array<{
 ]
 ---
 
-<header class="bg-background/80 supports-backdrop-filter:bg-background/60 border-border top-0 z-40 border-b backdrop-blur sm:sticky">
-  <div class="mx-auto flex min-h-14 w-full max-w-screen-2xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-1 sm:px-6 lg:px-8">
+<header
+  data-site-header
+  class="transition-transform duration-300 motion-reduce:transition-none data-[hidden]:-translate-y-full bg-background/80 supports-backdrop-filter:bg-background/60 border-border sticky top-0 z-40 border-b backdrop-blur"
+>
+  <div class="mx-auto flex min-h-14 w-full max-w-screen-2xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
     <a
       href="/"
       class="text-foreground hover:text-link focus-visible:ring-ring font-heading inline-flex min-h-11 items-center rounded-sm px-1 text-sm font-extrabold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
@@ -39,29 +49,117 @@ const navItems: Array<{
       <span class="sm:hidden">Ayoub</span>
       <span class="hidden sm:inline">Ayoub Abedrabbo</span>
     </a>
-    <ThemeSwitch />
-    <nav aria-label="Primary" class="w-full min-w-0 sm:w-auto">
-      <ul class="flex flex-wrap items-center gap-1 sm:gap-2">
-        {navItems.map((item) => {
-          const isActive = item.key === activeNav
-          return (
-            <li class:list={[item.key === 'home' && 'hidden sm:block']}>
-              <a
-                href={item.href}
-                aria-current={isActive ? 'page' : undefined}
-                class:list={[
-                  'focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-2 text-xs font-bold tracking-wide underline decoration-dotted underline-offset-4 transition-[color,background-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] sm:px-3 sm:text-sm',
-                  isActive
-                    ? 'text-foreground decoration-2 decoration-solid'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:decoration-solid',
-                ]}
-              >
-                {item.label}
-              </a>
-            </li>
-          )
-        })}
+    <nav aria-label="Primary" class="hidden md:block">
+      <ul class="flex items-center gap-1 lg:gap-2">
+        {navItems.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              aria-current={item.key === activeNav ? 'page' : undefined}
+              class:list={linkClass(item.key === activeNav)}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
       </ul>
     </nav>
+    <div class="flex items-center gap-1">
+      <a
+        href="/contact/"
+        class="bg-primary text-primary-foreground focus-visible:ring-ring inline-flex min-h-9 items-center rounded-full px-3.5 text-xs font-bold focus-visible:ring-2 focus-visible:outline-none md:hidden"
+      >
+        Book
+      </a>
+      <details class="group relative" data-header-menu>
+        <summary class="text-foreground hover:bg-accent focus-visible:ring-ring inline-flex size-11 cursor-pointer list-none items-center justify-center rounded-md focus-visible:ring-2 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+          <span class="sr-only md:hidden">Menu</span>
+          <span class="sr-only hidden md:inline">Appearance</span>
+          <svg
+            class="size-6 md:hidden"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path class="group-open:hidden" d="M4 7h16M4 12h16M4 17h16" />
+            <path class="hidden group-open:block" d="M6 6l12 12M18 6L6 18" />
+          </svg>
+          <svg
+            class="hidden size-5 md:block"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+          </svg>
+        </summary>
+        <div class="bg-background border-border fixed inset-x-0 top-14 border-b p-4 shadow-lg md:absolute md:inset-x-auto md:top-full md:right-0 md:mt-2 md:w-max md:rounded-lg md:border">
+          <nav aria-label="Mobile" class="md:hidden">
+            <ul class="flex flex-col">
+              {navItems.map((item) => (
+                <li>
+                  <a
+                    href={item.href}
+                    aria-current={item.key === activeNav ? 'page' : undefined}
+                    class:list={[
+                      linkClass(item.key === activeNav),
+                      'w-full text-base',
+                    ]}
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div class="border-border mt-3 border-t pt-3 md:mt-0 md:border-0 md:pt-0">
+            <p class="text-muted-foreground mb-2 px-1 text-xs font-bold tracking-widest uppercase">
+              Appearance
+            </p>
+            <ThemeSwitch />
+          </div>
+        </div>
+      </details>
+    </div>
   </div>
 </header>
+
+<script>
+  // Hide the header while scrolling down; show it on any upward scroll.
+  const header = document.querySelector<HTMLElement>('[data-site-header]')
+  let lastY = window.scrollY
+  window.addEventListener(
+    'scroll',
+    () => {
+      const y = window.scrollY
+      if (Math.abs(y - lastY) < 6) return // ignore jitter
+      const hide =
+        y > lastY &&
+        y > 80 &&
+        !menu?.open &&
+        !header?.contains(document.activeElement)
+      header?.toggleAttribute('data-hidden', hide)
+      lastY = y
+    },
+    { passive: true },
+  )
+
+  // Close the menu on outside click or Escape; <details> handles the rest natively.
+  const menu = document.querySelector<HTMLDetailsElement>('[data-header-menu]')
+  document.addEventListener('click', (event) => {
+    if (menu?.open && !menu.contains(event.target as Node)) menu.open = false
+  })
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && menu?.open) {
+      menu.open = false
+      menu.querySelector('summary')?.focus()
+    }
+  })
+</script>
