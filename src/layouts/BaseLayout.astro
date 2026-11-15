@@ -1,6 +1,7 @@
 ---
 import CloudflareWebAnalytics from '../components/CloudflareWebAnalytics.astro'
 import Header from '../components/Header.astro'
+import { themeScript } from '../components/ThemeBoot.mjs'
 import { Font } from 'astro:assets'
 import { cacheControlForPage } from '../lib/public-delivery'
 import {
@@ -84,20 +85,6 @@ const pageCacheControl = cacheControlForPage(
 if (pageCacheControl)
   Astro.response.headers.set('Cache-Control', pageCacheControl)
 
-const themeScript = `;(() => {
-  const systemQuery = window.matchMedia('(prefers-color-scheme: dark)')
-
-  const applyTheme = () => {
-    const isDark = systemQuery.matches
-    document.documentElement.classList.toggle('dark', isDark)
-    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'
-  }
-
-  applyTheme()
-  systemQuery.addEventListener('change', applyTheme)
-  document.documentElement.dataset.revealReady = 'true'
-})()`
-
 if (Astro.csp) {
   const digest = await crypto.subtle.digest(
     'SHA-256',
@@ -116,6 +103,23 @@ if (Astro.csp) {
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="theme-color"
+      content={
+        '#ffffff' /* design-system-allow: browser metadata requires a literal color */
+      }
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content={
+        '#1c1917' /* design-system-allow: browser metadata requires a literal color */
+      }
+      media="(prefers-color-scheme: dark)"
+    />
+
+    <script is:inline set:html={themeScript} />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
@@ -132,17 +136,6 @@ if (Astro.csp) {
     <Font cssVariable="--font-jakarta" preload={[{ style: 'normal' }]} />
     <Font cssVariable="--font-zodiak" preload={[{ style: 'normal' }]} />
     <slot name="head" />
-
-    <meta
-      name="theme-color"
-      content="#ffffff"
-      media="(prefers-color-scheme: light)"
-    />
-    <meta
-      name="theme-color"
-      content="#1c1917"
-      media="(prefers-color-scheme: dark)"
-    />
 
     <meta property="og:title" content={ogTitle} />
     <meta property="og:description" content={ogDescription} />
@@ -165,7 +158,6 @@ if (Astro.csp) {
     <link rel="canonical" href={canonicalUrl} />
     <link rel="alternate" type="text/markdown" href="/index.md" />
 
-    <script is:inline set:html={themeScript} />
     {structuredData && (
       <script
         is:inline

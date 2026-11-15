@@ -30,7 +30,7 @@ export function ToggleGroup({
   return (
     <ToggleGroupPrimitive
       className={cn(
-        'dark:*:[[data-slot=separator]:has(+[data-slot=toggle]:hover)]:before:bg-input/64 dark:*:[[data-slot=separator]:has(+[data-slot=toggle][data-pressed])]:before:bg-input dark:*:[[data-slot=toggle]:hover+[data-slot=separator]]:before:bg-input/64 dark:*:[[data-slot=toggle][data-pressed]+[data-slot=separator]]:before:bg-input flex w-fit *:focus-visible:z-10',
+        'dark:*:[[data-slot=separator]:has(+[data-slot=toggle]:hover)]:before:bg-input-surface/64 dark:*:[[data-slot=separator]:has(+[data-slot=toggle][data-pressed])]:before:bg-input-surface dark:*:[[data-slot=toggle]:hover+[data-slot=separator]]:before:bg-input-surface/64 dark:*:[[data-slot=toggle][data-pressed]+[data-slot=separator]]:before:bg-input-surface flex w-fit *:focus-visible:z-10',
         orientation === 'horizontal'
           ? '*:pointer-coarse:after:min-w-auto'
           : '*:pointer-coarse:after:min-h-auto',
@@ -91,7 +91,7 @@ export function ToggleGroupSeparator({
   return (
     <Separator
       className={cn(
-        'bg-input dark:before:bg-input/32 pointer-events-none relative before:absolute before:inset-0',
+        'bg-input-surface dark:before:bg-input-surface/32 pointer-events-none relative before:absolute before:inset-0',
         className,
       )}
       orientation={orientation}

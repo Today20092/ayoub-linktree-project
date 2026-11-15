@@ -7,8 +7,9 @@ This repository contains Ayoub Abedrabbo's Astro website and link hub, MDX portf
 ## Task documentation
 
 - For repository orientation, read `README.md` for the project map and production/preview boundaries.
-- For page layout, typography, colour tokens, and shared UI primitives, read `DESIGN.md`.
+- For page layout, typography, and shared UI primitives (layout modules, link and button styles), read `DESIGN.md`.
 - For homepage links, portfolio content, or shared page styles, read `docs/website-content.md`. Use `src/content.config.ts` and the MDX template for current portfolio fields.
+- For styling, colors, themes, or shared layout changes, read [the design system](docs/design-system.md) and run `pnpm run check:design-system`.
 - For gallery storage, guest uploads, moderation, or Access configuration, read `docs/interactive-event-galleries.md`.
 - For gallery viewing/submission links, unlisted access, or sharing migrations and rollback, read `docs/gallery-sharing-links.md`. This guide supersedes historical guest-password instructions in the gallery guides.
 - For gallery backend workflows, request lifecycles, publication failures, or retries, read `docs/gallery-effect-workflows.md`.

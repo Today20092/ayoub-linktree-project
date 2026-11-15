@@ -13,7 +13,7 @@ Source: `src/styles.css` (shadcn tokens, OKLCH).
 - Ground: `--background` white (light) / warm near-black `oklch(0.147 0.004 49.25)` (dark).
 - Ink: `--foreground`; secondary text `--muted-foreground` only. Do not use grey text on photos.
 - Accent: `--primary` emerald `oklch(0.696 0.17 162.48)`. Use it for the primary action and inline links only. Never use it for a decorative fill or section background.
-- Status and overlays: `--success` for confirmations (a check icon, not a fill), `--overlay` / `--overlay-foreground` for scrims and controls over photo or video. The overlay is black in both themes on purpose; use `bg-overlay/80`. Never write `text-emerald-*`, `bg-black`, `text-white`, or raw `rgb()`/hex in components.
+- Status and overlays: colour tokens live in `src/tokens.css` and are listed in [the design system](docs/design-system.md). Use `--success` for confirmations (a check icon, not a fill) and `--scrim` / `--scrim-foreground` for scrims and controls over photo or video (black in both themes on purpose; e.g. `bg-scrim/80`). Never write `text-emerald-*`, `bg-black`, `text-white`, or raw `rgb()`/hex in components; `pnpm run check:design-system` enforces this.
 - Surfaces: `--muted` for quiet rows and selected-state fills. `--border` for hairlines.
 - Radius: `--radius` 0.5rem. Photos use `rounded-2xl` (`rounded-sm` for the editorial photos on the event photography page); controls use `rounded-xl`.
 
@@ -41,7 +41,7 @@ Use the installed shadcn primitives in `src/components/ui/`: `button` (`buttonVa
 - Long-form prose (privacy, MDX): `class="typeset"` from `src/typeset.css`. The Tailwind typography plugin is not installed, so `prose` classes do nothing.
 - Text links: `class="link"` (accent) or `class="link-quiet"` (inherits colour), defined once in `src/styles.css`. Add only layout (`inline-flex min-h-11 items-center`) and weight.
 - Buttons and button-looking links: `buttonVariants({ variant, size })` from `@/components/ui/button`.
-- Choosing one of several: React uses `ToggleGroup`. In `.astro`, use a `role="group"` with `aria-label` of `buttonVariants({ variant: 'outline' })` buttons toggling `aria-pressed`, or native radios in a `<fieldset>` with `<legend>` when the choice submits with a form (see the coverage picker in `services/event-portraits.astro`). Never mirror one choice in two controls.
+- Choosing one of several: React uses `ToggleGroup`. In `.astro`, use a `role="group"` with `aria-label` of `buttonVariants({ variant: 'outline' })` buttons toggling `aria-pressed` (the outline variant styles the pressed state in both themes), or native radios in a `<fieldset>` with `<legend>` when the choice submits with a form (see the coverage picker in `services/event-portraits.astro`). Never mirror one choice in two controls.
 - Text fields in `.astro`: `inputClassName` from `@/components/ui/input`.
 - Focus is `focus-visible:ring-*` with `ring-ring`, never `outline-*`.
 

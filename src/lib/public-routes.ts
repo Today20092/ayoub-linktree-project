@@ -11,6 +11,8 @@ export type PublicRoute = {
   path: string
   /** Link text in the header and footer. */
   label: string
+  /** Shorter label for the header nav; defaults to `label`. */
+  navLabel?: string
   /** Header link; the key is what pages pass as `activeNav`. */
   nav?: NavKey
   footer?: true
@@ -48,6 +50,7 @@ export const publicRoutes: readonly PublicRoute[] = [
   {
     path: eventPortraitOffer.path,
     label: eventPortraitOffer.name,
+    navLabel: 'Events',
     nav: 'event-photography',
     footer: true,
     sitemap: true,

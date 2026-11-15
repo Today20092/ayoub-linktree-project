@@ -96,7 +96,7 @@ storage, follow [Local production-build audit](docs/production-audit.md).
 
 ## Releases and deployment
 
-GitHub is the source of truth. Integrate on `development` (this event-portrait batch uses `Today20092/rockfish`), then promote to `master` as described in [the Git workflow](docs/branch-workflow.md). Choose versions as described in [the versioning policy](docs/releasing.md).
+GitHub is the source of truth. Open pull requests from short-lived branches straight into `master`, as described in [the Git workflow](docs/branch-workflow.md). Choose versions as described in [the versioning policy](docs/releasing.md).
 
 - `npm run deploy` and `npm run deploy:preview` deploy the isolated preview website.
 - `npm run deploy:prod` deploys production from clean `master`.

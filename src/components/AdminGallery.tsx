@@ -1371,7 +1371,7 @@ export default function AdminGallery({
 
       {reviewPhoto && (
         <div
-          className="bg-overlay/95 text-overlay-foreground fixed inset-0 z-50 p-4 sm:p-6"
+          className="bg-scrim/95 text-scrim-foreground fixed inset-0 z-50 p-4 sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={`Review ${reviewPhoto.label}`}
@@ -1380,7 +1380,7 @@ export default function AdminGallery({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold">{reviewPhoto.label}</p>
-                <p className="text-overlay-foreground/60 text-xs">
+                <p className="text-scrim-foreground/60 text-xs">
                   Use ← / → to move, Esc to close.
                 </p>
               </div>
