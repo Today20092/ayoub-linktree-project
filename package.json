@@ -32,9 +32,11 @@
     "audit:prod": "pnpm audit --prod",
     "test:barber-tracker": "node --test scripts/barber-tracker.test.mjs",
     "test:ui": "tsx --test src/components/ui/migration.test.tsx src/lib/podcast-offer.test.ts",
-    "verify": "pnpm run format:check && pnpm run test:ui && pnpm run test:barber-tracker && pnpm run test:faces && pnpm run test:galleries && pnpm run check && pnpm run build",
+    "verify": "pnpm run format:check && pnpm run check:design-system && pnpm run test:design-system && pnpm run test:ui && pnpm run test:barber-tracker && pnpm run test:faces && pnpm run test:galleries && pnpm run check && pnpm run build",
     "astro": "astro",
-    "generate-types": "wrangler types"
+    "generate-types": "wrangler types",
+    "check:design-system": "node scripts/check-raw-colors.mjs --tokens src/tokens.css --allow-dark src/components/ui src && node scripts/check-contrast.mjs src/tokens.css",
+    "test:design-system": "node scripts/design-system-selftest.mjs && node --test src/components/ThemeBoot.test.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.4.2",

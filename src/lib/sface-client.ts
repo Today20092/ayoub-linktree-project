@@ -51,7 +51,7 @@ export function createSfaceDetector(): FaceDetector {
       })
       if (!detectionContext) throw new Error('Face detection is unavailable')
       const detectorScale = 640 / Math.max(canvas.width, canvas.height)
-      detectionContext.fillStyle = '#000'
+      detectionContext.fillStyle = '#000' // design-system-allow: canvas letterboxing uses black pixels for model input
       detectionContext.fillRect(0, 0, 640, 640)
       detectionContext.drawImage(
         canvas,

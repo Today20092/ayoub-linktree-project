@@ -218,7 +218,7 @@ export default function GuestUpload({
                   </div>
                   {item.status === 'complete' && (
                     <CheckCircle2
-                      className="size-5 shrink-0 text-emerald-600"
+                      className="text-success size-5 shrink-0"
                       aria-label="Uploaded"
                     />
                   )}

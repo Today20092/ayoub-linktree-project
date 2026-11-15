@@ -306,16 +306,16 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
     cursor: pointer;
   }
   .cash-app {
-    --brand-background: #00d632;
-    --brand-foreground: #002b09;
+    --brand-background: var(--cash-app);
+    --brand-foreground: var(--cash-app-foreground);
   }
   .venmo {
-    --brand-background: #008cff;
-    --brand-foreground: #001c40;
+    --brand-background: var(--venmo);
+    --brand-foreground: var(--venmo-foreground);
   }
   .paypal {
-    --brand-background: #003087;
-    --brand-foreground: #ffffff;
+    --brand-background: var(--paypal);
+    --brand-foreground: var(--paypal-foreground);
   }
   .venmo .brand-logo {
     grid-column: 1 / -1;
@@ -362,13 +362,13 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
     color: var(--foreground);
   }
   dialog::backdrop {
-    background: rgb(0 0 0 / 0.75);
+    background: color-mix(in srgb, var(--scrim) 75%, transparent);
   }
   .dialog-header h2 {
     font-size: 1.25rem;
   }
   .qr-code {
-    background: white;
+    background: var(--scrim-foreground);
     margin-block: 1rem;
     aspect-ratio: 1;
   }

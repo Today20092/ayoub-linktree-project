@@ -100,7 +100,7 @@ agent instructions. `public/.well-known/security.txt` directs security reports t
 the published contact email without promising a response time or reward. Review its
 contact details and renew its expiry before October 1, 2027.
 
-`src/styles.css` contains shared colors, typography, theme rules, and portfolio prose styles. Adjust `.typeset-portfolio` for case-study spacing. Extra blank lines in MDX do not control rendered spacing. Check both light and dark themes after styling changes.
+`src/tokens.css` defines shared color and theme tokens; `src/styles.css` imports them and contains shared typography and component styles. Read [the design system](design-system.md) before changing colors, themes, or layout. Adjust `.typeset-portfolio` for case-study spacing. Extra blank lines in MDX do not control rendered spacing. Check both light and dark themes after styling changes.
 
 Use `text-link` for readable green text and navigation; reserve primary colors for action fills and their paired foreground. Shared body text can wrap long URLs and email addresses. Badges grow and wrap rather than forcing a single fixed-height line. Portfolio table links have at least 24px-tall hit areas. Preserve these rules under enlarged text and spacing overrides; contain two-dimensional calendar scrolling locally. The photography offer describes about 20 portrait sessions per hour for every coverage duration, as a planning estimate rather than a cap.
 

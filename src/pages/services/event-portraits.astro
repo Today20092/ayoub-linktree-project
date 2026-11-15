@@ -809,7 +809,8 @@ const contactFields: InquiryField[] = [
     border: 1px solid var(--border);
     padding: 1rem 1.25rem;
     font-size: 0.72rem;
-    box-shadow: 0 12px 30px rgb(0 0 0 / 5%);
+    box-shadow: 0 12px 30px
+      color-mix(in srgb, var(--shadow-color) 5%, transparent);
   }
   .photo-label {
     display: block;

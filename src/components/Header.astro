@@ -1,4 +1,6 @@
 ---
+import ThemeSwitch from './ThemeSwitch.astro'
+
 type Props = {
   activeNav?:
     'home' | 'services' | 'galleries' | 'portraits' | 'about' | 'contact'
@@ -37,6 +39,7 @@ const navItems: Array<{
       <span class="sm:hidden">Ayoub</span>
       <span class="hidden sm:inline">Ayoub Abedrabbo</span>
     </a>
+    <ThemeSwitch />
     <nav aria-label="Primary" class="w-full min-w-0 sm:w-auto">
       <ul class="flex flex-wrap items-center gap-1 sm:gap-2">
         {navItems.map((item) => {

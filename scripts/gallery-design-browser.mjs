@@ -43,6 +43,7 @@ const measureContrast = (locator, pseudo = null) =>
   }, pseudo)
 try {
   for (const width of [320, 390, 768, 1440]) {
+    let lightBackground
     for (const theme of ['light', 'dark']) {
       const page = await browser.newPage({
         viewport: { width, height: 900 },
@@ -57,11 +58,18 @@ try {
         .locator('[data-gallery-favorite]:not([disabled])')
         .first()
         .waitFor({ state: 'attached' })
-      await page.evaluate(
-        (theme) =>
-          document.documentElement.classList.toggle('dark', theme === 'dark'),
-        theme,
-      )
+      const renderedTheme = await page.evaluate(() => ({
+        dark: document.documentElement.classList.contains('dark'),
+        background: getComputedStyle(document.body).backgroundColor,
+      }))
+      assert.equal(renderedTheme.dark, theme === 'dark', `${theme} class`)
+      if (theme === 'light') lightBackground = renderedTheme.background
+      else
+        assert.notEqual(
+          renderedTheme.background,
+          lightBackground,
+          'dark background',
+        )
       const fits = async () =>
         assert.ok(
           await page.evaluate(

@@ -34,7 +34,7 @@ const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude
         width="600"
         height="450"
         loading="lazy"
-        class="size-full border-0 contrast-[.92] saturate-[.55] transition-[filter] duration-300 hover:saturate-75 focus:saturate-75 dark:brightness-[.8] dark:contrast-[1.05]"
+        class="size-full border-0 [filter:var(--map-filter)_saturate(.55)] transition-[filter] duration-300 hover:[filter:var(--map-filter)_saturate(.75)] focus:[filter:var(--map-filter)_saturate(.75)]"
       >
       </iframe>
     </div>
@@ -76,6 +76,7 @@ const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude
       </div>
 
       <a
+        style="background: var(--map-button-background)"
         href={googleMapsUrl}
         target="_blank"
         rel="noopener noreferrer"
@@ -83,7 +84,7 @@ const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${longitude
           variant: 'outline',
           size: 'lg',
           className:
-            'h-10 w-fit rounded-none px-4 font-semibold shadow-none dark:bg-transparent',
+            'h-10 w-fit rounded-none px-4 font-semibold shadow-none',
         })}
       >
         Open in Google Maps
