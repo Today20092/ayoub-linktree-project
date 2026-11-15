@@ -9,7 +9,7 @@ const { activeNav } = Astro.props as Props
 const navItems: Array<{
   href: string
   label: string
-  key: 'home' | 'galleries' | 'portraits' | 'about' | 'contact'
+  key: 'home' | 'galleries' | 'portraits' | 'services' | 'about' | 'contact'
 }> = [
   { href: '/', label: 'Home', key: 'home' },
   { href: '/galleries/', label: 'Galleries', key: 'galleries' },
@@ -17,6 +17,11 @@ const navItems: Array<{
     href: '/services/event-portraits/',
     label: 'Event photography',
     key: 'portraits',
+  },
+  {
+    href: '/services/podcast-production/',
+    label: 'Podcasts',
+    key: 'services',
   },
   { href: '/about/', label: 'About', key: 'about' },
   { href: '/contact/', label: 'Contact', key: 'contact' },

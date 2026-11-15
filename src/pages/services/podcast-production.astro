@@ -1,0 +1,300 @@
+---
+import '../../styles.css'
+import { Image } from 'astro:assets'
+import {
+  ClapperboardIcon,
+  MicIcon,
+  RocketIcon,
+  ShieldCheckIcon,
+  SlidersHorizontalIcon,
+} from 'lucide-react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { buttonVariants } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
+import {
+  Timeline,
+  TimelineContent,
+  TimelineDescription,
+  TimelineIndicator,
+  TimelineItem,
+  TimelineTitle,
+} from '@/components/ui/timeline'
+import PodcastPricing, { PodcastFaq } from '../../components/PodcastPricing'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import episodePhoto from '../../assets/client-work/chop-shop-episode-151.jpg'
+import reportOverview from '../../assets/client-work/chop-shop-analytics-report-overview.png'
+import {
+  podcastDescription,
+  podcastGuarantee,
+  podcastPath,
+  podcastStructuredData,
+  podcastTitle,
+} from '../../lib/podcast-offer'
+import { siteConfig } from '../../lib/site-config'
+
+const canonicalUrl = new URL(podcastPath, Astro.site).toString()
+const ogImage = new URL(siteConfig.site.ogImage, Astro.site).toString()
+const caseStudy = '/portfolio/chop-shop-show-podcast/'
+const link =
+  'text-link rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4'
+
+const steps = [
+  {
+    icon: MicIcon,
+    title: 'You sit down and talk.',
+    body: 'I bring and set up the 4K camera, microphones, 32-bit float recorder, and lights at your table. Your ideas, your guests, your show.',
+  },
+  {
+    icon: SlidersHorizontalIcon,
+    title: 'I finish the episode.',
+    body: 'Professional color grade and full audio mastering: noise reduction, EQ, and compression on the complete, uncut episode.',
+  },
+  {
+    icon: ClapperboardIcon,
+    title: 'One recording becomes dozens of shorts.',
+    body: '25–50 AI shorts and three title and thumbnail options give every episode more chances to be discovered.',
+  },
+  {
+    icon: RocketIcon,
+    title: 'You see what changed.',
+    body: 'A report after every episode compares YouTube, Facebook, and Instagram with the last period, with what to try next.',
+  },
+]
+
+const stats = [
+  { label: 'Facebook views', value: '196K', change: '+414%' },
+  { label: 'YouTube watch time', value: '171.9 hrs', change: '+103%' },
+  { label: 'Instagram views', value: '39,226', change: '+31%' },
+]
+---
+
+<BaseLayout
+  activeNav="services"
+  title={podcastTitle}
+  description={podcastDescription}
+  canonicalUrl={canonicalUrl}
+  ogImage={ogImage}
+  ogImageWidth={siteConfig.site.ogImageWidth}
+  ogImageHeight={siteConfig.site.ogImageHeight}
+  ogImageType={siteConfig.site.ogImageType}
+  ogImageAlt={siteConfig.site.ogImageAlt}
+  twitterHandle={siteConfig.site.twitterHandle}
+  structuredData={podcastStructuredData(canonicalUrl)}
+>
+  <main
+    id="main-content"
+    class="podcast-page mx-auto w-full max-w-screen-xl self-center px-4 sm:px-6 lg:px-8"
+  >
+    <section
+      aria-labelledby="podcast-title"
+      class="grid items-center gap-10 py-10 sm:py-16 lg:grid-cols-2 lg:gap-16"
+    >
+      <div class="min-w-0">
+        <p class="eyebrow">Mobile podcast production / Tampa, FL</p>
+        <h1 id="podcast-title">
+          You bring the conversation.
+          <br />
+          <em>I bring the studio.</em>
+        </h1>
+        <p class="text-muted-foreground mt-5 max-w-lg text-lg leading-8">
+          4K video, 32-bit float audio, and a finished episode in three days.
+          Plus dozens of shorts and a report after every episode, so you always
+          know what is growing.
+        </p>
+        <div class="mt-7 flex flex-wrap items-center gap-5">
+          <a href="#pricing" class={buttonVariants({ size: 'lg' })}>
+            See packages
+          </a>
+          <a href={caseStudy} class={`${link} text-sm`}>
+            Read the Chop Shop Show case study ↗
+          </a>
+        </div>
+        <div class="mt-6 flex flex-wrap gap-2">
+          <Badge variant="secondary">From $450 / episode</Badge>
+          <Badge variant="secondary">Travel within 30 miles included</Badge>
+          <Badge variant="secondary">Next-day delivery available</Badge>
+        </div>
+      </div>
+      <figure class="min-w-0">
+        <Image
+          src={episodePhoto}
+          alt="Three Chop Shop Show hosts recording an episode at a table"
+          widths={[480, 720, 1080]}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          loading="eager"
+          fetchpriority="high"
+          class="aspect-video w-full rounded-2xl object-cover"
+        />
+        <figcaption class="text-muted-foreground mt-3 text-sm">
+          The Chop Shop Show, recorded on location and livestreamed.
+        </figcaption>
+      </figure>
+    </section>
+
+    <Separator />
+
+    <section aria-labelledby="process-title" class="py-12 sm:py-16">
+      <div class="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
+        <div>
+          <p class="eyebrow">01 / How it works</p>
+          <h2 id="process-title">
+            All you do is
+            <em>show up and talk.</em>
+          </h2>
+          <p class="text-muted-foreground mt-4 max-w-md leading-7">
+            No studio to rent, no gear to buy, and no editing to learn. I do not
+            write your content. You keep your voice, and I handle everything
+            around it.
+          </p>
+        </div>
+        <Timeline>
+          {steps.map((step) => (
+            <TimelineItem>
+              <TimelineIndicator>
+                <step.icon />
+              </TimelineIndicator>
+              <TimelineContent>
+                <TimelineTitle>{step.title}</TimelineTitle>
+                <TimelineDescription>{step.body}</TimelineDescription>
+              </TimelineContent>
+            </TimelineItem>
+          ))}
+        </Timeline>
+      </div>
+    </section>
+
+    <Separator />
+
+    <section aria-labelledby="proof-title" class="py-12 sm:py-16">
+      <p class="eyebrow">02 / Proof, every episode</p>
+      <h2 id="proof-title">
+        Never guess
+        <em>what is working.</em>
+      </h2>
+      <p class="text-muted-foreground mt-4 max-w-2xl leading-7">
+        Every Full Service episode ends with a report. Here is one 28-day
+        snapshot from the Chop Shop Show, October 18–November 14, 2026, compared
+        with the previous 28 days.
+      </p>
+      <ul class="mt-8 grid gap-4 sm:grid-cols-3">
+        {stats.map((stat) => (
+          <li>
+            <Card>
+              <CardHeader>
+                <CardDescription>{stat.label}</CardDescription>
+                <CardTitle className="text-3xl! font-bold tabular-nums">
+                  {stat.value}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Badge variant="secondary">{stat.change}</Badge>
+              </CardContent>
+            </Card>
+          </li>
+        ))}
+      </ul>
+      <figure class="mt-8">
+        <Image
+          src={reportOverview}
+          alt="Analytics report overview showing 28-day YouTube, Facebook, and Instagram views and follower changes"
+          widths={[640, 1060, 1600]}
+          sizes="(min-width: 1280px) 1200px, 100vw"
+          class="ring-foreground/10 w-full rounded-2xl ring-1"
+        />
+        <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
+          Part of a real client report. Platform audiences overlap, and figures
+          from summaries or screenshots are labeled unverified.
+          <a href={caseStudy} class={link}>
+            See the full case study
+          </a>
+        </figcaption>
+      </figure>
+    </section>
+
+    <Separator />
+
+    <section
+      id="pricing"
+      aria-labelledby="pricing-title"
+      class="scroll-mt-24 py-12 sm:py-16"
+    >
+      <p class="eyebrow">03 / Packages</p>
+      <h2 id="pricing-title">
+        Pick your starting point.
+        <em>Add what your show needs.</em>
+      </h2>
+      <p class="text-muted-foreground mt-4 mb-10 max-w-2xl leading-7">
+        Every package includes on-location recording up to 2 hours, all
+        equipment, a professional color grade, and full audio mastering. Prices
+        are per episode.
+      </p>
+      <PodcastPricing client:visible />
+      <Alert className="mt-10">
+        <ShieldCheckIcon />
+        <AlertTitle>On-time guarantee</AlertTitle>
+        <AlertDescription>{podcastGuarantee}</AlertDescription>
+      </Alert>
+    </section>
+
+    <Separator />
+
+    <section aria-labelledby="faq-title" class="py-12 sm:py-16">
+      <div class="grid gap-8 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
+        <div>
+          <p class="eyebrow">04 / Questions</p>
+          <h2 id="faq-title">
+            Good to know
+            <em>before we record.</em>
+          </h2>
+        </div>
+        <PodcastFaq client:visible />
+      </div>
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .podcast-page {
+    overflow-wrap: anywhere;
+  }
+  .eyebrow {
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-bottom: 1.25rem;
+  }
+  h1 {
+    font-family: var(--font-jakarta), sans-serif;
+    font-size: clamp(2.4rem, 4.5vw, 4.4rem);
+    font-weight: 500;
+    letter-spacing: -0.06em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+  h2 {
+    font-family: var(--font-jakarta), sans-serif;
+    font-size: clamp(1.7rem, 3vw, 2.5rem);
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    line-height: 1.12;
+  }
+  em {
+    font-family: var(--font-zodiak), serif;
+    font-weight: 400;
+    letter-spacing: -0.05em;
+  }
+  h1 em,
+  h2 em {
+    display: block;
+  }
+</style>

@@ -4,6 +4,7 @@ import type { APIContext } from 'astro'
 
 import { escapeXml, PUBLIC_PAGE_CACHE_CONTROL } from '../lib/discovery'
 import { eventPortraitPath } from '../lib/event-portrait-offer'
+import { podcastPath } from '../lib/podcast-offer'
 import { galleryReader } from '../lib/gallery-read'
 import { GALLERY_PAGE_SIZE, galleryPagePath } from '../lib/gallery-pagination'
 import { sortPortfolioProjects } from '../lib/portfolio-order'
@@ -22,6 +23,7 @@ export async function GET({ site }: APIContext) {
     '/contact/',
     '/privacy/',
     eventPortraitPath,
+    podcastPath,
     '/galleries/',
     ...portfolio
       .filter((entry) => entry.data.status === 'complete')

@@ -29,6 +29,7 @@ export function cacheControlForPage(
       '/contact/',
       '/privacy/',
       '/services/event-portraits/',
+      '/services/podcast-production/',
     ].includes(pathname) ||
     pathname.startsWith('/portfolio/')
   ) {
