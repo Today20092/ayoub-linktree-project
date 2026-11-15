@@ -11,6 +11,7 @@ import { getImage } from 'astro:assets'
 import PortfolioIndex from '../components/PortfolioIndex.astro'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { sortPortfolioProjects } from '../lib/portfolio-order'
+import { personEntity } from '../lib/service-offer'
 import { getBaseUrl, resolveSiteAsset, siteConfig } from '../lib/site-config'
 
 const {
@@ -130,13 +131,10 @@ const structuredData = {
     name: siteName,
   },
   mainEntity: {
-    '@type': 'Person',
-    '@id': `${canonicalUrl}#person`,
-    name: siteName,
+    ...personEntity(canonicalUrl),
     alternateName: profileName,
     description: pageDescription,
     image: profileImageUrl,
-    url: canonicalUrl,
     sameAs: sameAsUrls,
   },
   significantLink: sameAsUrls,

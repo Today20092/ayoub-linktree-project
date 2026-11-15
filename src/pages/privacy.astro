@@ -2,44 +2,24 @@
 import '../styles.css'
 
 import BaseLayout from '../layouts/BaseLayout.astro'
-import { siteConfig } from '../lib/site-config'
+import PageContainer from '../components/layout/PageContainer.astro'
+import PageHeader from '../components/layout/PageHeader.astro'
 
-const { site } = siteConfig
 const title = 'Website and Gallery Privacy | Ayoub Abedrabbo'
 const description =
   'How this portfolio and event gallery site uses Cloudflare hosting and analytics, handles photo uploads and face search, and receives your contact details.'
 const canonicalUrl = new URL('/privacy/', Astro.site).toString()
-const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
 ---
 
-<BaseLayout
-  title={title}
-  description={description}
-  canonicalUrl={canonicalUrl}
-  ogImage={ogImage}
-  ogImageWidth={1200}
-  ogImageHeight={630}
-  ogImageType="image/jpeg"
-  ogImageAlt={site.ogImageAlt}
->
-  <main
-    id="main-content"
-    class="mx-auto w-full max-w-3xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-20"
-  >
-    <header data-reveal="up">
-      <p class="text-link text-sm font-bold tracking-wide uppercase">Privacy</p>
-      <h1 class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
-        Privacy information
-      </h1>
-      <p class="text-muted-foreground mt-5 text-lg leading-8">
+<BaseLayout title={title} description={description} canonicalUrl={canonicalUrl}>
+  <PageContainer>
+    <PageHeader eyebrow="Privacy" title="Privacy information" data-reveal="up">
+      <Fragment slot="lead">
         This page explains the services and information involved when you use
         this site.
-      </p>
-    </header>
-    <div
-      class="prose prose-stone dark:prose-invert mt-10 max-w-none"
-      data-reveal="up"
-    >
+      </Fragment>
+    </PageHeader>
+    <div class="typeset mt-10" data-reveal="up">
       <h2>Site hosting and analytics</h2>
       <p>
         The site is hosted on Cloudflare. Cloudflare Web Analytics is loaded on
@@ -72,12 +52,12 @@ const ogImage = new URL('/og-ayoub-digital-media.jpg', Astro.site).toString()
         If you contact Ayoub by email, the information you provide is delivered
         through that service so the request can be answered. For questions about
         this page, use the
-        <a class="underline underline-offset-4" href="/contact/">
+        <a class="link" href="/contact/">
           contact page
         </a>
         .
       </p>
       <p>Last reviewed: September 11, 2026.</p>
     </div>
-  </main>
+  </PageContainer>
 </BaseLayout>

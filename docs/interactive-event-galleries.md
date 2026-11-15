@@ -47,6 +47,8 @@ The application verifies the Access JWT signature, issuer, audience, expiry,
 and authenticated email. It returns `403` when any value is missing or invalid.
 Localhost is allowed for development.
 
+Admin authorization is enforced once in `src/middleware.ts` (`galleryAdminGate`) for every `/admin/**` and `/api/admin/**` request, so new admin pages and routes are covered automatically and must not re-check. The payments host returns 404 for these paths. `/api/companion/**` is outside this gate.
+
 Android's `/api/companion/*` routes use device bearer keys and must remain outside interactive Access redirects. Create keys at `/admin/galleries/devices/`; gallery creation and management require the management permission. See [native gallery management](native-gallery-management.md).
 
 ## Local development

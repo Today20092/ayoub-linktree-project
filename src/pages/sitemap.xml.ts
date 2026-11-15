@@ -3,11 +3,10 @@ import { env } from 'cloudflare:workers'
 import type { APIContext } from 'astro'
 
 import { escapeXml, PUBLIC_PAGE_CACHE_CONTROL } from '../lib/discovery'
-import { eventPortraitPath } from '../lib/event-portrait-offer'
-import { podcastPath } from '../lib/podcast-offer'
 import { galleryReader } from '../lib/gallery-read'
 import { GALLERY_PAGE_SIZE, galleryPagePath } from '../lib/gallery-pagination'
 import { sortPortfolioProjects } from '../lib/portfolio-order'
+import { publicRoutes } from '../lib/public-routes'
 
 export const prerender = false
 
@@ -18,13 +17,7 @@ export async function GET({ site }: APIContext) {
     galleryReader(env.GALLERY_DB).listPublic(),
   ])
   const paths = new Set([
-    '/',
-    '/about/',
-    '/contact/',
-    '/privacy/',
-    eventPortraitPath,
-    podcastPath,
-    '/galleries/',
+    ...publicRoutes.filter((route) => route.sitemap).map((route) => route.path),
     ...portfolio
       .filter((entry) => entry.data.status === 'complete')
       .sort(sortPortfolioProjects)

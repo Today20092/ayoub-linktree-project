@@ -327,7 +327,7 @@ test('public agent guidance points readers to the offer and respects gallery acc
 
 test('security reports have a public contact without a promised response policy', async () => {
   const contact = await page('/.well-known/security.txt')
-  assert.match(contact, /^Contact: mailto:Ayoub@AyoubAbed.xyz$/m)
+  assert.match(contact, /^Contact: mailto:inquiry@ayoubabed.xyz$/m)
   assert.match(
     contact,
     /^Canonical: https:\/\/ayoubabed.xyz\/\.well-known\/security.txt$/m,

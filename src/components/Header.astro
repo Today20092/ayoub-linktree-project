@@ -1,31 +1,13 @@
 ---
-type Props = {
-  activeNav?:
-    'home' | 'services' | 'galleries' | 'portraits' | 'about' | 'contact'
-}
+import { publicRoutes, type NavKey } from '../lib/public-routes'
+
+type Props = { activeNav?: NavKey }
 
 const { activeNav } = Astro.props as Props
 
-const navItems: Array<{
-  href: string
-  label: string
-  key: 'home' | 'galleries' | 'portraits' | 'services' | 'about' | 'contact'
-}> = [
-  { href: '/', label: 'Home', key: 'home' },
-  { href: '/galleries/', label: 'Galleries', key: 'galleries' },
-  {
-    href: '/services/event-portraits/',
-    label: 'Event photography',
-    key: 'portraits',
-  },
-  {
-    href: '/services/podcast-production/',
-    label: 'Podcasts',
-    key: 'services',
-  },
-  { href: '/about/', label: 'About', key: 'about' },
-  { href: '/contact/', label: 'Contact', key: 'contact' },
-]
+const navItems = publicRoutes.flatMap((route) =>
+  route.nav ? [{ href: route.path, label: route.label, key: route.nav }] : [],
+)
 ---
 
 <header class="bg-background/80 supports-backdrop-filter:bg-background/60 border-border top-0 z-40 border-b backdrop-blur sm:sticky">
@@ -47,7 +29,7 @@ const navItems: Array<{
                 href={item.href}
                 aria-current={isActive ? 'page' : undefined}
                 class:list={[
-                  'focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-2 text-xs font-bold tracking-wide underline decoration-dotted underline-offset-4 transition-[color,background-color,transform] focus-visible:ring-2 focus-visible:outline-none active:scale-[0.98] sm:px-3 sm:text-sm',
+                  'link-quiet inline-flex min-h-11 items-center px-2 text-xs font-bold tracking-wide decoration-dotted transition-[color,background-color,transform] active:scale-[0.98] sm:px-3 sm:text-sm',
                   isActive
                     ? 'text-foreground decoration-2 decoration-solid'
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:decoration-solid',

@@ -6,22 +6,12 @@ import { ArrowLeft, ExternalLink } from 'lucide-react'
 
 import AdminGallery from '../../../components/AdminGallery'
 import { buttonVariants } from '../../../components/ui/button'
-import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
 import { galleryReader } from '../../../lib/gallery-read'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PageContainer from '../../../components/layout/PageContainer.astro'
+import PageHeader from '../../../components/layout/PageHeader.astro'
 
 export const prerender = false
-
-if (
-  !(await galleryAdminAuthorized(
-    Astro.request,
-    env.GALLERY_ADMIN_EMAIL,
-    env.GALLERY_ACCESS_TEAM_DOMAIN,
-    env.GALLERY_ACCESS_AUDS,
-  ))
-) {
-  return new Response('Forbidden', { status: 403 })
-}
 
 const eventSlug = Astro.params.slug
 const gallery = eventSlug
@@ -44,8 +34,6 @@ const eventMeta = {
   visibilityStatus: gallery.visibility,
   coverSrc: gallery.cover?.src,
 }
-
-Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
 ---
 
 <BaseLayout
@@ -55,13 +43,9 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     `/admin/galleries/${eventSlug}/`,
     Astro.site,
   ).toString()}
-  ogImage="/og-ayoub-digital-media.jpg"
-  ogImageAlt="Ayoub Abedrabbo digital media"
+  privatePage
 >
-  <main
-    id="main-content"
-    class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-10 sm:px-6 lg:px-8"
-  >
+  <PageContainer width="wide" class="py-10">
     <div class="flex flex-wrap items-center justify-between gap-3 [&_a]:h-auto [&_a]:max-w-full [&_a]:whitespace-normal">
       <a
         class={buttonVariants({ variant: 'ghost', size: 'sm' })}
@@ -81,18 +65,16 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
       </a>
     </div>
 
-    <header class="mt-8 max-w-3xl">
-      <p class="text-link text-sm font-bold tracking-wide uppercase">
-        Gallery administration
-      </p>
-      <h1 class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
-        {eventTitle}
-      </h1>
-      <p class="text-muted-foreground mt-4 text-lg leading-8">
+    <PageHeader
+      eyebrow="Gallery administration"
+      title={eventTitle}
+      class="mt-8 max-w-3xl"
+    >
+      <Fragment slot="lead">
         Review guest submissions, control upload access, and hide professional
         photos from the live gallery.
-      </p>
-    </header>
+      </Fragment>
+    </PageHeader>
 
     <div class="mt-10">
       <AdminGallery
@@ -111,5 +93,5 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         professional={professional}
       />
     </div>
-  </main>
+  </PageContainer>
 </BaseLayout>

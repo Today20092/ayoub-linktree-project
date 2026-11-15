@@ -9,6 +9,7 @@ import { buttonVariants } from '../../../components/ui/button'
 import { galleryReader } from '../../../lib/gallery-read'
 import { matchesSharingToken } from '../../../lib/gallery-sharing'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PageHeader from '../../../components/layout/PageHeader.astro'
 
 export const prerender = false
 
@@ -34,16 +35,11 @@ const canonicalUrl = new URL(
 ).toString()
 const title = `Share photos from ${gallery.title}`
 const description = `Submit guest photos from ${gallery.title} for review and inclusion in the event gallery.`
-const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc ?? '/og.jpg'
-
-Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
-Astro.response.headers.set('Cache-Control', 'no-store')
-Astro.response.headers.set('Referrer-Policy', 'no-referrer')
+const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc
 ---
 
 <BaseLayout
-  disableAnalytics
-  robots="noindex,nofollow"
+  privatePage
   title={title}
   description={description}
   canonicalUrl={canonicalUrl}
@@ -63,18 +59,16 @@ Astro.response.headers.set('Referrer-Policy', 'no-referrer')
       Gallery listing
     </a>
 
-    <header class="mt-8">
-      <p class="text-link text-sm font-bold tracking-wide uppercase">
-        Guest photos
-      </p>
-      <h1 class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
-        Share what you captured
-      </h1>
-      <p class="text-muted-foreground mt-5 max-w-xl text-lg leading-8">
+    <PageHeader
+      eyebrow="Guest photos"
+      title="Share what you captured"
+      class="mt-8"
+    >
+      <Fragment slot="lead">
         Add your photos from{gallery.title}. Every submission is reviewed before
         it appears in the public gallery.
-      </p>
-    </header>
+      </Fragment>
+    </PageHeader>
 
     <div class="mt-8">
       <GuestUpload

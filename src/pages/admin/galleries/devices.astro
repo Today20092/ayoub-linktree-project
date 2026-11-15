@@ -1,41 +1,31 @@
 ---
 import '../../../styles.css'
+import { buttonVariants } from '@/components/ui/button'
 import { env } from 'cloudflare:workers'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
-import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
+import PageHeader from '../../../components/layout/PageHeader.astro'
+import { listDevices } from '../../../lib/gallery-companion'
 
 export const prerender = false
-if (
-  !(await galleryAdminAuthorized(
-    Astro.request,
-    env.GALLERY_ADMIN_EMAIL,
-    env.GALLERY_ACCESS_TEAM_DOMAIN,
-    env.GALLERY_ACCESS_AUDS,
-  ))
-)
-  return new Response('Forbidden', { status: 403 })
-const devices = await env.GALLERY_DB.prepare(
-  'SELECT id, name, expires_at, can_manage FROM gallery_devices ORDER BY created_at DESC',
-).all<{ id: string; name: string; expires_at: number; can_manage: number }>()
-Astro.response.headers.set('Cache-Control', 'no-store')
-Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+const devices = await listDevices(env.GALLERY_DB)
 ---
 
 <BaseLayout
   title="Connect your phone"
   description="Pair the Ayoub Gallery Android app."
   canonicalUrl={Astro.url.toString()}
-  ogImage="/og-ayoub-digital-media.jpg"
+  privatePage
 >
   <main id="main-content" class="mx-auto max-w-2xl px-5 py-12">
     <a href="/admin/galleries/" class="text-link">
       ← Galleries
     </a>
-    <h1 class="font-heading mt-6 text-4xl font-bold">Connect your phone</h1>
-    <p class="text-muted-foreground mt-4">
-      Create a key here, then paste it into Ayoub Gallery on your phone. Keys
-      expire after 90 days and can be revoked below.
-    </p>
+    <PageHeader title="Connect your phone" class="mt-6">
+      <Fragment slot="lead">
+        Create a key here, then paste it into Ayoub Gallery on your phone. Keys
+        expire after 90 days and can be revoked below.
+      </Fragment>
+    </PageHeader>
     <form id="pair-form" class="bg-muted/40 mt-8 space-y-4 rounded-3xl p-6">
       <label class="block" for="device-name">
         Device name
@@ -59,7 +49,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         </span>
       </label>
       <button
-        class="bg-primary text-primary-foreground rounded-full px-6 py-3 font-semibold"
+        class={buttonVariants({ size: 'lg', className: 'min-h-11 px-6' })}
         type="submit"
       >
         Create pairing key
@@ -79,7 +69,10 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         rows="3"
       >
       </textarea>
-      <button id="copy-key" class="text-link mt-3 rounded-full px-4 py-3">
+      <button
+        id="copy-key"
+        class={buttonVariants({ variant: 'link', className: 'mt-3 min-h-11' })}
+      >
         Copy key
       </button>
       <p class="text-muted-foreground mt-2 text-sm">
@@ -89,7 +82,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
     </section>
     <h2 class="mt-10 text-2xl font-semibold">Connected devices</h2>
     <div class="mt-4 space-y-3">
-      {devices.results.map((device) => (
+      {devices.map((device) => (
         <div class="bg-muted/40 flex items-center justify-between gap-4 rounded-2xl p-4">
           <div>
             <>
@@ -105,13 +98,16 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
           </div>
           <button
             data-revoke={device.id}
-            class="text-destructive rounded-full px-4 py-3"
+            class={buttonVariants({
+              variant: 'destructive',
+              className: 'min-h-11 px-4',
+            })}
           >
             Revoke
           </button>
         </div>
       ))}
-      {devices.results.length === 0 && (
+      {devices.length === 0 && (
         <p class="text-muted-foreground">No paired devices yet.</p>
       )}
     </div>

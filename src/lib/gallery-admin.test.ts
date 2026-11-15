@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { exportJWK, generateKeyPair, SignJWT } from 'jose'
 
-import { galleryAdminAuthorized } from './gallery-admin'
+import { galleryAdminAuthorized, galleryAdminGate } from './gallery-admin'
 
 test('requires a signed Access token outside local development', async () => {
   const production = new Request('https://ayoubabed.xyz/admin/galleries', {
@@ -64,4 +64,29 @@ test('accepts a valid Access JWT for the configured admin', async () => {
   } finally {
     globalThis.fetch = originalFetch
   }
+})
+
+test('admin gate covers every admin path family and the payments host', async () => {
+  const env = { GALLERY_ADMIN_EMAIL: 'ayoub@example.com' }
+  const gate = (url: string) => galleryAdminGate(new Request(url), env)
+  for (const path of [
+    '/admin/galleries/',
+    '/admin',
+    '//admin/galleries',
+    '/%61dmin/galleries',
+    '/ADMIN/galleries',
+    '/%E0%A4%A',
+  ])
+    assert.equal(await gate(`https://ayoubabed.xyz${path}`), 'forbidden', path)
+  assert.equal(
+    await gate('https://ayoubabed.xyz/api/admin/galleries/devices'),
+    'forbidden-api',
+  )
+  for (const path of ['/administrator', '/api/companion/devices', '/'])
+    assert.equal(await gate(`https://ayoubabed.xyz${path}`), 'skip', path)
+  assert.equal(await gate('http://localhost:4321/admin/galleries/'), 'allow')
+  assert.equal(
+    await gate('https://payments.ayoubabed.xyz/admin/galleries/'),
+    'not-found',
+  )
 })

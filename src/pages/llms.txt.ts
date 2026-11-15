@@ -1,15 +1,9 @@
 import type { APIContext } from 'astro'
-import template from '../data/llms.txt?raw'
-import { eventPortraitProofGalleryUrl } from '../lib/event-portrait-offer'
+import { llmsText } from '../lib/discovery'
+import { siteConfig } from '../lib/site-config'
 
 export function GET({ site }: APIContext) {
-  return new Response(
-    template
-      .split(eventPortraitProofGalleryUrl)
-      .map((part) => part.replaceAll('https://ayoubabed.xyz', site!.origin))
-      .join(eventPortraitProofGalleryUrl),
-    {
-      headers: { 'content-type': 'text/plain; charset=utf-8' },
-    },
-  )
+  return new Response(llmsText(site!.origin, siteConfig.site), {
+    headers: { 'content-type': 'text/plain; charset=utf-8' },
+  })
 }

@@ -89,7 +89,7 @@ const githubIcon = simpleIcons.icons.github.body
 const focusRing =
   'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none'
 const textLink =
-  'text-foreground inline-flex min-h-11 items-center gap-2 rounded-sm text-sm font-bold underline decoration-dotted underline-offset-4 hover:decoration-solid'
+  'link-quiet text-foreground inline-flex min-h-11 items-center gap-2 text-sm font-bold decoration-dotted hover:decoration-solid'
 ---
 
 <section
@@ -115,7 +115,7 @@ const textLink =
       href="https://github.com/Today20092"
       target="_blank"
       rel="noopener noreferrer"
-      class:list={[textLink, 'hover:bg-accent px-2', focusRing]}
+      class:list={[textLink, 'hover:bg-accent px-2']}
     >
       <svg
         class="size-5"
@@ -151,7 +151,7 @@ const textLink =
         quality={75}
         class="block aspect-video h-auto w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.02] motion-reduce:transition-none"
       />
-      <span class="bg-background/90 text-foreground absolute top-3 left-3 inline-flex min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-bold shadow-[0_4px_16px_rgb(0_0_0/0.25)]">
+      <span class="bg-background/90 text-foreground absolute top-3 left-3 inline-flex min-h-11 items-center gap-2 rounded-xl px-4 text-sm font-bold shadow-lg">
         <Play size={16} aria-hidden="true" className="fill-current" />
         Watch the 7-minute demo
       </span>
@@ -199,7 +199,7 @@ const textLink =
           href={cleanSlate.repo}
           target="_blank"
           rel="noopener noreferrer"
-          class:list={[textLink, focusRing]}
+          class={textLink}
         >
           <svg
             class="size-4"

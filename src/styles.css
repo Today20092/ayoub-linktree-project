@@ -17,6 +17,10 @@
   --primary: oklch(0.696 0.17 162.48);
   --primary-foreground: oklch(0.262 0.051 172.552);
   --link: oklch(0.52 0.12 162.48);
+  --success: oklch(0.5 0.13 155);
+  /* Media overlays stay black in both themes so photos and video keep their contrast. */
+  --overlay: oklch(0 0 0);
+  --overlay-foreground: oklch(1 0 0);
   --secondary: oklch(0.97 0.001 106.424);
   --secondary-foreground: oklch(0.216 0.006 56.043);
   --muted: oklch(0.97 0.001 106.424);
@@ -53,6 +57,7 @@
   --primary: oklch(0.696 0.17 162.48);
   --primary-foreground: oklch(0.262 0.051 172.552);
   --link: var(--primary);
+  --success: oklch(0.72 0.17 160);
   --secondary: oklch(0.268 0.007 34.298);
   --secondary-foreground: oklch(0.985 0.001 106.423);
   --muted: oklch(0.268 0.007 34.298);
@@ -90,6 +95,9 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-link: var(--link);
+  --color-success: var(--success);
+  --color-overlay: var(--overlay);
+  --color-overlay-foreground: var(--overlay-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -117,6 +125,44 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* The one text-link style. `link` is accent-coloured; `link-quiet` inherits the surrounding colour. */
+@utility link-quiet {
+  @apply focus-visible:ring-ring focus-visible:ring-offset-background rounded-sm underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-offset-2;
+}
+
+@utility link {
+  @apply link-quiet text-link;
+}
+
+/* Small uppercase label above a heading. Add the margin where it is used. */
+@utility eyebrow {
+  @apply text-muted-foreground text-xs font-semibold tracking-[0.15em] uppercase;
+}
+
+/* Marketing display headings (service pages): sans medium, with an optional serif <em> accent line. */
+@utility display-title {
+  @apply font-sans font-medium text-balance;
+  font-size: clamp(1.75rem, 3.1vw, 2.75rem);
+  letter-spacing: -0.05em;
+  line-height: 1.15;
+  & em {
+    @apply font-heading block font-normal;
+    letter-spacing: -0.05em;
+  }
+}
+
+@utility display-hero {
+  @apply font-sans font-medium text-balance;
+  font-size: clamp(2.5rem, 4.6vw, 4.5rem);
+  letter-spacing: -0.06em;
+  line-height: 1.1;
+  & em {
+    @apply font-heading block font-normal;
+    font-size: 0.8em;
+    letter-spacing: -0.055em;
+  }
 }
 
 @layer base {
@@ -213,24 +259,6 @@
     transform: translate3d(0, 0, 0);
     will-change: auto;
   }
-
-  .services-reel-track {
-    animation: services-reel 28s linear infinite;
-  }
-
-  .services-reel:hover .services-reel-track {
-    animation-play-state: paused;
-  }
-}
-
-@keyframes services-reel {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(calc(-50% - 0.5rem));
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -248,10 +276,6 @@
     transform: none;
     transition: none;
     will-change: auto;
-  }
-
-  .services-reel-track {
-    animation: none;
   }
 }
 

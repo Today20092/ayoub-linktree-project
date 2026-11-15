@@ -3,6 +3,12 @@ import CloudflareWebAnalytics from '../components/CloudflareWebAnalytics.astro'
 import Header from '../components/Header.astro'
 import { Font } from 'astro:assets'
 import { cacheControlForPage } from '../lib/public-delivery'
+import {
+  PRIVATE_PAGE_ROBOTS,
+  applyPrivatePageHeaders,
+} from '../lib/private-page'
+import { publicRoutes, type NavKey } from '../lib/public-routes'
+import { siteConfig } from '../lib/site-config'
 
 type Props = {
   title: string
@@ -10,7 +16,8 @@ type Props = {
   canonicalUrl: string
   ogTitle?: string
   ogDescription?: string
-  ogImage: string
+  /** Defaults to the site share image; omit it and the dimensions and type follow. */
+  ogImage?: string
   ogImageAlt?: string
   ogType?: 'website' | 'article'
   ogImageWidth?: number
@@ -21,10 +28,11 @@ type Props = {
   sitemapUrl?: string
   preconnectHints?: string[]
   structuredData?: Record<string, unknown>
-  activeNav?:
-    'home' | 'services' | 'galleries' | 'portraits' | 'about' | 'contact'
+  activeNav?: NavKey
   disableAnalytics?: boolean
   minimal?: boolean
+  /** Secret-link or admin page: noindex, no-store, no-referrer, no analytics. */
+  privatePage?: boolean
 }
 
 const {
@@ -33,21 +41,40 @@ const {
   canonicalUrl,
   ogTitle = title,
   ogDescription = description,
-  ogImage,
-  ogImageAlt,
+  ogImage: customOgImage,
+  ogImageAlt: customOgImageAlt,
   ogType = 'website',
-  ogImageWidth = 1200,
-  ogImageHeight = 630,
-  ogImageType,
+  ogImageWidth: customOgImageWidth,
+  ogImageHeight: customOgImageHeight,
+  ogImageType: customOgImageType,
   twitterHandle,
-  robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
+  robots:
+    customRobots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1',
   sitemapUrl,
   preconnectHints = [],
   structuredData,
   activeNav,
-  disableAnalytics = false,
+  disableAnalytics: customDisableAnalytics = false,
   minimal = false,
+  privatePage = false,
 } = Astro.props as Props
+
+const { site } = siteConfig
+const isDefaultOgImage = !customOgImage
+const ogImage = customOgImage ?? new URL(site.ogImage, Astro.site).toString()
+const ogImageAlt =
+  customOgImageAlt ?? (isDefaultOgImage ? site.ogImageAlt : undefined)
+const ogImageWidth =
+  customOgImageWidth ?? (isDefaultOgImage ? site.ogImageWidth : 1200)
+const ogImageHeight =
+  customOgImageHeight ?? (isDefaultOgImage ? site.ogImageHeight : 630)
+const ogImageType =
+  customOgImageType ?? (isDefaultOgImage ? site.ogImageType : undefined)
+const robots = privatePage ? PRIVATE_PAGE_ROBOTS : customRobots
+const disableAnalytics = privatePage || customDisableAnalytics
+
+// Set before the cache helper below so it sees no-store and stays out of the way.
+if (privatePage) applyPrivatePageHeaders(Astro.response.headers)
 
 const pageCacheControl = cacheControlForPage(
   Astro.url,
@@ -159,30 +186,16 @@ if (Astro.csp) {
     <slot />
     {!minimal && (
       <footer class="text-muted-foreground mx-auto mt-auto flex w-full max-w-screen-2xl shrink-0 flex-wrap justify-center gap-4 px-4 py-8 text-xs sm:px-6 lg:px-8">
-        <a
-          class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-2 underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
-          href="/about/"
-        >
-          About
-        </a>
-        <a
-          class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-2 underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
-          href="/contact/"
-        >
-          Contact
-        </a>
-        <a
-          class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-2 underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
-          href="/services/event-portraits/"
-        >
-          Event photography
-        </a>
-        <a
-          class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm px-2 underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
-          href="/privacy/"
-        >
-          Privacy
-        </a>
+        {publicRoutes
+          .filter((route) => route.footer)
+          .map((route) => (
+            <a
+              class="link-quiet inline-flex min-h-11 items-center px-2"
+              href={route.path}
+            >
+              {route.label}
+            </a>
+          ))}
       </footer>
     )}
     <script>

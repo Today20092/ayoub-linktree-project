@@ -4,15 +4,29 @@ import { readFile } from 'node:fs/promises'
 
 import {
   eventPortraitDescription,
-  eventPortraitMapsUrl,
-  eventPortraitMarkdownSection,
-  eventPortraitPackages,
+  eventPortraitOffer,
   eventPortraitPath,
   eventPortraitProofProjects,
   eventPortraitProofGalleryUrl,
-  eventPortraitStructuredData,
+  eventPortraitStartingPrices,
   eventPortraitTitle,
 } from './event-portrait-offer'
+import {
+  inquiryEmail,
+  mapsListingUrl,
+  offerMarkdown,
+  offerStructuredData,
+} from './service-offer'
+
+const eventPortraitMarkdownSection = (origin = 'https://ayoubabed.xyz') =>
+  offerMarkdown(eventPortraitOffer, origin)
+const eventPortraitStructuredData = (pageUrl: string) => {
+  const [person, business, service] = offerStructuredData(
+    eventPortraitOffer,
+    pageUrl,
+  )['@graph']
+  return { person, business, service }
+}
 
 test('the public offer names the Tampa starting prices', () => {
   assert.equal(
@@ -28,34 +42,21 @@ test('the public offer names the Tampa starting prices', () => {
     `${eventPortraitDescription.length} chars`,
   )
   assert.deepEqual(
-    eventPortraitPackages.map((option) => option.price),
-    ['$400', '$550', '$700', '$850'],
+    eventPortraitStartingPrices.map((option) => option.price),
+    [400, 550, 700, 850],
   )
 })
 
-test('agent-readable copies share the offer and omit a street address', async () => {
+test('agent-readable copy states the offer and omits a street address', () => {
   const section = eventPortraitMarkdownSection()
-  const llms = await readFile(
-    new URL('../data/llms.txt', import.meta.url),
-    'utf8',
-  )
-  assert.equal(
-    llms
-      .slice(llms.indexOf('## Event photography'))
-      .replaceAll('\r\n', '\n')
-      .trim(),
-    section.trim(),
-  )
-  for (const copy of [section, llms]) {
-    assert.match(copy, /\$400/)
-    assert.match(copy, /\$850/)
-    assert.match(copy, /\$150/)
-    assert.match(copy, /Tampa/)
-    assert.match(copy, /Ayoub@AyoubAbed\.xyz/)
-    assert.doesNotMatch(copy, /- Phone:|(?:tel|sms):/)
-    assert.equal(copy.includes('streetAddress'), false)
-    assert.equal(copy.includes('$300'), false)
-  }
+  assert.match(section, /\$400/)
+  assert.match(section, /\$850/)
+  assert.match(section, /\$150/)
+  assert.match(section, /Tampa/)
+  assert.ok(section.includes(inquiryEmail))
+  assert.doesNotMatch(section, /- Phone:|(?:tel|sms):/)
+  assert.equal(section.includes('streetAddress'), false)
+  assert.equal(section.includes('$300'), false)
   assert.match(section, /Guests do not pay/)
   assert.match(section, /Portrait sessions are included/)
   assert.match(section, /within minutes/)
@@ -71,7 +72,7 @@ test('agent-readable offer answers how to book without the page layout', () => {
     section,
     /coverage length, extra time, event date, venue, city, guest count, event type, name, phone, and email/,
   )
-  assert.match(section, /mailto:Ayoub@AyoubAbed\.xyz/)
+  assert.match(section, /mailto:inquiry@ayoubabed\.xyz/)
   assert.match(section, /does not reserve the date/)
   assert.match(
     section,
@@ -100,20 +101,21 @@ test('structured data describes the visible service and each starting offer with
   const url = 'https://ayoubabed.xyz/services/event-portraits/'
   const data = eventPortraitStructuredData(url)
   assert.deepEqual(
-    data['@graph'].map((node) => node['@type']),
-    ['ProfessionalService', 'Service'],
+    [data.person, data.business, data.service].map((node) => node['@type']),
+    ['Person', 'ProfessionalService', 'Service'],
   )
-  const business = data['@graph'][0]
-  assert.equal(business.email, 'Ayoub@AyoubAbed.xyz')
+  const { business, service } = data
+  assert.equal(business.email, 'inquiry@ayoubabed.xyz')
   assert.equal('telephone' in business, false)
   assert.equal(JSON.stringify(data).includes('streetAddress'), false)
-  const service = data['@graph'][1]
   assert.equal(service.name, 'Event photography')
   assert.equal(
     service.serviceType,
     'Event photography with portrait sessions and a live gallery',
   )
-  assert.deepEqual(service.provider, { '@id': `${url}#business` })
+  assert.deepEqual(service.provider, {
+    '@id': 'https://ayoubabed.xyz/#business',
+  })
   const area = {
     '@type': 'GeoCircle',
     geoMidpoint: {
@@ -155,12 +157,9 @@ test('structured data links the live Google Maps listing', () => {
   const data = eventPortraitStructuredData(
     'https://ayoubabed.xyz/services/event-portraits/',
   )
-  const business = data['@graph'][0]
-  assert.equal(
-    eventPortraitMapsUrl,
-    'https://maps.app.goo.gl/7r3JFHfe32ubHtKa7',
-  )
-  assert.deepEqual(business.sameAs, [eventPortraitMapsUrl])
+  const { business } = data
+  assert.equal(mapsListingUrl, 'https://maps.app.goo.gl/7r3JFHfe32ubHtKa7')
+  assert.deepEqual(business.sameAs, [mapsListingUrl])
   assert.equal(
     business.hasMap,
     'https://www.google.com/maps?cid=7799557622400498050',
@@ -192,7 +191,7 @@ test(
     assert.match(copy, /Extra hour \+\$150/)
     assert.match(copy, /Opens an email draft to Ayoub/)
     assert.match(copy, /does not reserve the date/)
-    assert.match(html, /mailto:Ayoub@AyoubAbed\.xyz/)
+    assert.match(html, /mailto:inquiry@ayoubabed\.xyz/)
     assert.doesNotMatch(html, /href="(?:tel|sms):/)
     // The denial is the only mention of a backdrop or lighting.
     const visible = html
@@ -228,7 +227,8 @@ test(
     assert.ok(graph)
     assert.deepEqual(
       graph,
-      eventPortraitStructuredData(
+      offerStructuredData(
+        eventPortraitOffer,
         'https://ayoubabed.xyz/services/event-portraits/',
       ),
     )

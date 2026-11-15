@@ -29,22 +29,26 @@ import {
 } from '@/components/ui/timeline'
 import PodcastPricing, { PodcastFaq } from '../../components/PodcastPricing'
 import BaseLayout from '../../layouts/BaseLayout.astro'
+import PageContainer from '../../components/layout/PageContainer.astro'
+import ServiceSection from '../../components/layout/ServiceSection.astro'
 import episodePhoto from '../../assets/client-work/chop-shop-episode-151.jpg'
 import reportOverview from '../../assets/client-work/chop-shop-analytics-report-overview.png'
 import {
   podcastDescription,
   podcastGuarantee,
+  podcastOffer,
   podcastPath,
-  podcastStructuredData,
   podcastTitle,
 } from '../../lib/podcast-offer'
+import {
+  formatUsd,
+  headlineStartingPrice,
+  offerStructuredData,
+} from '../../lib/service-offer'
 import { siteConfig } from '../../lib/site-config'
 
 const canonicalUrl = new URL(podcastPath, Astro.site).toString()
-const ogImage = new URL(siteConfig.site.ogImage, Astro.site).toString()
 const caseStudy = '/portfolio/chop-shop-show-podcast/'
-const link =
-  'text-link rounded-sm font-medium underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4'
 
 const steps = [
   {
@@ -77,29 +81,21 @@ const stats = [
 ---
 
 <BaseLayout
-  activeNav="services"
+  activeNav="podcasts"
   title={podcastTitle}
   description={podcastDescription}
   canonicalUrl={canonicalUrl}
-  ogImage={ogImage}
-  ogImageWidth={siteConfig.site.ogImageWidth}
-  ogImageHeight={siteConfig.site.ogImageHeight}
-  ogImageType={siteConfig.site.ogImageType}
-  ogImageAlt={siteConfig.site.ogImageAlt}
   twitterHandle={siteConfig.site.twitterHandle}
-  structuredData={podcastStructuredData(canonicalUrl)}
+  structuredData={offerStructuredData(podcastOffer, canonicalUrl)}
 >
-  <main
-    id="main-content"
-    class="podcast-page mx-auto w-full max-w-screen-xl self-center px-4 sm:px-6 lg:px-8"
-  >
+  <PageContainer width="wide">
     <section
       aria-labelledby="podcast-title"
-      class="grid items-center gap-10 py-10 sm:py-16 lg:grid-cols-2 lg:gap-16"
+      class="grid items-center gap-10 py-10 sm:py-16 lg:grid-cols-2 lg:gap-16 lg:py-20"
     >
       <div class="min-w-0">
-        <p class="eyebrow">Mobile podcast production / Tampa, FL</p>
-        <h1 id="podcast-title">
+        <p class="eyebrow mb-5">Mobile podcast production / Tampa, FL</p>
+        <h1 id="podcast-title" class="display-hero">
           You bring the conversation.
           <br />
           <em>I bring the studio.</em>
@@ -113,12 +109,14 @@ const stats = [
           <a href="#pricing" class={buttonVariants({ size: 'lg' })}>
             See packages
           </a>
-          <a href={caseStudy} class={`${link} text-sm`}>
+          <a href={caseStudy} class="link text-sm font-medium">
             Read the Chop Shop Show case study ↗
           </a>
         </div>
         <div class="mt-6 flex flex-wrap gap-2">
-          <Badge variant="secondary">From $450 / episode</Badge>
+          <Badge variant="secondary">
+            From{formatUsd(headlineStartingPrice(podcastOffer))}/ episode
+          </Badge>
           <Badge variant="secondary">Travel within 30 miles included</Badge>
           <Badge variant="secondary">Next-day delivery available</Badge>
         </div>
@@ -141,50 +139,48 @@ const stats = [
 
     <Separator />
 
-    <section aria-labelledby="process-title" class="py-12 sm:py-16">
-      <div class="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
-        <div>
-          <p class="eyebrow">01 / How it works</p>
-          <h2 id="process-title">
-            All you do is
-            <em>show up and talk.</em>
-          </h2>
-          <p class="text-muted-foreground mt-4 max-w-md leading-7">
-            No studio to rent, no gear to buy, and no editing to learn. I do not
-            write your content. You keep your voice, and I handle everything
-            around it.
-          </p>
-        </div>
-        <Timeline>
-          {steps.map((step) => (
-            <TimelineItem>
-              <TimelineIndicator>
-                <step.icon />
-              </TimelineIndicator>
-              <TimelineContent>
-                <TimelineTitle>{step.title}</TimelineTitle>
-                <TimelineDescription>{step.body}</TimelineDescription>
-              </TimelineContent>
-            </TimelineItem>
-          ))}
-        </Timeline>
-      </div>
-    </section>
+    <ServiceSection
+      titleId="process-title"
+      eyebrow="01 / How it works"
+      layout="split"
+    >
+      <Fragment slot="title">
+        All you do is
+        <em>show up and talk.</em>
+      </Fragment>
+      <p slot="lead">
+        No studio to rent, no gear to buy, and no editing to learn. I do not
+        write your content. You keep your voice, and I handle everything around
+        it.
+      </p>
+      <Timeline>
+        {steps.map((step) => (
+          <TimelineItem>
+            <TimelineIndicator>
+              <step.icon />
+            </TimelineIndicator>
+            <TimelineContent>
+              <TimelineTitle>{step.title}</TimelineTitle>
+              <TimelineDescription>{step.body}</TimelineDescription>
+            </TimelineContent>
+          </TimelineItem>
+        ))}
+      </Timeline>
+    </ServiceSection>
 
     <Separator />
 
-    <section aria-labelledby="proof-title" class="py-12 sm:py-16">
-      <p class="eyebrow">02 / Proof, every episode</p>
-      <h2 id="proof-title">
+    <ServiceSection titleId="proof-title" eyebrow="02 / Proof, every episode">
+      <Fragment slot="title">
         Never guess
         <em>what is working.</em>
-      </h2>
-      <p class="text-muted-foreground mt-4 max-w-2xl leading-7">
+      </Fragment>
+      <p slot="lead">
         Every Full Service episode ends with a report. Here is one 28-day
         snapshot from the Chop Shop Show, October 18–November 14, 2026, compared
         with the previous 28 days.
       </p>
-      <ul class="mt-8 grid gap-4 sm:grid-cols-3">
+      <ul class="grid gap-4 sm:grid-cols-3">
         {stats.map((stat) => (
           <li>
             <Card>
@@ -212,26 +208,25 @@ const stats = [
         <figcaption class="text-muted-foreground mt-3 text-sm leading-6">
           Part of a real client report. Platform audiences overlap, and figures
           from summaries or screenshots are labeled unverified.
-          <a href={caseStudy} class={link}>
+          <a href={caseStudy} class="link font-medium">
             See the full case study
           </a>
         </figcaption>
       </figure>
-    </section>
+    </ServiceSection>
 
     <Separator />
 
-    <section
+    <ServiceSection
       id="pricing"
-      aria-labelledby="pricing-title"
-      class="scroll-mt-24 py-12 sm:py-16"
+      titleId="pricing-title"
+      eyebrow="03 / Packages"
     >
-      <p class="eyebrow">03 / Packages</p>
-      <h2 id="pricing-title">
+      <Fragment slot="title">
         Pick your starting point.
         <em>Add what your show needs.</em>
-      </h2>
-      <p class="text-muted-foreground mt-4 mb-10 max-w-2xl leading-7">
+      </Fragment>
+      <p slot="lead">
         Every package includes on-location recording up to 2 hours, all
         equipment, a professional color grade, and full audio mastering. Prices
         are per episode.
@@ -242,59 +237,16 @@ const stats = [
         <AlertTitle>On-time guarantee</AlertTitle>
         <AlertDescription>{podcastGuarantee}</AlertDescription>
       </Alert>
-    </section>
+    </ServiceSection>
 
     <Separator />
 
-    <section aria-labelledby="faq-title" class="py-12 sm:py-16">
-      <div class="grid gap-8 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
-        <div>
-          <p class="eyebrow">04 / Questions</p>
-          <h2 id="faq-title">
-            Good to know
-            <em>before we record.</em>
-          </h2>
-        </div>
-        <PodcastFaq client:visible />
-      </div>
-    </section>
-  </main>
+    <ServiceSection titleId="faq-title" eyebrow="04 / Questions" layout="split">
+      <Fragment slot="title">
+        Good to know
+        <em>before we record.</em>
+      </Fragment>
+      <PodcastFaq client:visible />
+    </ServiceSection>
+  </PageContainer>
 </BaseLayout>
-
-<style>
-  .podcast-page {
-    overflow-wrap: anywhere;
-  }
-  .eyebrow {
-    font-size: 0.66rem;
-    font-weight: 600;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted-foreground);
-    margin-bottom: 1.25rem;
-  }
-  h1 {
-    font-family: var(--font-jakarta), sans-serif;
-    font-size: clamp(2.4rem, 4.5vw, 4.4rem);
-    font-weight: 500;
-    letter-spacing: -0.06em;
-    line-height: 1.08;
-    text-wrap: balance;
-  }
-  h2 {
-    font-family: var(--font-jakarta), sans-serif;
-    font-size: clamp(1.7rem, 3vw, 2.5rem);
-    font-weight: 500;
-    letter-spacing: -0.045em;
-    line-height: 1.12;
-  }
-  em {
-    font-family: var(--font-zodiak), serif;
-    font-weight: 400;
-    letter-spacing: -0.05em;
-  }
-  h1 em,
-  h2 em {
-    display: block;
-  }
-</style>

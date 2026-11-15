@@ -24,6 +24,7 @@ import {
 import { buttonVariants } from '../../components/ui/button'
 import { Separator } from '../../components/ui/separator'
 import { eventGalleries } from '../../data/event-galleries'
+import { formatUtcDate } from '../../lib/format-date'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import {
   eventPortraitPath,
@@ -179,12 +180,7 @@ const bayaanGalleryGroups = galleryImages.reduce<
   return groups
 }, [])
 const formatVideoDate = (date: string) =>
-  new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${date}T00:00:00Z`))
+  formatUtcDate(new Date(`${date}T00:00:00Z`))
 const hasDetails = Boolean(
   projectData.collaborators.length ||
   projectData.duration ||
@@ -231,7 +227,7 @@ const galleryHeading =
           <BreadcrumbItem>
             <BreadcrumbLink
               href="/#portfolio"
-              className="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+              className="link-quiet inline-flex min-h-11 items-center"
             >
               Portfolio
             </BreadcrumbLink>
@@ -242,7 +238,7 @@ const galleryHeading =
 
     <article class="pt-8 pb-12 sm:pt-12 lg:pb-20">
       <header class="mx-auto max-w-4xl pb-8 sm:pb-10">
-        <h1 class="font-heading max-w-3xl text-3xl leading-tight font-extrabold tracking-tight text-balance [overflow-wrap:anywhere] sm:text-4xl lg:text-5xl">
+        <h1 class="font-heading max-w-3xl text-3xl leading-tight font-extrabold tracking-tight text-balance sm:text-4xl lg:text-5xl">
           {projectData.title}
         </h1>
         <p class="text-muted-foreground mt-4 max-w-3xl text-lg leading-8">
@@ -260,14 +256,14 @@ const galleryHeading =
           >
             <a
               href="#project-work"
-              class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+              class="link-quiet inline-flex min-h-11 items-center font-bold"
             >
               View work
             </a>
             {resultsHeading ? (
               <a
                 href={`#${resultsHeading.slug}`}
-                class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+                class="link-quiet inline-flex min-h-11 items-center font-bold"
               >
                 Results
               </a>
@@ -275,7 +271,7 @@ const galleryHeading =
               projectData.outcomes.length > 0 && (
                 <a
                   href="#project-results"
-                  class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+                  class="link-quiet inline-flex min-h-11 items-center font-bold"
                 >
                   Delivery
                 </a>
@@ -283,7 +279,7 @@ const galleryHeading =
             )}
             <a
               href="#project-story"
-              class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+              class="link-quiet inline-flex min-h-11 items-center font-bold"
             >
               Process
             </a>
@@ -584,7 +580,7 @@ const galleryHeading =
         <p class="mx-auto max-w-4xl pb-8 sm:pb-10" data-reveal="up">
           <a
             href={eventPortraitPath}
-            class="text-foreground hover:text-link focus-visible:ring-ring inline-flex min-h-11 items-center gap-2 rounded-sm font-bold underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
+            class="link-quiet hover:text-link text-foreground inline-flex min-h-11 items-center gap-2 font-bold"
           >
             See event photography starting prices
             <ArrowRight className="size-4" aria-hidden="true" />
@@ -668,7 +664,11 @@ const galleryHeading =
                 data-comparison-select={index}
                 aria-pressed={index === 0}
                 aria-controls={`comparison-${index}`}
-                class="border-border aria-pressed:bg-foreground aria-pressed:text-background min-h-11 rounded-sm border px-5 font-bold"
+                class={buttonVariants({
+                  variant: 'outline',
+                  className:
+                    'aria-pressed:bg-foreground aria-pressed:text-background aria-pressed:hover:bg-foreground dark:aria-pressed:bg-foreground dark:aria-pressed:hover:bg-foreground min-h-11 px-5 font-bold',
+                })}
               >
                 {video.comparisonRole === 'before' ? 'Before' : 'After'}
               </button>
@@ -799,7 +799,7 @@ const galleryHeading =
                       href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="text-link mt-4 inline-flex font-bold underline underline-offset-4"
+                      class="link mt-4 inline-flex font-bold"
                     >
                       Watch {video.title} on YouTube
                     </a>
@@ -858,7 +858,7 @@ const galleryHeading =
                     'h-auto min-h-11 max-w-full justify-start gap-3 px-4 py-3 text-left whitespace-normal',
                   )}
                 >
-                  <span class="min-w-0 [overflow-wrap:anywhere]">
+                  <span class="min-w-0">
                     {link.label === 'Website'
                       ? `${projectData.title} website`
                       : link.label}

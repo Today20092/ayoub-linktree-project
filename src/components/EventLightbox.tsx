@@ -697,7 +697,7 @@ export default function EventLightbox({
           href={tipUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-muted-foreground inline-flex min-h-11 items-center text-sm underline underline-offset-4"
+          className="link-quiet text-muted-foreground inline-flex min-h-11 items-center text-sm"
         >
           Support my work (optional)
         </a>

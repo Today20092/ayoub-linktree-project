@@ -66,10 +66,10 @@ const localPoster = typeof poster === 'string' ? undefined : poster
     <button
       type="button"
       aria-label={`Play ${title}`}
-      class="absolute inset-0 flex cursor-pointer items-center justify-center focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-white"
+      class="absolute inset-0 flex cursor-pointer items-center justify-center focus-visible:outline-4 focus-visible:-outline-offset-4 focus-visible:outline-overlay-foreground"
       data-youtube-play
     >
-      <span class="rounded-full bg-black/80 px-6 py-4 text-lg font-bold text-white">
+      <span class="bg-overlay/80 text-overlay-foreground rounded-full px-6 py-4 text-lg font-bold">
         <span aria-hidden="true" class="mr-2">
           ▶
         </span>
@@ -80,7 +80,7 @@ const localPoster = typeof poster === 'string' ? undefined : poster
 </div>
 <a
   href={`https://www.youtube.com/watch?v=${youtubeId}`}
-  class="text-link mt-2 inline-block text-sm underline underline-offset-4"
+  class="link mt-2 inline-block text-sm"
   aria-label={`Watch on YouTube: ${title}`}
 >
   Watch on YouTube

@@ -2,7 +2,8 @@
 import { env } from 'cloudflare:workers'
 
 import CloudflareWebAnalytics from '../../../../components/CloudflareWebAnalytics.astro'
-import { galleryReader } from '../../../../lib/gallery-read'
+import { applyPrivatePageHeaders } from '../../../../lib/private-page'
+import { loadPublicGallery } from '../../../../lib/gallery-read'
 import {
   GALLERY_PAGE_SIZE,
   galleryPagePath,
@@ -19,12 +20,7 @@ type ShareImage = {
 
 const eventSlug = Astro.params.slug
 const photoNumber = Number(Astro.params.photo)
-const gallery = eventSlug
-  ? await galleryReader(env.GALLERY_DB).getPublicDetail(
-      eventSlug,
-      Astro.url.searchParams.get('share') ?? undefined,
-    )
-  : undefined
+const gallery = await loadPublicGallery(env.GALLERY_DB, eventSlug, Astro.url)
 if (
   !gallery ||
   !eventSlug ||
@@ -33,11 +29,7 @@ if (
 ) {
   return new Response(null, { status: 404 })
 }
-if (gallery.isUnlisted) {
-  Astro.response.headers.set('Cache-Control', 'no-store')
-  Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
-  Astro.response.headers.set('Referrer-Policy', 'no-referrer')
-}
+if (gallery.isUnlisted) applyPrivatePageHeaders(Astro.response.headers)
 const images: ShareImage[] = gallery.allImages
 const image = images[photoNumber - 1]
 if (!image) return new Response(null, { status: 404 })

@@ -1,5 +1,6 @@
 ---
 import '../../../styles.css'
+import { buttonVariants } from '@/components/ui/button'
 
 import type { ImageMetadata } from 'astro'
 import Image from '../../../components/GalleryImage.astro'
@@ -14,54 +15,34 @@ import {
   CardHeader,
   CardTitle,
 } from '../../../components/ui/card'
-import { galleryAdminAuthorized } from '../../../lib/gallery-admin'
 import { galleryReader } from '../../../lib/gallery-read'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
+import PageContainer from '../../../components/layout/PageContainer.astro'
+import PageHeader from '../../../components/layout/PageHeader.astro'
 
 export const prerender = false
 
-if (
-  !(await galleryAdminAuthorized(
-    Astro.request,
-    env.GALLERY_ADMIN_EMAIL,
-    env.GALLERY_ACCESS_TEAM_DOMAIN,
-    env.GALLERY_ACCESS_AUDS,
-  ))
-) {
-  return new Response('Forbidden', { status: 403 })
-}
-
 const galleries = await galleryReader(env.GALLERY_DB).listAdmin()
-
-Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
 ---
 
 <BaseLayout
   title="Gallery administration"
   description="Manage event gallery uploads and culling."
   canonicalUrl={new URL('/admin/galleries/', Astro.site).toString()}
-  ogImage="/og-ayoub-digital-media.jpg"
-  ogImageAlt="Gallery administration"
+  privatePage
 >
-  <main
-    id="main-content"
-    class="mx-auto w-full max-w-screen-xl scroll-mt-20 px-4 py-10 sm:px-6 lg:px-8"
-  >
-    <header class="max-w-2xl">
-      <p class="text-link text-sm font-bold tracking-wide uppercase">Admin</p>
-      <h1 class="font-heading mt-3 text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
-        Event galleries
-      </h1>
-      <p class="text-muted-foreground mt-5 text-lg leading-8">
+  <PageContainer width="wide" class="py-10">
+    <PageHeader eyebrow="Admin" title="Event galleries" class="max-w-2xl">
+      <Fragment slot="lead">
         Create event galleries, upload web-ready photos, generate guest links,
         and curate published galleries.
-      </p>
-    </header>
+      </Fragment>
+    </PageHeader>
 
     <div class="mt-8 flex flex-wrap items-start gap-4">
       <a
         href="/admin/galleries/devices/"
-        class="bg-primary text-primary-foreground rounded-full px-6 py-3 font-semibold"
+        class={buttonVariants({ size: 'lg', className: 'min-h-11 px-6' })}
       >
         Connect Android app
       </a>
@@ -165,5 +146,5 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow')
         ),
       )}
     </section>
-  </main>
+  </PageContainer>
 </BaseLayout>

@@ -1,3 +1,5 @@
+import { publicRoutes } from './public-routes'
+
 export const PUBLIC_PAGE_CACHE_CONTROL =
   'public, max-age=60, s-maxage=300, stale-while-revalidate=60'
 
@@ -23,14 +25,7 @@ export function cacheControlForPage(
 
   const { pathname } = url
   if (
-    pathname === '/' ||
-    [
-      '/about/',
-      '/contact/',
-      '/privacy/',
-      '/services/event-portraits/',
-      '/services/podcast-production/',
-    ].includes(pathname) ||
+    publicRoutes.some((route) => route.cache && route.path === pathname) ||
     pathname.startsWith('/portfolio/')
   ) {
     return PUBLIC_PAGE_CACHE_CONTROL

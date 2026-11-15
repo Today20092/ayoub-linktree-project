@@ -1,0 +1,55 @@
+---
+// A numbered service-page section: eyebrow, display <h2> (slot="title", wrap
+// the accent line in <em>), optional lead (slot="lead"), then the content.
+// `stack` puts content under the heading; `split` puts it beside the heading.
+interface Props {
+  titleId: string
+  eyebrow: string
+  id?: string
+  layout?: 'stack' | 'split'
+  stickyIntro?: boolean
+  class?: string
+}
+
+const {
+  titleId,
+  eyebrow,
+  id,
+  layout = 'stack',
+  stickyIntro = false,
+  class: className,
+} = Astro.props
+const split = layout === 'split'
+---
+
+<section
+  id={id}
+  aria-labelledby={titleId}
+  class:list={['py-12 sm:py-16 lg:py-20', id && 'scroll-mt-24', className]}
+>
+  <div
+    class:list={[
+      split && 'grid items-start gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16',
+    ]}
+  >
+    <div class:list={['min-w-0', stickyIntro && 'lg:sticky lg:top-24']}>
+      <p class="eyebrow mb-5">{eyebrow}</p>
+      <h2 id={titleId} class="display-title">
+        <slot name="title" />
+      </h2>
+      {Astro.slots.has('lead') && (
+        <div
+          class:list={[
+            'text-muted-foreground mt-4 space-y-3 leading-7',
+            split ? 'max-w-md' : 'max-w-2xl',
+          ]}
+        >
+          <slot name="lead" />
+        </div>
+      )}
+    </div>
+    <div class:list={['min-w-0', !split && 'mt-8 empty:mt-0']}>
+      <slot />
+    </div>
+  </div>
+</section>

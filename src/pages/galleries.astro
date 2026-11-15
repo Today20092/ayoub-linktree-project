@@ -16,19 +16,14 @@ import {
   EmptyTitle,
 } from '../components/ui/empty'
 import { galleryReader } from '../lib/gallery-read'
+import { formatUtcDate } from '../lib/format-date'
 import BaseLayout from '../layouts/BaseLayout.astro'
 
 export const prerender = false
 
 const canonicalUrl = new URL('/galleries/', Astro.site).toString()
 
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(date)
+const formatDate = (date: Date) => formatUtcDate(date, 'short')
 
 const sortedGalleries = await galleryReader(env.GALLERY_DB).listPublic()
 
