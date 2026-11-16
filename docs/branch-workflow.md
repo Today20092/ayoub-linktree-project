@@ -10,7 +10,7 @@ Open a pull request from that branch into `master` once the checks below pass. A
 
 ## Checks
 
-Website code or content: `npm run verify` on the pull request branch.
+Website code or content: `npm run verify` on the pull request branch. The [Website workflow](../.github/workflows/website.yml) runs it on every pull request, and on pushes to `master` that change files outside `android/`.
 
 Android code: the unit, lint, and emulator checks in [android/README.md](../android/README.md#github-builds-and-signing) and [`.github/workflows/android.yml`](../.github/workflows/android.yml).
 
@@ -30,4 +30,8 @@ Merging to `master` does not deploy the website. Production deploy is a separate
 
 Pushing `master` does not build the Android app. The Android workflow runs on a pull request that changes `android/**`, on `workflow_dispatch`, on pushes to `codex/android-gallery-uploader` that change `android/**`, and on tags `android-v*`. A tag `android-v*` builds the signed APK and publishes a GitHub Release. Version selection for that tag is in [the versioning policy](releasing.md).
 
-Remote merge settings and branch protection were not changed by this policy.
+## Automated maintenance
+
+- [Dependabot](../.github/dependabot.yml) opens grouped update pull requests: npm and Gradle weekly, GitHub Actions monthly. Treat them like any other pull request; merge only after the checks pass.
+- GitHub CodeQL default setup, secret scanning, and push protection run from the repository's security settings.
+- Branch protection on `master` requires the `verify` check from the Website workflow.
