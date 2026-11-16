@@ -27,3 +27,5 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run verify
+        env:
+          ASTRO_LOCAL_BINDINGS: '1'

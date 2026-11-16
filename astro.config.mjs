@@ -107,6 +107,8 @@ export default defineConfig({
   },
 
   adapter: cloudflare({
+    // GitHub CI has no Cloudflare token, so it builds against local binding simulators.
+    remoteBindings: process.env.ASTRO_LOCAL_BINDINGS !== '1',
     imageService: {
       build: 'cloudflare-binding',
       runtime: 'cloudflare-binding',
