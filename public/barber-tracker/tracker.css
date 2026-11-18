@@ -359,9 +359,12 @@ dialog {
   width: min(calc(100% - 24px), 480px);
   max-height: calc(100dvh - 24px);
   padding: 20px;
+  overscroll-behavior: contain;
 }
 dialog::backdrop {
   background: #0009;
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 dialog .primary {
   margin-top: 16px;
