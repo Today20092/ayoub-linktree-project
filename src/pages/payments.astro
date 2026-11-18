@@ -129,7 +129,7 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
     </a>
   </main>
 
-  <dialog id="qr-dialog" aria-labelledby="qr-title">
+  <dialog id="qr-dialog" aria-labelledby="qr-title" closedby="any">
     <div class="dialog-header">
       <h2 id="qr-title" class="font-heading">
         Scan to send a tip
@@ -172,17 +172,19 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
       status.textContent = `Could not load the QR code. Open ${shareUrl}`
     }
   })
-  dialog.addEventListener('click', (event) => {
-    if (event.target !== dialog) return
-    const rect = dialog.getBoundingClientRect()
-    if (
-      event.clientX < rect.left ||
-      event.clientX > rect.right ||
-      event.clientY < rect.top ||
-      event.clientY > rect.bottom
-    )
-      dialog.close()
-  })
+  // Light-dismiss fallback for browsers without closedby (Safari).
+  if (!('closedBy' in HTMLDialogElement.prototype))
+    dialog.addEventListener('click', (event) => {
+      if (event.target !== dialog) return
+      const rect = dialog.getBoundingClientRect()
+      if (
+        event.clientX < rect.left ||
+        event.clientX > rect.right ||
+        event.clientY < rect.top ||
+        event.clientY > rect.bottom
+      )
+        dialog.close()
+    })
 </script>
 
 <style>

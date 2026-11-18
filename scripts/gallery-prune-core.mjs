@@ -113,7 +113,7 @@ export function pruneGalleryMdx(text, selectedIndexes) {
 
 export async function createDeterministicZip(files, outputPath) {
   const zip = new ZipFile()
-  const sorted = [...files].sort((a, b) =>
+  const sorted = files.toSorted((a, b) =>
     basename(a).localeCompare(basename(b), undefined, { numeric: true }),
   )
 

@@ -20,10 +20,7 @@ try {
       .locator('[data-gallery-filename]')
       .first()
       .getAttribute('data-gallery-filename')
-    let release
-    const held = new Promise((resolve) => {
-      release = resolve
-    })
+    const { promise: held, resolve: release } = Promise.withResolvers()
     await page.route('https://photos.ayoubabed.xyz/**', async (route) => {
       if (route.request().resourceType() !== 'fetch') return route.continue()
       await held

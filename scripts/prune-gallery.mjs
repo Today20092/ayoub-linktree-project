@@ -297,7 +297,7 @@ async function main() {
       zipPath,
     )
     const zipEntries = await listZipEntries(zipPath)
-    const expectedEntries = [...remainingNames].sort((a, b) =>
+    const expectedEntries = remainingNames.toSorted((a, b) =>
       a.localeCompare(b, undefined, { numeric: true }),
     )
     if (JSON.stringify(zipEntries) !== JSON.stringify(expectedEntries)) {
@@ -412,7 +412,9 @@ async function main() {
       : remoteMutationStarted
         ? `npm run gallery:prune -- ${options.slug} ${resolution.selected.map(({ photo }) => photo.filename).join(' ')} --source "${sourceFolder}"`
         : 'Fix reported error, then rerun same command.'
-    throw new Error(`${error.message}\nRecovery: ${recovery}`)
+    throw new Error(`${error.message}\nRecovery: ${recovery}`, {
+      cause: error,
+    })
   } finally {
     await rm(temporaryFolder, { recursive: true, force: true })
   }
