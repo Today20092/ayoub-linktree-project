@@ -252,7 +252,7 @@ function renderRecords() {
   if (!day().timeline.length)
     $('timeline').textContent = 'No timer records yet.'
   $('payment-records').replaceChildren()
-  for (const payment of [...day().payments].reverse()) {
+  for (const payment of day().payments.toReversed()) {
     const record = document.createElement('div')
     record.className = 'record'
     const shop =

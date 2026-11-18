@@ -150,17 +150,14 @@ try {
     assert.equal(failures, 1)
     await page.unroute('**/galleries/sanad-silwadi-wedding/?page=4')
     let release
-    let entered
-    const intercepted = new Promise((resolve) => {
-      entered = resolve
-    })
+    const { promise: intercepted, resolve: entered } = Promise.withResolvers()
     await page.route(
       '**/galleries/sanad-silwadi-wedding/?page=5',
       async (route) => {
         entered()
-        await new Promise((resolve) => {
-          release = resolve
-        })
+        const held = Promise.withResolvers()
+        release = held.resolve
+        await held.promise
         try {
           await route.continue()
         } catch {}
@@ -276,17 +273,15 @@ try {
     await deep.close()
     const ordered = await browser.newPage({ viewport: { width, height: 900 } })
     let completeBatch
-    let beganBatch
-    const batchStarted = new Promise((resolve) => {
-      beganBatch = resolve
-    })
+    const { promise: batchStarted, resolve: beganBatch } =
+      Promise.withResolvers()
     await ordered.route(
       '**/galleries/sanad-silwadi-wedding/?page=5',
       async (route) => {
         beganBatch()
-        await new Promise((resolve) => {
-          completeBatch = resolve
-        })
+        const batch = Promise.withResolvers()
+        completeBatch = batch.resolve
+        await batch.promise
         await route.continue()
       },
     )

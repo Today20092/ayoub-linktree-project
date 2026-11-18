@@ -216,15 +216,14 @@ export default function FaceFinder({
     setStatus('searching')
     setError(undefined)
 
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), SEARCH_TIMEOUT)
+    const signal = AbortSignal.timeout(SEARCH_TIMEOUT)
 
     try {
       const response = await fetch('/api/faces/search', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ eventSlug, indexVersion, embedding }),
-        signal: controller.signal,
+        signal,
       })
       const result = (await response.json()) as {
         matches?: PhotoMatch[]
@@ -241,14 +240,12 @@ export default function FaceFinder({
       if (searchAttempt.current !== currentAttempt) return
       setStatus('idle')
       setError(
-        controller.signal.aborted
+        signal.aborted
           ? 'Gallery search took too long. Check your connection and try again.'
           : searchError instanceof Error && searchError.message
             ? searchError.message
             : 'Search is temporarily unavailable.',
       )
-    } finally {
-      clearTimeout(timeout)
     }
   }
 

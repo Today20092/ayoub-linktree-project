@@ -241,9 +241,9 @@ try {
     await page.route(
       '**/galleries/dawah-at-tampa-riverwalk/',
       async (route) => {
-        await new Promise((resolve) => {
-          delayed = resolve
-        })
+        const held = Promise.withResolvers()
+        delayed = held.resolve
+        await held.promise
         try {
           await route.continue()
         } catch {
