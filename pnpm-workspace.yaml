@@ -9,3 +9,6 @@ overrides:
   'undici@>=8.0.0 <8.12.3': 8.12.3
   # Miniflare pins an older Sharp; include the libheif and librsvg security fixes.
   'miniflare>sharp': 0.35.5
+  # Keep @emnapi on 1.x: a 2.0 prerelease runtime paired with 1.x core crashes astro check.
+  '@emnapi/core': ^1.11.3
+  '@emnapi/runtime': ^1.11.3
