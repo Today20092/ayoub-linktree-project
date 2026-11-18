@@ -307,12 +307,15 @@ export function createGallerySelection(
     else updateStream()
   }
   gallery.addEventListener('gallery:order', onOrder)
+  // Debounced scroll is the fallback for browsers without scrollend.
+  const scrollEvent = 'onscrollend' in window ? 'scrollend' : 'scroll'
   let scrollTimer: ReturnType<typeof setTimeout> | undefined
   const onScroll = () => {
     clearTimeout(scrollTimer)
-    scrollTimer = setTimeout(remember, 200)
+    if (scrollEvent === 'scrollend') remember()
+    else scrollTimer = setTimeout(remember, 200)
   }
-  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener(scrollEvent, onScroll, { passive: true })
   window.addEventListener('pagehide', remember)
   if (pagination) pagination.hidden = true
   updateStream()
@@ -457,7 +460,7 @@ export function createGallerySelection(
       earlier?.removeEventListener('click', onEarlier)
       gallery.removeEventListener('gallery:order', onOrder)
       clearTimeout(scrollTimer)
-      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener(scrollEvent, onScroll)
       window.removeEventListener('pagehide', remember)
       retry.removeEventListener('click', onRetry)
       showPage.removeEventListener('click', onShowPage)

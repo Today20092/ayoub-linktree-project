@@ -61,6 +61,30 @@
     min-width: 0;
   }
 
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  blockquote,
+  figcaption {
+    text-wrap: pretty;
+  }
+
+  /* Keep scroll gestures inside a modal from scrolling the page underneath. */
+  dialog:modal {
+    overscroll-behavior: contain;
+  }
+
+  dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
