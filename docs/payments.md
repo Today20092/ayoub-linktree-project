@@ -25,7 +25,7 @@ scanning device to have tailnet access.
 Live tip links were created in the Alpha Bravo Media account
 `acct_1U2j8kIlyeigpagV` through the logged-in dashboard on September 30, 2026.
 `payments.stripeTipLinks` in `src/data/site.yaml` supplies $10, $20, and $30 USD
-suggestions. Each link is titled "Photography tip" and lets customers edit the
+suggestions. Each link is titled "Tip for Ayoub Abedrabbo" and lets customers edit the
 amount, so the page has no separate Other option. The $20 choice is highlighted
 on the page.
 
@@ -57,7 +57,7 @@ production deployment is performed by local development.
 - At `/payments/`, check small phone, desktop, light/dark, and enlarged text.
 - Open Show QR, close with Escape, and confirm focus returns to Show QR.
 - Check all three payment links without sending money.
-- Check the three Stripe choices open "Photography tip" with $10/$20/$30 editable.
+- Check the three Stripe choices open "Tip for Ayoub Abedrabbo" with $10/$20/$30 editable.
 - Open a URL with a query/fragment and verify Show QR encodes only its origin/path.
 
 Local validation covered a 320 x 568 phone viewport, a 390 x 844 phone viewport,
