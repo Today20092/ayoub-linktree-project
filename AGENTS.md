@@ -63,7 +63,7 @@ Report checks run and any failures or checks left unrun; a focused suite does no
 
 ## Agent skills
 
-- Branch setup, integration, promotion, or cleanup: read [the Git workflow](docs/branch-workflow.md).
+- Branches, worktrees, pull requests or merging: read [the Git workflow](docs/branch-workflow.md).
 - Version selection, release-status wording, or release preparation: read [the versioning policy](docs/releasing.md).
 - Issue work: read `docs/agents/issue-tracker.md` for GitHub issue operations and the external-PR triage boundary.
 - Triage: use the label mapping in `docs/agents/triage-labels.md`.
@@ -73,7 +73,7 @@ Report checks run and any failures or checks left unrun; a focused suite does no
 
 - GitHub is the source of truth. Local uncommitted code never goes to production.
 - Branch roles, integration, and promotion: [the Git workflow](docs/branch-workflow.md). Version and release preparation: [the versioning policy](docs/releasing.md).
-- Commit, push, merge, tag, or deploy only when the user explicitly asks.
+- End every code task with a commit and a pull request to `master`. Merge, tag, or deploy only when the user explicitly asks.
 - When a commit is requested, leave out `.env`, `.env.production`, `.dev.vars`, `.gallery-prune.local.json`, and Android signing files. Keep signing material outside the repo, as described in `android/README.md`.
 - Production deploy only from clean `master`: `npm run deploy:prod`.
 - Default deploy is preview-safe: `npm run deploy` (alias of `npm run deploy:preview`).

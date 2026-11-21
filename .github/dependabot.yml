@@ -1,23 +1,37 @@
+# One monthly PR per ecosystem for all minor and patch updates (one CI run, no
+# lockfile conflicts between PRs); majors come one PR each. The 7-day cooldown
+# skips fresh releases; security updates are not delayed.
+# .github/workflows/dependabot-auto-merge.yml merges npm and GitHub Actions
+# minor and patch PRs once `verify` passes. Gradle and majors wait for a person.
 version: 2
 updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       minor-and-patch:
+        patterns: ['*']
         update-types: [minor, patch]
   - package-ecosystem: gradle
     directory: /android
     schedule:
-      interval: weekly
+      interval: monthly
+    cooldown:
+      default-days: 7
     groups:
-      android:
+      minor-and-patch:
         patterns: ['*']
+        update-types: [minor, patch]
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
-      actions:
+      minor-and-patch:
         patterns: ['*']
+        update-types: [minor, patch]
