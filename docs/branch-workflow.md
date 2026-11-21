@@ -4,9 +4,10 @@
 
 ## Everyday work
 
-Cut a branch from an up-to-date `origin/master` for each task. Agent branches use `codex/<scope>` or a short descriptive name. An Orca workspace may use the slug passed to `orca worktree create --branch`. Keep the primary checkout and existing worktrees.
-
-Open a pull request from that branch into `master` once the checks below pass. A push is a backup, not a test result and not a release. External contributions use the same pull request flow and checks.
+1. Work in a worktree the host manages, based on current `origin/master`. A T3 Code thread on the main checkout moves itself with `t3_worktree_handoff` before editing; the project's worktree script runs `pnpm install --frozen-lockfile`. Without host worktree tools, use `git worktree add` and install there. Agent branches use `codex/<scope>` or a short descriptive name.
+2. Commit work in progress instead of using `git stash`: stashes are shared by every worktree.
+3. End every code task with a commit and a pull request to `master`, without being asked, once the checks below pass. Opening a PR is safe: a merge does not deploy. A push is a backup, not a test result and not a release. External contributions use the same pull request flow and checks.
+4. Watch the PR's checks and fix failures until they pass.
 
 ## Checks
 
@@ -18,11 +19,11 @@ Documentation-only edits: format the changed Markdown and check its links. A web
 
 ## Merging
 
-Fetch before branching or synchronizing. When a branch falls behind `master`, merge or rebase `origin/master` into it on purpose and rerun the checks. Keep local commits.
+Fetch before branching or synchronizing. Use `git pull --ff-only` to advance a local `master`. Never force-push `master`.
 
-Merge the pull request into `master` with a merge commit. Record the checks that ran in the pull request.
+Merge only when the user asks, with a merge commit. To merge without waiting, queue it with `gh pr merge --auto --merge`; GitHub merges once `verify` passes. `master` does not require branches to be up to date, so several PRs can each merge on their own checks. Record the checks that ran in the pull request.
 
-After the branch is merged, and its uncommitted files are kept or discarded on purpose, remove its worktree with `orca worktree rm` and delete the branch. Leave `master` and unrelated worktrees in place.
+After the merge, GitHub deletes the branch. Once its uncommitted files are kept or discarded on purpose, remove the worktree through the host (or `git worktree remove`). Leave `master` and unrelated worktrees in place.
 
 ## What a merge does
 
@@ -32,6 +33,6 @@ Pushing `master` does not build the Android app. The Android workflow runs on a 
 
 ## Automated maintenance
 
-- [Dependabot](../.github/dependabot.yml) opens grouped update pull requests: npm and Gradle weekly, GitHub Actions monthly. Treat them like any other pull request; merge only after the checks pass.
+- [Dependabot](../.github/dependabot.yml) opens one monthly minor-and-patch pull request per ecosystem (npm, Gradle, GitHub Actions), majors one PR each, with a 7-day cooldown. [Auto-merge](../.github/workflows/dependabot-auto-merge.yml) queues npm and Actions minor and patch PRs to merge once `verify` passes; Gradle and major updates wait for a person.
 - GitHub CodeQL default setup, secret scanning, and push protection run from the repository's security settings.
-- Branch protection on `master` requires the `verify` check from the Website workflow.
+- Branch protection on `master` requires the `verify` check from the Website workflow. Auto-merge is allowed and merged branches are deleted automatically.
