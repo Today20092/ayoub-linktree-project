@@ -59,7 +59,7 @@ New uploaded images use `/api/gallery-media/` on the selected website, so previe
 | Production  | [ayoubabed.xyz](https://ayoubabed.xyz)                                                | Live galleries and normal app use       |
 | Preview     | [Preview website](https://ayoub-linktree-project-preview.ayoub-abedrabbo.workers.dev) | Upload, moderation, and release testing |
 
-`npm run deploy:preview` verifies and builds with the preview site origin before
+`pnpm run deploy:preview` verifies and builds with the preview site origin before
 deploying the separate preview Worker and its explicit preview D1/R2 bindings.
 Normal builds retain the production origin; `ASTRO_SITE_URL` overrides it for
 isolated audit builds. Canonicals, sitemap, robots, and Markdown discovery use
@@ -75,7 +75,7 @@ Use the Node and pnpm versions specified in `package.json`, then run:
 
 ```sh
 pnpm install --frozen-lockfile
-npm run dev
+pnpm run dev
 ```
 
 Use the server URL reported by Astro. The gallery backend also needs Cloudflare bindings and local configuration; see [gallery infrastructure](docs/interactive-event-galleries.md).
@@ -83,8 +83,8 @@ Use the server URL reported by Astro. The gallery backend also needs Cloudflare 
 For website changes:
 
 ```sh
-npm run verify
-npm run audit:prod
+pnpm run verify
+pnpm run audit:prod
 ```
 
 `verify` checks formatting, face-search and gallery tests, Astro types, and the website build. Android has separate Gradle checks and a GitHub Actions workflow, documented in its README. See `package.json` for the full website command list.
@@ -98,8 +98,8 @@ storage, follow [Local production-build audit](docs/production-audit.md).
 
 GitHub is the source of truth. Open pull requests from short-lived branches straight into `master`, as described in [the Git workflow](docs/branch-workflow.md). Choose versions as described in [the versioning policy](docs/releasing.md).
 
-- `npm run deploy` and `npm run deploy:preview` deploy the isolated preview website.
-- `npm run deploy:prod` deploys production from clean `master`.
+- `pnpm run deploy` and `pnpm run deploy:preview` deploy the isolated preview website.
+- `pnpm run deploy:prod` deploys production from clean `master`.
 - Android tags `android-v*` build and publish an APK through `.github/workflows/android.yml`.
 
 Publishing an APK does not deploy the website. Deploy required backend changes and database migrations before distributing an app that depends on them. Preview upload testing must use the isolated bindings in `scripts/deploy-preview-worker.mjs`.

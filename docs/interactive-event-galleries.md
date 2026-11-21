@@ -39,7 +39,7 @@ The team domain is already configured as
 then set it on the Worker:
 
 ```powershell
-npx wrangler secret put GALLERY_ACCESS_AUDS
+pnpm exec wrangler secret put GALLERY_ACCESS_AUDS
 # Enter the application AUD tag
 ```
 
@@ -62,7 +62,7 @@ GALLERY_SESSION_SECRET=<random development-only value>
 Then use the normal background Astro server:
 
 ```powershell
-npm run dev
+pnpm run dev
 ```
 
 Open `/admin/galleries/`, choose an event, set an upload password of at least
@@ -92,8 +92,8 @@ Photographer uploads from the dashboard or Android app and trusted guest-invite 
 ## Verification
 
 ```powershell
-npm run verify
-npm run deploy:dry-run
+pnpm run verify
+pnpm run deploy:dry-run
 ```
 
 Pilot one event before opening uploads broadly. Confirm password throttling,

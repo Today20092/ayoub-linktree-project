@@ -14,8 +14,8 @@ After renewing Wrangler authentication, the same CORS policy can be applied
 from the project root:
 
 ```powershell
-npx wrangler login
-npx wrangler r2 bucket cors set alphabravomedia-galleries --file cloudflare/r2-gallery-cors.json
+pnpm exec wrangler login
+pnpm exec wrangler r2 bucket cors set alphabravomedia-galleries --file cloudflare/r2-gallery-cors.json
 ```
 
 ## Export
@@ -57,7 +57,7 @@ Use `copy`, choose the `r2:` remote, and upload into the matching event prefix.
 Generate paste-ready YAML after the files are uploaded:
 
 ```powershell
-npm run gallery:manifest -- "C:\event\exports" "https://photos.ayoubabed.xyz/events/event-slug/images/" --output "gallery.yml"
+pnpm run gallery:manifest -- "C:\event\exports" "https://photos.ayoubabed.xyz/events/event-slug/images/" --output "gallery.yml"
 ```
 
 Optional flags:
@@ -77,7 +77,7 @@ generated sequential alt text with specific descriptions before publishing.
 - Open at least one image directly through `photos.ayoubabed.xyz`.
 - Verify an individual Download action saves a file instead of navigating away.
 - Verify the Download All ZIP opens from the gallery page.
-- Run `npm run verify` before deployment.
+- Run `pnpm run verify` before deployment.
 
 ## Prune an uploaded gallery
 
@@ -87,13 +87,13 @@ branch must be ready to push to `origin`.
 Use filenames, current one-based photo positions, or position ranges:
 
 ```powershell
-npm run gallery:prune -- muslim-business-chamber-2026 P1290863.jpg 12 20-24
+pnpm run gallery:prune -- muslim-business-chamber-2026 P1290863.jpg 12 20-24
 ```
 
 Preview every action without changing local files, R2, or Git:
 
 ```powershell
-npm run gallery:prune -- muslim-business-chamber-2026 12 20-24 --source "C:\event\exports" --dry-run
+pnpm run gallery:prune -- muslim-business-chamber-2026 12 20-24 --source "C:\event\exports" --dry-run
 ```
 
 The first non-dry run saves the source folder in the ignored
@@ -124,13 +124,13 @@ nor its search descriptor is retained.
 Create the Vectorize index once:
 
 ```powershell
-npx wrangler vectorize create face-search --dimensions=1024 --metric=cosine
-npx wrangler vectorize create-metadata-index face-search --property-name faceOrder --type number
+pnpm exec wrangler vectorize create face-search --dimensions=1024 --metric=cosine
+pnpm exec wrangler vectorize create-metadata-index face-search --property-name faceOrder --type number
 ```
 
 Wait for metadata-index creation to finish before publishing vectors. Check
-`npx wrangler vectorize list-metadata-index face-search --json` for the numeric
-`faceOrder` field and `npx wrangler vectorize info face-search --json` for the
+`pnpm exec wrangler vectorize list-metadata-index face-search --json` for the numeric
+`faceOrder` field and `pnpm exec wrangler vectorize info face-search --json` for the
 creation mutation to be processed. `faces:publish` checks the metadata field
 before uploading. Existing event vectors are unchanged until that event is
 republished.
@@ -161,7 +161,7 @@ node scripts/face-index-human.mjs --event muslim-business-chamber-2026 --photos 
 Publish every detected face:
 
 ```powershell
-npm run faces:publish -- --event muslim-business-chamber-2026
+pnpm run faces:publish -- --event muslim-business-chamber-2026
 ```
 
 Use `--no-upload` to prepare the manifest and NDJSON without changing
@@ -198,7 +198,7 @@ similarity. Results are possible matches rather than confirmed identities.
 Delete an event’s vectors and manifest:
 
 ```powershell
-npm run faces:delete -- --event muslim-business-chamber-2026
+pnpm run faces:delete -- --event muslim-business-chamber-2026
 ```
 
 `faceSearch` defaults to `false` in portfolio frontmatter. Enable it only for

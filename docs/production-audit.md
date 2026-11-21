@@ -13,7 +13,7 @@ Astro 7.4.2, Wrangler 4.152.0, Node 26.3.0, and SquirrelScan 0.0.148.
 
 ```powershell
 $env:WRANGLER_SEND_METRICS = 'false'
-npm run build
+pnpm run build
 pnpm exec wrangler d1 migrations apply GALLERY_DB --config scripts/audit/wrangler.jsonc --local --persist-to .wrangler/squirrelscan-state
 pnpm exec wrangler dev --config scripts/audit/wrangler.jsonc --local --ip 127.0.0.1 --port 8788 --inspector-port 9238 --persist-to .wrangler/squirrelscan-state
 ```
@@ -88,7 +88,7 @@ With the built local Worker running, run `node --test scripts/website-audit.test
 Set `AUDIT_ORIGIN` to use another isolated local port. These HTTP checks cover
 video control names, page and gallery schema, local font delivery, the manifest,
 image download sizes, social-card dimensions, and public contact/guidance files.
-They supplement `npm run verify`; they do not test browser hydration or replace
+They supplement `pnpm run verify`; they do not test browser hydration or replace
 the full SquirrelScan comparison.
 
 For focused public UI accessibility regressions, run
@@ -280,7 +280,7 @@ The scanner behavior is documented by its installed `audit --help` and
 [crawler settings](https://docs.squirrelscan.com/configuration/crawler).
 
 For changes to this guide/configuration, format and check the explicit paths.
-For application changes, run `npm run verify` and rerun the exact audit command
+For application changes, run `pnpm run verify` and rerun the exact audit command
 to new report filenames. Compare the page set and coverage before comparing
 scores. Do not push, deploy, publish reports, or change live resources as part
 of this procedure.

@@ -32,7 +32,7 @@ The recognizer is 9.90 MB and YuNet is 0.23 MB. The browser WASM binary adds 11.
 Install Node/pnpm following the README, and install `uv` for the local Python runner. The wrapper explicitly selects Python 3.12 and the script pins OpenCV, NumPy, and ONNX Runtime. Other Python projects' versions do not change this runtime.
 
 ```powershell
-npm run faces:index -- --event event-slug --photos "C:\event\delivery\photos"
+pnpm run faces:index -- --event event-slug --photos "C:\event\delivery\photos"
 ```
 
 Use the prepared filenames that the managed gallery actually serves. Do not index the raw camera folder and rename files afterward. Source media is read only. The indexer uses an 1800-pixel long-edge limit for event detection and the same SFace alignment/recognition input used by the browser.
@@ -58,8 +58,8 @@ The automated browser check verifies raw RGB channel order, alignment against Op
 ## Publish, verify, release
 
 ```powershell
-npm run faces:publish -- --event event-slug --vector-index face-search-sface-int8-preview
-npm run faces:publish -- --event event-slug
+pnpm run faces:publish -- --event event-slug --vector-index face-search-sface-int8-preview
+pnpm run faces:publish -- --event event-slug
 ```
 
 The default publisher chooses the index by the model and rejects mismatched dimensions. `--no-upload` prepares local NDJSON and the manifest without inserting vectors. A calibrated threshold can be supplied with `--threshold`; retain the evaluation evidence for that choice.
@@ -76,7 +76,7 @@ For an existing Human gallery that intentionally remains on that model:
 
 ```powershell
 node scripts/face-index-human.mjs --event legacy-event --photos "C:\event\exports"
-npm run faces:publish -- --event legacy-event
+pnpm run faces:publish -- --event legacy-event
 ```
 
 The legacy indexer still accepts its original `--labels` option. The new default GPU indexer accepts `--threshold`; it does not accept the legacy calibration option. See [legacy gallery operations](event-galleries.md) for deletion and range-search compatibility.

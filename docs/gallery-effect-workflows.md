@@ -118,9 +118,9 @@ Do not run a nested runtime for a new internal workflow: yield its Effect.
 
 ## Verification and rollout
 
-`npm run test:galleries` includes the SQLite receipt/authentication tests, fake
-bucket moderation/media tests, and guest publication tests. Run `npm run verify`,
-`npm run audit:prod`, and `npm run deploy:dry-run` before review. A dry-run bundles
+`pnpm run test:galleries` includes the SQLite receipt/authentication tests, fake
+bucket moderation/media tests, and guest publication tests. Run `pnpm run verify`,
+`pnpm run audit:prod`, and `pnpm run deploy:dry-run` before review. A dry-run bundles
 the Worker locally; it is not a deployment or an authorization to write to live
 bindings. Record bundle totals before/after and confirm client bundles contain
 no Effect runtime.
@@ -138,16 +138,16 @@ or uncertain outcomes must be reconciled using their existing IDs and keys.
 ## Local validation for issue #68 (October 6, 2026)
 
 - Effect is pinned to 4.0.1; the frozen lockfile installation passed.
-- `npm run verify` passed: 87 tests (68 gallery), Astro check with zero errors
+- `pnpm run verify` passed: 87 tests (68 gallery), Astro check with zero errors
   and warnings, and the production build. Seven pre-existing hints remain.
-- `npm run deploy:dry-run` passed without deployment. Worker upload size changed
+- `pnpm run deploy:dry-run` passed without deployment. Worker upload size changed
   from 7291.82 KiB / gzip 2421.64 KiB to 7466.24 KiB / gzip 2464.93 KiB
   (+174.42 KiB / gzip +43.29 KiB). The client output contains no Effect runtime.
 - Local workerd smoke passed six authorization/missing-resource/media HTTP probes
   against explicitly isolated local D1/R2 bindings; no remote service was used.
 - Independent repository-standards and issue-specification reviews found no
   remaining material issues after the failure-injection fixes.
-- `npm run audit:prod` failed on the same four baseline advisories: three high
+- `pnpm run audit:prod` failed on the same four baseline advisories: three high
   (`http-cache-semantics`, `source-map-js`, `sharp`) and one moderate (`smol-toml`).
   Baseline and final advisory IDs match; this migration adds no audit findings.
 - Real preview upload, management and moderation smoke testing remains pending
