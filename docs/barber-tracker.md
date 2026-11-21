@@ -82,11 +82,11 @@ The static response is marked `noindex,nofollow` and no public navigation link i
 
 The shared Permissions-Policy keeps camera, microphone, payment, and USB blocked. The tracker adds same-origin geolocation permission, which still requires a user prompt. Geolocation is no longer globally disabled for static assets so that the tracker can request it.
 
-For development, run `npm run dev` and open the server's `/barber-tracker/` address. The folder requires a web server; opening `index.html` directly as a file is not the supported workflow. No production deployment is implied by local implementation. Follow [AGENTS.md](../AGENTS.md) for deployment authorization.
+For development, run `pnpm run dev` and open the server's `/barber-tracker/` address. The folder requires a web server; opening `index.html` directly as a file is not the supported workflow. No production deployment is implied by local implementation. Follow [AGENTS.md](../AGENTS.md) for deployment authorization.
 
 ## Validation
 
-`npm run test:barber-tracker` checks a two-shop day, breaks, completed timer stability, unknown Stripe amounts, manual revenue/cost totals, backup validation, exact cents, and CSV escaping. It is included in `npm run verify`.
+`pnpm run test:barber-tracker` checks a two-shop day, breaks, completed timer stability, unknown Stripe amounts, manual revenue/cost totals, backup validation, exact cents, and CSV escaping. It is included in `pnpm run verify`.
 
 Browser validation covers tally +/−, payment forms, owner revenue, expenses, breaks, multiple visits, and persistence after reload. Offline reopening was verified with the browser network disabled. Phone layout is checked at narrow widths; physical Galaxy S25 Ultra and Syncthing folder behavior still require a device trial.
 

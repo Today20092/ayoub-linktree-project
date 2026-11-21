@@ -53,7 +53,7 @@ production deployment is performed by local development.
 
 - The standalone middleware test currently needs a Workers-aware runner because
   gallery middleware imports `cloudflare:workers`; plain `tsx` cannot load it.
-- `npm run verify`
+- `pnpm run verify`
 - At `/payments/`, check small phone, desktop, light/dark, and enlarged text.
 - Open Show QR, close with Escape, and confirm focus returns to Show QR.
 - Check all three payment links without sending money.

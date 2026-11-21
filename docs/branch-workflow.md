@@ -11,7 +11,7 @@
 
 ## Checks
 
-Website code or content: `npm run verify` on the pull request branch. The [Website workflow](../.github/workflows/website.yml) runs it on every pull request, and on pushes to `master` that change files outside `android/`.
+Website code or content: `pnpm run verify` on the pull request branch. The [Website workflow](../.github/workflows/website.yml) runs it on every pull request, and on pushes to `master` that change files outside `android/`.
 
 Android code: the unit, lint, and emulator checks in [android/README.md](../android/README.md#github-builds-and-signing) and [`.github/workflows/android.yml`](../.github/workflows/android.yml).
 
@@ -27,7 +27,7 @@ After the merge, GitHub deletes the branch. Once its uncommitted files are kept 
 
 ## What a merge does
 
-Merging to `master` does not deploy the website. Production deploy is a separate command from a clean `master` checkout: `npm run deploy:prod`. Preview deploy is `npm run deploy`.
+Merging to `master` does not deploy the website. Production deploy is a separate command from a clean `master` checkout: `pnpm run deploy:prod`. Preview deploy is `pnpm run deploy`.
 
 Pushing `master` does not build the Android app. The Android workflow runs on a pull request that changes `android/**`, on `workflow_dispatch`, on pushes to `codex/android-gallery-uploader` that change `android/**`, and on tags `android-v*`. A tag `android-v*` builds the signed APK and publishes a GitHub Release. Version selection for that tag is in [the versioning policy](releasing.md).
 

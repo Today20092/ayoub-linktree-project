@@ -6,7 +6,7 @@ Two products share this repository. The website and the Android companion are re
 
 The public site is `https://ayoubabed.xyz`. Visitors depend on public pages, gallery viewing and upload links, and the admin and companion HTTP behavior those pages call.
 
-There is no website release version. `package.json` `"version": "0.0.1"` is package metadata, not the deployed site. The deployed site is whatever clean `master` commit was last published with `npm run deploy:prod`.
+There is no website release version. `package.json` `"version": "0.0.1"` is package metadata, not the deployed site. The deployed site is whatever clean `master` commit was last published with `pnpm run deploy:prod`.
 
 A website change ships by promotion to `master` and a separate production deploy. See [the Git workflow](branch-workflow.md). Documentation-only commits ride along with the next deploy and do not make a release by themselves.
 
@@ -31,6 +31,6 @@ Readiness labels, when used, are SemVer suffixes: `-alpha.N`, `-beta.N`, `-rc.N`
 
 1. Choose the reviewed `master` commit. For Android, set `versionName` and `versionCode` to an unused pair and match the tag to `versionName`. For the website, record the `master` commit instead of a version number.
 2. Update `android/RELEASE_NOTES.md` for an Android release so the notes match that version, including migration and known limits. Website deploy notes stay with the promotion record.
-3. Run `npm run verify` for website source. For Android, the release evidence is the `android-v*` workflow: unit tests, lint, emulator checks, and the signed APK. State any check that did not run.
+3. Run `pnpm run verify` for website source. For Android, the release evidence is the `android-v*` workflow: unit tests, lint, emulator checks, and the signed APK. State any check that did not run.
 4. Confirm the tag suffix matches the intended channel. A tag without a hyphen publishes as the latest stable release. A tag with a hyphen publishes as a prerelease.
-5. Publish only after an explicit request. An Android tag push is the publication. A website production deploy is `npm run deploy:prod` from clean `master`. Confirm the public release or the deployed site afterward.
+5. Publish only after an explicit request. An Android tag push is the publication. A website production deploy is `pnpm run deploy:prod` from clean `master`. Confirm the public release or the deployed site afterward.
