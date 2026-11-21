@@ -9,11 +9,12 @@ redirects to the subdomain. It is excluded from the sitemap and sends `noindex` 
 both its HTML and response headers. This is discoverability control, not access
 control; anyone with the URL can see the payment destinations.
 
-Cash App, Venmo, and PayPal reuse `src/data/site.yaml`. The phone-based Zelle
+Cash App, Venmo, and PayPal reuse `src/data/site.yaml`. The footer links to the
+main site's `/galleries/` so guests can find their photos. The phone-based Zelle
 option was removed to keep Ayoub's number off the page. The page does not process
 or confirm payments.
 
-The Scan button opens a native dialog with a locally generated, black-on-white QR
+The Show QR button in the footer opens a native dialog with a locally generated, black-on-white QR
 code, error correction L and a four-module quiet zone. It generates the code in
 the browser when opened, using the current origin and pathname, including any port.
 Query parameters and fragments are omitted. A Tailscale preview QR requires the
@@ -25,8 +26,8 @@ Live tip links were created in the Alpha Bravo Media account
 `acct_1U2j8kIlyeigpagV` through the logged-in dashboard on September 30, 2026.
 `payments.stripeTipLinks` in `src/data/site.yaml` supplies $10, $20, and $30 USD
 suggestions. Each link is titled "Photography tip" and lets customers edit the
-amount. `payments.stripePaymentLink` supplies the Other option, which opens the
-$20 link with an editable amount. The $20 choice is highlighted on the page.
+amount, so the page has no separate Other option. The $20 choice is highlighted
+on the page.
 
 The links use Stripe-hosted checkout and a hosted thank-you message. No additional
 phone, shipping, custom fields, automatic tax, paid invoice PDF, or Managed
@@ -54,15 +55,14 @@ production deployment is performed by local development.
   gallery middleware imports `cloudflare:workers`; plain `tsx` cannot load it.
 - `npm run verify`
 - At `/payments/`, check small phone, desktop, light/dark, and enlarged text.
-- Open Scan, close with Escape, and confirm focus returns to Scan.
+- Open Show QR, close with Escape, and confirm focus returns to Show QR.
 - Check all three payment links without sending money.
 - Check the three Stripe choices open "Photography tip" with $10/$20/$30 editable.
-- Check Other opens an editable amount.
-- Open a URL with a query/fragment and verify Scan encodes only its origin/path.
+- Open a URL with a query/fragment and verify Show QR encodes only its origin/path.
 
 Local validation covered a 320 x 568 phone viewport, a 390 x 844 phone viewport,
 desktop, light/dark themes, enlarged text, and QR dismissal/focus return.
-Secondary text and Scan button contrast exceed 4.5:1.
+Secondary text and Show QR button contrast exceed 4.5:1.
 The routing test and project verification passed. The Cloudflare build logged
 runtime cancellation messages during teardown but exited successfully. Lighthouse
 could not complete because the local browser launcher failed; no performance score

@@ -3,7 +3,9 @@ import '../styles.css'
 
 export const prerender = false
 import simpleIcons from '@iconify-json/simple-icons/icons.json'
-import { ArrowUpRight, CreditCard, QrCode, X } from 'lucide-react'
+import { Image } from 'astro:assets'
+import { ArrowRight, CreditCard, QrCode, X } from 'lucide-react'
+import portrait from '../assets/ayoub-portrait.jpg'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { siteConfig } from '../lib/site-config'
 
@@ -35,16 +37,15 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
 >
   <main id="main-content" class="payment-page">
     <header class="payment-header">
+      <Image
+        src={portrait}
+        alt=""
+        width={40}
+        height={40}
+        densities={[1, 2]}
+        class="avatar"
+      />
       <span class="text-sm font-semibold">Ayoub Abedrabbo</span>
-      <button
-        id="show-qr"
-        class="qr-trigger"
-        aria-label="Show QR code to scan"
-        aria-haspopup="dialog"
-      >
-        <QrCode size={20} aria-hidden="true" />
-        <span>Show QR</span>
-      </button>
     </header>
 
     <section aria-labelledby="payment-title" class="payment-content">
@@ -60,7 +61,7 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
         >
           <div class="card-heading">
             <CreditCard size={20} aria-hidden="true" />
-            <strong>Tip by card</strong>
+            <strong>Card or mobile wallet</strong>
           </div>
           <div class="tip-amounts">
             {stripeTipLinks.map((tip) => (
@@ -75,12 +76,9 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
                 )}
               </a>
             ))}
-            <a class="tip-amount" href={stripePaymentLink}>
-              Other
-            </a>
           </div>
           <p id="card-tip-note" class="tip-note">
-            Cards & mobile wallets. Any amount welcome.
+            You can change the amount at checkout.
           </p>
         </div>
       )}
@@ -112,21 +110,27 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
               <span class={link.id === 'venmo' ? 'sr-only' : undefined}>
                 {link.label}
               </span>
-              <ArrowUpRight
-                className="app-arrow"
-                size={16}
-                aria-hidden="true"
-              />
             </a>
           )
         })}
       </div>
     </section>
 
-    <a class="back-link" href="https://ayoubabed.xyz/">
-      Visit my website
-      <ArrowUpRight size={16} aria-hidden="true" />
-    </a>
+    <footer class="payment-footer">
+      <a class="footer-link" href="https://ayoubabed.xyz/galleries/">
+        Find your photos
+        <ArrowRight size={16} aria-hidden="true" />
+      </a>
+      <button
+        id="show-qr"
+        class="qr-trigger"
+        aria-label="Show QR code to scan"
+        aria-haspopup="dialog"
+      >
+        <QrCode size={18} aria-hidden="true" />
+        <span>Show QR</span>
+      </button>
+    </footer>
   </main>
 
   <dialog id="qr-dialog" aria-labelledby="qr-title" closedby="any">
@@ -197,7 +201,19 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
     display: flex;
     flex-direction: column;
   }
-  .payment-header,
+  .payment-header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+  }
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center 25%;
+  }
+  .payment-footer,
   .dialog-header {
     display: flex;
     align-items: center;
@@ -229,7 +245,7 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
   h1 {
     font-size: clamp(2.5rem, 10vw, 3.5rem);
     line-height: 1.15;
-    letter-spacing: -0.055em;
+    letter-spacing: -0.035em;
   }
   .intro {
     color: var(--muted-foreground);
@@ -238,8 +254,8 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
   }
   .payment-options {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
   }
   .card-tips {
     margin-bottom: 1.25rem;
@@ -253,7 +269,7 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
   }
   .tip-amounts {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.5rem;
   }
   .tip-amount {
@@ -273,12 +289,9 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
     color: var(--primary-foreground);
   }
   .suggested-label {
-    font-size: 0.625rem;
+    font-size: 0.75rem;
     line-height: 1.2;
     font-weight: 500;
-  }
-  .tip-amount:last-child {
-    font-size: 0.875rem;
   }
   .apps-heading {
     margin-bottom: 0.625rem;
@@ -291,17 +304,15 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
     color: var(--muted-foreground);
   }
   .payment-option {
-    position: relative;
-    display: grid;
-    grid-template-columns: 24px 1fr;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
-    width: 100%;
-    min-height: 96px;
-    padding: 1rem 0.875rem;
+    gap: 0.375rem;
+    min-height: 52px;
+    padding: 0.5rem;
     border: 1px solid transparent;
     border-radius: var(--radius);
-    text-align: left;
+    font-size: 0.875rem;
     font-weight: 600;
     background: var(--brand-background);
     color: var(--brand-foreground);
@@ -319,25 +330,23 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
     --brand-background: var(--paypal);
     --brand-foreground: var(--paypal-foreground);
   }
-  .venmo .brand-logo {
-    grid-column: 1 / -1;
-    width: 88px;
-    height: 30px;
-    max-width: 100%;
+  .brand-logo {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
   }
-  .payment-option :global(.app-arrow) {
-    position: absolute;
-    right: 0.5rem;
-    top: 0.5rem;
+  .venmo .brand-logo {
+    width: 64px;
+    height: 22px;
+    max-width: 100%;
   }
   .payment-option:hover,
   .tip-amount:hover {
     box-shadow: inset 0 0 0 2px currentColor;
   }
-  .back-link {
-    display: flex;
+  .footer-link {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 0.35rem;
     min-height: 44px;
     font-size: 0.8125rem;
@@ -388,8 +397,11 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
   }
   @media (max-width: 360px) {
     .payment-option {
-      font-size: 0.875rem;
-      padding-inline: 0.75rem;
+      font-size: 0.8125rem;
+      padding-inline: 0.25rem;
+    }
+    :is(.cash-app, .paypal) .brand-logo {
+      display: none;
     }
   }
   @media (max-height: 650px) {
@@ -417,8 +429,7 @@ const stripeTipLinks = siteConfig.payments?.stripeTipLinks ?? []
       gap: 0.5rem;
     }
     .payment-option {
-      min-height: 64px;
-      padding-block: 0.5rem;
+      min-height: 44px;
     }
   }
 </style>

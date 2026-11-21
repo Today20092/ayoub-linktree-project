@@ -25,9 +25,11 @@ Keep this file focused on working rules and task-specific pointers. Put operator
 ## Development Commands
 
 - For dependency installation and toolchain versions, follow [README development setup](README.md#development); `package.json` specifies Node and pnpm requirements.
-- Use `npx astro add <integration>` for official Astro integrations; don't edit `package.json` manually.
+- Use pnpm for every install, script, and package binary (`pnpm install`, `pnpm run <script>`, `pnpm exec <bin>`). Don't use npm or npx; they bypass `pnpm-lock.yaml`. Use `pnpm run deploy`, not `pnpm deploy`, which is a built-in pnpm command.
+- Use `pnpm astro add <integration>` for official Astro integrations; don't edit `package.json` manually.
 - Check latest Astro docs before newer or changed APIs.
-- Run `npm run dev` normally. Astro 7+ automatically backgrounds the server for coding agents; use `npx astro dev status` to reuse its URL/PID and `npx astro dev logs` for logs.
+- Run `pnpm run dev` normally. Astro 7+ automatically backgrounds the server for coding agents; use `pnpm astro dev status` to reuse its URL/PID and `pnpm astro dev logs` for logs.
+- For a phone or Tailscale preview, run `pnpm run dev --host` and use the tailnet `100.x` Network URL from `pnpm astro dev status`. After a dependency update, restart with `--force` if Vite serves stale package paths (for example, `/_image` returns 500).
 - Check `/_astro/status` for `{"ok":true}` before testing. Set `ASTRO_DEV_BACKGROUND=0` only for foreground logs.
 - Don't use `--ignore-lock` for normal agent testing. It creates an untracked second foreground server, requires a different port, and cannot be combined with background mode or `--force`.
 
@@ -48,8 +50,8 @@ Keep this file focused on working rules and task-specific pointers. Put operator
 
 ## Verification and formatting
 
-- Website code or content: run `npm run verify` before review. It checks formatting, barber tracker, face and gallery tests, Astro types, and the build; it does not run Android checks or the gallery-prune tests.
-- During development, run the relevant suite: `npm run test:galleries`, `npm run test:faces`, `npm run test:barber-tracker`, or `npm run test:gallery-prune`. For one TypeScript test file, use `pnpm exec tsx --test src/lib/gallery-sharing.test.ts`, substituting the affected file.
+- Website code or content: run `pnpm run verify` before review. It checks formatting, barber tracker, face and gallery tests, Astro types, and the build; it does not run Android checks or the gallery-prune tests.
+- During development, run the relevant suite: `pnpm run test:galleries`, `pnpm run test:faces`, `pnpm run test:barber-tracker`, or `pnpm run test:gallery-prune`. For one TypeScript test file, use `pnpm exec tsx --test src/lib/gallery-sharing.test.ts`, substituting the affected file.
 - Android changes: follow [Android build checks](android/README.md#github-builds-and-signing) and `.github/workflows/android.yml` for unit tests, lint, APK builds, and emulator tests. Website verification does not cover Android. Report physical-device checks separately from emulator results.
 - Documentation-only changes: format the changed Markdown and verify referenced paths and heading anchors. A website build is not required solely for documentation edits.
 - Format explicit changed paths with Prettier; use `--check` on the same paths to confirm. For example:
@@ -75,9 +77,9 @@ Report checks run and any failures or checks left unrun; a focused suite does no
 - Branch roles, integration, and promotion: [the Git workflow](docs/branch-workflow.md). Version and release preparation: [the versioning policy](docs/releasing.md).
 - End every code task with a commit and a pull request to `master`. Merge, tag, or deploy only when the user explicitly asks.
 - When a commit is requested, leave out `.env`, `.env.production`, `.dev.vars`, `.gallery-prune.local.json`, and Android signing files. Keep signing material outside the repo, as described in `android/README.md`.
-- Production deploy only from clean `master`: `npm run deploy:prod`.
-- Default deploy is preview-safe: `npm run deploy` (alias of `npm run deploy:preview`).
+- Production deploy only from clean `master`: `pnpm run deploy:prod`.
+- Default deploy is preview-safe: `pnpm run deploy` (alias of `pnpm run deploy:preview`).
 - Environment URLs and usage are in [README production and preview](README.md#production-and-preview). Deployment scripts are authoritative for Worker and binding selection: `scripts/deploy-preview-worker.mjs`, `scripts/deploy-production-worker.mjs`, and `scripts/gallery-production-config.mjs`.
 - Admin/upload testing must use preview only after verifying the D1 database and both R2 buckets in `scripts/deploy-preview-worker.mjs` are the isolated preview resources. Check outstanding migrations for that database before testing.
-- `npm run deploy:branch-preview` uploads a Worker version with preview alias `dev`. Use it for a branch smoke test only, not admin/upload testing unless the bindings are the isolated preview resources.
+- `pnpm run deploy:branch-preview` uploads a Worker version with preview alias `dev`. Use it for a branch smoke test only, not admin/upload testing unless the bindings are the isolated preview resources.
 - Run `wrangler deploy` directly only when the user explicitly asks for a direct production deployment.
