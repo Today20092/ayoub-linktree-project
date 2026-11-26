@@ -58,6 +58,9 @@ export const inquiryFieldNames = Object.keys(
   inquiryFieldDefs,
 ) as InquiryFieldName[]
 
+export const inquiryRequirement = (name: InquiryFieldName) =>
+  (inquiryFieldDefs[name] as InquiryFieldDef).required ? 'Required' : 'Optional'
+
 export type CoveragePrice = { name: string; price: number }
 
 export function startingPriceFor(
