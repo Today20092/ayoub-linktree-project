@@ -76,7 +76,7 @@ Report checks run and any failures or checks left unrun; a focused suite does no
 
 - GitHub is the source of truth. Local uncommitted code never goes to production.
 - Branch roles, integration, and promotion: [the Git workflow](docs/branch-workflow.md). Version and release preparation: [the versioning policy](docs/releasing.md).
-- End every code task with a commit and a pull request to `master`. Merge, tag, or deploy only when the user explicitly asks.
+- End every code task with a commit and a pull request to `master`, then queue auto-merge as [the Git workflow](docs/branch-workflow.md#merging) describes. Tag or deploy only when the user explicitly asks.
 - When a commit is requested, leave out `.env`, `.env.production`, `.dev.vars`, `.gallery-prune.local.json`, and Android signing files. Keep signing material outside the repo, as described in `android/README.md`.
 - Production deploy only from clean `master`: `pnpm run deploy:prod`.
 - Default deploy is preview-safe: `pnpm run deploy` (alias of `pnpm run deploy:preview`).

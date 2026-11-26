@@ -21,7 +21,7 @@ Documentation-only edits: format the changed Markdown and check its links. A web
 
 Fetch before branching or synchronizing. Use `git pull --ff-only` to advance a local `master`. Never force-push `master`.
 
-Merge only when the user asks, with a merge commit. To merge without waiting, queue it with `gh pr merge --auto --merge`; GitHub merges once `verify` passes. `master` does not require branches to be up to date, so several PRs can each merge on their own checks. Record the checks that ran in the pull request.
+After opening a pull request, queue it without being asked: `gh pr merge --auto --merge`. GitHub merges once `verify` passes. `verify` is the only required check, so on a pull request that changes `android/**` or `.github/workflows/android.yml`, queue it after the Android checks pass. Leave a pull request unqueued when the user asks to review or test it first. `master` does not require branches to be up to date, so several PRs can each merge on their own checks. Record the checks that ran in the pull request.
 
 After the merge, GitHub deletes the branch. Once its uncommitted files are kept or discarded on purpose, remove the worktree through the host (or `git worktree remove`). Leave `master` and unrelated worktrees in place.
 
