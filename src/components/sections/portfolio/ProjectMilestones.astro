@@ -1,0 +1,118 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { Image } from 'astro:assets'
+import { ArrowUpRight, Play } from 'lucide-react'
+
+import YouTubeEmbed from '@/components/YouTubeEmbed.astro'
+import { formatDateOnly } from '@/lib/format-date'
+
+type Props = {
+  projectId: string
+  videos: CollectionEntry<'portfolio'>['data']['videos']
+}
+
+const { projectId, videos: milestoneVideos } = Astro.props
+const isYaHalaProject = projectId === 'ya-hala'
+---
+
+<section
+  class="mx-auto max-w-4xl py-8 sm:py-10"
+  aria-labelledby="milestones-title"
+  data-reveal="up"
+>
+  <h2 id="milestones-title" class="font-heading text-2xl font-bold">
+    {isYaHalaProject
+      ? 'First collaborations'
+      : milestoneVideos.length > 1
+        ? 'Featured videos'
+        : milestoneVideos[0].label}
+  </h2>
+  <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
+    {isYaHalaProject
+      ? 'These October 2025 uploads mark the beginning of my production work with Ya Hala.'
+      : 'Explore the videos below, with context for each recording.'}
+  </p>
+  {isYaHalaProject ? (
+    <ol class="mt-6 grid gap-6 sm:grid-cols-2">
+      {milestoneVideos.map((video, index) => (
+        <li
+          data-reveal="up"
+          style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+        >
+          <a
+            href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <div class="bg-muted relative aspect-video overflow-hidden">
+              <Image
+                src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
+                alt={`Video thumbnail for ${video.title}`}
+                width={320}
+                height={180}
+                layout="constrained"
+                widths={[320, 480, 640]}
+                sizes="(min-width: 640px) 50vw, 100vw"
+                loading="lazy"
+                decoding="async"
+                class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              />
+              <span class="bg-background/90 text-foreground absolute inset-0 m-auto inline-flex size-12 items-center justify-center rounded-full shadow-sm">
+                <Play className="size-5 fill-current" aria-hidden="true" />
+              </span>
+            </div>
+            <div class="py-4">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <p class="font-bold">{video.label}</p>
+                  <p class="text-muted-foreground mt-1 text-sm">
+                    {formatDateOnly(video.publishedAt)}
+                  </p>
+                </div>
+                <ArrowUpRight
+                  className="mt-1 size-4 shrink-0"
+                  aria-hidden="true"
+                />
+              </div>
+              <p class="text-muted-foreground mt-3 text-sm leading-6">
+                {video.description}
+              </p>
+            </div>
+          </a>
+        </li>
+      ))}
+    </ol>
+  ) : (
+    <div class="mt-6 space-y-8">
+      {milestoneVideos.map((video, index) => (
+        <article
+          data-reveal="up"
+          style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+        >
+          <YouTubeEmbed
+            youtubeId={video.youtubeId}
+            title={`${video.label}: ${video.title}`}
+          />
+          <div class="py-4">
+            <p class="font-bold">{video.title}</p>
+            <p class="text-muted-foreground mt-1 text-sm">
+              {formatDateOnly(video.publishedAt)}
+            </p>
+            <p class="text-muted-foreground mt-3 leading-7">
+              {video.description}
+            </p>
+            <a
+              href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link mt-4 inline-flex font-bold"
+            >
+              Watch {video.title} on YouTube
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
+</section>

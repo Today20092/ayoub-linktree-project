@@ -1,0 +1,77 @@
+---
+import type { CollectionEntry } from 'astro:content'
+
+import YouTubeEmbed from '@/components/YouTubeEmbed.astro'
+import { buttonVariants } from '@/components/ui/button'
+import { formatDateOnly } from '@/lib/format-date'
+
+type Props = {
+  videos: CollectionEntry<'portfolio'>['data']['videos']
+}
+
+const { videos: comparisonVideos } = Astro.props
+---
+
+<section
+  class="mx-auto max-w-4xl py-8 sm:py-10"
+  aria-labelledby="comparison-title"
+  data-reveal="up"
+>
+  <h2 id="comparison-title" class="font-heading mt-2 text-2xl font-bold">
+    Before and after
+  </h2>
+  <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
+    These are different episodes recorded at different times and locations,
+    rather than a controlled comparison of the same scene. Listen to the
+    dialogue and look at lighting, skin tones, and consistency between camera
+    angles to explore the production approach.
+  </p>
+
+  <div
+    data-comparison-controls
+    hidden
+    class="mt-6 flex flex-wrap gap-3"
+    role="group"
+    aria-label="Choose production version"
+  >
+    {comparisonVideos.map((video, index) => (
+      <button
+        type="button"
+        data-comparison-select={index}
+        aria-pressed={index === 0}
+        aria-controls={`comparison-${index}`}
+        class={buttonVariants({
+          variant: 'outline',
+          className: 'min-h-11 px-5 font-bold',
+        })}
+      >
+        {video.comparisonRole === 'before' ? 'Before' : 'After'}
+      </button>
+    ))}
+  </div>
+  <div data-comparison class="mt-7 grid gap-8 lg:grid-cols-2">
+    {comparisonVideos.map((video, index) => (
+      <article
+        id={`comparison-${index}`}
+        data-comparison-panel
+        class="flex flex-col gap-4"
+        data-reveal="up"
+        style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
+      >
+        <div>
+          <p class="text-link text-xs font-bold tracking-wider uppercase">
+            {video.label}
+          </p>
+          <p class="text-muted-foreground mt-1 text-sm font-medium">
+            {formatDateOnly(video.publishedAt)}
+          </p>
+        </div>
+        <YouTubeEmbed
+          youtubeId={video.youtubeId}
+          title={`${video.label}: ${video.title}`}
+        />
+        <p class="text-muted-foreground leading-7">{video.description}</p>
+      </article>
+    ))}
+  </div>
+</section>
