@@ -1,0 +1,368 @@
+---
+// The photo grid, paging links and viewer. Gallery scripts find this by its
+// data-gallery-* attributes and expect GalleryGridControls as a direct child.
+import Image from '@/components/GalleryImage.astro'
+import { Heart } from 'lucide-react'
+
+import EventLightbox from '@/components/EventLightbox'
+import GalleryGridControls from '@/components/GalleryGridControls.astro'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  galleryImageUrl,
+  galleryThumbnailSrcset,
+  imageDimensions,
+} from '@/lib/gallery-media'
+import { GALLERY_PAGE_SIZE, galleryPagePath } from '@/lib/gallery-pagination'
+import type { loadPublicGallery } from '@/lib/gallery-read'
+
+type Gallery = NonNullable<Awaited<ReturnType<typeof loadPublicGallery>>>
+
+type Props = {
+  galleryId: string
+  galleryTitle: string
+  eventSlug: string
+  pathname: string
+  /** Set only for unlisted galleries; paging links and the viewer keep it. */
+  viewingToken?: string
+  page: number
+  pageStart: number
+  professionalCount: number
+  guestStart: number
+  images: Gallery['professionalImages']
+  guestImages: Gallery['guestImages']
+  allImages: Gallery['allImages']
+  hasFaceSearch: boolean
+  downloadAllUrl?: string
+  tipUrl?: string
+}
+
+const {
+  galleryId,
+  galleryTitle,
+  eventSlug,
+  pathname,
+  viewingToken,
+  page,
+  pageStart,
+  professionalCount,
+  guestStart,
+  images,
+  guestImages,
+  allImages,
+  hasFaceSearch,
+  downloadAllUrl,
+  tipUrl,
+} = Astro.props
+const totalPhotoCount = allImages.length
+const pageCount = Math.max(1, Math.ceil(totalPhotoCount / GALLERY_PAGE_SIZE))
+const pagePath = (number: number) =>
+  galleryPagePath(pathname, number, viewingToken)
+const lightboxPreview = allImages[0]
+  ? imageDimensions(allImages[0].width, allImages[0].height, 720)
+  : undefined
+---
+
+<section
+  id={galleryId}
+  class="mt-4"
+  data-gallery-browser
+  data-gallery-page={page}
+  data-gallery-page-size={GALLERY_PAGE_SIZE}
+  tabindex="-1"
+  data-gallery-has-picks="false"
+  aria-label={`${galleryTitle} photographs`}
+>
+  {totalPhotoCount > 0 && <GalleryGridControls count={totalPhotoCount} />}
+  {totalPhotoCount > 0 && (
+    <a
+      data-gallery-load-earlier
+      hidden
+      class="gallery-page-link"
+      href={pagePath(page - 1)}
+    >
+      Load earlier photos
+    </a>
+  )}
+  <div data-gallery-page-content>
+    {images.length > 0 && (
+      <div data-gallery-grid data-photo-grid>
+        {images.map((image, index) => {
+          const dimensions = imageDimensions(image.width, image.height, 960)
+          const srcset = galleryThumbnailSrcset(
+            image.src,
+            dimensions.width,
+            dimensions.height,
+          )
+          return (
+            <figure
+              class="relative mb-1 break-inside-avoid"
+              data-gallery-filename={image.filename}
+            >
+              {hasFaceSearch && (
+                <Badge
+                  variant="secondary"
+                  data-face-rank
+                  hidden
+                  className="absolute top-2 left-2"
+                >
+                  Match
+                </Badge>
+              )}
+              <a
+                href={image.src}
+                data-gallery-open={pageStart + index}
+                aria-label={`Open photograph ${pageStart + index + 1}: ${image.alt}`}
+                class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              >
+                <Image
+                  {...(srcset ? { srcset } : {})}
+                  src={
+                    galleryImageUrl(
+                      image.src,
+                      480,
+                      Math.round((dimensions.height * 480) / dimensions.width),
+                      75,
+                    ) ?? image.src
+                  }
+                  alt={image.alt}
+                  width={dimensions.width}
+                  height={dimensions.height}
+                  layout="full-width"
+                  widths={[80, 160, 240, 480, 960]}
+                  sizes="(min-width: 768px) 20vw, 33vw"
+                  quality={85}
+                  loading={index < 5 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                />
+              </a>
+              <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                data-gallery-favorite
+                disabled
+                data-filename={image.filename}
+                data-selected="false"
+                aria-label={`Add photograph ${pageStart + index + 1} to favorites`}
+                aria-pressed="false"
+                className="absolute top-2 right-2 min-h-11 min-w-11 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
+              >
+                <Heart aria-hidden="true" />
+              </Button>
+            </figure>
+          )
+        })}
+      </div>
+    )}
+    {guestImages.length > 0 && (
+      <section
+        class="mt-14"
+        aria-labelledby="guest-photos-heading"
+        data-reveal="up"
+      >
+        <div class="mb-6 max-w-2xl">
+          <Badge variant="secondary">Community gallery</Badge>
+          <h2
+            id="guest-photos-heading"
+            class="font-heading mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl"
+          >
+            Photos shared by guests
+          </h2>
+          <p class="text-muted-foreground mt-2 leading-7">
+            Moments captured and submitted by people who attended the event.
+          </p>
+        </div>
+        <div data-photo-grid>
+          {guestImages.map((image, index) => {
+            const dimensions = imageDimensions(image.width, image.height, 960)
+            const photoIndex = professionalCount + guestStart + index
+            const srcset = galleryThumbnailSrcset(
+              image.src,
+              dimensions.width,
+              dimensions.height,
+            )
+            return (
+              <figure
+                class="relative mb-1 break-inside-avoid"
+                data-gallery-filename={image.filename}
+              >
+                <a
+                  href={image.src}
+                  data-gallery-open={photoIndex}
+                  aria-label={`Open guest photograph ${guestStart + index + 1}: ${image.alt}`}
+                  class="group bg-muted focus-visible:ring-ring block overflow-hidden focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
+                  <Image
+                    {...(srcset ? { srcset } : {})}
+                    src={
+                      galleryImageUrl(
+                        image.src,
+                        480,
+                        Math.round(
+                          (dimensions.height * 480) / dimensions.width,
+                        ),
+                        75,
+                      ) ?? image.src
+                    }
+                    alt={image.alt}
+                    width={dimensions.width}
+                    height={dimensions.height}
+                    layout="full-width"
+                    widths={[80, 160, 240, 480, 960]}
+                    sizes="(min-width: 768px) 20vw, 33vw"
+                    quality={85}
+                    loading="lazy"
+                    decoding="async"
+                    class="block h-auto w-full transition-opacity duration-300 ease-out group-hover:opacity-90"
+                  />
+                </a>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  data-gallery-favorite
+                  disabled
+                  data-filename={image.filename}
+                  data-selected="false"
+                  aria-label={`Add guest photograph ${guestStart + index + 1} to favorites`}
+                  aria-pressed="false"
+                  className="absolute top-2 right-2 min-h-11 min-w-11 shadow-md data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground data-[selected=true]:[&_svg]:fill-current"
+                >
+                  <Heart aria-hidden="true" />
+                </Button>
+              </figure>
+            )
+          })}
+        </div>
+      </section>
+    )}
+  </div>
+  {totalPhotoCount > 0 && (
+    <div data-gallery-stream hidden class="mt-6 text-center text-sm">
+      <p
+        data-gallery-stream-status
+        role="status"
+        class="text-muted-foreground"
+      />
+      <a
+        data-gallery-load-more
+        class="gallery-page-link"
+        href={pagePath(Math.min(page + 1, pageCount))}
+      >
+        Load more photos
+      </a>
+    </div>
+  )}
+  {totalPhotoCount > 0 && (
+    <nav
+      data-gallery-pagination
+      aria-label="Photo pages"
+      class="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm"
+    >
+      <p class="text-muted-foreground w-full text-center">
+        Photos {pageStart + 1}–
+        {Math.min(pageStart + GALLERY_PAGE_SIZE, totalPhotoCount)} of{' '}
+        {totalPhotoCount}
+      </p>
+      {page > 1 && (
+        <a class="gallery-page-link" href={pagePath(page - 1)} rel="prev">
+          Previous photo page
+        </a>
+      )}
+      {Array.from({ length: pageCount }, (_, index) => index + 1).map(
+        (number) => (
+          <a
+            class="gallery-page-link"
+            href={pagePath(number)}
+            aria-label={`Page ${number}`}
+            aria-current={number === page ? 'page' : undefined}
+          >
+            {number}
+          </a>
+        ),
+      )}
+      {page < pageCount && (
+        <a class="gallery-page-link" href={pagePath(page + 1)} rel="next">
+          Next photo page
+        </a>
+      )}
+    </nav>
+  )}
+  {totalPhotoCount > 0 && (
+    <div class="mt-8">
+      <EventLightbox
+        client:load
+        galleryId={galleryId}
+        heading={galleryTitle}
+        projectSlug={eventSlug}
+        shareToken={viewingToken}
+        projectTitle={galleryTitle}
+        downloadAllUrl={downloadAllUrl}
+        tipUrl={tipUrl}
+        images={allImages.map((image) => ({
+          src: image.src,
+          filename: image.filename,
+          alt: image.alt,
+          width: image.width,
+          height: image.height,
+          caption:
+            'caption' in image && typeof image.caption === 'string'
+              ? image.caption
+              : undefined,
+        }))}
+      >
+        {allImages.slice(0, 1).map((image) => (
+          <figure
+            class="m-0 grid max-h-full w-full justify-items-center"
+            data-gallery-slide="0"
+          >
+            <Image
+              src={image.src}
+              alt={image.alt}
+              width={lightboxPreview?.width ?? image.width}
+              height={lightboxPreview?.height ?? image.height}
+              layout="constrained"
+              widths={[480, 720]}
+              sizes="min(100vw, 1600px)"
+              quality={75}
+              loading="lazy"
+              decoding="async"
+              data-gallery-original={image.src}
+              class="h-full min-h-0 w-full object-contain"
+            />
+            <figcaption
+              data-gallery-caption
+              class="gallery-viewer-caption max-w-3xl px-3 py-2 text-center text-xs"
+            >
+              {'caption' in image && image.caption
+                ? image.caption
+                : image.filename}
+            </figcaption>
+          </figure>
+        ))}
+      </EventLightbox>
+    </div>
+  )}
+</section>
+
+<style>
+  .gallery-page-link {
+    display: inline-flex;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .gallery-page-link[aria-current='page'] {
+    font-weight: 800;
+  }
+  .gallery-page-link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+  }
+</style>
