@@ -1,0 +1,37 @@
+---
+// The <main> both guest upload routes share. Access checks, metadata and the
+// <GuestUpload> mode stay in each route.
+import { ArrowLeft } from 'lucide-react'
+
+import { buttonVariants } from '@/components/ui/button'
+import PageHeader from './PageHeader.astro'
+
+interface Props {
+  eyebrow: string
+  title: string
+}
+
+const { eyebrow, title } = Astro.props
+---
+
+<main
+  id="main-content"
+  class="mx-auto w-full max-w-2xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14"
+>
+  <a
+    class={buttonVariants({ variant: 'ghost', size: 'sm' })}
+    href="/galleries/"
+  >
+    <ArrowLeft data-icon="inline-start" aria-hidden="true" />
+    Gallery listing
+  </a>
+
+  <PageHeader eyebrow={eyebrow} title={title} class="mt-8">
+    <slot name="lead" slot="lead" />
+    <slot name="details" />
+  </PageHeader>
+
+  <div class="mt-8">
+    <slot />
+  </div>
+</main>

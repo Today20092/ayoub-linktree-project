@@ -2,13 +2,11 @@
 import '../../../../styles.css'
 
 import { env } from 'cloudflare:workers'
-import { ArrowLeft } from 'lucide-react'
 
 import GuestUpload from '../../../../components/GuestUpload'
-import { buttonVariants } from '../../../../components/ui/button'
 import { galleryReader } from '../../../../lib/gallery-read'
 import BaseLayout from '../../../../layouts/BaseLayout.astro'
-import PageHeader from '../../../../components/layout/PageHeader.astro'
+import GuestUploadShell from '../../../../components/layout/GuestUploadShell.astro'
 
 export const prerender = false
 
@@ -43,39 +41,25 @@ const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc
   ogImageAlt={`${eventTitle} upload`}
   activeNav="galleries"
 >
-  <main
-    id="main-content"
-    class="mx-auto w-full max-w-2xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14"
+  <GuestUploadShell
+    eyebrow="Guest upload"
+    title={`Share photos for ${eventTitle}`}
   >
-    <a
-      class={buttonVariants({ variant: 'ghost', size: 'sm' })}
-      href="/galleries/"
-    >
-      <ArrowLeft data-icon="inline-start" aria-hidden="true" />
-      Gallery listing
-    </a>
-
-    <PageHeader
-      eyebrow="Guest upload"
-      title={`Share photos for ${eventTitle}`}
-      class="mt-8"
-    >
-      <Fragment slot="lead">
-        This upload link is assigned to{invite.guest_name}. Photos publish to
-        the gallery after upload.
-      </Fragment>
+    <Fragment slot="lead">
+      This upload link is assigned to{invite.guest_name}. Photos publish to the
+      gallery after upload.
+    </Fragment>
+    <Fragment slot="details">
       {summary && <p class="text-muted-foreground mt-3 text-sm">{summary}</p>}
-    </PageHeader>
+    </Fragment>
 
-    <div class="mt-8">
-      <GuestUpload
-        client:only="react"
-        eventSlug={eventSlug}
-        eventTitle={eventTitle}
-        enabled
-        inviteToken={token}
-        guestName={invite.guest_name}
-      />
-    </div>
-  </main>
+    <GuestUpload
+      client:only="react"
+      eventSlug={eventSlug}
+      eventTitle={eventTitle}
+      enabled
+      inviteToken={token}
+      guestName={invite.guest_name}
+    />
+  </GuestUploadShell>
 </BaseLayout>
