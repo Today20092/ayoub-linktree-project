@@ -2,7 +2,7 @@
 
 ## Homepage and link hub
 
-Edit `src/data/site.yaml` for profile information, social and contact links, YouTube channels, and support links. `src/lib/site-config.ts` reads the configuration. `src/pages/index.astro` renders the homepage and loads portfolio cards through `src/components/PortfolioIndex.astro`.
+Edit `src/data/site.yaml` for profile information, social and contact links, YouTube channels, and support links. `src/lib/site-config.ts` reads the configuration. `src/pages/index.astro` loads portfolio cards and lists the homepage bands in `src/components/sections/home/`.
 
 The homepage Support links use one link per row below 640px so the longer Patreon label does not crowd Ko-fi. At wider widths they wrap across rows. Link labels can wrap with enlarged text; icons keep their size and each link stays within its container.
 

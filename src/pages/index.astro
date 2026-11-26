@@ -8,7 +8,12 @@ import type { ImageMetadata } from 'astro'
 import { getCollection } from 'astro:content'
 import { getImage } from 'astro:assets'
 
-import PortfolioIndex from '../components/PortfolioIndex.astro'
+import MotionPreview from '../components/MotionPreview.astro'
+import TechnicalWork from '../components/TechnicalWork.astro'
+import HomeElsewhere from '../components/sections/home/HomeElsewhere.astro'
+import HomeIntro from '../components/sections/home/HomeIntro.astro'
+import HomeSupport from '../components/sections/home/HomeSupport.astro'
+import HomeWork from '../components/sections/home/HomeWork.astro'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { sortPortfolioProjects } from '../lib/portfolio-order'
 import { personEntity } from '../lib/service-offer'
@@ -170,15 +175,21 @@ const structuredData = {
       fetchpriority="high"
     />
   )}
-  <PortfolioIndex
-    shareTitle={shareTitle}
-    shareText={shareText}
-    shareUrl={canonicalUrl}
-    currentYear={currentYear}
-    primaryLinks={primaryLinks}
-    socialLinks={socialLinks}
-    supportLinks={supportLinks}
-    channels={youtubeChannels}
-    projects={portfolioProjects}
-  />
+  <main
+    id="main-content"
+    data-motion-home
+    class="mx-auto w-full max-w-screen-2xl px-4 py-6 text-left sm:px-6 sm:py-8 lg:px-8"
+  >
+    <MotionPreview />
+    <HomeIntro
+      shareTitle={shareTitle}
+      shareText={shareText}
+      shareUrl={canonicalUrl}
+      primaryLinks={primaryLinks}
+    />
+    <HomeWork projects={portfolioProjects} />
+    <TechnicalWork />
+    <HomeElsewhere channels={youtubeChannels} socialLinks={socialLinks} />
+    <HomeSupport supportLinks={supportLinks} currentYear={currentYear} />
+  </main>
 </BaseLayout>
