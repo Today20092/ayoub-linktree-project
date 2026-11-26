@@ -113,6 +113,7 @@ Follow [AGENTS.md](AGENTS.md) for deployment authorization. Android signing inst
 | When you need to…                                                  | Read                                                                          |
 | ------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
 | Edit links, portfolio content, images, or shared styles            | [Website content](docs/website-content.md)                                    |
+| Add or move pages, sections, or components                         | [Site structure](docs/site-structure.md)                                      |
 | Change native gallery controls or companion permissions            | [Native gallery management](docs/native-gallery-management.md)                |
 | Configure storage, Access, guest uploads, or moderation            | [Gallery infrastructure](docs/interactive-event-galleries.md)                 |
 | Extend typed gallery workflows and handle publication failures     | [Effect service and runtime guide](docs/gallery-effect-workflows.md)          |

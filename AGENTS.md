@@ -8,6 +8,7 @@ This repository contains Ayoub Abedrabbo's Astro website and link hub, MDX portf
 
 - For repository orientation, read `README.md` for the project map and production/preview boundaries.
 - For page layout, typography, and shared UI primitives (layout modules, link and button styles), read `DESIGN.md`.
+- Before adding or moving components, or splitting a page, read `docs/site-structure.md` for placement and import rules.
 - For homepage links, portfolio content, or shared page styles, read `docs/website-content.md`. Use `src/content.config.ts` and the MDX template for current portfolio fields.
 - For styling, colors, themes, or shared layout changes, read [the design system](docs/design-system.md) and run `pnpm run check:design-system`.
 - For gallery storage, guest uploads, moderation, or Access configuration, read `docs/interactive-event-galleries.md`.
@@ -51,7 +52,7 @@ Keep this file focused on working rules and task-specific pointers. Put operator
 ## Verification and formatting
 
 - Website code or content: run `pnpm run verify` before review. It checks formatting, barber tracker, face and gallery tests, Astro types, and the build; it does not run Android checks or the gallery-prune tests.
-- During development, run the relevant suite: `pnpm run test:galleries`, `pnpm run test:faces`, `pnpm run test:barber-tracker`, or `pnpm run test:gallery-prune`. For one TypeScript test file, use `pnpm exec tsx --test src/lib/gallery-sharing.test.ts`, substituting the affected file.
+- During development, run the relevant suite: `pnpm run test:galleries`, `pnpm run test:faces`, `pnpm run test:barber-tracker`, `pnpm run test:structure`, or `pnpm run test:gallery-prune`. For one TypeScript test file, use `pnpm exec tsx --test src/lib/gallery-sharing.test.ts`, substituting the affected file.
 - Android changes: follow [Android build checks](android/README.md#github-builds-and-signing) and `.github/workflows/android.yml` for unit tests, lint, APK builds, and emulator tests. Website verification does not cover Android. Report physical-device checks separately from emulator results.
 - Documentation-only changes: format the changed Markdown and verify referenced paths and heading anchors. A website build is not required solely for documentation edits.
 - Format explicit changed paths with Prettier; use `--check` on the same paths to confirm. For example:

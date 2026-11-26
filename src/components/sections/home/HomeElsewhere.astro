@@ -1,0 +1,156 @@
+---
+import { Image } from 'astro:assets'
+import { BookOpen } from 'lucide-react'
+
+import keetIcon from '@/assets/keet.svg?raw'
+import { simpleIconBody } from '@/lib/simple-icons'
+import type { SocialLink, YoutubeChannel } from '@/lib/site-config'
+
+type Props = {
+  channels: YoutubeChannel[]
+  socialLinks: SocialLink[]
+}
+
+const { channels, socialLinks } = Astro.props
+
+const chatIds = ['discord', 'keet']
+const workIds = ['linkedin', 'github']
+const socialGroups = [
+  {
+    name: 'Social & community',
+    links: socialLinks.filter(
+      (link) => !chatIds.includes(link.id) && !workIds.includes(link.id),
+    ),
+  },
+  {
+    name: 'Professional profiles',
+    links: socialLinks.filter((link) => workIds.includes(link.id)),
+  },
+  {
+    name: 'Chat',
+    links: socialLinks.filter((link) => chatIds.includes(link.id)),
+  },
+]
+---
+
+<section
+  id="elsewhere"
+  aria-labelledby="elsewhere-title"
+  class="border-border mt-12 scroll-mt-20 border-t pt-8 lg:mt-16 lg:pt-10"
+>
+  <h2
+    id="elsewhere-title"
+    class="font-heading text-foreground mb-6 text-2xl font-extrabold sm:text-3xl"
+  >
+    Find me elsewhere
+  </h2>
+  <div class="grid gap-8 lg:grid-cols-2 lg:gap-12">
+    <nav
+      aria-label="Channels and resources"
+      data-reveal="up"
+      style="--reveal-delay: 210ms"
+    >
+      <h3 class="text-foreground mb-2 text-base font-bold">
+        Channels & resources
+      </h3>
+      <div class="flex flex-col text-base font-bold">
+        {channels.map((channel) => (
+          <a
+            href={channel.videosUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring grid min-h-12 w-full grid-cols-[1.25rem_minmax(0,1fr)] items-start gap-3 rounded-sm px-2 py-3 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <span
+              class="mt-0.5 inline-flex size-5 items-center justify-center"
+              aria-hidden="true"
+            >
+              <svg
+                class="size-5"
+                viewBox="0 0 24 24"
+                set:html={simpleIconBody('simple-icons:youtube')}
+              />
+            </span>
+            <span class="min-w-0 wrap-anywhere">
+              <span class="underline decoration-dotted underline-offset-4">
+                {channel.name}
+              </span>
+              <span class="text-muted-foreground mt-1 block text-sm leading-6 font-normal">
+                {channel.description}
+              </span>
+            </span>
+          </a>
+        ))}
+        <a
+          href="https://islam.ayoubabed.xyz/"
+          class="text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring grid min-h-12 w-full grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-3 rounded-sm px-2 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+        >
+          <BookOpen size={20} aria-hidden="true" />
+          <span>
+            <span class="underline decoration-dotted underline-offset-4">
+              Live with Ayoub
+            </span>
+            <span class="text-muted-foreground mt-1 block text-xs leading-5 font-normal">
+              Quran readings, articles, and resources.
+            </span>
+          </span>
+        </a>
+      </div>
+    </nav>
+
+    <div
+      class="grid content-start gap-6 sm:grid-cols-2"
+      data-reveal="up"
+      style="--reveal-delay: 280ms"
+    >
+      {socialGroups.map((group) => (
+        <nav aria-label={group.name}>
+          <h3 class="text-foreground mb-2 text-base font-bold">{group.name}</h3>
+          <div class="flex flex-col text-base font-bold">
+            {group.links.map((link) => (
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring grid min-h-12 min-w-0 grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-3 rounded-sm px-2 py-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <span
+                  class="inline-flex size-5 items-center justify-center [&_svg]:size-5"
+                  aria-hidden="true"
+                >
+                  {link.id === 'keet' ? (
+                    <Fragment set:html={keetIcon} />
+                  ) : link.iconUrl ? (
+                    <Image
+                      src={link.iconUrl}
+                      alt=""
+                      width={107}
+                      height={117}
+                      class="size-5"
+                    />
+                  ) : (
+                    <svg
+                      class="size-5"
+                      viewBox="0 0 24 24"
+                      set:html={simpleIconBody(link.icon)}
+                    />
+                  )}
+                </span>
+                <span class="min-w-0 wrap-anywhere">
+                  <span class="underline decoration-dotted underline-offset-4">
+                    {link.label}
+                  </span>
+                  {link.description && (
+                    <span class="text-muted-foreground mt-1 block text-sm leading-6 font-normal">
+                      {link.description}
+                    </span>
+                  )}
+                </span>
+              </a>
+            ))}
+          </div>
+        </nav>
+      ))}
+    </div>
+  </div>
+</section>

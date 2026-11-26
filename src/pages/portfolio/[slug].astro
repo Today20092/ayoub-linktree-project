@@ -4,17 +4,14 @@ import '../../styles.css'
 import type { ImageMetadata } from 'astro'
 import { Image, getImage } from 'astro:assets'
 import { getCollection, render, type CollectionEntry } from 'astro:content'
-import {
-  ArrowLeft,
-  ArrowRight,
-  ArrowUpRight,
-  Download,
-  Play,
-} from 'lucide-react'
+import { ArrowLeft, ArrowRight, ArrowUpRight, Download } from 'lucide-react'
 import PortfolioLocation from '../../components/PortfolioLocation.astro'
 import MotionPreview from '../../components/MotionPreview.astro'
 import UpcomingVideo from '../../components/UpcomingVideo'
 import YouTubeEmbed from '../../components/YouTubeEmbed.astro'
+import ProjectComparison from '../../components/sections/portfolio/ProjectComparison.astro'
+import ProjectGallery from '../../components/sections/portfolio/ProjectGallery.astro'
+import ProjectMilestones from '../../components/sections/portfolio/ProjectMilestones.astro'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -24,7 +21,6 @@ import {
 import { buttonVariants } from '../../components/ui/button'
 import { Separator } from '../../components/ui/separator'
 import { eventGalleries } from '../../data/event-galleries'
-import { formatUtcDate } from '../../lib/format-date'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import {
   eventPortraitPath,
@@ -154,43 +150,11 @@ const comparisonVideos = projectData.videos.filter(
 const milestoneVideos = projectData.videos.filter(
   (video) => !video.comparisonRole && video.youtubeId !== projectData.heroVideo,
 )
-const isYaHalaProject = project.id === 'ya-hala'
-const bayaanLandscapeImages = new Set([
-  'Bayaan Academy students standing together onstage during a fundraising event',
-  'Bayaan Academy students and adults gathered onstage during a fundraising event',
-])
-const bayaanGalleryGroups = galleryImages.reduce<
-  Array<
-    | { type: 'portraits'; images: typeof galleryImages }
-    | { type: 'landscape'; image: (typeof galleryImages)[number] }
-  >
->((groups, image) => {
-  if (bayaanLandscapeImages.has(image.alt)) {
-    groups.push({ type: 'landscape', image })
-    return groups
-  }
-
-  const lastGroup = groups.at(-1)
-  if (lastGroup?.type === 'portraits') {
-    lastGroup.images.push(image)
-  } else {
-    groups.push({ type: 'portraits', images: [image] })
-  }
-
-  return groups
-}, [])
-const formatVideoDate = (date: string) =>
-  formatUtcDate(new Date(`${date}T00:00:00Z`))
 const hasDetails = Boolean(
   projectData.collaborators.length ||
   projectData.duration ||
   projectData.tools.length,
 )
-const galleryHeading =
-  projectData.galleryHeading ??
-  (project.id === 'bayaan-academy' || project.id === 'arqam-academy'
-    ? 'Photography'
-    : 'Additional visuals')
 ---
 
 <BaseLayout
@@ -380,166 +344,12 @@ const galleryHeading =
           </div>
         </aside>
       ) : galleryImages.length > 0 ? (
-        <section
-          class="mx-auto max-w-4xl py-8 sm:py-10"
-          aria-labelledby="gallery-title"
-          data-reveal="up"
-        >
-          <h2 id="gallery-title" class="font-heading text-2xl font-bold">
-            {galleryHeading}
-          </h2>
-          {projectData.galleryLayout === 'masonry' ? (
-            <div class="mt-6 columns-1 gap-4 sm:columns-2">
-              {galleryImages.map((image, index) => (
-                <figure
-                  class="mb-6 break-inside-avoid"
-                  data-reveal={index < 12 ? 'up' : undefined}
-                  style={
-                    index < 12
-                      ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
-                      : undefined
-                  }
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    width={Math.min(image.src.width, 1280)}
-                    layout="full-width"
-                    widths={[480, 768, 1024, 1280]}
-                    sizes="(min-width: 640px) 50vw, 100vw"
-                    quality={75}
-                    loading={index < 2 ? 'eager' : 'lazy'}
-                    decoding="async"
-                    class="block h-auto w-full"
-                  />
-                  {image.caption && (
-                    <figcaption class="text-muted-foreground mt-2 text-sm">
-                      {image.caption}
-                    </figcaption>
-                  )}
-                </figure>
-              ))}
-            </div>
-          ) : project.id === 'bayaan-academy' ? (
-            <div class="mt-6 space-y-6">
-              {bayaanGalleryGroups.map((group, groupIndex) =>
-                group.type === 'landscape' ? (
-                  <figure data-reveal="up">
-                    <Image
-                      src={group.image.src}
-                      alt={group.image.alt}
-                      width={Math.min(group.image.src.width, 1280)}
-                      layout="full-width"
-                      widths={[640, 960, 1280, 1600]}
-                      sizes="(min-width: 1280px) 896px, 100vw"
-                      quality={80}
-                      loading={groupIndex === 0 ? 'eager' : 'lazy'}
-                      class="block h-auto w-full"
-                    />
-                    {group.image.caption && (
-                      <figcaption class="text-muted-foreground mt-2 text-sm">
-                        {group.image.caption}
-                      </figcaption>
-                    )}
-                  </figure>
-                ) : (
-                  <div class="columns-1 gap-4 sm:columns-2">
-                    {group.images.map((image, index) => (
-                      <figure
-                        class="mb-6 break-inside-avoid"
-                        data-reveal={index < 12 ? 'up' : undefined}
-                        style={
-                          index < 12
-                            ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
-                            : undefined
-                        }
-                      >
-                        <Image
-                          src={image.src}
-                          alt={image.alt}
-                          width={Math.min(image.src.width, 1024)}
-                          layout="full-width"
-                          widths={[480, 768, 1024]}
-                          sizes="(min-width: 640px) 50vw, 100vw"
-                          quality={80}
-                          loading={
-                            groupIndex < 2 && index < 2 ? 'eager' : 'lazy'
-                          }
-                          class="block h-auto w-full"
-                        />
-                        {image.caption && (
-                          <figcaption class="text-muted-foreground mt-2 text-sm">
-                            {image.caption}
-                          </figcaption>
-                        )}
-                      </figure>
-                    ))}
-                  </div>
-                ),
-              )}
-            </div>
-          ) : project.id === 'arqam-academy' ? (
-            <div class="mt-6 grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-              {galleryImages.map((image, index) => (
-                <figure
-                  data-reveal={index < 12 ? 'up' : undefined}
-                  style={
-                    index < 12
-                      ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
-                      : undefined
-                  }
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    layout="full-width"
-                    widths={[480, 768, 1024]}
-                    width={Math.min(image.src.width, 1024)}
-                    sizes="(min-width: 640px) 50vw, 100vw"
-                    quality={80}
-                    loading={index < 2 ? 'eager' : 'lazy'}
-                    class="block h-auto w-full"
-                  />
-                  {image.caption && (
-                    <figcaption class="text-muted-foreground mt-2 text-sm">
-                      {image.caption}
-                    </figcaption>
-                  )}
-                </figure>
-              ))}
-            </div>
-          ) : (
-            <div class="mt-6 space-y-8">
-              {galleryImages.map((image, index) => (
-                <figure
-                  data-reveal={index < 12 ? 'up' : undefined}
-                  style={
-                    index < 12
-                      ? `--reveal-delay: ${Math.min(index, 8) * 35}ms`
-                      : undefined
-                  }
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    layout="full-width"
-                    widths={[640, 960, 1280, 1600]}
-                    width={Math.min(image.src.width, 1280)}
-                    sizes="(min-width: 1280px) 896px, 100vw"
-                    quality={80}
-                    loading={index < 2 ? 'eager' : 'lazy'}
-                    class="block h-auto w-full"
-                  />
-                  {image.caption && (
-                    <figcaption class="text-muted-foreground mt-2 text-sm">
-                      {image.caption}
-                    </figcaption>
-                  )}
-                </figure>
-              ))}
-            </div>
-          )}
-        </section>
+        <ProjectGallery
+          projectId={project.id}
+          images={galleryImages}
+          layout={projectData.galleryLayout}
+          heading={projectData.galleryHeading}
+        />
       ) : null}
 
       {hasBody && (
@@ -632,182 +442,11 @@ const galleryHeading =
       )}
 
       {comparisonVideos.length > 0 && (
-        <section
-          class="mx-auto max-w-4xl py-8 sm:py-10"
-          aria-labelledby="comparison-title"
-          data-reveal="up"
-        >
-          <h2
-            id="comparison-title"
-            class="font-heading mt-2 text-2xl font-bold"
-          >
-            Before and after
-          </h2>
-          <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
-            These are different episodes recorded at different times and
-            locations, rather than a controlled comparison of the same scene.
-            Listen to the dialogue and look at lighting, skin tones, and
-            consistency between camera angles to explore the production
-            approach.
-          </p>
-
-          <div
-            data-comparison-controls
-            hidden
-            class="mt-6 flex flex-wrap gap-3"
-            role="group"
-            aria-label="Choose production version"
-          >
-            {comparisonVideos.map((video, index) => (
-              <button
-                type="button"
-                data-comparison-select={index}
-                aria-pressed={index === 0}
-                aria-controls={`comparison-${index}`}
-                class={buttonVariants({
-                  variant: 'outline',
-                  className: 'min-h-11 px-5 font-bold',
-                })}
-              >
-                {video.comparisonRole === 'before' ? 'Before' : 'After'}
-              </button>
-            ))}
-          </div>
-          <div data-comparison class="mt-7 grid gap-8 lg:grid-cols-2">
-            {comparisonVideos.map((video, index) => (
-              <article
-                id={`comparison-${index}`}
-                data-comparison-panel
-                class="flex flex-col gap-4"
-                data-reveal="up"
-                style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
-              >
-                <div>
-                  <p class="text-link text-xs font-bold tracking-wider uppercase">
-                    {video.label}
-                  </p>
-                  <p class="text-muted-foreground mt-1 text-sm font-medium">
-                    {formatVideoDate(video.publishedAt)}
-                  </p>
-                </div>
-                <YouTubeEmbed
-                  youtubeId={video.youtubeId}
-                  title={`${video.label}: ${video.title}`}
-                />
-                <p class="text-muted-foreground leading-7">
-                  {video.description}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
+        <ProjectComparison videos={comparisonVideos} />
       )}
 
       {milestoneVideos.length > 0 && (
-        <section
-          class="mx-auto max-w-4xl py-8 sm:py-10"
-          aria-labelledby="milestones-title"
-          data-reveal="up"
-        >
-          <h2 id="milestones-title" class="font-heading text-2xl font-bold">
-            {isYaHalaProject
-              ? 'First collaborations'
-              : milestoneVideos.length > 1
-                ? 'Featured videos'
-                : milestoneVideos[0].label}
-          </h2>
-          <p class="text-muted-foreground mt-3 max-w-3xl leading-7">
-            {isYaHalaProject
-              ? 'These October 2025 uploads mark the beginning of my production work with Ya Hala.'
-              : 'Explore the videos below, with context for each recording.'}
-          </p>
-          {isYaHalaProject ? (
-            <ol class="mt-6 grid gap-6 sm:grid-cols-2">
-              {milestoneVideos.map((video, index) => (
-                <li
-                  data-reveal="up"
-                  style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
-                >
-                  <a
-                    href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    <div class="bg-muted relative aspect-video overflow-hidden">
-                      <Image
-                        src={`https://i.ytimg.com/vi/${video.youtubeId}/mqdefault.jpg`}
-                        alt={`Video thumbnail for ${video.title}`}
-                        width={320}
-                        height={180}
-                        layout="constrained"
-                        widths={[320, 480, 640]}
-                        sizes="(min-width: 640px) 50vw, 100vw"
-                        loading="lazy"
-                        decoding="async"
-                        class="size-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                      />
-                      <span class="bg-background/90 text-foreground absolute inset-0 m-auto inline-flex size-12 items-center justify-center rounded-full shadow-sm">
-                        <Play
-                          className="size-5 fill-current"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </div>
-                    <div class="py-4">
-                      <div class="flex items-start justify-between gap-4">
-                        <div>
-                          <p class="font-bold">{video.label}</p>
-                          <p class="text-muted-foreground mt-1 text-sm">
-                            {formatVideoDate(video.publishedAt)}
-                          </p>
-                        </div>
-                        <ArrowUpRight
-                          className="mt-1 size-4 shrink-0"
-                          aria-hidden="true"
-                        />
-                      </div>
-                      <p class="text-muted-foreground mt-3 text-sm leading-6">
-                        {video.description}
-                      </p>
-                    </div>
-                  </a>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <div class="mt-6 space-y-8">
-              {milestoneVideos.map((video, index) => (
-                <article
-                  data-reveal="up"
-                  style={`--reveal-delay: ${Math.min(index, 4) * 60}ms`}
-                >
-                  <YouTubeEmbed
-                    youtubeId={video.youtubeId}
-                    title={`${video.label}: ${video.title}`}
-                  />
-                  <div class="py-4">
-                    <p class="font-bold">{video.title}</p>
-                    <p class="text-muted-foreground mt-1 text-sm">
-                      {formatVideoDate(video.publishedAt)}
-                    </p>
-                    <p class="text-muted-foreground mt-3 leading-7">
-                      {video.description}
-                    </p>
-                    <a
-                      href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="link mt-4 inline-flex font-bold"
-                    >
-                      Watch {video.title} on YouTube
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+        <ProjectMilestones projectId={project.id} videos={milestoneVideos} />
       )}
 
       {projectData.upcomingVideo && (

@@ -65,3 +65,16 @@ export function galleryMediaUrl(src: string, site?: string) {
   const path = galleryObjectUrl(src.slice(LEGACY_ORIGIN.length + 1))
   return galleryMediaKey(path) ? path : src
 }
+
+/** Scales a photo down to `maxWidth`, keeping its ratio and never enlarging it. */
+export function imageDimensions(
+  width: number,
+  height: number,
+  maxWidth: number,
+) {
+  const scale = Math.min(1, maxWidth / width)
+  return {
+    width: Math.max(1, Math.round(width * scale)),
+    height: Math.max(1, Math.round(height * scale)),
+  }
+}

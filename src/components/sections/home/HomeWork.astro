@@ -1,0 +1,112 @@
+---
+import { Image } from 'astro:assets'
+import type { ImageMetadata } from 'astro'
+
+import { buttonVariants } from '@/components/ui/button'
+
+type Props = {
+  projects: {
+    filters: string
+    slug: string
+    title: string
+    category: string
+    thumbnail: ImageMetadata | string
+    imageAlt: string
+    imageWidth: number
+    imageHeight: number
+  }[]
+}
+
+const { projects } = Astro.props
+---
+
+<section id="portfolio" class="scroll-mt-20 pt-8 lg:pt-10" data-reveal="fade">
+  <h2 class="font-heading text-foreground mb-5 text-2xl font-extrabold sm:text-3xl">
+    My work
+  </h2>
+  <div data-portfolio-filters hidden class="mb-6">
+    <div
+      role="group"
+      aria-label="Filter portfolio"
+      class="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap"
+    >
+      {['all', 'photography', 'video', 'podcasts'].map((filter) => (
+        <button
+          type="button"
+          data-filter={filter}
+          aria-pressed={filter === 'all'}
+          class={buttonVariants({
+            variant: 'outline',
+            className: 'min-h-11 px-3 font-semibold capitalize sm:px-4',
+          })}
+        >
+          {filter}
+        </button>
+      ))}
+    </div>
+    <p
+      data-filter-count
+      role="status"
+      class="text-muted-foreground mt-3 text-xs"
+    >
+      {`${projects.length} projects`}
+    </p>
+  </div>
+  <div class="columns-1 gap-4 space-y-8 md:columns-2 lg:gap-6 xl:columns-3">
+    {projects.map((project, index) => (
+      <article
+        data-project-filters={project.filters}
+        class="break-inside-avoid"
+        data-reveal="up"
+        style={`--reveal-delay: ${Math.min(index, 8) * 45}ms`}
+      >
+        <a
+          href={`/portfolio/${project.slug}/`}
+          class="group focus-visible:ring-ring block rounded-sm focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none"
+        >
+          {typeof project.thumbnail === 'string' ? (
+            <Image
+              src={project.thumbnail}
+              alt={project.imageAlt}
+              width={Math.min(project.imageWidth, 960)}
+              height={Math.round(
+                (project.imageHeight * Math.min(project.imageWidth, 960)) /
+                  project.imageWidth,
+              )}
+              layout="constrained"
+              widths={[480, 720, 960]}
+              sizes="(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"
+              quality={80}
+              priority={index < 2}
+              class="bg-muted block h-auto w-full transition-[opacity,transform] duration-300 ease-out group-hover:scale-[1.015] group-hover:opacity-90"
+            />
+          ) : (
+            <Image
+              src={project.thumbnail}
+              alt={project.imageAlt}
+              width={Math.min(project.imageWidth, 960)}
+              height={Math.round(
+                (project.imageHeight * Math.min(project.imageWidth, 960)) /
+                  project.imageWidth,
+              )}
+              layout="constrained"
+              widths={[480, 720, 960]}
+              sizes="(min-width: 1280px) 30vw, (min-width: 768px) 48vw, 100vw"
+              quality={80}
+              priority={index < 2}
+              class="bg-muted block h-auto w-full transition-[opacity,transform] duration-300 ease-out group-hover:scale-[1.015] group-hover:opacity-90"
+            />
+          )}
+          <span class="mt-3 block">
+            <strong class="font-heading text-foreground block text-base leading-5 font-extrabold">
+              {project.title}
+            </strong>
+            <small class="text-muted-foreground mt-1 block text-xs font-medium tracking-wider uppercase">
+              {project.category}
+            </small>
+          </span>
+        </a>
+      </article>
+    ))}
+  </div>
+</section>

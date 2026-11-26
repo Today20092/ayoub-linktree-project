@@ -2,14 +2,12 @@
 import '../../../styles.css'
 
 import { env } from 'cloudflare:workers'
-import { ArrowLeft } from 'lucide-react'
 
 import GuestUpload from '../../../components/GuestUpload'
-import { buttonVariants } from '../../../components/ui/button'
 import { galleryReader } from '../../../lib/gallery-read'
 import { matchesSharingToken } from '../../../lib/gallery-sharing'
 import BaseLayout from '../../../layouts/BaseLayout.astro'
-import PageHeader from '../../../components/layout/PageHeader.astro'
+import GuestUploadShell from '../../../components/layout/GuestUploadShell.astro'
 
 export const prerender = false
 
@@ -47,37 +45,18 @@ const ogImage = gallery.flyer?.src ?? gallery.featuredImageSrc
   ogImageAlt={gallery.imageAlt ?? `${gallery.title} gallery`}
   activeNav="galleries"
 >
-  <main
-    id="main-content"
-    class="mx-auto w-full max-w-2xl scroll-mt-20 px-4 py-10 sm:px-6 sm:py-14"
-  >
-    <a
-      class={buttonVariants({ variant: 'ghost', size: 'sm' })}
-      href="/galleries/"
-    >
-      <ArrowLeft data-icon="inline-start" aria-hidden="true" />
-      Gallery listing
-    </a>
+  <GuestUploadShell eyebrow="Guest photos" title="Share what you captured">
+    <Fragment slot="lead">
+      Add your photos from{gallery.title}. Every submission is reviewed before
+      it appears in the public gallery.
+    </Fragment>
 
-    <PageHeader
-      eyebrow="Guest photos"
-      title="Share what you captured"
-      class="mt-8"
-    >
-      <Fragment slot="lead">
-        Add your photos from{gallery.title}. Every submission is reviewed before
-        it appears in the public gallery.
-      </Fragment>
-    </PageHeader>
-
-    <div class="mt-8">
-      <GuestUpload
-        client:only="react"
-        eventSlug={eventSlug}
-        eventTitle={gallery.title}
-        enabled={Boolean(settings?.uploads_enabled)}
-        submissionToken={submissionToken ?? undefined}
-      />
-    </div>
-  </main>
+    <GuestUpload
+      client:only="react"
+      eventSlug={eventSlug}
+      eventTitle={gallery.title}
+      enabled={Boolean(settings?.uploads_enabled)}
+      submissionToken={submissionToken ?? undefined}
+    />
+  </GuestUploadShell>
 </BaseLayout>

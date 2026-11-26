@@ -1,0 +1,287 @@
+---
+// The inquiry form and its script. The coverage radios stay in the pricing band
+// and join this form through form="event-portrait-inquiry".
+import ServiceSection from '@/components/layout/ServiceSection.astro'
+import { buttonVariants } from '@/components/ui/button'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { inputClassName } from '@/components/ui/input'
+import {
+  inquiryFieldDefs,
+  inquiryRequirement,
+  type InquiryFieldDef,
+} from '@/lib/event-portrait-inquiry'
+
+const control = `${inputClassName} min-h-11 w-full min-w-0`
+const eventFieldRows = [
+  ['date', 'guests'],
+  ['venue', 'city'],
+  ['eventType'],
+] as const
+const contactFieldNames = ['name', 'phone', 'email'] as const
+---
+
+<ServiceSection
+  id="inquiry"
+  titleId="inquiry-title"
+  eyebrow="04 / Let’s make it happen"
+  layout="split"
+  stickyIntro
+>
+  <Fragment slot="title">
+    Tell me what you’re
+    <em>celebrating.</em>
+  </Fragment>
+  <Fragment slot="lead">
+    <p>Opens an email draft to Ayoub. It does not reserve the date.</p>
+    <p>
+      I’ll review the details with you and confirm availability. For coverage up
+      to 8 hours or extras, include what you have in mind.
+    </p>
+  </Fragment>
+  <div class="bg-muted rounded-md border p-5 md:p-8">
+    <form id="event-portrait-inquiry" class="grid gap-6" novalidate>
+      <div
+        id="inquiry-errors"
+        class="border-destructive bg-destructive/10 text-foreground hidden rounded-xl border px-4 py-3 text-sm"
+        tabindex="-1"
+        role="alert"
+      ></div>
+      <fieldset class="min-w-0">
+        <legend class="mb-4 text-sm font-semibold">The event</legend>
+        <FieldGroup>
+          <Field className="min-w-0">
+            <FieldLabel
+              htmlFor="extraTime"
+              className="max-w-full flex-wrap justify-between"
+            >
+              {inquiryFieldDefs.extraTime.label}
+              <span class="text-muted-foreground text-xs font-normal">
+                {inquiryRequirement('extraTime')}
+              </span>
+            </FieldLabel>
+            <input
+              id="extraTime"
+              name="extraTime"
+              class={control}
+              placeholder={inquiryFieldDefs.extraTime.placeholder}
+            />
+          </Field>
+          {eventFieldRows.map((row) => (
+            <div
+              class:list={['grid gap-4', row.length > 1 && 'sm:grid-cols-2']}
+            >
+              {row.map((id) => {
+                const field: InquiryFieldDef = inquiryFieldDefs[id]
+                return (
+                  <Field className="min-w-0">
+                    <FieldLabel
+                      htmlFor={id}
+                      className="max-w-full flex-wrap justify-between"
+                    >
+                      {field.label}
+                      <span class="text-muted-foreground text-xs font-normal">
+                        {inquiryRequirement(id)}
+                      </span>
+                    </FieldLabel>
+                    <input
+                      id={id}
+                      name={id}
+                      type={field.type ?? 'text'}
+                      autocomplete={field.autocomplete}
+                      placeholder={field.placeholder}
+                      {...(field.type === 'number'
+                        ? { min: '1', step: '1', inputmode: 'numeric' }
+                        : {})}
+                      required
+                      aria-describedby={`error-${id}`}
+                      class={control}
+                    />
+                    <p
+                      id={`error-${id}`}
+                      class="text-foreground text-sm"
+                      hidden
+                    ></p>
+                  </Field>
+                )
+              })}
+            </div>
+          ))}
+        </FieldGroup>
+      </fieldset>
+      <fieldset class="min-w-0">
+        <legend class="mb-4 text-sm font-semibold">How to reach you</legend>
+        <FieldGroup className="grid gap-4 sm:grid-cols-2">
+          {contactFieldNames.map((id) => {
+            const field: InquiryFieldDef = inquiryFieldDefs[id]
+            return (
+              <Field className="min-w-0">
+                <FieldLabel
+                  htmlFor={id}
+                  className="max-w-full flex-wrap justify-between"
+                >
+                  {field.label}
+                  <span class="text-muted-foreground text-xs font-normal">
+                    {inquiryRequirement(id)}
+                  </span>
+                </FieldLabel>
+                <input
+                  id={id}
+                  name={id}
+                  type={field.type ?? 'text'}
+                  autocomplete={field.autocomplete}
+                  enterkeyhint={id === 'email' ? 'done' : undefined}
+                  required
+                  aria-describedby={`error-${id}`}
+                  class={control}
+                />
+                <p
+                  id={`error-${id}`}
+                  class="text-foreground text-sm"
+                  hidden
+                ></p>
+              </Field>
+            )
+          })}
+        </FieldGroup>
+      </fieldset>
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
+        <p
+          id="inquiry-selection"
+          class="text-sm font-medium"
+          aria-live="polite"
+          hidden
+        ></p>
+        <button
+          type="submit"
+          class={buttonVariants({
+            size: 'lg',
+            className: 'h-auto min-h-11 max-w-full px-5 py-3 whitespace-normal',
+          })}
+        >
+          Open email draft
+        </button>
+        <a href="/contact/" class="link text-sm font-medium">
+          Or use the contact page
+        </a>
+      </div>
+    </form>
+    <div
+      id="inquiry-ready"
+      class="bg-muted/50 mt-6 hidden rounded-2xl p-6"
+      role="status"
+    >
+      <h3 class="text-lg font-semibold">Request ready for Ayoub to review.</h3>
+      <p
+        id="inquiry-ready-copy"
+        class="text-muted-foreground mt-2 text-sm leading-6"
+      ></p>
+      <p class="mt-3 text-sm leading-6">
+        This does not reserve the date, and this page does not send the email
+        itself.
+      </p>
+      <a
+        id="inquiry-mailto"
+        class="link mt-4 inline-flex min-h-11 items-center text-sm font-medium"
+        href=""
+      >
+        Open the email draft again
+      </a>
+    </div>
+  </div>
+</ServiceSection>
+
+<script>
+  import {
+    inquiryErrors,
+    inquiryFieldNames,
+    inquiryMailto,
+    startingPriceFor,
+    type InquiryFields,
+  } from '@/lib/event-portrait-inquiry'
+  import { formatUsd } from '@/lib/service-offer'
+
+  const form = document.querySelector('#event-portrait-inquiry')
+  const errors = document.querySelector('#inquiry-errors')
+  const ready = document.querySelector('#inquiry-ready')
+  const readyCopy = document.querySelector('#inquiry-ready-copy')
+  const mailtoLink = document.querySelector('#inquiry-mailto')
+  const coverage = document.querySelector('#coverage')
+  const selection = document.querySelector('#inquiry-selection')
+  const fieldNames = inquiryFieldNames
+  const clearFieldErrors = () => {
+    for (const name of fieldNames) {
+      document.getElementById(name)?.removeAttribute('aria-invalid')
+      const message = document.getElementById(`error-${name}`)
+      if (message) {
+        message.hidden = true
+        message.textContent = ''
+      }
+    }
+  }
+  const showFieldErrors = (
+    problems: Partial<Record<(typeof fieldNames)[number], string>>,
+  ) => {
+    clearFieldErrors()
+    let first: HTMLElement | null = null
+    for (const name of fieldNames) {
+      const message = problems[name]
+      if (!message) continue
+      const field = document.getElementById(name)
+      const slot = document.getElementById(`error-${name}`)
+      field?.setAttribute('aria-invalid', 'true')
+      if (slot) {
+        slot.hidden = false
+        slot.textContent = message
+      }
+      if (!first && field) first = field
+    }
+    first?.focus()
+  }
+  const showSelection = () => {
+    if (!(selection instanceof HTMLElement)) return
+    const checked = document.querySelector<HTMLInputElement>(
+      'input[name="coverage"]:checked',
+    )
+    const price = checked && startingPriceFor(checked.value)
+    selection.hidden = !checked
+    selection.textContent =
+      checked && price != null
+        ? `${checked.value}, starting at ${formatUsd(price)}`
+        : ''
+  }
+  coverage?.addEventListener('change', showSelection)
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault()
+    if (
+      !(form instanceof HTMLFormElement) ||
+      !(errors instanceof HTMLElement) ||
+      !(ready instanceof HTMLElement) ||
+      !(readyCopy instanceof HTMLElement) ||
+      !(mailtoLink instanceof HTMLAnchorElement)
+    ) {
+      return
+    }
+    const data = new FormData(form)
+    const fields = Object.fromEntries(
+      fieldNames.map((name) => [name, String(data.get(name) ?? '')]),
+    ) as InquiryFields
+    const problems = inquiryErrors(fields)
+    const messages = Object.values(problems)
+    if (messages.length > 0) {
+      errors.classList.remove('hidden')
+      errors.textContent =
+        messages.length === 1 ? messages[0] : `Check ${messages.length} fields.`
+      ready.classList.add('hidden')
+      showFieldErrors(problems)
+      return
+    }
+    const href = inquiryMailto(fields)
+    const price = startingPriceFor(fields.coverage)
+    clearFieldErrors()
+    errors.classList.add('hidden')
+    ready.classList.remove('hidden')
+    readyCopy.textContent = `${fields.coverage}, starting at ${formatUsd(price ?? 0)}.`
+    mailtoLink.href = href
+    mailtoLink.click()
+  })
+</script>
